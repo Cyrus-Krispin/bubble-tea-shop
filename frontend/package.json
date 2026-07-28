@@ -1,0 +1,13 @@
+{
+  "name": "bubble-tea-frontend",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "placeholder": "node -e \"console.log('Frontend implementation follows the schema slice')\""
+  }
+}
+

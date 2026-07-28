@@ -1,0 +1,22 @@
+name: bubble-tea-shop
+
+services:
+  db:
+    image: postgres:18.4-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bubble_tea}
+      POSTGRES_USER: ${POSTGRES_USER:-bubble_tea}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bubble_tea_dev}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - bubble-tea-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  bubble-tea-postgres:
