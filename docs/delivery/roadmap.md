@@ -36,4 +36,5 @@ healthy database.
 
 - Customer accounts/history, card payments, forecasting/alerts, supplier integration, dashboards,
   active multi-location operation, localization, and multiple currencies.
-
+- Opt-in customer face authentication, only after customer accounts and the standard JWT session
+  flow; see [`../architecture/face-authentication.md`](../architecture/face-authentication.md).

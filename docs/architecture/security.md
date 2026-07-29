@@ -9,6 +9,9 @@
   HttpOnly, SameSite=Lax cookie.
 - Only a token hash is stored in `refresh_session`; logout and suspected reuse revoke the session.
 - Production owner credentials are created by an explicit bootstrap workflow, never a migration.
+- Future customer face authentication is an alternative credential check before normal token
+  issuance; the matching component never issues JWTs. See
+  [`face-authentication.md`](face-authentication.md).
 
 ## Authorization
 
@@ -24,4 +27,3 @@
 - Refresh endpoints require origin/CSRF protection in addition to SameSite cookies.
 - Authentication failures use generic messages so username enumeration is not exposed.
 - Audit records retain the acting account identifier where a staff action caused a state change.
-
