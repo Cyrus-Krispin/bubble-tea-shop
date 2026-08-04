@@ -41,7 +41,7 @@ entities.
 
 ## Data and authentication
 
-PostgreSQL 18 is the system of record. The expected data model is well understood and relational:
+PostgreSQL is the system of record. The expected data model is well understood and relational:
 organizations, locations, recipes, offerings, inventory movements, orders, and staff access all
 benefit from foreign keys, constraints, transactions, and precise numeric types. PostgreSQL owns
 relational integrity, while Spring owns workflows and authorization.
@@ -51,30 +51,34 @@ reviewable when the model evolves, and Hibernate runs with `ddl-auto=validate` s
 mapping mismatch without modifying the schema. Inventory balances and their immutable movement
 history live in the same database transaction as order completion to prevent overselling.
 
-Authentication will be implemented within the Spring application using Spring Security. The
-planned browser flow uses short-lived JWT access tokens held in memory and rotating refresh
-sessions backed by hashed tokens in PostgreSQL and protected cookies. Authorization will be
-resolved from current server-side memberships and location assignments. The application owns this
-design; Supabase is not part of the selected stack.
+Local Supabase Auth is the development identity provider. It runs in the same Compose project as
+the application and database, so development does not depend on a hosted Supabase project or an
+online signing-key endpoint. Spring Security remains the application authorization boundary:
+organization memberships, roles, and location assignments must still be resolved server-side
+rather than trusted from client claims. The concrete JWT-validation integration is delivered
+separately from this container foundation.
 
 The account, membership, location-assignment, and refresh-session schema exists today, but the
 login, token rotation, logout, and authorization endpoints are planned work.
 
 ## Local infrastructure
 
-Docker Compose runs PostgreSQL locally with a persistent named volume and a health check. The
-reason for Compose is practical: it gives every contributor the same database version and startup
-path, removes ambiguity from local setup, and makes the application straightforward to run.
+Docker Compose runs a trimmed local Supabase stack (the official Postgres and GoTrue images), the
+Spring backend, and the frontend workspace. Postgres uses a persistent named volume, every service
+has a health check, and dependency conditions prevent the application from starting before its
+local infrastructure is ready. Flyway remains the only application schema-change mechanism; the
+Supabase Auth service owns its own schema.
 
-Hosting is intentionally local-only for now. The repository does not select a cloud provider,
-production container platform, managed database, or deployment pipeline, and those choices should
-not be inferred from the local Compose setup. Production images, observability, backups, and CI
-deployment gates remain future work.
+Hosting is intentionally local-only for now. The repository does not use a hosted Supabase project
+and does not select a cloud provider, production container platform, managed database, or
+deployment pipeline. The Compose file must not be treated as production configuration: its local
+credentials, loopback ports, auto-confirmed email accounts, persistence, backups, TLS, and
+observability are deliberately development-grade.
 
 ## Tooling and testing
 
 The Maven wrapper pins the backend build environment. Backend tests use JUnit 5, Spring Boot Test,
-AssertJ, and Testcontainers against the same PostgreSQL 18 image used for local development. The
+AssertJ, and Testcontainers against PostgreSQL. The
 current integration suite verifies Flyway migrations, Hibernate mappings, relational invariants,
 immutable history, idempotent order completion, and concurrent protection against overselling.
 

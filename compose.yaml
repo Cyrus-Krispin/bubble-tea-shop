@@ -2,21 +2,115 @@ name: bubble-tea-shop
 
 services:
   db:
-    image: postgres:18.4-alpine
+    image: supabase/postgres:17.6.1.136
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-bubble_tea}
-      POSTGRES_USER: ${POSTGRES_USER:-bubble_tea}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bubble_tea_dev}
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+      PGPASSWORD: ${POSTGRES_PASSWORD:-local-supabase-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-supabase-postgres}
+      PGDATABASE: postgres
+      POSTGRES_DB: postgres
+      JWT_SECRET: ${JWT_SECRET:-local-only-jwt-secret-change-before-sharing-1234567890}
+      JWT_EXP: ${JWT_EXPIRY:-3600}
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-54322}:5432"
     volumes:
-      - bubble-tea-postgres:/var/lib/postgresql
+      - ./infra/supabase/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
+      - ./infra/supabase/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:ro
+      - supabase-postgres:/var/lib/postgresql/data
+      - supabase-db-config:/etc/postgresql-custom
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost", "-p", "5432"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  auth:
+    image: supabase/gotrue:v2.189.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:${AUTH_PORT:-9999}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD:-local-supabase-postgres}@db:5432/postgres
+      GOTRUE_SITE_URL: http://localhost:${FRONTEND_PORT:-4173}
+      GOTRUE_URI_ALLOW_LIST: http://localhost:${FRONTEND_PORT:-4173}/*
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY:-3600}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:-local-only-jwt-secret-change-before-sharing-1234567890}
+      GOTRUE_JWT_ISSUER: http://localhost:${AUTH_PORT:-9999}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+    ports:
+      - "127.0.0.1:${AUTH_PORT:-9999}:9999"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/postgres
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-local-supabase-postgres}
+      SUPABASE_ISSUER: http://localhost:${AUTH_PORT:-9999}
+      SUPABASE_AUTH_URL: http://auth:9999
+      SUPABASE_JWT_SECRET: ${JWT_SECRET:-local-only-jwt-secret-change-before-sharing-1234567890}
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--output-document=-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8080}
+      AUTH_BASE_URL: http://localhost:${AUTH_PORT:-9999}
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-4173}:4173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--output-document=-", "http://localhost:4173/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
       start_period: 5s
 
 volumes:
-  bubble-tea-postgres:
+  supabase-postgres:
+  supabase-db-config:

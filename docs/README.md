@@ -20,6 +20,8 @@ The Flyway migration remains the executable source of truth for the database.
 - [`database/invariants.md`](database/invariants.md) — transactional and data integrity rules.
 - [`api/conventions.md`](api/conventions.md) — future HTTP and OpenAPI conventions.
 - [`delivery/roadmap.md`](delivery/roadmap.md) — incremental delivery order and acceptance gates.
+- [`development/local-docker.md`](development/local-docker.md) — local Supabase, backend, and
+  frontend Docker workflow.
 
 ## Documentation rules
 

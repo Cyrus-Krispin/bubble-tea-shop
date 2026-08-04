@@ -9,3 +9,6 @@ Its planned structure is:
 
 The API client will be generated from the backend OpenAPI document.
 
+Until that application exists, `server.mjs` provides only a health endpoint and an explicit JSON
+placeholder so the complete local Docker stack can start without pretending that product UI has
+been implemented.
