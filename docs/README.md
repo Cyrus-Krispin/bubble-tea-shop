@@ -8,6 +8,8 @@ The Flyway migration remains the executable source of truth for the database.
 - [`product/mvp.md`](product/mvp.md) — MVP scope, roles, workflows, and deferred stories.
 - [`product/glossary.md`](product/glossary.md) — shared domain language.
 - [`architecture/overview.md`](architecture/overview.md) — system shape and module responsibilities.
+- [`architecture/technology-stack.md`](architecture/technology-stack.md) — selected technologies,
+  implementation status, and the rationale behind each choice.
 - [`architecture/security.md`](architecture/security.md) — authentication and authorization direction.
 - [`architecture/face-authentication.md`](architecture/face-authentication.md) — deferred customer
   face authentication and its integration with JWT sessions.
