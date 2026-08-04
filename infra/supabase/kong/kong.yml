@@ -1,0 +1,11 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: auth
+    url: http://auth:9999
+    routes:
+      - name: auth-v1
+        paths:
+          - /auth/v1
+        strip_path: true

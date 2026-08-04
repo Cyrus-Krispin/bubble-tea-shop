@@ -13,11 +13,16 @@ Schema-first monorepo for a bubble tea shop management and ordering platform.
 
 ```bash
 cp .env.example .env
-docker compose up -d db
-cd backend
-./mvnw verify
+docker compose up --build
 ```
 
-The database is exposed on `localhost:5432` by default. See
-[`docs/README.md`](docs/README.md) for the documentation index.
+This starts the official Supabase Postgres and Auth images, the Spring Boot backend, and the
+frontend placeholder in one local-only Compose network. Open the frontend at
+<http://localhost:4173>; backend health is at <http://localhost:8080/actuator/health> and Auth
+health is at <http://localhost:9999/health>.
 
+The first run needs internet access to pull images and download build dependencies. Once those
+artifacts are cached, `docker compose up` runs without a hosted Supabase project or other online
+runtime dependency. See [`docs/development/local-docker.md`](docs/development/local-docker.md) for
+configuration, health checks, and lifecycle commands, and [`docs/README.md`](docs/README.md) for
+the documentation index.

@@ -7,7 +7,7 @@
   },
   "packageManager": "pnpm@11.9.0",
   "scripts": {
+    "start": "node server.mjs",
     "placeholder": "node -e \"console.log('Frontend implementation follows the schema slice')\""
   }
 }
-
