@@ -25,7 +25,7 @@ Read `docs/README.md` before making architecture or product changes. In particul
 - `docs/architecture/overview.md` defines module boundaries.
 - `docs/architecture/security.md` defines authentication and authorization rules.
 - `docs/architecture/face-authentication.md` defines the deferred biometric experiment and its
-  relationship to managed authentication.
+  relationship to local Supabase authentication.
 - `docs/database/erd.md`, `data-dictionary.md`, and `invariants.md` describe the schema.
 - `docs/delivery/roadmap.md` describes delivery order.
 

@@ -7,7 +7,7 @@ When the migration and this page disagree, the migration wins and this page must
 
 The V1 `account` credential fields and `refresh_session` table reflect the superseded
 application-owned authentication design. They remain documented because they are implemented
-schema. Supabase is now the selected managed authentication direction; a new migration will be
+schema. Local Supabase Auth is now the selected authentication issuer; a new migration will be
 needed after the identity mapping and legacy-data lifecycle are decided.
 
 ## Legend
@@ -192,7 +192,7 @@ Primary key: `(membership_id, location_id)`.
 ### `refresh_session`
 
 This table is part of the implemented V1 schema but is not the target session store. Supabase will
-own managed authentication and session concerns. Whether this table is dropped, retained for audit,
+own authentication and session concerns. Whether this table is dropped, retained for audit,
 or repurposed must be decided and delivered through a later Flyway migration.
 
 | Column | Type | Nullability | Default | Key |

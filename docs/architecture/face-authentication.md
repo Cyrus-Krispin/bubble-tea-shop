@@ -5,10 +5,11 @@ may build a simple local model and is investigating whether matching can run in 
 model, biometric provider, liveness technology, enrollment store, or Supabase integration has been
 selected or implemented.
 
-## Relationship to managed authentication
+## Relationship to local authentication
 
-Supabase is the selected managed authentication service. A face experiment does not replace
-Supabase, issue an application session, or become authorization evidence for Spring.
+The local, self-hosted Supabase Auth service is the selected authentication issuer. A face
+experiment does not replace Supabase, issue an application session, or become authorization
+evidence for Spring.
 
 If face authentication is ever proposed for production, it must use a supported, reviewed path
 into Supabase authentication. The repository intentionally does not define that flow yet. A local
@@ -21,7 +22,7 @@ domain access and must not be copied into general authorization claims or applic
 
 ## Intended experimental scope
 
-- Customer use only at first. Owner and manager access continues to use the standard managed
+- Customer use only at first. Owner and manager access continues to use the standard Supabase
   authentication path and any stronger controls selected later.
 - Enrollment is opt-in and requires an already authenticated customer plus explicit consent.
 - Customers can remove a face credential and must always have a non-biometric login and recovery
@@ -63,7 +64,7 @@ organizations, or stored in unprotected application metadata.
   changes.
 - Treat multiple close candidates as no match and offer a non-biometric recovery path.
 - Avoid silently switching an active user when another face enters view.
-- Revoke biometric credentials independently from the managed Supabase session and disable their
+- Revoke biometric credentials independently from the Supabase session and disable their
   use when the linked application account is disabled.
 
 ## Delivery sequence
