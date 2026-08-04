@@ -28,6 +28,7 @@ sequenceDiagram
     participant UI as Customer UI / kiosk
     participant API as Spring identity module
     participant FACE as Face matching service
+    participant AUTH as Supabase Auth
     participant DB as PostgreSQL
 
     UI->>API: POST /api/v1/auth/face/challenges
@@ -38,24 +39,23 @@ sequenceDiagram
     FACE-->>API: Candidate credential + confidence + model version
     API->>DB: Resolve credential to enabled customer account
     API->>API: Apply threshold, device, rate-limit, and risk policy
-    API->>DB: Create rotating refresh session
-    API-->>UI: Access JWT + Secure HttpOnly refresh cookie
+    API->>AUTH: Complete a separately designed trusted auth exchange
+    AUTH-->>UI: Supabase access and refresh session
 ```
 
 The face matching component never creates JWTs. It returns a narrowly scoped match result to the
-Spring identity module. Only the identity module may decide that authentication succeeded, resolve
-the credential to an enabled `account`, and create tokens.
+Spring identity module. Only the identity module may decide that the biometric check succeeded and
+resolve the credential to an enabled `account`; only Supabase Auth may issue the resulting access
+and refresh session. The trusted exchange shown above is conceptual and requires a separate design
+and threat model before implementation.
 
-On success, token handling is identical to password login:
+On success, token handling must remain identical to other Supabase Auth sessions:
 
-- Return a 15-minute access JWT in the response body for in-memory use.
-- Set the 14-day rotating refresh token in the existing Secure, HttpOnly, SameSite cookie.
-- Persist only the refresh-token hash in `refresh_session`.
-- Include the account ID in `sub`, the refresh-session ID in `sid`, the authentication time in
-  `auth_time`, and an authentication-method claim such as `amr: ["face"]`.
+- Supabase owns access-token lifetime, refresh rotation, and logout behavior.
+- The JWT `sub` remains the Supabase user ID; Spring resolves application identity and current
+  authorization from server-side data.
 - Do not put a face image, face template, match score, or biometric credential ID in a JWT.
-- Refreshing a session does not run face matching again. Revocation, rotation, and reuse detection
-  are the same as for a password-created session.
+- Refreshing a session does not run face matching again.
 
 `amr` is audit and risk context, not authorization. Roles and access are still loaded from current
 server-side account, membership, and assignment state. Sensitive operations may require a recent
@@ -105,7 +105,7 @@ organizations or unrelated purposes.
 
 ## Delivery sequence
 
-1. Build customer accounts and the standard JWT login/refresh/logout flow.
+1. Build customer accounts and the standard Supabase Auth sign-in/session flow.
 2. Add biometric consent, enrollment, deletion, and audit records.
 3. Evaluate on-device/platform biometric authentication where it can satisfy the experience; it
    avoids central face identification.
@@ -114,4 +114,3 @@ organizations or unrelated purposes.
 5. Add challenge and face-session endpoints behind a feature flag.
 6. Pilot on registered devices with test identities, then complete security, accessibility,
    privacy, bias, and operational reviews before production use.
-

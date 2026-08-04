@@ -51,14 +51,19 @@ reviewable when the model evolves, and Hibernate runs with `ddl-auto=validate` s
 mapping mismatch without modifying the schema. Inventory balances and their immutable movement
 history live in the same database transaction as order completion to prevent overselling.
 
-Authentication will be implemented within the Spring application using Spring Security. The
-planned browser flow uses short-lived JWT access tokens held in memory and rotating refresh
-sessions backed by hashed tokens in PostgreSQL and protected cookies. Authorization will be
-resolved from current server-side memberships and location assignments. The application owns this
-design; Supabase is not part of the selected stack.
+The fully local, self-hosted Supabase Auth service is the authentication issuer; the hosted
+Supabase platform is not used. Local Auth performs sign-in and owns access/refresh session
+lifecycle. Spring Security is configured as an OAuth 2.0 resource server and validates access JWTs
+against the asymmetric public JWKS served on the private Compose network, expected local issuer,
+and `authenticated` audience. Validation has no runtime internet dependency. Spring does not
+receive a signing secret, mint a second application JWT, or expose application
+login/password/refresh endpoints.
 
-The account, membership, location-assignment, and refresh-session schema exists today, but the
-login, token rotation, logout, and authorization endpoints are planned work.
+Authentication does not grant domain access by itself. Authorization will be resolved from current
+server-side account mappings, memberships, and location assignments rather than trusting mutable
+user metadata or client-provided claims. The existing account and refresh-session schema predates
+the Supabase issuer decision and remains unchanged until a later identity migration defines the
+external-user mapping and legacy-column lifecycle.
 
 ## Local infrastructure
 

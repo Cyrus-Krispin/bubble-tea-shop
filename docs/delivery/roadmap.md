@@ -13,8 +13,8 @@ healthy database.
 
 ## Phase 2 — Staff access and catalog
 
-- Production owner bootstrap command.
-- Login, refresh rotation, logout, and owner/manager authorization.
+- Local Supabase Auth frontend sign-in/session integration and application-account mapping.
+- Production owner bootstrap command and owner/manager authorization from server-side memberships.
 - Ingredient, recipe-version, menu, and option management APIs.
 - OpenAPI generation and typed frontend client.
 - First design-system tokens, form primitives, and Storybook.
