@@ -9,3 +9,7 @@ Its planned structure is:
 
 The API client will be generated from the backend OpenAPI document.
 
+## Documentation
+
+- [`docs/visual-style-guide.md`](docs/visual-style-guide.md) — selected visual direction for the
+  customer ordering experience and its separation from staff operations.
