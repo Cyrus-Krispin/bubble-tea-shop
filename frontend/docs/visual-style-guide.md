@@ -10,6 +10,15 @@ The direction is an original, minimalist hand-drawn storybook tea shop. It borro
 discovery and warmth associated with a gentle 2D fantasy adventure without copying a specific
 game, character, logo, interface, or proprietary visual asset.
 
+## Visual reference
+
+![Minimalist hand-drawn customer menu and drink customization concept](assets/customer-ordering-concept.png)
+
+This concept image is the preferred visual reference for the customer ordering direction. It is
+design guidance only, not a production implementation asset. Product requirements, responsive
+behavior, accessibility, and the reusable design-system rules below take precedence over its
+specific mock content or layout.
+
 ## Visual identity
 
 The customer experience should feel like arriving at a welcoming tea shop at the edge of an
