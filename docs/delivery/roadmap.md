@@ -13,8 +13,15 @@ healthy database.
 
 ## Phase 2 — Staff access and catalog
 
-- Production owner bootstrap command.
-- Login, refresh rotation, logout, and owner/manager authorization.
+- Decide the Supabase Auth/data boundary, local-development topology, identity mapping, and
+  browser-to-Spring credential validation.
+- Add a Flyway migration that reconciles the legacy V1 credential/session schema without editing
+  V1.
+- Configure Supabase managed authentication and an explicit first-owner provisioning/linking
+  workflow.
+- Resolve verified Supabase identities to active owner/manager memberships and location
+  assignments in Spring.
+- Add a protected staff-context endpoint as the first authenticated vertical slice.
 - Ingredient, recipe-version, menu, and option management APIs.
 - OpenAPI generation and typed frontend client.
 - First design-system tokens, form primitives, and Storybook.
@@ -36,5 +43,6 @@ healthy database.
 
 - Customer accounts/history, card payments, forecasting/alerts, supplier integration, dashboards,
   active multi-location operation, localization, and multiple currencies.
-- Opt-in customer face authentication, only after customer accounts and the standard JWT session
-  flow; see [`../architecture/face-authentication.md`](../architecture/face-authentication.md).
+- Opt-in customer face authentication, only after customer accounts and the standard Supabase
+  authentication path; see
+  [`../architecture/face-authentication.md`](../architecture/face-authentication.md).

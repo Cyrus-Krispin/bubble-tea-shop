@@ -32,8 +32,9 @@ The application is a modular monolith organized around identity, catalog, invent
 This keeps deployment and local development simple while allowing inventory and order completion
 to share a strongly consistent transaction. Spring Data JPA and Hibernate map the domain data,
 while focused workflow services can use Spring JDBC when explicit locking and SQL make transaction
-behavior clearer. Spring Validation and Spring Security are included as the foundations for future
-HTTP input validation and staff access control.
+behavior clearer. Spring Validation and Spring Security are present in the current Maven
+foundation, but no HTTP authentication is implemented. Supabase now supersedes the earlier custom
+Spring password and session plan; the eventual Spring-side verification mechanism remains open.
 
 There are no HTTP controllers in the current schema-first slice. The planned API will expose JSON
 over HTTPS under `/api/v1`, publish an OpenAPI contract, and return DTOs rather than persistence
@@ -44,21 +45,24 @@ entities.
 PostgreSQL 18 is the system of record. The expected data model is well understood and relational:
 organizations, locations, recipes, offerings, inventory movements, orders, and staff access all
 benefit from foreign keys, constraints, transactions, and precise numeric types. PostgreSQL owns
-relational integrity, while Spring owns workflows and authorization.
+relational integrity, while Spring owns workflows and authorization. Supabase is the selected
+managed authentication and data-service direction, although whether the first integration uses
+Auth only or Auth plus managed PostgreSQL is not yet settled.
 
 Flyway is the only schema-change mechanism. Versioned migrations make changes deliberate and
 reviewable when the model evolves, and Hibernate runs with `ddl-auto=validate` so it can detect a
 mapping mismatch without modifying the schema. Inventory balances and their immutable movement
 history live in the same database transaction as order completion to prevent overselling.
 
-Authentication will be implemented within the Spring application using Spring Security. The
-planned browser flow uses short-lived JWT access tokens held in memory and rotating refresh
-sessions backed by hashed tokens in PostgreSQL and protected cookies. Authorization will be
-resolved from current server-side memberships and location assignments. The application owns this
-design; Supabase is not part of the selected stack.
+Supabase will manage authentication instead of the application verifying passwords, issuing login
+tokens, or rotating custom refresh sessions. Spring remains the boundary for domain operations and
+resolves authorization from current server-owned memberships and location assignments after the
+Supabase identity has been verified.
 
-The account, membership, location-assignment, and refresh-session schema exists today, but the
-login, token rotation, logout, and authorization endpoints are planned work.
+The exact Supabase identity mapping, browser credential flow, Spring validation method, and local
+development topology are not selected. The Phase 1 account and refresh-session schema reflects the
+superseded custom-auth design; it remains implemented until a new Flyway migration and matching JPA
+changes reconcile it.
 
 ## Local infrastructure
 
@@ -66,10 +70,10 @@ Docker Compose runs PostgreSQL locally with a persistent named volume and a heal
 reason for Compose is practical: it gives every contributor the same database version and startup
 path, removes ambiguity from local setup, and makes the application straightforward to run.
 
-Hosting is intentionally local-only for now. The repository does not select a cloud provider,
-production container platform, managed database, or deployment pipeline, and those choices should
-not be inferred from the local Compose setup. Production images, observability, backups, and CI
-deployment gates remain future work.
+Hosting is intentionally local-only for now. Selecting Supabase as the managed-service direction
+does not yet select a hosted project, region, production container platform, or deployment
+pipeline. The choice between a local Supabase stack and a hosted development project is also open.
+Production images, observability, backups, and CI deployment gates remain future work.
 
 ## Tooling and testing
 

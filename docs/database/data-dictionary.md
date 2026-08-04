@@ -6,10 +6,10 @@
 |---|---|---|
 | `organization` | Top-level business owner. | Retained permanently in MVP. |
 | `location` | Physical stock/order boundary and display timezone/currency. | Deactivated with `active=false`. |
-| `account` | Login identity shared by staff and future customers. | Disabled rather than deleted. |
+| `account` | Phase 1 application identity record; future Supabase linkage is not yet modeled. | Disabled rather than deleted. |
 | `organization_membership` | Owner/manager role inside an organization. | Deactivated to remove access. |
 | `location_assignment` | Manager-to-location access. | Rows added or removed with audit at service layer. |
-| `refresh_session` | Rotating, revocable browser session. | Revoked or expired; token values are hashed. |
+| `refresh_session` | Legacy custom-session structure superseded by the Supabase direction. | Implemented in V1; later migration is undecided. |
 
 ## Catalog
 
@@ -60,4 +60,3 @@ Movement types:
 - Money: signed or non-negative `bigint` minor units as appropriate, plus `varchar(3)` ISO code.
 - Time: `timestamptz` in UTC.
 - Archival: nullable `archived_at`; historical foreign keys remain valid.
-

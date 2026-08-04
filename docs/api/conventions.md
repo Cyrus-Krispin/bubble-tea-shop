@@ -45,8 +45,13 @@ resources `404`, state conflicts `409`, and unexpected failures `500`.
 
 ## Authentication
 
-- Access JWTs are sent as bearer tokens.
-- Refresh tokens are accepted only from the protected cookie.
-- A token's organization/location claims are hints; authorization is resolved against active
-  memberships and assignments on the server.
-
+- Supabase is the managed authentication service. The application does not expose custom login,
+  refresh-token rotation, or logout endpoints.
+- The browser credential presented to Spring and the supported Supabase validation mechanism have
+  not been selected. They must be documented before authenticated controllers are introduced.
+- After identity verification, Spring resolves the caller's active application account,
+  organization membership, role, and location assignments on the server.
+- Organization, location, role, price, and inventory values supplied by the browser or stored in
+  untrusted identity metadata are not authorization evidence.
+- Domain APIs remain Spring endpoints; the frontend does not write application tables directly
+  through Supabase data APIs.

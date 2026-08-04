@@ -10,10 +10,14 @@ The Flyway migration remains the executable source of truth for the database.
 - [`architecture/overview.md`](architecture/overview.md) — system shape and module responsibilities.
 - [`architecture/technology-stack.md`](architecture/technology-stack.md) — selected technologies,
   implementation status, and the rationale behind each choice.
-- [`architecture/security.md`](architecture/security.md) — authentication and authorization direction.
+- [`architecture/security.md`](architecture/security.md) — authentication and authorization
+  direction.
 - [`architecture/face-authentication.md`](architecture/face-authentication.md) — deferred customer
-  face authentication and its integration with JWT sessions.
-- [`architecture/decisions/0001-schema-first-modular-monolith.md`](architecture/decisions/0001-schema-first-modular-monolith.md) — foundational ADR.
+  face-authentication experiment and its relationship to managed authentication.
+- [`architecture/decisions/0001-schema-first-modular-monolith.md`](architecture/decisions/0001-schema-first-modular-monolith.md)
+  — foundational ADR.
+- [`architecture/decisions/0002-supabase-managed-services.md`](architecture/decisions/0002-supabase-managed-services.md)
+  — Supabase authentication and data-service direction.
 - [`database/schema.md`](database/schema.md) — complete tables, columns, keys, relationships, and indexes.
 - [`database/erd.md`](database/erd.md) — entity relationship diagrams.
 - [`database/data-dictionary.md`](database/data-dictionary.md) — tables and lifecycle rules.

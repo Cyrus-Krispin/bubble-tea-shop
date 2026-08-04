@@ -3,6 +3,10 @@
 The diagrams are split by concern for readability. `organization_id` is repeated through owned
 tables to support composite foreign keys that reject cross-organization references.
 
+The identity diagram reflects the implemented V1 schema. Its `REFRESH_SESSION` relationship belongs
+to the superseded custom-auth design and is not the target Supabase session model. A later migration
+will reconcile it after the Supabase identity mapping has been selected.
+
 ## Identity
 
 ```mermaid
@@ -12,7 +16,7 @@ erDiagram
     ACCOUNT ||--o{ ORGANIZATION_MEMBERSHIP : receives
     ORGANIZATION_MEMBERSHIP ||--o{ LOCATION_ASSIGNMENT : scoped_by
     LOCATION ||--o{ LOCATION_ASSIGNMENT : allows
-    ACCOUNT ||--o{ REFRESH_SESSION : authenticates
+    ACCOUNT ||--o{ REFRESH_SESSION : has_legacy_session
 ```
 
 ## Catalog
@@ -58,4 +62,3 @@ erDiagram
     CUSTOMER_ORDER ||--o{ PAYMENT : paid_by
     CUSTOMER_ORDER o|--o{ INVENTORY_MOVEMENT : causes
 ```
-
