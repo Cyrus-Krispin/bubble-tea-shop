@@ -1,5 +1,17 @@
 # Security Model
 
+## Implementation status
+
+The fully local, self-hosted Supabase Auth service is the authentication issuer, superseding the
+earlier plan for Spring to verify passwords, issue access tokens, and rotate application-owned
+refresh sessions. Spring now implements the bearer-token validation boundary; sign-in UI and
+application identity mapping remain later work.
+
+The Phase 1 schema still contains `account.password_hash` and `refresh_session`, with matching JPA
+entities. Those structures document implemented database state, not the target authentication
+design. Flyway V1 is immutable, so a later versioned migration must reconcile them after the
+identity mapping and migration lifecycle have been decided.
+
 ## Authentication
 
 - The fully local, self-hosted Supabase Auth service is the authentication issuer. No hosted
@@ -51,13 +63,18 @@ location, or other token claims as application authorization evidence.
 
 ## Authorization
 
+- Authentication establishes identity; it does not grant organization or location access by
+  itself.
 - `OWNER` is organization-wide.
 - `MANAGER` is effective only while its membership is active and for assigned locations.
 - Deactivation preserves audit history.
-- Every command resolves organization and location access before loading or mutating domain data.
-- Client-provided organization IDs are never trusted as authorization evidence.
+- Spring resolves the verified Supabase identity to current server-owned account, membership, and
+  assignment data before loading or mutating domain data.
+- Client-provided organization IDs, location IDs, roles, prices, inventory values, or Supabase
+  metadata are never accepted as authorization evidence.
+- The React application does not call Supabase data APIs to bypass Spring domain workflows.
 
-## Browser boundary
+## Browser and service boundary
 
 - Supabase's client library will own browser session persistence and refresh behavior when the
   frontend authentication increment is implemented.

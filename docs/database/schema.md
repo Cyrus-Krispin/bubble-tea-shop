@@ -5,6 +5,11 @@ of truth is
 [`V1__create_mvp_schema.sql`](../../backend/src/main/resources/db/migration/V1__create_mvp_schema.sql).
 When the migration and this page disagree, the migration wins and this page must be corrected.
 
+The V1 `account` credential fields and `refresh_session` table reflect the superseded
+application-owned authentication design. They remain documented because they are implemented
+schema. Local Supabase Auth is now the selected authentication issuer; a new migration will be
+needed after the identity mapping and legacy-data lifecycle are decided.
+
 ## Legend
 
 - **PK**: primary key.
@@ -25,7 +30,7 @@ erDiagram
     ACCOUNT ||--o{ ORGANIZATION_MEMBERSHIP : receives
     ORGANIZATION_MEMBERSHIP ||--o{ LOCATION_ASSIGNMENT : grants
     LOCATION ||--o{ LOCATION_ASSIGNMENT : scopes
-    ACCOUNT ||--o{ REFRESH_SESSION : authenticates
+    ACCOUNT ||--o{ REFRESH_SESSION : has_legacy_session
     REFRESH_SESSION o|--o| REFRESH_SESSION : replaces
 
     ORGANIZATION ||--o{ INGREDIENT : owns
@@ -76,8 +81,8 @@ erDiagram
 | `organization_membership.account_id` | `account.id` | Membership is granted to an account. |
 | `location_assignment.(membership_id, organization_id)` | `organization_membership.(id, organization_id)` | Assignment belongs to a membership in the same organization. |
 | `location_assignment.(location_id, organization_id)` | `location.(id, organization_id)` | Assignment targets a location in the same organization. |
-| `refresh_session.account_id` | `account.id` | Session authenticates an account. |
-| `refresh_session.replaced_by_session_id` | `refresh_session.id` | Rotated session points to its replacement. |
+| `refresh_session.account_id` | `account.id` | Legacy session belongs to an account. |
+| `refresh_session.replaced_by_session_id` | `refresh_session.id` | Legacy rotated session points to its replacement. |
 | `ingredient.organization_id` | `organization.id` | Organization owns the ingredient. |
 | `recipe.organization_id` | `organization.id` | Organization owns the recipe. |
 | `recipe_version.(recipe_id, organization_id)` | `recipe.(id, organization_id)` | Version belongs to a recipe in the same organization. |
@@ -185,6 +190,10 @@ Unique: `(id, organization_id)` and `(organization_id, account_id)`. Role is `OW
 Primary key: `(membership_id, location_id)`.
 
 ### `refresh_session`
+
+This table is part of the implemented V1 schema but is not the target session store. Supabase will
+own authentication and session concerns. Whether this table is dropped, retained for audit,
+or repurposed must be decided and delivered through a later Flyway migration.
 
 | Column | Type | Nullability | Default | Key |
 |---|---|---|---|---|
@@ -523,7 +532,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `uq_inventory_sale_order_ingredient` | `inventory_movement` | `(customer_order_id, ingredient_id) WHERE movement_type = 'SALE'` | Prevent duplicate sale deductions. |
 | `idx_location_active` | `location` | `(organization_id, active)` | Active location lookup. |
 | `idx_membership_active` | `organization_membership` | `(organization_id, role, active)` | Active role lookup. |
-| `idx_refresh_session_account_active` | `refresh_session` | `(account_id, expires_at) WHERE revoked_at IS NULL` | Active session lookup. |
+| `idx_refresh_session_account_active` | `refresh_session` | `(account_id, expires_at) WHERE revoked_at IS NULL` | Legacy active-session lookup. |
 | `idx_ingredient_active` | `ingredient` | `(organization_id, name) WHERE archived_at IS NULL` | Active ingredient listing. |
 | `idx_recipe_active` | `recipe` | `(organization_id, name) WHERE archived_at IS NULL` | Active recipe listing. |
 | `idx_menu_product_active` | `menu_product` | `(organization_id, name) WHERE archived_at IS NULL` | Active product listing. |
@@ -544,4 +553,3 @@ Never edit an applied Flyway migration. When a later migration changes the schem
 3. Update [`erd.md`](erd.md), [`data-dictionary.md`](data-dictionary.md), and
    [`invariants.md`](invariants.md) when their views of the schema change.
 4. Run the migration/integration tests and `git diff --check`.
-

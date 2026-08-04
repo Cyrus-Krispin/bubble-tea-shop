@@ -8,20 +8,25 @@ The application is a modular monolith:
 flowchart LR
     UI["React SPA<br/>public, staff, owner, display routes"]
     API["Spring Boot<br/>modular monolith"]
-    DB[("PostgreSQL")]
+    AUTH["Local Supabase Auth<br/>session and JWT issuer"]
+    DB[("PostgreSQL<br/>local Compose today")]
 
     UI -->|"JSON over HTTPS<br/>generated OpenAPI client"| API
+    UI -.->|"local sign-in/session<br/>(planned frontend slice)"| AUTH
+    API -.->|"JWKS discovery<br/>private Compose network"| AUTH
     API --> DB
 ```
 
-Spring is the only backend. The React application does not introduce a Node server at runtime.
-PostgreSQL owns relational integrity; Spring owns workflows and authorization.
+Spring is the only custom application backend. The React application does not introduce a Node
+server at runtime or bypass Spring for domain operations. A self-hosted Supabase Auth service is
+the local authentication issuer; it does not replace Spring or the application database.
+PostgreSQL owns relational integrity; Spring owns workflows and server-side authorization.
 
 ## Backend modules
 
 | Module | Responsibility | May depend on |
 |---|---|---|
-| `identity` | Organizations, locations, accounts, memberships, refresh sessions | shared infrastructure |
+| `identity` | Supabase identity mapping, organizations, locations, accounts, memberships | shared infrastructure |
 | `catalog` | Ingredients, recipes, products, variants, choices, offerings | identity identifiers |
 | `inventory` | Balances, immutable movements, manual stock transactions | identity and catalog identifiers |
 | `ordering` | Order snapshots, payments, status history, completion | identity, catalog, inventory |
@@ -43,6 +48,9 @@ The future frontend is one React/TypeScript/Vite SPA:
 ## Runtime configuration
 
 - All timestamps are stored in UTC; location timezone is used at presentation/report boundaries.
-- Production secrets are environment-injected and never committed or seeded by Flyway.
+- Supabase signing material and other secrets are environment-injected and never committed or
+  seeded by Flyway.
 - `ddl-auto=validate` ensures mappings match migrations without allowing Hibernate to alter schema.
-
+- Local development uses PostgreSQL, Supabase Auth, its gateway, and Spring through Compose. The
+  backend retrieves only public verification keys from the private network and uses no hosted
+  Supabase service.

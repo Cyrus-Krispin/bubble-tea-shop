@@ -15,6 +15,11 @@ healthy database.
 
 - Local Supabase Auth frontend sign-in/session integration and application-account mapping.
 - Production owner bootstrap command and owner/manager authorization from server-side memberships.
+- Add a Flyway migration that reconciles the legacy V1 credential/session schema without editing
+  V1.
+- Resolve verified Supabase identities to active owner/manager memberships and location
+  assignments in Spring.
+- Add a protected staff-context endpoint as the first authenticated vertical slice.
 - Ingredient, recipe-version, menu, and option management APIs.
 - OpenAPI generation and typed frontend client.
 - First design-system tokens, form primitives, and Storybook.
@@ -36,5 +41,6 @@ healthy database.
 
 - Customer accounts/history, card payments, forecasting/alerts, supplier integration, dashboards,
   active multi-location operation, localization, and multiple currencies.
-- Opt-in customer face authentication, only after customer accounts and the standard JWT session
-  flow; see [`../architecture/face-authentication.md`](../architecture/face-authentication.md).
+- Opt-in customer face authentication, only after customer accounts and the standard Supabase
+  authentication path; see
+  [`../architecture/face-authentication.md`](../architecture/face-authentication.md).
