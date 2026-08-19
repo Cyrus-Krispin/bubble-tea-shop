@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import { CustomerHeader } from "../../app/CustomerHeader";
 import { useCart } from "../cart/CartContext";
-import { CustomerHeader } from "./CustomerHeader";
 import { demoDrinks } from "./demoCatalog";
 import { DrinkArtwork } from "./DrinkArtwork";
 import { formatMoney } from "./formatMoney";

@@ -5,93 +5,6 @@
     var(--color-canvas);
 }
 
-.customer-header {
-  display: flex;
-  min-height: 6rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  width: min(100% - 3rem, 84rem);
-  margin: 0 auto;
-  border-bottom: 1px solid var(--color-line);
-}
-
-.customer-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--color-ink);
-  text-decoration: none;
-}
-
-.customer-brand strong,
-.customer-brand small {
-  display: block;
-}
-
-.customer-brand strong {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-}
-
-.customer-brand small {
-  margin-top: 0.2rem;
-  color: var(--color-muted);
-}
-
-.leaf-mark {
-  display: grid;
-  width: 2.75rem;
-  height: 2.75rem;
-  place-items: center;
-  color: var(--color-canvas);
-  background: var(--color-forest-strong);
-  border-radius: 50% 50% 50% 0.5rem;
-  transform: rotate(-12deg);
-}
-
-.customer-header nav {
-  display: flex;
-  align-items: center;
-  gap: clamp(var(--space-3), 3vw, var(--space-6));
-}
-
-.customer-header nav a {
-  min-height: 2.75rem;
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-ink);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.customer-header nav a[aria-current="page"] {
-  box-shadow: inset 0 -2px var(--color-forest);
-}
-
-.customer-header nav a[aria-disabled="true"] {
-  color: var(--color-muted);
-  cursor: not-allowed;
-}
-
-.customer-header .order-link {
-  gap: var(--space-2);
-  padding: 0 var(--space-4);
-  border: 1px solid var(--color-forest);
-  border-radius: var(--radius-control);
-}
-
-.order-link span {
-  display: grid;
-  min-width: 1.5rem;
-  height: 1.5rem;
-  place-items: center;
-  color: var(--color-canvas);
-  font-size: 0.75rem;
-  background: var(--color-forest-strong);
-  border-radius: 999px;
-}
-
 .shop-main {
   width: min(100% - 3rem, 84rem);
   margin: 0 auto;
@@ -506,14 +419,6 @@
 }
 
 @media (max-width: 44rem) {
-  .customer-header {
-    width: min(100% - 2rem, 84rem);
-    align-items: flex-start;
-    padding: var(--space-3) 0;
-  }
-  .customer-brand strong { font-size: 1.05rem; }
-  .customer-header nav { gap: var(--space-2); }
-  .customer-header nav > a:not(.order-link) { display: none; }
   .shop-main { width: min(100% - 2rem, 84rem); padding-top: var(--space-6); }
   .shop-heading { display: block; }
   .demo-note { margin-top: var(--space-4); }

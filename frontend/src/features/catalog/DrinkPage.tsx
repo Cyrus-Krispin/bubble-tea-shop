@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
 
+import { CustomerHeader } from "../../app/CustomerHeader";
 import { useCart } from "../cart/CartContext";
-import { CustomerHeader } from "./CustomerHeader";
 import { findDemoDrink } from "./demoCatalog";
 import { DrinkArtwork } from "./DrinkArtwork";
 import { formatMoney } from "./formatMoney";
@@ -69,6 +69,11 @@ export function DrinkPage() {
     setAddedMessage("");
   }
 
+  function selectChoice(choice: Partial<DrinkConfiguration>) {
+    setConfiguration((current) => ({ ...current, ...choice }));
+    setAddedMessage("");
+  }
+
   return (
     <div className="customer-shell">
       <a className="skip-link" href="#customize-title">Skip to customization</a>
@@ -91,7 +96,7 @@ export function DrinkPage() {
             <div className="option-row option-row--three">
               {sizeOptions.map((option) => (
                 <label key={option.id}>
-                  <input aria-label={`${option.label} ${priceDeltaLabel(option.priceDeltaMinor)}`} checked={configuration.size === option.id} name="size" onChange={() => setConfiguration({ ...configuration, size: option.id })} type="radio" />
+                  <input aria-label={`${option.label} ${priceDeltaLabel(option.priceDeltaMinor)}`} checked={configuration.size === option.id} name="size" onChange={() => selectChoice({ size: option.id })} type="radio" />
                   <span>{option.label}</span><small>{priceDeltaLabel(option.priceDeltaMinor)}</small>
                 </label>
               ))}
@@ -101,7 +106,7 @@ export function DrinkPage() {
             <legend>Sweetness</legend>
             <div className="option-row option-row--five">
               {sweetnessOptions.map((option) => (
-                <label key={option}><input checked={configuration.sweetness === option} name="sweetness" onChange={() => setConfiguration({ ...configuration, sweetness: option })} type="radio" /><span>{option}</span></label>
+                <label key={option}><input checked={configuration.sweetness === option} name="sweetness" onChange={() => selectChoice({ sweetness: option })} type="radio" /><span>{option}</span></label>
               ))}
             </div>
           </fieldset>
@@ -109,7 +114,7 @@ export function DrinkPage() {
             <legend>Ice</legend>
             <div className="option-row option-row--four">
               {iceOptions.map((option) => (
-                <label key={option}><input checked={configuration.ice === option} name="ice" onChange={() => setConfiguration({ ...configuration, ice: option })} type="radio" /><span>{option}</span></label>
+                <label key={option}><input checked={configuration.ice === option} name="ice" onChange={() => selectChoice({ ice: option })} type="radio" /><span>{option}</span></label>
               ))}
             </div>
           </fieldset>

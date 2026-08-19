@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 
-import { CustomerHeader } from "../catalog/CustomerHeader";
+import { CustomerHeader } from "../../app/CustomerHeader";
 import { formatMoney } from "../catalog/formatMoney";
 import { toppingOptions, type DrinkConfiguration } from "../catalog/pricing";
 import { useCart } from "./CartContext";

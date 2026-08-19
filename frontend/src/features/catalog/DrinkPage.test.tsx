@@ -25,7 +25,10 @@ describe("DrinkPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add to order · $8.00" }));
 
     expect(screen.getByRole("status")).toHaveTextContent("Added Moonlit Milk Tea to your order.");
-    expect(screen.getByRole("link", { name: "Order 1 items" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Order 1 item" })).toBeVisible();
+
+    fireEvent.click(screen.getByRole("radio", { name: "Small −$0.50" }));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("offers a route back to the menu for an unknown drink", () => {
