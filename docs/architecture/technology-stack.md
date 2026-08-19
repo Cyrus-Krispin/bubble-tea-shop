@@ -18,10 +18,11 @@ the shop's own design system, TanStack Query will manage server state, and Story
 isolated component development. The frontend will consume a typed client generated from the
 Spring OpenAPI contract so that API changes remain visible at compile time.
 
-The frontend directory currently contains only a Node 24 and pnpm 11 workspace foundation plus a
-containerized health/placeholder process. React, TypeScript, Vite, Tailwind, Radix, TanStack
-Query, Storybook, and OpenAPI generation are selected choices for the next delivery phases rather
-than installed production code.
+The frontend now contains the React, TypeScript, and Vite foundation plus a staff sign-in screen
+that uses the local Supabase Auth gateway. It includes linting, type checking, Vitest component
+tests, and a containerized SPA build. Tailwind, Radix, TanStack Query, Storybook, and generated
+OpenAPI client code remain selected choices for later increments rather than installed production
+code.
 
 ## Backend and API
 
@@ -87,7 +88,7 @@ its own schema.
 | Authentication | GoTrue `supabase/gotrue:v2.189.0` | Local sign-in, access tokens, refresh sessions, and the asymmetric signing key. |
 | Auth gateway | Kong `kong:3.9.1`, host port `8000` | Routes `/auth/v1` to GoTrue and exposes its issuer and public JWKS consistently. |
 | Application API | Spring Boot 4.1 on Java 21, host port `8080` | Modular-monolith workflows, authorization, Flyway migrations, and access-token validation. |
-| Frontend workspace | Node `24.16.0` and pnpm `11.9.0`, host port `4173` | Current health/placeholder process; future home for the React SPA. |
+| Frontend workspace | Node `24.16.0`, pnpm `11.9.0`, and Nginx, host port `4173` | React SPA build and staff sign-in; future home for staff and customer workflows. |
 
 Inside Compose, the backend connects to PostgreSQL at `db:5432` and fetches public signing keys
 from Kong at `kong:8000`; it does not call a hosted service. Host ports bind to `127.0.0.1` only.
@@ -119,8 +120,8 @@ Developers need a Java 21 JDK, Node 24 for the local generator, and a Docker-com
 for Compose and Testcontainers. The backend verification command is `cd backend && ./mvnw verify`;
 it requires Docker because its integration tests start PostgreSQL with Testcontainers.
 
-Frontend linting, type checking, component tests, end-to-end tests, and production builds will be
-added with the frontend implementation.
+The frontend uses ESLint, TypeScript, Vitest, React Testing Library, and Vite production builds.
+Browser end-to-end tests will be added with the first authenticated staff-context workflow.
 
 ## Experimental face authentication
 

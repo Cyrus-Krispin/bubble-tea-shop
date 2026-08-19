@@ -9,3 +9,21 @@ services:
         paths:
           - /auth/v1
         strip_path: true
+
+plugins:
+  - name: cors
+    route: auth-v1
+    config:
+      origins:
+        - http://localhost:4173
+      methods:
+        - GET
+        - POST
+        - OPTIONS
+      headers:
+        - authorization
+        - apikey
+        - content-type
+        - x-client-info
+        - x-supabase-api-version
+      max_age: 3600
