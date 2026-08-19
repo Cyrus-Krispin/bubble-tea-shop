@@ -17,6 +17,8 @@ spring:
           time_zone: UTC
 
 app:
+  catalog:
+    guest-location-slug: ${GUEST_LOCATION_SLUG:orchard-central}
   security:
     supabase:
       enabled: ${LOCAL_SUPABASE_AUTH_ENABLED:false}

@@ -35,7 +35,7 @@ class GuestCatalogApiIntegrationTest {
 
     @Test
     void menuIsPublicAndReturnsDatabaseBackedProductSummaries() throws Exception {
-        mvc.perform(get("/api/v1/guest/locations/orchard-central/menu"))
+        mvc.perform(get("/api/v1/guest/menu"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.location.slug").value("orchard-central"))
             .andExpect(jsonPath("$.location.name").value("Orchard Central"))
@@ -51,7 +51,7 @@ class GuestCatalogApiIntegrationTest {
 
     @Test
     void productDetailReturnsVariantsAndTheirEnabledOptions() throws Exception {
-        mvc.perform(get("/api/v1/guest/locations/orchard-central/menu/products/moonlit-milk-tea"))
+        mvc.perform(get("/api/v1/guest/menu/products/moonlit-milk-tea"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.slug").value("moonlit-milk-tea"))
             .andExpect(jsonPath("$.variants.length()").value(3))

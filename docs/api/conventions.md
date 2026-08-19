@@ -60,12 +60,15 @@ resources `404`, state conflicts `409`, and unexpected failures `500`.
 
 These read-only endpoints are public so a guest can browse without a Supabase session:
 
+- `GET /api/v1/guest/menu` and `GET /api/v1/guest/menu/products/{productSlug}` resolve the
+  deployment-configured MVP guest location and are the frontend's current endpoints.
 - `GET /api/v1/guest/locations/{locationSlug}/menu` returns the active location and ordered product
   summaries with database-owned availability and starting prices.
 - `GET /api/v1/guest/locations/{locationSlug}/menu/products/{productSlug}` returns available size
   variants, exact variant prices, and enabled option groups and choices.
 
-The menu is a bounded singleton resource for one location, so it is not paginated. Unknown or
+`GUEST_LOCATION_SLUG` configures the current MVP location on the server; the frontend does not own
+or duplicate that domain value. The menu is a bounded singleton resource for one location, so it is not paginated. Unknown or
 inactive locations and products return `404` problem details with `CATALOG_NOT_FOUND` or
 `CATALOG_PRODUCT_NOT_FOUND`. All other `/api/**` routes keep their configured authentication or
 deny-by-default rule.
