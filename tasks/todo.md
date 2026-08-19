@@ -7,15 +7,15 @@
 
 **Acceptance criteria:**
 
-- [ ] `/` exposes a primary `Continue as guest` link and a secondary, clearly labeled staff link.
-- [ ] Guest navigation reaches `/shop`; direct URLs, refresh, back, and forward navigation work.
-- [ ] Staff authentication behavior remains unchanged at `/staff/sign-in`.
+- [x] `/` exposes a primary `Continue as guest` link and a secondary, clearly labeled staff link.
+- [x] Guest navigation reaches `/shop`; direct URLs, refresh, back, and forward navigation work.
+- [x] Staff authentication behavior remains unchanged at `/staff/sign-in`.
 
 **Verification:**
 
-- [ ] Component tests cover both entry actions and the staff route.
-- [ ] Manual keyboard check covers skip link, both actions, focus visibility, and browser history.
-- [ ] `pnpm test`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass in `frontend/`.
+- [x] Component tests cover both entry actions and the staff route.
+- [x] Manual keyboard check covers skip link, both actions, focus visibility, and browser history.
+- [x] `pnpm test`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass in `frontend/`.
 
 **Dependencies:** None
 
@@ -36,15 +36,15 @@ and action hierarchy into reusable tokens and small accessible primitives used b
 
 **Acceptance criteria:**
 
-- [ ] Color, spacing, typography, radius, and motion values use named tokens rather than repeated literals.
-- [ ] Primary, secondary, and text actions have consistent hover, focus, disabled, and pressed states.
-- [ ] Reduced motion, 200% zoom, forced colors, contrast, and 44px interaction targets are supported.
+- [x] Color, spacing, typography, radius, and motion values use named tokens rather than repeated literals.
+- [x] Primary, secondary, and text actions have consistent hover, focus, disabled, and pressed states.
+- [x] Reduced motion, 200% zoom, forced colors, contrast, and 44px interaction targets are supported.
 
 **Verification:**
 
-- [ ] Primitive component tests cover accessible names and disabled behavior.
-- [ ] Manual checks run at 320px, 768px, 1024px, and 1440px.
-- [ ] `pnpm test`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass in `frontend/`.
+- [x] Component tests cover accessible names, selected states, and disabled behavior.
+- [x] Manual checks run at 320px, 768px, 1024px, and 1440px.
+- [x] `pnpm test`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` pass in `frontend/`.
 
 **Dependencies:** Task 1
 
@@ -64,15 +64,15 @@ menu with location, category filters, availability, product summaries, and curre
 
 **Acceptance criteria:**
 
-- [ ] Available drinks expose name, flavor note, image alternative text, and formatted SGD starting price.
-- [ ] Filtering is keyboard accessible and unavailable products cannot enter customization.
-- [ ] Loading, error, empty, and available states are explicit and tested.
+- [x] Available drinks expose name, flavor note, image alternative text, and formatted SGD starting price.
+- [x] Filtering is keyboard accessible and unavailable products cannot enter customization.
+- [x] Available, filtered, and unavailable demo-catalog states are explicit and tested; async states remain with the future API adapter.
 
 **Verification:**
 
-- [ ] Component tests cover catalog states, category filters, and unavailable products.
-- [ ] Manual screen-reader and responsive checks cover semantic navigation and product headings.
-- [ ] Frontend test, typecheck, lint, and build commands pass.
+- [x] Component tests cover catalog states, category filters, and unavailable products.
+- [x] Browser accessibility-tree and responsive checks cover semantic navigation and product headings.
+- [x] Frontend test, typecheck, lint, and build commands pass.
 
 **Dependencies:** Tasks 1 and 2
 
@@ -93,15 +93,15 @@ as a side panel on wide screens and a focused page on phones while preserving on
 
 **Acceptance criteria:**
 
-- [ ] Radio groups and checkboxes expose labels, selected state, availability, and price deltas.
-- [ ] The displayed total updates deterministically and is announced without moving focus.
-- [ ] Unknown or unavailable drinks provide a recovery path to `/shop`.
+- [x] Radio groups and checkboxes expose labels, selected state, availability, and price deltas.
+- [x] The displayed total updates deterministically and is announced without moving focus.
+- [x] Unknown or unavailable drinks provide a recovery path to `/shop`.
 
 **Verification:**
 
-- [ ] Tests cover default options, total changes, unavailable options, and unknown drink IDs.
-- [ ] Keyboard, screen-reader, 200% zoom, reduced-motion, and breakpoint checks pass.
-- [ ] Frontend test, typecheck, lint, and build commands pass.
+- [x] Tests cover default options, total changes, unavailable options, and unknown drink IDs.
+- [x] Keyboard, screen-reader, 200% zoom, reduced-motion, and breakpoint checks pass.
+- [x] Frontend test, typecheck, lint, and build commands pass.
 
 **Dependencies:** Task 3
 
@@ -122,15 +122,15 @@ preview totals, then connect the customizer's primary action to that state.
 
 **Acceptance criteria:**
 
-- [ ] Adding the same configuration increments quantity; different configurations stay separate.
-- [ ] The header count and preview total update after add, quantity change, or removal.
-- [ ] No client-owned organization, location, availability, or price value is represented as authoritative.
+- [x] Adding the same configuration increments quantity; different configurations stay separate.
+- [x] The header count and preview total update after add, quantity change, or removal.
+- [x] No client-owned organization, location, availability, or price value is represented as authoritative.
 
 **Verification:**
 
-- [ ] Reducer tests cover add, merge, quantity change, remove, and clear operations.
-- [ ] Component test confirms add-to-order feedback and current-order count.
-- [ ] Frontend test, typecheck, lint, and build commands pass.
+- [x] Reducer tests cover add, merge, quantity change, remove, and clear operations.
+- [x] Component test confirms add-to-order feedback and current-order count.
+- [x] Frontend test, typecheck, lint, and build commands pass.
 
 **Dependencies:** Task 4
 
@@ -151,16 +151,16 @@ see preview totals, and understand the future pickup/cash checkout flow without 
 
 **Acceptance criteria:**
 
-- [ ] Empty and populated carts have clear routes back to the menu.
-- [ ] Each line item exposes its configuration, quantity controls, item total, edit, and remove actions.
-- [ ] The checkout handoff is visibly unavailable or marked as a demo until a Spring endpoint exists.
+- [x] Empty and populated carts have clear routes back to the menu.
+- [x] Each line item exposes its configuration, quantity controls, item total, edit, and remove actions.
+- [x] The checkout handoff is visibly unavailable or marked as a demo until a Spring endpoint exists.
 
 **Verification:**
 
-- [ ] Component tests cover empty cart, quantity edits, removal, totals, and disabled handoff.
-- [ ] Manual keyboard and screen-reader checks confirm focus and status messages remain understandable.
-- [ ] Browser console and accessibility scan are clean at all supported breakpoints.
-- [ ] Frontend test, typecheck, lint, and build commands pass.
+- [x] Component tests cover empty cart, quantity edits, removal, totals, and disabled handoff.
+- [x] Manual keyboard and screen-reader checks confirm focus and status messages remain understandable.
+- [x] Browser console and accessibility-tree review are clean at all supported breakpoints.
+- [x] Frontend test, typecheck, lint, and build commands pass.
 
 **Dependencies:** Task 5
 

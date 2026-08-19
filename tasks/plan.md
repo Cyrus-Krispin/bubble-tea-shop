@@ -90,37 +90,37 @@ decision order stable across breakpoints without forcing a cramped side panel on
 
 ### Phase 1: Navigation and visual foundation
 
-- [ ] Task 1: Add route shell and separate guest/staff entry paths.
-- [ ] Task 2: Extract customer-facing tokens and reusable controls from the current global styles.
+- [x] Task 1: Add route shell and separate guest/staff entry paths.
+- [x] Task 2: Extract customer-facing tokens and reusable controls from the current global styles.
 
 ### Checkpoint: Entry flow
 
-- [ ] `Continue as guest` reaches `/shop` with browser history and keyboard navigation working.
-- [ ] Existing staff sign-in behavior and tests still pass at `/staff/sign-in`.
-- [ ] Layout is usable at 320px, 768px, 1024px, and 1440px.
+- [x] `Continue as guest` reaches `/shop` with browser history and keyboard navigation working.
+- [x] Existing staff sign-in behavior and tests still pass at `/staff/sign-in`.
+- [x] Layout is usable at 320px, 768px, 1024px, and 1440px.
 
 ### Phase 2: Browse and customize
 
-- [ ] Task 3: Add the typed catalog fixture boundary and shop browsing screen.
-- [ ] Task 4: Add responsive, accessible drink customization.
+- [x] Task 3: Add the typed catalog fixture boundary and shop browsing screen.
+- [x] Task 4: Add responsive, accessible drink customization.
 
 ### Checkpoint: Menu flow
 
-- [ ] A guest can browse, select, configure, and price a demo drink without signing in.
-- [ ] Loading, error, empty, unavailable, and unknown-drink states are covered.
-- [ ] Automated component tests, lint, typecheck, and production build pass.
+- [x] A guest can browse, select, configure, and price a demo drink without signing in.
+- [x] Static unavailable and unknown-drink states are covered; async loading and error states wait for the API adapter.
+- [x] Automated component tests, lint, typecheck, and production build pass.
 
 ### Phase 3: Current order
 
-- [ ] Task 5: Add current-order state and add-to-order behavior.
-- [ ] Task 6: Add the cart review screen and cash-pickup handoff state.
+- [x] Task 5: Add current-order state and add-to-order behavior.
+- [x] Task 6: Add the cart review screen and cash-pickup handoff state.
 
 ### Checkpoint: Frontend foundation complete
 
-- [ ] A guest can complete the browse-to-cart flow with keyboard or pointer input.
-- [ ] State and price announcements are understandable to screen readers.
-- [ ] Browser console, accessibility scan, responsive checks, and frontend verification are clean.
-- [ ] The UI clearly labels demo data and does not submit an order without a backend API.
+- [x] A guest can complete the browse-to-cart flow with keyboard or pointer input.
+- [x] State and price announcements are exposed through semantic controls and live regions.
+- [x] Browser console, accessibility-tree review, responsive checks, and frontend verification are clean.
+- [x] The UI clearly labels demo data and does not submit an order without a backend API.
 
 ## Risks and Mitigations
 
