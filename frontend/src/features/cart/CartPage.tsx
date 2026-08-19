@@ -2,18 +2,17 @@ import { Link } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
 import { formatMoney } from "../catalog/formatMoney";
-import { toppingOptions, type DrinkConfiguration } from "../catalog/pricing";
+import type { DrinkConfiguration } from "../catalog/pricing";
 import { useCart } from "./CartContext";
 import "./cart.css";
 
 function configurationSummary(configuration: DrinkConfiguration) {
-  const toppings = configuration.toppingIds.map((id) => toppingLabel(id)).join(", ");
-  const size = configuration.size[0].toUpperCase() + configuration.size.slice(1);
-  return [size, `${configuration.sweetness} sweetness`, configuration.ice, toppings || "No toppings"].join(" · ");
-}
-
-function toppingLabel(toppingId: DrinkConfiguration["toppingIds"][number]) {
-  return toppingOptions.find((option) => option.id === toppingId)?.label ?? toppingId;
+  const choices = configuration.selections.map((selection) => (
+    selection.choiceNames.length > 0
+      ? selection.choiceNames.join(", ")
+      : `No ${selection.groupName.toLowerCase()}`
+  ));
+  return [configuration.variantName, ...choices].join(" · ");
 }
 
 export function CartPage() {
@@ -56,7 +55,7 @@ export function CartPage() {
                       <button className="remove-button" onClick={() => removeItem(item.id)} type="button">Remove {item.drinkName}</button>
                     </div>
                     <div className="cart-item-actions">
-                      <strong>{formatMoney(item.unitPriceMinor * item.quantity)}</strong>
+                      <strong>{formatMoney(item.unitPriceMinor * item.quantity, item.currency)}</strong>
                       <div className="quantity-control">
                         <button aria-label={`Decrease ${item.drinkName} quantity`} onClick={() => decrementItem(item.id)} type="button">−</button>
                         <span aria-live="polite">Quantity {item.quantity}</span>
@@ -72,7 +71,7 @@ export function CartPage() {
               <p className="eyebrow">Pickup summary</p>
               <h2 id="summary-title">Pay at the shop</h2>
               <p>This MVP uses cash payment at pickup. Live checkout will open after the ordering API is connected.</p>
-              <dl><div><dt>Items</dt><dd>{itemCount}</dd></div><div className="summary-total"><dt>Preview total</dt><dd>{formatMoney(previewTotalMinor)}</dd></div></dl>
+              <dl><div><dt>Items</dt><dd>{itemCount}</dd></div><div className="summary-total"><dt>Preview total</dt><dd>{formatMoney(previewTotalMinor, items[0].currency)}</dd></div></dl>
               <button aria-describedby="checkout-note" disabled type="button">Checkout coming soon</button>
               <small id="checkout-note">No order has been submitted and no stock is reserved.</small>
             </aside>

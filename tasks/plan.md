@@ -5,9 +5,8 @@
 Build the first customer-facing ordering journey without weakening the existing staff authentication
 boundary. The application entry page will clearly separate guest ordering from staff operations:
 `Continue as guest` is the primary action and opens `/shop`, while staff sign-in moves to
-`/staff/sign-in`. The shop will follow the existing minimalist storybook direction and initially use
-typed demo menu data behind a replaceable data boundary because guest catalog and ordering APIs are
-scheduled for Phase 3.
+`/staff/sign-in`. The shop follows the existing minimalist storybook direction and loads the current
+location menu from Spring endpoints backed by the versioned PostgreSQL catalog seed.
 
 ## Experience Structure
 
@@ -45,14 +44,15 @@ decision order stable across breakpoints without forcing a cramped side panel on
   shop screens. Retain the documented palette and eight-point spacing rhythm; defer Tailwind,
   Radix, and Storybook setup to their planned design-system increment unless a component needs an
   accessible behavior that the platform cannot provide cleanly.
-- Keep catalog data access separate from presentation. Use typed local fixtures for this frontend
-  foundation, then replace the fixture adapter with the generated Spring OpenAPI client when the
-  Phase 3 guest-menu API exists.
+- Keep catalog data access separate from presentation. Runtime product, location, price,
+  availability, variant, option, and default values come only from the Spring guest catalog API;
+  tests isolate fixtures at the HTTP boundary.
 - Keep the current order in a narrowly scoped React context with a reducer. Persisting an unfinished
   guest order is optional for the first slice; server-created prices and order totals will replace
   client calculations before checkout can submit.
-- Never present fixture availability, price, or a client-computed total as server-authoritative.
-  Checkout submission remains out of scope until Spring exposes guest ordering endpoints.
+- Present fetched catalog prices as current menu values while keeping cart totals explicitly
+  provisional. Checkout submission remains out of scope until Spring exposes guest ordering
+  endpoints that recalculate the final total.
 
 ## Page Design
 
@@ -101,7 +101,7 @@ decision order stable across breakpoints without forcing a cramped side panel on
 
 ### Phase 2: Browse and customize
 
-- [x] Task 3: Add the typed catalog fixture boundary and shop browsing screen.
+- [x] Task 3: Add the typed catalog boundary and shop browsing screen.
 - [x] Task 4: Add responsive, accessible drink customization.
 
 ### Checkpoint: Menu flow
@@ -120,13 +120,20 @@ decision order stable across breakpoints without forcing a cramped side panel on
 - [x] A guest can complete the browse-to-cart flow with keyboard or pointer input.
 - [x] State and price announcements are exposed through semantic controls and live regions.
 - [x] Browser console, accessibility-tree review, responsive checks, and frontend verification are clean.
-- [x] The UI clearly labels demo data and does not submit an order without a backend API.
+- [x] The UI distinguishes fetched menu prices from the provisional cart total and does not submit
+  an order without a backend API.
+
+### Phase 4: Database-backed guest catalog
+
+- [x] Task 7: Seed the current location menu through immutable Flyway migrations.
+- [x] Task 8: Expose public Spring menu and product-detail DTO endpoints.
+- [x] Task 9: Remove runtime frontend catalog constants and load validated API responses.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| Guest catalog APIs do not exist yet | High | Put typed fixtures behind a data adapter and keep checkout non-submitting. |
+| Guest catalog read API is unavailable | High | Show a recoverable error and never substitute frontend fallback business data. |
 | Client totals diverge from future server prices | High | Treat displayed totals as previews and accept server-owned snapshots only when APIs arrive. |
 | Customer visuals leak into staff operations | Medium | Use separate route layouts while sharing only foundational tokens and controls. |
 | Customization becomes cramped on phones | Medium | Use the drink URL as a full-page mobile step and the 64/36 panel only on wide screens. |
@@ -144,7 +151,7 @@ decision order stable across breakpoints without forcing a cramped side panel on
 ## Explicitly Deferred
 
 - Customer accounts, loyalty, favorites, discounts, card payment, and face authentication.
-- Server-authoritative catalog availability, price snapshots, order placement, and order tracking.
+- Server-authoritative order price snapshots, order placement, and order tracking.
 - Staff catalog management, inventory screens, and order completion UI.
 - Tailwind, Radix, Storybook, TanStack Query, and generated OpenAPI client adoption unless required
   by the corresponding backend/design-system increment.

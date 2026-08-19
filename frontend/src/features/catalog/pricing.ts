@@ -1,39 +1,68 @@
-import type { Drink } from "./types";
+import type { CatalogOptionGroup, CatalogProduct, CatalogVariant } from "./types";
 
-export const sizeOptions = [
-  { id: "small", label: "Small", priceDeltaMinor: -50 },
-  { id: "medium", label: "Medium", priceDeltaMinor: 0 },
-  { id: "large", label: "Large", priceDeltaMinor: 80 },
-] as const;
-
-export const sweetnessOptions = ["0%", "25%", "50%", "75%", "100%"] as const;
-export const iceOptions = ["No ice", "Less ice", "Regular ice", "Extra ice"] as const;
-
-export const toppingOptions = [
-  { id: "pearls", label: "Pearls", priceDeltaMinor: 60 },
-  { id: "grass-jelly", label: "Grass jelly", priceDeltaMinor: 60 },
-  { id: "aloe", label: "Aloe", priceDeltaMinor: 60 },
-] as const;
+export type OptionSelection = {
+  groupId: string;
+  groupName: string;
+  choiceIds: string[];
+  choiceNames: string[];
+};
 
 export type DrinkConfiguration = {
-  size: (typeof sizeOptions)[number]["id"];
-  sweetness: (typeof sweetnessOptions)[number];
-  ice: (typeof iceOptions)[number];
-  toppingIds: Array<(typeof toppingOptions)[number]["id"]>;
+  variantId: string;
+  variantName: string;
+  selections: OptionSelection[];
 };
 
-export const defaultConfiguration: DrinkConfiguration = {
-  size: "medium",
-  sweetness: "50%",
-  ice: "Less ice",
-  toppingIds: [],
-};
+function defaultChoices(group: CatalogOptionGroup) {
+  const selected = group.choices.filter((choice) => choice.isDefault);
+  for (const choice of group.choices) {
+    if (selected.length >= group.minimumSelections) break;
+    if (!selected.some((current) => current.id === choice.id)) selected.push(choice);
+  }
+  return selected.slice(0, group.maximumSelections);
+}
 
-export function calculatePreviewTotal(drink: Drink, configuration: DrinkConfiguration) {
-  const sizePrice = sizeOptions.find((option) => option.id === configuration.size)?.priceDeltaMinor ?? 0;
-  const toppingsPrice = configuration.toppingIds.reduce((total, toppingId) => (
-    total + (toppingOptions.find((option) => option.id === toppingId)?.priceDeltaMinor ?? 0)
-  ), 0);
+export function configurationForVariant(variant: CatalogVariant): DrinkConfiguration {
+  return {
+    variantId: variant.id,
+    variantName: variant.name,
+    selections: variant.optionGroups.map((group) => {
+      const choices = defaultChoices(group);
+      return {
+        groupId: group.id,
+        groupName: group.name,
+        choiceIds: choices.map((choice) => choice.id),
+        choiceNames: choices.map((choice) => choice.name),
+      };
+    }),
+  };
+}
 
-  return drink.basePriceMinor + sizePrice + toppingsPrice;
+export function createDefaultConfiguration(product: CatalogProduct): DrinkConfiguration {
+  const variant = product.variants.find((candidate) => candidate.isDefault && candidate.available)
+    ?? product.variants.find((candidate) => candidate.available);
+  if (!variant) throw new Error("catalog product has no available variant");
+  return configurationForVariant(variant);
+}
+
+export function calculatePreviewTotal(product: CatalogProduct, configuration: DrinkConfiguration) {
+  const variant = product.variants.find((candidate) => (
+    candidate.id === configuration.variantId && candidate.available
+  ));
+  if (!variant) throw new Error("catalog selection is invalid");
+
+  let total = variant.price.amountMinor;
+  for (const group of variant.optionGroups) {
+    const selection = configuration.selections.find((candidate) => candidate.groupId === group.id);
+    const choiceIds = selection?.choiceIds ?? [];
+    if (choiceIds.length < group.minimumSelections || choiceIds.length > group.maximumSelections) {
+      throw new Error("catalog selection is invalid");
+    }
+    for (const choiceId of choiceIds) {
+      const choice = group.choices.find((candidate) => candidate.id === choiceId);
+      if (!choice) throw new Error("catalog selection is invalid");
+      total += choice.priceDelta.amountMinor;
+    }
+  }
+  return total;
 }

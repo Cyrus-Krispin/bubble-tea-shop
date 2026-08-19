@@ -59,14 +59,14 @@ and action hierarchy into reusable tokens and small accessible primitives used b
 
 ## Task 3: Build typed menu browsing
 
-**Description:** Add a catalog data boundary with realistic demo drinks and render the `/shop`
+**Description:** Add a catalog data boundary and render the `/shop`
 menu with location, category filters, availability, product summaries, and current-order access.
 
 **Acceptance criteria:**
 
 - [x] Available drinks expose name, flavor note, image alternative text, and formatted SGD starting price.
 - [x] Filtering is keyboard accessible and unavailable products cannot enter customization.
-- [x] Available, filtered, and unavailable demo-catalog states are explicit and tested; async states remain with the future API adapter.
+- [x] Available, filtered, unavailable, loading, empty, and API-error states are explicit and tested.
 
 **Verification:**
 
@@ -79,12 +79,33 @@ menu with location, category filters, availability, product summaries, and curre
 **Files likely touched:**
 
 - `frontend/src/features/catalog/types.ts`
-- `frontend/src/features/catalog/catalogRepository.ts`
-- `frontend/src/features/catalog/demoCatalog.ts`
+- `frontend/src/features/catalog/catalogClient.ts`
+- `frontend/src/features/catalog/useGuestCatalog.ts`
 - `frontend/src/features/catalog/ShopPage.tsx`
 - `frontend/src/features/catalog/ShopPage.test.tsx`
 
 **Estimated scope:** Medium (5 files)
+
+## Task 7: Load the guest catalog from PostgreSQL
+
+**Description:** Seed the MVP location catalog through new Flyway migrations, expose public Spring
+menu/product DTO endpoints, and remove runtime frontend business-data fixtures.
+
+**Acceptance criteria:**
+
+- [x] Products, location, currency, prices, availability, variants, options, and defaults are stored
+  in PostgreSQL and returned by Spring.
+- [x] The frontend validates responses and shows loading, empty, and recoverable error states.
+- [x] Production frontend code contains no fallback catalog or hard-coded catalog values.
+- [x] `AGENTS.md` requires application-domain values to flow through Spring from PostgreSQL.
+
+**Verification:**
+
+- [x] Backend integration tests cover migrations, public access, DTO shape, and 404 problem details.
+- [x] Frontend tests cover client validation and API-backed browse/customize/cart behavior.
+- [x] Compose and real-browser verification pass against the migrated local database.
+
+**Dependencies:** Tasks 3–6
 
 ## Task 4: Build responsive drink customization
 

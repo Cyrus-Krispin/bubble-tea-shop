@@ -1,10 +1,13 @@
-import type { Drink } from "./types";
+import type { DrinkArtworkProduct } from "./types";
 
-export function DrinkArtwork({ drink }: { drink: Drink }) {
+const artworkKeys = new Set(["moon", "berry", "matcha", "taro"]);
+
+export function DrinkArtwork({ drink }: { drink: DrinkArtworkProduct }) {
+  const artworkKey = artworkKeys.has(drink.artworkKey) ? drink.artworkKey : "moon";
   return (
     <svg
       aria-label={`Illustration of ${drink.name}`}
-      className={`drink-art drink-art--${drink.tone}`}
+      className={`drink-art drink-art--${artworkKey}`}
       role="img"
       viewBox="0 0 240 280"
     >

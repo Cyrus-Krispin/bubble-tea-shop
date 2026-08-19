@@ -30,7 +30,7 @@
   line-height: 1.6;
 }
 
-.demo-note {
+.location-note {
   max-width: 20rem;
   margin-bottom: var(--space-2);
   padding-left: var(--space-3);
@@ -69,6 +69,34 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-4);
+}
+
+.catalog-status,
+.catalog-empty {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.catalog-status {
+  width: min(100% - 2rem, 44rem);
+  margin: 0 auto;
+  padding: var(--space-10) 0;
+}
+
+.catalog-status button,
+.not-found button {
+  min-height: 2.75rem;
+  margin-right: var(--space-3);
+  padding: 0 var(--space-4);
+  color: var(--color-canvas);
+  font-weight: 800;
+  background: var(--color-forest-strong);
+  border: 1px solid var(--color-forest-strong);
+  border-radius: var(--radius-control);
+}
+
+.catalog-empty {
+  grid-column: 1 / -1;
 }
 
 .product-card {
@@ -279,8 +307,12 @@
 }
 
 .option-row--three { grid-template-columns: repeat(3, 1fr); }
+.option-row--2 { grid-template-columns: repeat(2, 1fr); }
+.option-row--3 { grid-template-columns: repeat(3, 1fr); }
 .option-row--four { grid-template-columns: repeat(4, 1fr); }
+.option-row--4 { grid-template-columns: repeat(4, 1fr); }
 .option-row--five { grid-template-columns: repeat(5, 1fr); }
+.option-row--5 { grid-template-columns: repeat(5, 1fr); }
 
 .option-row label {
   position: relative;
@@ -421,7 +453,7 @@
 @media (max-width: 44rem) {
   .shop-main { width: min(100% - 2rem, 84rem); padding-top: var(--space-6); }
   .shop-heading { display: block; }
-  .demo-note { margin-top: var(--space-4); }
+  .location-note { margin-top: var(--space-4); }
   .product-grid { grid-template-columns: 1fr; }
   .drink-art { max-height: 17rem; }
   .customize-layout { padding-top: var(--space-3); }

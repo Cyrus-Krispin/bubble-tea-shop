@@ -5,6 +5,7 @@ export type CartDraft = {
   drinkName: string;
   configuration: DrinkConfiguration;
   unitPriceMinor: number;
+  currency: string;
 };
 
 export type CartItem = CartDraft & {
@@ -22,8 +23,8 @@ type CartAction =
 export const initialCartState: CartState = { items: [] };
 
 function cartItemId(draft: CartDraft) {
-  const { size, sweetness, ice, toppingIds } = draft.configuration;
-  return [draft.drinkId, size, sweetness, ice, ...[...toppingIds].sort()].join("|");
+  const choiceIds = draft.configuration.selections.flatMap((selection) => selection.choiceIds).sort();
+  return [draft.drinkId, draft.configuration.variantId, ...choiceIds].join("|");
 }
 
 export function cartReducer(state: CartState, action: CartAction): CartState {

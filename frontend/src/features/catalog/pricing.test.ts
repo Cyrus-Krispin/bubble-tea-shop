@@ -1,27 +1,40 @@
 import { describe, expect, it } from "vitest";
 
-import { demoDrinks } from "./demoCatalog";
-import { calculatePreviewTotal, defaultConfiguration } from "./pricing";
+import { catalogProduct } from "../../test/catalogFixtures";
+import { calculatePreviewTotal, createDefaultConfiguration } from "./pricing";
 
 describe("calculatePreviewTotal", () => {
-  it("starts with the drink base price for default choices", () => {
-    expect(calculatePreviewTotal(demoDrinks[0], defaultConfiguration)).toBe(660);
-  });
-
-  it("adds size and topping price deltas", () => {
-    expect(calculatePreviewTotal(demoDrinks[0], {
-      ...defaultConfiguration,
-      size: "large",
-      toppingIds: ["pearls", "aloe"],
-    })).toBe(860);
-  });
-
-  it("does not mutate the base configuration", () => {
-    calculatePreviewTotal(demoDrinks[0], {
-      ...defaultConfiguration,
-      toppingIds: ["pearls"],
+  it("selects database-marked defaults", () => {
+    expect(createDefaultConfiguration(catalogProduct)).toEqual({
+      variantId: "medium",
+      variantName: "Medium",
+      selections: [
+        { groupId: "sweetness", groupName: "Sweetness", choiceIds: ["sweet-50"], choiceNames: ["50%"] },
+        { groupId: "ice", groupName: "Ice", choiceIds: ["less-ice"], choiceNames: ["Less ice"] },
+        { groupId: "toppings", groupName: "Toppings", choiceIds: [], choiceNames: [] },
+      ],
     });
+  });
 
-    expect(defaultConfiguration.toppingIds).toEqual([]);
+  it("adds selected option deltas to the selected variant price", () => {
+    const configuration = createDefaultConfiguration(catalogProduct);
+    configuration.selections[2] = {
+      ...configuration.selections[2],
+      choiceIds: ["pearls", "aloe"],
+      choiceNames: ["Pearls", "Aloe"],
+    };
+
+    expect(calculatePreviewTotal(catalogProduct, configuration)).toBe(780);
+  });
+
+  it("rejects stale selections that are not in the fetched product", () => {
+    const configuration = createDefaultConfiguration(catalogProduct);
+    configuration.selections[2] = {
+      ...configuration.selections[2],
+      choiceIds: ["not-an-option"],
+      choiceNames: ["Unknown"],
+    };
+
+    expect(() => calculatePreviewTotal(catalogProduct, configuration)).toThrow("catalog selection is invalid");
   });
 });

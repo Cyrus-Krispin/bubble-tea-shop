@@ -12,8 +12,17 @@ function SeedControl() {
     <button onClick={() => addItem({
       drinkId: "moonlit-milk-tea",
       drinkName: "Moonlit Milk Tea",
-      configuration: { size: "medium", sweetness: "50%", ice: "Less ice", toppingIds: ["pearls"] },
+      configuration: {
+        variantId: "medium",
+        variantName: "Medium",
+        selections: [
+          { groupId: "sweetness", groupName: "Sweetness", choiceIds: ["sweet-50"], choiceNames: ["50%"] },
+          { groupId: "ice", groupName: "Ice", choiceIds: ["less-ice"], choiceNames: ["Less ice"] },
+          { groupId: "toppings", groupName: "Toppings", choiceIds: ["pearls"], choiceNames: ["Pearls"] },
+        ],
+      },
       unitPriceMinor: 720,
+      currency: "SGD",
     })} type="button">Seed item</button>
   );
 }
@@ -40,7 +49,7 @@ describe("CartPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Seed item" }));
 
     expect(screen.getByRole("heading", { name: "Moonlit Milk Tea" })).toBeVisible();
-    expect(screen.getByText("Medium · 50% sweetness · Less ice · Pearls")).toBeVisible();
+    expect(screen.getByText("Medium · 50% · Less ice · Pearls")).toBeVisible();
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$7.20");
 
     fireEvent.click(screen.getByRole("button", { name: "Increase Moonlit Milk Tea quantity" }));

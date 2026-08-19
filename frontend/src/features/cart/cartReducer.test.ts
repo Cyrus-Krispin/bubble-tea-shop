@@ -5,8 +5,15 @@ import { cartReducer, initialCartState, type CartDraft } from "./cartReducer";
 const moonlit: CartDraft = {
   drinkId: "moonlit-milk-tea",
   drinkName: "Moonlit Milk Tea",
-  configuration: { size: "medium", sweetness: "50%", ice: "Less ice", toppingIds: ["pearls"] },
+  configuration: {
+    variantId: "medium",
+    variantName: "Medium",
+    selections: [
+      { groupId: "toppings", groupName: "Toppings", choiceIds: ["pearls"], choiceNames: ["Pearls"] },
+    ],
+  },
   unitPriceMinor: 720,
+  currency: "SGD",
 };
 
 describe("cartReducer", () => {
@@ -22,7 +29,11 @@ describe("cartReducer", () => {
     const twice = cartReducer(once, { type: "add", draft: moonlit });
     const withLarge = cartReducer(twice, {
       type: "add",
-      draft: { ...moonlit, configuration: { ...moonlit.configuration, size: "large" }, unitPriceMinor: 800 },
+      draft: {
+        ...moonlit,
+        configuration: { ...moonlit.configuration, variantId: "large", variantName: "Large" },
+        unitPriceMinor: 800,
+      },
     });
 
     expect(withLarge.items).toHaveLength(2);
