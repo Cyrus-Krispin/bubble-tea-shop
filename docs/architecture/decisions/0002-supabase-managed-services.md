@@ -1,6 +1,6 @@
 # ADR 0002: Supabase managed services
 
-- Status: Accepted
+- Status: Superseded by [ADR 0003](0003-local-supabase-auth.md)
 - Date: 2026-08-04
 
 ## Context

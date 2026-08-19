@@ -33,8 +33,8 @@ This keeps deployment and local development simple while allowing inventory and 
 to share a strongly consistent transaction. Spring Data JPA and Hibernate map the domain data,
 while focused workflow services can use Spring JDBC when explicit locking and SQL make transaction
 behavior clearer. Spring Validation and Spring Security are present in the current Maven
-foundation, but no HTTP authentication is implemented. Supabase now supersedes the earlier custom
-Spring password and session plan; the eventual Spring-side verification mechanism remains open.
+foundation. Supabase now supersedes the earlier custom Spring password and session plan; Spring
+Security implements the bearer-token verification boundary for the local Auth issuer.
 
 There are no HTTP controllers in the current schema-first slice. The planned API will expose JSON
 over HTTPS under `/api/v1`, publish an OpenAPI contract, and return DTOs rather than persistence
@@ -45,24 +45,28 @@ entities.
 PostgreSQL 18 is the system of record. The expected data model is well understood and relational:
 organizations, locations, recipes, offerings, inventory movements, orders, and staff access all
 benefit from foreign keys, constraints, transactions, and precise numeric types. PostgreSQL owns
-relational integrity, while Spring owns workflows and authorization. Supabase is the selected
-managed authentication and data-service direction, although whether the first integration uses
-Auth only or Auth plus managed PostgreSQL is not yet settled.
+relational integrity, while Spring owns workflows and authorization. The local Supabase stack
+provides Auth only at this integration boundary; application data remains in the PostgreSQL
+database owned by Spring and Flyway.
 
 Flyway is the only schema-change mechanism. Versioned migrations make changes deliberate and
 reviewable when the model evolves, and Hibernate runs with `ddl-auto=validate` so it can detect a
 mapping mismatch without modifying the schema. Inventory balances and their immutable movement
 history live in the same database transaction as order completion to prevent overselling.
 
-Supabase will manage authentication instead of the application verifying passwords, issuing login
-tokens, or rotating custom refresh sessions. Spring remains the boundary for domain operations and
-resolves authorization from current server-owned memberships and location assignments after the
-Supabase identity has been verified.
+The fully local, self-hosted Supabase Auth service is the authentication issuer; the hosted
+Supabase platform is not used. Local Auth performs sign-in and owns access/refresh session
+lifecycle. Spring Security is configured as an OAuth 2.0 resource server and validates access JWTs
+against the asymmetric public JWKS served on the private Compose network, expected local issuer,
+and `authenticated` audience. Validation has no runtime internet dependency. Spring does not
+receive a signing secret, mint a second application JWT, or expose application
+login/password/refresh endpoints.
 
-The exact Supabase identity mapping, browser credential flow, Spring validation method, and local
-development topology are not selected. The Phase 1 account and refresh-session schema reflects the
-superseded custom-auth design; it remains implemented until a new Flyway migration and matching JPA
-changes reconcile it.
+Authentication does not grant domain access by itself. Authorization will be resolved from current
+server-side account mappings, memberships, and location assignments rather than trusting mutable
+user metadata or client-provided claims. The existing account and refresh-session schema predates
+the Supabase issuer decision and remains unchanged until a later identity migration defines the
+external-user mapping and legacy-column lifecycle.
 
 ## Local infrastructure
 
@@ -70,10 +74,11 @@ Docker Compose runs PostgreSQL locally with a persistent named volume and a heal
 reason for Compose is practical: it gives every contributor the same database version and startup
 path, removes ambiguity from local setup, and makes the application straightforward to run.
 
-Hosting is intentionally local-only for now. Selecting Supabase as the managed-service direction
-does not yet select a hosted project, region, production container platform, or deployment
-pipeline. The choice between a local Supabase stack and a hosted development project is also open.
-Production images, observability, backups, and CI deployment gates remain future work.
+Hosting is intentionally local-only. The backend and Supabase services share a private Compose
+network, and Spring discovers public signing keys from the local gateway without a runtime internet
+dependency. No hosted Supabase project, region, production container platform, or deployment
+pipeline is selected. Production images, observability, backups, and CI deployment gates remain
+future work.
 
 ## Tooling and testing
 

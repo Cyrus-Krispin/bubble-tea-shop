@@ -8,18 +8,18 @@ The application is a modular monolith:
 flowchart LR
     UI["React SPA<br/>public, staff, owner, display routes"]
     API["Spring Boot<br/>modular monolith"]
-    AUTH["Supabase<br/>managed authentication (planned)"]
+    AUTH["Local Supabase Auth<br/>session and JWT issuer"]
     DB[("PostgreSQL<br/>local Compose today")]
 
     UI -->|"JSON over HTTPS<br/>generated OpenAPI client"| API
-    UI -.->|"managed sign-in/session<br/>flow to be selected"| AUTH
-    API -.->|"identity verification<br/>integration to be selected"| AUTH
+    UI -.->|"local sign-in/session<br/>(planned frontend slice)"| AUTH
+    API -.->|"JWKS discovery<br/>private Compose network"| AUTH
     API --> DB
 ```
 
 Spring is the only custom application backend. The React application does not introduce a Node
-server at runtime or bypass Spring for domain operations. Supabase is the selected managed
-authentication and data-service direction, but its exact boundary and local topology remain open.
+server at runtime or bypass Spring for domain operations. A self-hosted Supabase Auth service is
+the local authentication issuer; it does not replace Spring or the application database.
 PostgreSQL owns relational integrity; Spring owns workflows and server-side authorization.
 
 ## Backend modules
@@ -48,8 +48,9 @@ The future frontend is one React/TypeScript/Vite SPA:
 ## Runtime configuration
 
 - All timestamps are stored in UTC; location timezone is used at presentation/report boundaries.
-- Supabase credentials and other secrets are environment-injected and never committed or seeded by
-  Flyway.
+- Supabase signing material and other secrets are environment-injected and never committed or
+  seeded by Flyway.
 - `ddl-auto=validate` ensures mappings match migrations without allowing Hibernate to alter schema.
-- Local development currently uses PostgreSQL through Compose. A local or hosted Supabase
-  development topology has not been selected.
+- Local development uses PostgreSQL, Supabase Auth, its gateway, and Spring through Compose. The
+  backend retrieves only public verification keys from the private network and uses no hosted
+  Supabase service.

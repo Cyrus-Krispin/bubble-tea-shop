@@ -2,9 +2,10 @@
 
 ## Implementation status
 
-Supabase is the selected managed authentication service, superseding the earlier plan for Spring
-to verify passwords, issue access tokens, and rotate application-owned refresh sessions. The
-repository does not yet implement Supabase authentication or any HTTP authentication endpoints.
+The fully local, self-hosted Supabase Auth service is the authentication issuer, superseding the
+earlier plan for Spring to verify passwords, issue access tokens, and rotate application-owned
+refresh sessions. Spring now implements the bearer-token validation boundary; sign-in UI and
+application identity mapping remain later work.
 
 The Phase 1 schema still contains `account.password_hash` and `refresh_session`, with matching JPA
 entities. Those structures document implemented database state, not the target authentication
@@ -13,20 +14,52 @@ identity mapping and migration lifecycle have been decided.
 
 ## Authentication
 
-- Supabase owns managed credential verification, account recovery, and session concerns.
-- The application does not issue its own login tokens or maintain custom refresh-token rotation.
-- A Supabase identity must be linked to an application account before it can receive staff access.
-- The exact identity key, provisioning workflow, browser session handling, and Spring validation
-  mechanism are still open integration decisions.
-- Production owner access requires an explicit Supabase provisioning and application-linking
-  workflow. Credentials are never created by a Flyway migration.
-- Future customer face authentication remains an opt-in experiment. It cannot establish a parallel
-  application-owned session or bypass Supabase. See
+- The fully local, self-hosted Supabase Auth service is the authentication issuer. No hosted
+  Supabase project is used. Local Auth owns sign-in, password handling, access-token issuance,
+  refresh rotation, and logout/session lifecycle.
+- The React client will send the Supabase access token to Spring as an
+  `Authorization: Bearer <token>` header. Spring does not mint another application JWT.
+- Spring validates the signature against the local stack's JWKS plus the expected local issuer,
+  `authenticated` audience, and standard token timestamps before accepting a request.
+- Only asymmetric Supabase signing keys are supported. The backend never receives or stores the
+  legacy JWT secret, a secret/service-role key, a refresh token, or a raw access token.
+- The token subject (`sub`) is the external Supabase user identifier. A later identity increment
+  will map it to the application's account and load current memberships from PostgreSQL.
+- The existing password and refresh-session columns predate this issuer decision and are not used
+  by this integration. Removing or repurposing them requires a later versioned migration.
+- Future customer face authentication is an alternative credential check before normal token
+  issuance by the authentication issuer; the matching component never issues JWTs. See
   [`face-authentication.md`](face-authentication.md).
 
-Selecting Supabase does not select a login provider, MFA method, callback design, service-key
-placement, row-level-security policy, or production hosting environment. Those choices require
-separate decisions before implementation.
+### Backend configuration
+
+JWT validation is deliberately opt-in. When `LOCAL_SUPABASE_AUTH_ENABLED` is absent or `false`, Spring
+denies all `/api/**` requests. To enable the resource server, copy `.env.example` to an ignored
+local `.env` (or inject the same variables through the runtime environment) and set the network
+contract shared with the separate local-Supabase Compose work:
+
+```text
+LOCAL_SUPABASE_AUTH_ENABLED=true
+LOCAL_SUPABASE_AUTH_ISSUER_URI=http://localhost:8000/auth/v1
+LOCAL_SUPABASE_AUTH_JWK_SET_URI=http://kong:8000/auth/v1/.well-known/jwks.json
+LOCAL_SUPABASE_AUTH_AUDIENCE=authenticated
+```
+
+The issuer is the exact `iss` value configured into local Auth and visible to local clients. The
+JWKS URI is deliberately different: it uses the `kong` service name on the private Compose network,
+so the backend retrieves public verification keys without internet access. These URLs are
+identifiers, not credentials. If the backend runs directly on the host for development, override
+the JWKS URI with `http://localhost:8000/auth/v1/.well-known/jwks.json`.
+
+The local Supabase stack must configure `GOTRUE_JWT_KEYS` with an asymmetric ES256 or RS256 signing
+key and expose its public half at the JWKS endpoint. The backend does not accept legacy/shared-secret
+HS256 tokens and never receives `JWT_SECRET`, `JWT_KEYS`, `JWT_JWKS`, an API secret/service-role key,
+or a raw user token. The exact Compose services and generated local secrets belong to the separate
+local-stack infrastructure change, not this backend integration.
+
+The current slice protects the API boundary but adds no login, refresh, logout, or password
+endpoint and no frontend sign-in UI. It also does not treat `role`, `user_metadata`, organization,
+location, or other token claims as application authorization evidence.
 
 ## Authorization
 
@@ -43,14 +76,8 @@ separate decisions before implementation.
 
 ## Browser and service boundary
 
-- The browser-to-Supabase sign-in flow and the credential presented to Spring have not been
-  selected.
-- Spring must verify the caller through a supported Supabase integration before resolving
-  application authorization. The validation method, caching, failure behavior, and local test
-  strategy must be documented with the implementation.
-- CORS, CSRF, cookie, and durable-storage policies depend on the selected browser credential flow;
-  the earlier fixed in-memory-token and custom refresh-cookie rules no longer apply.
-- Authentication failures use generic messages where the application controls the response so
-  account enumeration is not exposed.
-- Audit records retain the acting application account identifier where a staff action caused a
-  state change.
+- Supabase's client library will own browser session persistence and refresh behavior when the
+  frontend authentication increment is implemented.
+- Access tokens must not be logged or placed in URLs.
+- Authentication failures use generic messages so username enumeration is not exposed.
+- Audit records retain the acting account identifier where a staff action caused a state change.

@@ -45,10 +45,10 @@ resources `404`, state conflicts `409`, and unexpected failures `500`.
 
 ## Authentication
 
-- Supabase is the managed authentication service. The application does not expose custom login,
-  refresh-token rotation, or logout endpoints.
-- The browser credential presented to Spring and the supported Supabase validation mechanism have
-  not been selected. They must be documented before authenticated controllers are introduced.
+- The local Supabase Auth service is the authentication issuer. The application does not expose
+  custom login, refresh-token rotation, or logout endpoints.
+- The browser presents its Supabase access token as an HTTP bearer token. Spring validates it
+  against the local issuer, audience, timestamps, and asymmetric JWKS before dispatching `/api/**`.
 - After identity verification, Spring resolves the caller's active application account,
   organization membership, role, and location assignments on the server.
 - Organization, location, role, price, and inventory values supplied by the browser or stored in
