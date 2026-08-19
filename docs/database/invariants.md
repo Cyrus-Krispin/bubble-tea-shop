@@ -10,8 +10,8 @@
 
 - A non-null location public slug resolves globally to one location; product public slugs are
   unique inside their organization.
-- Public slugs and artwork keys use lowercase kebab case, and each product has at most one active
-  default variant.
+- Public slugs and artwork keys use lowercase kebab case. Each product has at most one active
+  default variant, and each option group has at most one active default choice.
 - Component quantities are strictly positive and use the ingredient's base unit.
 - Components of a published or retired recipe version cannot be inserted, changed, or deleted.
 - An available offering references an active product/variant and a published, non-archived recipe.

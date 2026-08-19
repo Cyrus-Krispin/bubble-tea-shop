@@ -64,6 +64,7 @@ public final class GuestCatalogDto {
         UUID id,
         String name,
         int displayOrder,
+        boolean isDefault,
         Money priceDelta
     ) {
     }

@@ -26,6 +26,9 @@ public class OptionChoiceEntity {
     @Column(name = "display_order", nullable = false)
     int displayOrder;
 
+    @Column(name = "is_default", nullable = false)
+    boolean defaultChoice;
+
     @Column(name = "archived_at")
     Instant archivedAt;
 
@@ -38,4 +41,3 @@ public class OptionChoiceEntity {
     protected OptionChoiceEntity() {
     }
 }
-

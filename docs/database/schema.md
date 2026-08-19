@@ -353,12 +353,13 @@ display order must be non-negative.
 | `option_group_id` | `uuid` | NN | — | FK with `organization_id` → `option_group`; UQ with `name` |
 | `name` | `varchar(120)` | NN | — | UQ with `option_group_id` |
 | `display_order` | `integer` | NN | `0` | — |
+| `is_default` | `boolean` | NN | `false` | Partial UQ with `option_group_id` when true and active |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
-Unique: `(id, organization_id)` and `(option_group_id, name)`. Name must not be blank and display
-order must be non-negative.
+Unique: `(id, organization_id)`, `(option_group_id, name)`, and at most one active default choice
+per option group. Name must not be blank and display order must be non-negative.
 
 ### `menu_variant_option_choice`
 
@@ -547,6 +548,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `idx_menu_product_active` | `menu_product` | `(organization_id, name) WHERE archived_at IS NULL` | Active product listing. |
 | `uq_menu_product_public_slug_organization` | `menu_product` | `(organization_id, public_slug) WHERE public_slug IS NOT NULL` | Resolve a product URL inside an organization. |
 | `uq_menu_variant_default_product` | `menu_variant` | `(menu_product_id) WHERE is_default AND archived_at IS NULL` | Keep one active default size per product. |
+| `uq_option_choice_default_group` | `option_choice` | `(option_group_id) WHERE is_default AND archived_at IS NULL` | Keep one active default choice per option group. |
 | `idx_offering_catalog` | `menu_variant_offering` | `(location_id, available, menu_variant_id)` | Location menu lookup. |
 | `idx_inventory_balance_stock` | `inventory_balance` | `(location_id, quantity)` | Stock-level lookup. |
 | `idx_inventory_movement_history` | `inventory_movement` | `(location_id, ingredient_id, created_at DESC)` | Movement history. |

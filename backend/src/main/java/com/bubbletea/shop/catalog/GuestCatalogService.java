@@ -196,6 +196,7 @@ public class GuestCatalogService {
                    option_choice.id AS choice_id,
                    option_choice.name AS choice_name,
                    option_choice.display_order AS choice_display_order,
+                   option_choice.is_default,
                    variant_choice.price_delta_minor
               FROM menu_variant variant
               JOIN menu_variant_option_choice variant_choice
@@ -237,6 +238,7 @@ public class GuestCatalogService {
                     rs.getObject("choice_id", UUID.class),
                     rs.getString("choice_name"),
                     rs.getInt("choice_display_order"),
+                    rs.getBoolean("is_default"),
                     new GuestCatalogDto.Money(rs.getLong("price_delta_minor"), currency)));
             }, organizationId, productId);
         return result;

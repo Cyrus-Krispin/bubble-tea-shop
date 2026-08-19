@@ -23,7 +23,7 @@
 | `menu_variant` | Size/form of a menu product, including its optional default marker. | Archived after use. |
 | `menu_variant_offering` | Location price, availability, and recipe assignment. | Updated when price/availability changes. |
 | `option_group` | Selection limits and display order for a choice family. | Archived after use. |
-| `option_choice` | Value within an option group. | Archived after use. |
+| `option_choice` | Value within an option group, including its optional default marker. | Archived after use. |
 | `menu_variant_option_choice` | Variant-specific enablement and price delta. | Disabled rather than deleted after use. |
 | `option_choice_ingredient_effect` | Signed ingredient delta caused by a choice. | Copied into order consumption at placement. |
 

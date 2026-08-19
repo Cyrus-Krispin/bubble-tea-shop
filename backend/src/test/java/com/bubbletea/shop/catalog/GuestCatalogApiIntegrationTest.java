@@ -62,6 +62,8 @@ class GuestCatalogApiIntegrationTest {
             .andExpect(jsonPath("$.variants[1].optionGroups.length()").value(3))
             .andExpect(jsonPath("$.variants[1].optionGroups[0].name").value("Sweetness"))
             .andExpect(jsonPath("$.variants[1].optionGroups[0].choices.length()").value(5))
+            .andExpect(jsonPath("$.variants[1].optionGroups[0].choices[2].isDefault").value(true))
+            .andExpect(jsonPath("$.variants[1].optionGroups[1].choices[1].isDefault").value(true))
             .andExpect(jsonPath("$.variants[1].optionGroups[2].name").value("Toppings"))
             .andExpect(jsonPath("$.variants[1].optionGroups[2].choices[0].priceDelta.amountMinor").value(60));
     }
