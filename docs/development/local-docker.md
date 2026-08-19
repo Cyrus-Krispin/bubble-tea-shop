@@ -5,8 +5,7 @@ The development runtime is intentionally local-only. One Compose project starts:
 - Supabase Postgres from the official `supabase/postgres` image;
 - Supabase Auth (GoTrue) from the official `supabase/gotrue` image;
 - the Spring Boot modular monolith; and
-- a minimal Node HTTP process that keeps the frontend workspace runnable until the React/Vite UI
-  is implemented.
+- a React/Vite SPA served by Nginx, beginning with local staff sign-in.
 
 There is no standalone generic PostgreSQL container and no hosted Supabase project. Postgres is
 the single database in the stack, and Flyway in the Spring backend remains the authority for the
@@ -37,7 +36,7 @@ artifacts are already cached.
 
 | Service | URL | Purpose |
 | --- | --- | --- |
-| Frontend workspace | <http://localhost:4173> | Honest placeholder process; no product UI yet |
+| Frontend workspace | <http://localhost:4173> | React staff sign-in SPA; later staff and customer screens follow |
 | Spring health | <http://localhost:8080/actuator/health> | Backend and database readiness |
 | Supabase Auth health | <http://localhost:8000/auth/v1/health> | Local GoTrue readiness through Kong |
 | PostgreSQL | `localhost:54322` | Optional host access for database tools |

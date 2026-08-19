@@ -48,7 +48,7 @@ services:
       GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD:-local-supabase-postgres}@db:5432/postgres
       GOTRUE_SITE_URL: http://localhost:${FRONTEND_PORT:-4173}
       GOTRUE_URI_ALLOW_LIST: http://localhost:${FRONTEND_PORT:-4173}/*
-      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_DISABLE_SIGNUP: "true"
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
@@ -120,16 +120,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    environment:
-      API_BASE_URL: ${API_BASE_URL:-http://localhost:8080}
-      AUTH_BASE_URL: http://localhost:${KONG_PORT:-8000}
+      args:
+        VITE_SUPABASE_URL: http://localhost:${KONG_PORT:-8000}
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-4173}:4173"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "--eval", "fetch('http://localhost:4173/health').then(response => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:4173/health"]
       interval: 10s
       timeout: 5s
       retries: 6

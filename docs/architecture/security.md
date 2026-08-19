@@ -19,6 +19,9 @@ identity mapping and migration lifecycle have been decided.
   refresh rotation, and logout/session lifecycle.
 - The React client will send the Supabase access token to Spring as an
   `Authorization: Bearer <token>` header. Spring does not mint another application JWT.
+- Browser sign-in uses the local gateway base URL; the Supabase client appends `/auth/v1` itself.
+  Kong allows Auth CORS requests only from the local frontend origin and only with the request
+  headers required by the client.
 - Spring validates the signature against the local stack's JWKS plus the expected local issuer,
   `authenticated` audience, and standard token timestamps before accepting a request.
 - Only asymmetric Supabase signing keys are supported. The backend never receives or stores the
@@ -57,9 +60,13 @@ HS256 tokens and never receives `JWT_SECRET`, `JWT_KEYS`, `JWT_JWKS`, an API sec
 or a raw user token. The exact Compose services and generated local secrets belong to the separate
 local-stack infrastructure change, not this backend integration.
 
-The current slice protects the API boundary but adds no login, refresh, logout, or password
-endpoint and no frontend sign-in UI. It also does not treat `role`, `user_metadata`, organization,
-location, or other token claims as application authorization evidence.
+The current slice protects the API boundary and includes a frontend email/password sign-in form.
+The browser client delegates session persistence and refresh to Supabase Auth; it does not log or
+manually store access or refresh tokens. It adds no Spring login, refresh, logout, or password
+endpoint and does not treat `role`, `user_metadata`, organization, location, or other token claims
+as application authorization evidence.
+Self-service Auth signup is disabled; staff provisioning belongs to the later owner/bootstrap
+workflow.
 
 ## Authorization
 

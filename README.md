@@ -16,8 +16,8 @@ cp .env.example .env
 docker compose up --build
 ```
 
-This starts the official Supabase Postgres and Auth images, the Spring Boot backend, and the
-frontend placeholder in one local-only Compose network. Open the frontend at
+This starts the official Supabase Postgres and Auth images, the Spring Boot backend, and the React
+frontend in one local-only Compose network. Open the frontend at
 <http://localhost:4173>; backend health is at <http://localhost:8080/actuator/health> and Auth
 health is at <http://localhost:9999/health>.
 
