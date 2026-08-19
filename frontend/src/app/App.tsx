@@ -1,6 +1,7 @@
 import { Link, Navigate, Route, Routes } from "react-router";
 
 import { StaffSignInPage } from "../features/auth/StaffSignInPage";
+import { ShopPage } from "../features/catalog/ShopPage";
 
 function WelcomePage() {
   return (
@@ -30,24 +31,11 @@ function WelcomePage() {
   );
 }
 
-function ShopPlaceholder() {
-  return (
-    <main aria-label="Guest shop" className="auth-page">
-      <section className="auth-introduction">
-        <p className="eyebrow">Guest menu</p>
-        <h1>Choose your brew</h1>
-        <p className="lede">The menu is being prepared. Your guest journey is ready.</p>
-        <Link to="/">Back to welcome</Link>
-      </section>
-    </main>
-  );
-}
-
 export function App() {
   return (
     <Routes>
       <Route path="/" element={<WelcomePage />} />
-      <Route path="/shop" element={<ShopPlaceholder />} />
+      <Route path="/shop" element={<ShopPage />} />
       <Route path="/staff/sign-in" element={<StaffSignInPage />} />
       <Route path="*" element={<Navigate replace to="/" />} />
     </Routes>

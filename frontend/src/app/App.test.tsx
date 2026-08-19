@@ -20,6 +20,7 @@ describe("App", () => {
 
     expect(screen.getByRole("main")).toHaveAccessibleName("Guest shop");
     expect(screen.getByRole("heading", { level: 1, name: "Choose your brew" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 2, name: "Moonlit Milk Tea" })).toBeVisible();
   });
 
   it("keeps staff sign-in on its own route", () => {
