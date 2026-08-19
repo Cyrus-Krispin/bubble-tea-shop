@@ -35,7 +35,7 @@ Read `docs/README.md` before making architecture or product changes. In particul
 - `frontend/`: future React/TypeScript/Vite SPA; currently only the workspace placeholder exists.
 - `docs/`: product, architecture, API, database, and delivery documentation.
 - `infra/`: infrastructure notes and future deployment assets.
-- `compose.yaml`: local PostgreSQL 18 service.
+- `compose.yaml`: local Supabase Postgres/Auth, Spring backend, and frontend services.
 
 ## Architecture rules
 
@@ -70,11 +70,11 @@ cd backend
 
 The backend integration tests require Docker because they use PostgreSQL through Testcontainers.
 
-Local database:
+Local application stack:
 
 ```bash
 cp .env.example .env
-docker compose up -d db
+docker compose up --build
 ```
 
 For documentation-only work, at minimum run `git diff --check` and verify that added relative links

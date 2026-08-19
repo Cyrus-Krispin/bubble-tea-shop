@@ -28,6 +28,8 @@ The Flyway migration remains the executable source of truth for the database.
 - [`../frontend/docs/visual-style-guide.md`](../frontend/docs/visual-style-guide.md) — selected
   customer ordering visual direction and frontend interaction guidance.
 - [`delivery/roadmap.md`](delivery/roadmap.md) — incremental delivery order and acceptance gates.
+- [`development/local-docker.md`](development/local-docker.md) — local Supabase, backend, and
+  frontend Docker workflow.
 
 ## Documentation rules
 

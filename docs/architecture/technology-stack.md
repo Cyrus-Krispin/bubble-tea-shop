@@ -42,7 +42,7 @@ entities.
 
 ## Data and authentication
 
-PostgreSQL 18 is the system of record. The expected data model is well understood and relational:
+PostgreSQL is the system of record. The expected data model is well understood and relational:
 organizations, locations, recipes, offerings, inventory movements, orders, and staff access all
 benefit from foreign keys, constraints, transactions, and precise numeric types. PostgreSQL owns
 relational integrity, while Spring owns workflows and authorization. The local Supabase stack
@@ -70,9 +70,11 @@ external-user mapping and legacy-column lifecycle.
 
 ## Local infrastructure
 
-Docker Compose runs PostgreSQL locally with a persistent named volume and a health check. The
-reason for Compose is practical: it gives every contributor the same database version and startup
-path, removes ambiguity from local setup, and makes the application straightforward to run.
+Docker Compose runs a trimmed local Supabase stack (the official Postgres and GoTrue images), the
+Spring backend, and the frontend workspace. Postgres uses a persistent named volume, every service
+has a health check, and dependency conditions prevent the application from starting before its
+local infrastructure is ready. Flyway remains the only application schema-change mechanism; the
+Supabase Auth service owns its own schema.
 
 Hosting is intentionally local-only. The backend and Supabase services share a private Compose
 network, and Spring discovers public signing keys from the local gateway without a runtime internet
@@ -83,7 +85,7 @@ future work.
 ## Tooling and testing
 
 The Maven wrapper pins the backend build environment. Backend tests use JUnit 5, Spring Boot Test,
-AssertJ, and Testcontainers against the same PostgreSQL 18 image used for local development. The
+AssertJ, and Testcontainers against PostgreSQL. The
 current integration suite verifies Flyway migrations, Hibernate mappings, relational invariants,
 immutable history, idempotent order completion, and concurrent protection against overselling.
 

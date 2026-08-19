@@ -23,3 +23,13 @@ app:
       issuer: ${LOCAL_SUPABASE_AUTH_ISSUER_URI:}
       jwk-set-uri: ${LOCAL_SUPABASE_AUTH_JWK_SET_URI:}
       audience: ${LOCAL_SUPABASE_AUTH_AUDIENCE:authenticated}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
