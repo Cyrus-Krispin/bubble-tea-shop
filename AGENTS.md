@@ -16,7 +16,8 @@ can be added without redesigning ownership boundaries.
 Current delivery status:
 
 - Phase 1 schema foundation is implemented.
-- Phase 2 staff authentication, authorization, catalog APIs, and frontend foundations are next.
+- The guest catalog seed, public read endpoints, and frontend foundation are implemented.
+- Staff identity mapping, authorization, catalog management, and guest order placement are next.
 - Customer accounts and opt-in face authentication are later features.
 
 Read `docs/README.md` before making architecture or product changes. In particular:
@@ -32,7 +33,7 @@ Read `docs/README.md` before making architecture or product changes. In particul
 ## Repository structure
 
 - `backend/`: Java 21, Spring Boot, JPA, Flyway, PostgreSQL, and Testcontainers.
-- `frontend/`: future React/TypeScript/Vite SPA; currently only the workspace placeholder exists.
+- `frontend/`: React/TypeScript/Vite SPA for guest ordering and staff access.
 - `docs/`: product, architecture, API, database, and delivery documentation.
 - `infra/`: infrastructure notes and future deployment assets.
 - `compose.yaml`: local Supabase Postgres/Auth, Spring backend, and frontend services.
@@ -51,6 +52,10 @@ Read `docs/README.md` before making architecture or product changes. In particul
   behavior changes.
 - Never trust client-supplied organization, location, role, price, inventory, biometric match, or
   authorization data without resolving it on the server.
+- Do not ship mock, demo, fixture, or hard-coded application-domain data in frontend runtime code.
+  Catalog products, prices, availability, options, orders, inventory, and other business values
+  must come from Spring APIs backed by PostgreSQL. Tests may use isolated fixtures or mocked API
+  boundaries, but production frontend code must not contain a fallback data catalog.
 - Preserve historical records through deactivation or archival unless the documented lifecycle
   explicitly permits deletion.
 - Never commit secrets, production credentials, raw tokens, biometric templates, or local `.env`
@@ -78,8 +83,8 @@ docker compose up --build
 ```
 
 For documentation-only work, at minimum run `git diff --check` and verify that added relative links
-resolve. Add frontend lint, typecheck, test, and build commands here when the frontend is
-implemented.
+resolve. Frontend changes must run `pnpm test`, `pnpm typecheck`, `pnpm lint`, and `pnpm build` in
+`frontend/`.
 
 ## Git delivery rule
 

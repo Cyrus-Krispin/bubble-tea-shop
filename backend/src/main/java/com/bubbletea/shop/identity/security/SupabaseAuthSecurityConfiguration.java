@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -33,6 +34,7 @@ public class SupabaseAuthSecurityConfiguration {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(HttpMethod.GET, "/api/v1/guest/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll())
             .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))

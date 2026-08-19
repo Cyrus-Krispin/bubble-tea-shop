@@ -1,7 +1,9 @@
 # Database ERD
 
 The diagrams are split by concern for readability. `organization_id` is repeated through owned
-tables to support composite foreign keys that reject cross-organization references.
+tables to support composite foreign keys that reject cross-organization references. V2 adds public
+slugs and presentation metadata to the existing location/product relationships and seeds the local
+guest catalog; it does not introduce another entity relationship.
 
 The identity diagram reflects the implemented V1 schema. Its `REFRESH_SESSION` relationship belongs
 to the superseded custom-auth design and is not the target Supabase session model. A later migration

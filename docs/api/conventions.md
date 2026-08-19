@@ -1,12 +1,12 @@
 # API Conventions
 
-No HTTP endpoints are included in the schema-first slice. These conventions apply when controllers
-are introduced.
+The guest catalog is the first implemented HTTP surface. Remaining endpoints follow these
+conventions as controllers are introduced.
 
 ## Contract
 
-- Spring-generated OpenAPI is the contract source.
-- Frontend request/response types and client functions are generated from the committed contract.
+- Spring DTOs are the current contract source. OpenAPI generation and generated frontend types are
+  the next contract-tooling increment.
 - JPA entities never cross the HTTP boundary.
 - Breaking changes require a versioning decision and migration note.
 
@@ -55,3 +55,20 @@ resources `404`, state conflicts `409`, and unexpected failures `500`.
   untrusted identity metadata are not authorization evidence.
 - Domain APIs remain Spring endpoints; the frontend does not write application tables directly
   through Supabase data APIs.
+
+## Guest catalog
+
+These read-only endpoints are public so a guest can browse without a Supabase session:
+
+- `GET /api/v1/guest/menu` and `GET /api/v1/guest/menu/products/{productSlug}` resolve the
+  deployment-configured MVP guest location and are the frontend's current endpoints.
+- `GET /api/v1/guest/locations/{locationSlug}/menu` returns the active location and ordered product
+  summaries with database-owned availability and starting prices.
+- `GET /api/v1/guest/locations/{locationSlug}/menu/products/{productSlug}` returns available size
+  variants, exact variant prices, and enabled option groups and choices.
+
+`GUEST_LOCATION_SLUG` configures the current MVP location on the server; the frontend does not own
+or duplicate that domain value. The menu is a bounded singleton resource for one location, so it is not paginated. Unknown or
+inactive locations and products return `404` problem details with `CATALOG_NOT_FOUND` or
+`CATALOG_PRODUCT_NOT_FOUND`. All other `/api/**` routes keep their configured authentication or
+deny-by-default rule.

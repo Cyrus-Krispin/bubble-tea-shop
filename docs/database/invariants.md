@@ -8,6 +8,10 @@
 
 ## Recipes and offerings
 
+- A non-null location public slug resolves globally to one location; product public slugs are
+  unique inside their organization.
+- Public slugs and artwork keys use lowercase kebab case. Each product has at most one active
+  default variant, and each option group has at most one active default choice.
 - Component quantities are strictly positive and use the ingredient's base unit.
 - Components of a published or retired recipe version cannot be inserted, changed, or deleted.
 - An available offering references an active product/variant and a published, non-archived recipe.
@@ -38,4 +42,5 @@
 - Flyway migration SQL is the schema source of truth.
 - Hibernate uses `validate`; it never creates or updates production schema.
 - Applied migrations are immutable. Corrections use a new numbered migration.
-
+- V2 contains the local MVP guest catalog seed. Runtime catalog values are read through Spring,
+  not duplicated in the browser.

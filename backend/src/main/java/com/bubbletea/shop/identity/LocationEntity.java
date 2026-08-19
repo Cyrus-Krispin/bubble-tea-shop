@@ -17,6 +17,9 @@ public class LocationEntity {
     @Column(name = "organization_id", nullable = false)
     UUID organizationId;
 
+    @Column(name = "public_slug", length = 120)
+    String publicSlug;
+
     @Column(nullable = false, length = 160)
     String name;
 

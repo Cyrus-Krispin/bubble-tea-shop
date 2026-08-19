@@ -42,7 +42,8 @@ The future frontend is one React/TypeScript/Vite SPA:
 - `app` owns routing and providers.
 - `features` groups screens and behavior by backend domain.
 - `design-system` owns tokens and accessible Radix-based components.
-- TanStack Query owns server state; local UI state stays local.
+- Guest catalog pages load server-owned values from Spring; TanStack Query remains planned for
+  broader server-state caching.
 - The API client is generated from Spring's OpenAPI document.
 
 ## Runtime configuration

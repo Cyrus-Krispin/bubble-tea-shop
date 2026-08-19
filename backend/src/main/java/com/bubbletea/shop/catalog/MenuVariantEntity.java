@@ -26,6 +26,9 @@ public class MenuVariantEntity {
     @Column(name = "display_order", nullable = false)
     int displayOrder;
 
+    @Column(name = "is_default", nullable = false)
+    boolean defaultVariant;
+
     @Column(name = "archived_at")
     Instant archivedAt;
 
@@ -38,4 +41,3 @@ public class MenuVariantEntity {
     protected MenuVariantEntity() {
     }
 }
-

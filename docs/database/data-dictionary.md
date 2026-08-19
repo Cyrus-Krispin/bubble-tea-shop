@@ -5,7 +5,7 @@
 | Table | Purpose | Lifecycle |
 |---|---|---|
 | `organization` | Top-level business owner. | Retained permanently in MVP. |
-| `location` | Physical stock/order boundary and display timezone/currency. | Deactivated with `active=false`. |
+| `location` | Physical stock/order boundary, public menu slug, timezone, and currency. | Deactivated with `active=false`. |
 | `account` | Phase 1 application identity record; future Supabase linkage is not yet modeled. | Disabled rather than deleted. |
 | `organization_membership` | Owner/manager role inside an organization. | Deactivated to remove access. |
 | `location_assignment` | Manager-to-location access. | Rows added or removed with audit at service layer. |
@@ -19,11 +19,11 @@
 | `recipe` | Stable recipe name and description. | Archived after use. |
 | `recipe_version` | Numbered draft/published/retired formula revision. | Published content is immutable. |
 | `recipe_component` | Positive base-unit quantity of an ingredient. | Editable only while version is draft. |
-| `menu_product` | Customer-facing drink identity. | Archived after use. |
-| `menu_variant` | Size/form of a menu product. | Archived after use. |
+| `menu_product` | Customer-facing drink identity, public slug, category, artwork key, and display order. | Archived after use. |
+| `menu_variant` | Size/form of a menu product, including its optional default marker. | Archived after use. |
 | `menu_variant_offering` | Location price, availability, and recipe assignment. | Updated when price/availability changes. |
 | `option_group` | Selection limits and display order for a choice family. | Archived after use. |
-| `option_choice` | Value within an option group. | Archived after use. |
+| `option_choice` | Value within an option group, including its optional default marker. | Archived after use. |
 | `menu_variant_option_choice` | Variant-specific enablement and price delta. | Disabled rather than deleted after use. |
 | `option_choice_ingredient_effect` | Signed ingredient delta caused by a choice. | Copied into order consumption at placement. |
 

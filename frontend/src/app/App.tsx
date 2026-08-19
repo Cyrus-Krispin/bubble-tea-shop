@@ -1,48 +1,50 @@
-import { LoginForm } from "../features/auth/LoginForm";
-import { signInWithEmailAndPassword } from "../features/auth/authClient";
+import { Link, Navigate, Route, Routes } from "react-router";
 
-export function App() {
+import { StaffSignInPage } from "../features/auth/StaffSignInPage";
+import { CartPage } from "../features/cart/CartPage";
+import { CartProvider } from "../features/cart/CartProvider";
+import { DrinkPage } from "../features/catalog/DrinkPage";
+import { ShopPage } from "../features/catalog/ShopPage";
+
+function WelcomePage() {
   return (
     <div className="app-shell">
-      <a className="skip-link" href="#staff-sign-in">
-        Skip to sign in
-      </a>
-
+      <a className="skip-link" href="#welcome-title">Skip to welcome</a>
       <header className="app-header">
-        <a className="brand" href="/" aria-label="Bubble Tea Shop home">
+        <Link className="brand" to="/" aria-label="Bubble Tea Shop home">
           <span className="brand-mark" aria-hidden="true">BT</span>
-          <span>
-            <strong>Bubble Tea Shop</strong>
-            <span>Operations</span>
-          </span>
-        </a>
+          <span><strong>Bubble Tea Shop</strong><span>Freshly made, your way</span></span>
+        </Link>
       </header>
-
-      <main aria-label="Staff sign in" className="auth-page">
-        <section className="auth-introduction" aria-labelledby="auth-page-title">
-          <p className="eyebrow">Staff workspace</p>
-          <h1 id="auth-page-title">Sign in to your workspace</h1>
-          <p className="lede">Use your staff account to access shop operations.</p>
-          <dl className="access-notes">
-            <div>
-              <dt>Secure sign-in</dt>
-              <dd>Your password is handled by the local authentication service.</dd>
-            </div>
-            <div>
-              <dt>Server-verified access</dt>
-              <dd>Roles and location permissions are checked before staff tools are available.</dd>
-            </div>
-          </dl>
+      <main aria-labelledby="welcome-title" className="auth-page">
+        <section className="auth-introduction">
+          <p className="eyebrow">A little joy in every cup</p>
+          <h1 id="welcome-title">Your next favorite brew starts here.</h1>
+          <p className="lede">Browse the menu, make it yours, and order for pickup—no account needed.</p>
         </section>
-
-        <section className="auth-card" id="staff-sign-in" aria-labelledby="sign-in-heading">
-          <p className="card-kicker">Staff access</p>
-          <h2 id="sign-in-heading">Welcome back</h2>
-          <p className="card-copy">Sign in with the email and password assigned to you.</p>
-          <LoginForm onSignIn={signInWithEmailAndPassword} />
-          <p className="access-help">Need access? Ask the shop owner to add your staff membership.</p>
+        <section className="auth-card" aria-labelledby="order-heading">
+          <p className="card-kicker">Guest ordering</p>
+          <h2 id="order-heading">Ready for tea?</h2>
+          <p className="card-copy">Explore today&apos;s drinks and build your order as a guest.</p>
+          <Link className="primary-link" to="/shop">Continue as guest</Link>
+          <p className="access-help">Working today? <Link to="/staff/sign-in">Staff sign in</Link></p>
         </section>
       </main>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <CartProvider>
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/shop/drinks/:drinkId" element={<DrinkPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/staff/sign-in" element={<StaffSignInPage />} />
+        <Route path="*" element={<Navigate replace to="/" />} />
+      </Routes>
+    </CartProvider>
   );
 }
