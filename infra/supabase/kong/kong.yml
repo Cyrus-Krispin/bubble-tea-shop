@@ -25,4 +25,5 @@ plugins:
         - apikey
         - content-type
         - x-client-info
+        - x-supabase-api-version
       max_age: 3600
