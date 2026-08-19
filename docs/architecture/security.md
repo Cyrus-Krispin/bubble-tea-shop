@@ -61,6 +61,8 @@ or a raw user token. The exact Compose services and generated local secrets belo
 local-stack infrastructure change, not this backend integration.
 
 The current slice protects the API boundary and includes a frontend email/password sign-in form.
+Read-only `GET /api/v1/guest/**` catalog requests are explicitly public; later guest order writes
+must validate all identifiers and recalculate prices on the server.
 The browser client delegates session persistence and refresh to Supabase Auth; it does not log or
 manually store access or refresh tokens. It adds no Spring login, refresh, logout, or password
 endpoint and does not treat `role`, `user_metadata`, organization, location, or other token claims

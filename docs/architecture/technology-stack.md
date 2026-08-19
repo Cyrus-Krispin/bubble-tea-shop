@@ -20,9 +20,10 @@ Spring OpenAPI contract so that API changes remain visible at compile time.
 
 The frontend now contains the React, TypeScript, and Vite foundation, declarative client-side
 routing, a staff sign-in screen that uses the local Supabase Auth gateway, and a customer guest
-ordering preview. The preview supports menu filtering, drink customization, and an in-memory current
-order while clearly preventing checkout until Spring owns catalog availability, pricing, and order
-placement. It includes linting, type checking, Vitest component tests, and a containerized SPA build.
+ordering preview. The guest menu and customization routes load catalog, availability, prices, and
+options from Spring. The current order remains in memory and checkout stays disabled until Spring
+owns order placement and final total calculation. It includes linting, type checking, Vitest
+component tests, and a containerized SPA build.
 Tailwind, Radix, TanStack Query, Storybook, and generated OpenAPI client code remain selected choices
 for later increments rather than installed production code.
 
@@ -41,9 +42,10 @@ Web, and Actuator are present in the current Maven foundation. Supabase now supe
 custom Spring password and session plan; Spring Security implements the bearer-token verification
 boundary for the local Auth issuer.
 
-There are no HTTP controllers in the current schema-first slice. The planned API will expose JSON
-over HTTPS under `/api/v1`, publish an OpenAPI contract, and return DTOs rather than persistence
-entities.
+The first controllers expose the public, read-only guest menu under `/api/v1/guest`. They return
+purpose-built DTOs rather than persistence entities and read catalog state through the catalog
+application service. OpenAPI publication and generated frontend client code remain planned contract
+tooling.
 
 ## Data and authentication
 
@@ -113,8 +115,8 @@ future work.
 
 The Maven wrapper pins the backend build environment. Backend tests use JUnit 5, Spring Boot Test,
 AssertJ, and Testcontainers against PostgreSQL. The current integration suite verifies Flyway
-migrations, Hibernate mappings, relational invariants, immutable history, idempotent order
-completion, and concurrent protection against overselling. The local Auth key generator has a
+migrations, seeded guest catalog responses, Hibernate mappings, relational invariants, immutable
+history, idempotent order completion, and concurrent protection against overselling. The local Auth key generator has a
 Node test (`node --test infra/supabase/generate-local-auth-keys.test.mjs`) to ensure generated
 JWKs remain acceptable to GoTrue.
 

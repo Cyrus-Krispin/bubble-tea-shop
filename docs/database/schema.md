@@ -1,9 +1,9 @@
 # Database Schema Reference
 
-This page is a human-readable reference for the current PostgreSQL schema. The executable source
-of truth is
-[`V1__create_mvp_schema.sql`](../../backend/src/main/resources/db/migration/V1__create_mvp_schema.sql).
-When the migration and this page disagree, the migration wins and this page must be corrected.
+This page is a human-readable reference for the current PostgreSQL schema. The executable sources
+of truth are the ordered scripts in
+[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 and V2. When the
+migrations and this page disagree, the migrations win and this page must be corrected.
 
 The V1 `account` credential fields and `refresh_session` table reflect the superseded
 application-owned authentication design. They remain documented because they are implemented
@@ -137,6 +137,7 @@ Checks: `name` must not be blank.
 |---|---|---|---|---|
 | `id` | `uuid` | NN | `gen_random_uuid()` | PK; UQ with `organization_id` |
 | `organization_id` | `uuid` | NN | — | FK → `organization.id`; UQ with `id` |
+| `public_slug` | `varchar(120)` | Nullable | — | Global partial UQ when present |
 | `name` | `varchar(160)` | NN | — | UQ with `organization_id` |
 | `timezone` | `varchar(64)` | NN | — | — |
 | `default_locale` | `varchar(16)` | NN | `'en-SG'` | — |
@@ -145,8 +146,8 @@ Checks: `name` must not be blank.
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
-Unique: `(id, organization_id)` and `(organization_id, name)`. Checks: non-blank name and
-three-letter uppercase currency code.
+Unique: `(id, organization_id)`, `(organization_id, name)`, and non-null `public_slug`. Checks:
+non-blank name, lowercase kebab-case public slug, and three-letter uppercase currency code.
 
 ### `account`
 
@@ -276,14 +277,20 @@ Primary key: `(recipe_version_id, ingredient_id)`. Quantity must be positive.
 |---|---|---|---|---|
 | `id` | `uuid` | NN | `gen_random_uuid()` | PK; UQ with `organization_id` |
 | `organization_id` | `uuid` | NN | — | FK → `organization.id`; UQ component |
+| `public_slug` | `varchar(120)` | Nullable | — | Partial UQ with `organization_id` when present |
 | `name` | `varchar(160)` | NN | — | UQ with `organization_id` |
 | `description` | `text` | Nullable | — | — |
 | `image_url` | `text` | Nullable | — | — |
+| `category` | `varchar(80)` | Nullable | — | — |
+| `artwork_key` | `varchar(40)` | Nullable | — | — |
+| `display_order` | `integer` | NN | `0` | — |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
-Unique: `(id, organization_id)` and `(organization_id, name)`. Name must not be blank.
+Unique: `(id, organization_id)`, `(organization_id, name)`, and non-null
+`(organization_id, public_slug)`. Name and category must not be blank when present; public slug and
+artwork key use lowercase kebab case; display order is non-negative.
 
 ### `menu_variant`
 
@@ -294,12 +301,13 @@ Unique: `(id, organization_id)` and `(organization_id, name)`. Name must not be 
 | `menu_product_id` | `uuid` | NN | — | FK with `organization_id` → `menu_product`; UQ with `name` |
 | `name` | `varchar(100)` | NN | — | UQ with `menu_product_id` |
 | `display_order` | `integer` | NN | `0` | — |
+| `is_default` | `boolean` | NN | `false` | Partial UQ with `menu_product_id` when true and active |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
-Unique: `(id, organization_id)` and `(menu_product_id, name)`. Name must not be blank and display
-order must be non-negative.
+Unique: `(id, organization_id)`, `(menu_product_id, name)`, and at most one active default variant
+per product. Name must not be blank and display order must be non-negative.
 
 ### `menu_variant_offering`
 
@@ -531,11 +539,14 @@ Primary keys and unique constraints create their own indexes. The migration also
 |---|---|---|---|
 | `uq_inventory_sale_order_ingredient` | `inventory_movement` | `(customer_order_id, ingredient_id) WHERE movement_type = 'SALE'` | Prevent duplicate sale deductions. |
 | `idx_location_active` | `location` | `(organization_id, active)` | Active location lookup. |
+| `uq_location_public_slug` | `location` | `(public_slug) WHERE public_slug IS NOT NULL` | Resolve a public shop URL to one location. |
 | `idx_membership_active` | `organization_membership` | `(organization_id, role, active)` | Active role lookup. |
 | `idx_refresh_session_account_active` | `refresh_session` | `(account_id, expires_at) WHERE revoked_at IS NULL` | Legacy active-session lookup. |
 | `idx_ingredient_active` | `ingredient` | `(organization_id, name) WHERE archived_at IS NULL` | Active ingredient listing. |
 | `idx_recipe_active` | `recipe` | `(organization_id, name) WHERE archived_at IS NULL` | Active recipe listing. |
 | `idx_menu_product_active` | `menu_product` | `(organization_id, name) WHERE archived_at IS NULL` | Active product listing. |
+| `uq_menu_product_public_slug_organization` | `menu_product` | `(organization_id, public_slug) WHERE public_slug IS NOT NULL` | Resolve a product URL inside an organization. |
+| `uq_menu_variant_default_product` | `menu_variant` | `(menu_product_id) WHERE is_default AND archived_at IS NULL` | Keep one active default size per product. |
 | `idx_offering_catalog` | `menu_variant_offering` | `(location_id, available, menu_variant_id)` | Location menu lookup. |
 | `idx_inventory_balance_stock` | `inventory_balance` | `(location_id, quantity)` | Stock-level lookup. |
 | `idx_inventory_movement_history` | `inventory_movement` | `(location_id, ingredient_id, created_at DESC)` | Movement history. |

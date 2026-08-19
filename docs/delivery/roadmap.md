@@ -27,8 +27,9 @@ healthy database.
 ## Phase 3 — Inventory and ordering
 
 - Stock level and movement APIs.
-- Guest menu and order-placement APIs with consumption snapshots, replacing the frontend's typed
-  demo catalog and enabling its currently disabled checkout handoff.
+- Guest menu read APIs backed by a versioned local catalog seed. (Implemented.)
+- Guest order-placement APIs with consumption snapshots and server-recalculated totals, enabling
+  the frontend's currently disabled checkout handoff.
 - Staff order queue and completion UI.
 - Cash payment recording and shortage conflict UX.
 - End-to-end tests from order placement through inventory deduction.
