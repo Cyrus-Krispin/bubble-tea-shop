@@ -2,8 +2,8 @@
 
 Bubble Tea Shop uses a deliberately familiar backend stack and a flexible frontend stack. The goal
 is to spend less time experimenting with infrastructure and more time on the ordering experience,
-shop workflows, and user interface. This document describes the selected direction even where a
-part of the application has not been implemented yet.
+shop workflows, and user interface. This document distinguishes the local runtime that is now
+implemented from choices that remain planned for later delivery phases.
 
 ## Frontend
 
@@ -18,9 +18,10 @@ the shop's own design system, TanStack Query will manage server state, and Story
 isolated component development. The frontend will consume a typed client generated from the
 Spring OpenAPI contract so that API changes remain visible at compile time.
 
-The frontend directory currently contains only the Node and pnpm workspace foundation. React,
-TypeScript, Vite, Tailwind, Radix, TanStack Query, Storybook, and OpenAPI generation are selected
-choices for the next delivery phases rather than installed production code.
+The frontend directory currently contains only a Node 24 and pnpm 11 workspace foundation plus a
+containerized health/placeholder process. React, TypeScript, Vite, Tailwind, Radix, TanStack
+Query, Storybook, and OpenAPI generation are selected choices for the next delivery phases rather
+than installed production code.
 
 ## Backend and API
 
@@ -32,9 +33,10 @@ The application is a modular monolith organized around identity, catalog, invent
 This keeps deployment and local development simple while allowing inventory and order completion
 to share a strongly consistent transaction. Spring Data JPA and Hibernate map the domain data,
 while focused workflow services can use Spring JDBC when explicit locking and SQL make transaction
-behavior clearer. Spring Validation and Spring Security are present in the current Maven
-foundation. Supabase now supersedes the earlier custom Spring password and session plan; Spring
-Security implements the bearer-token verification boundary for the local Auth issuer.
+behavior clearer. Spring Validation, Spring Security, OAuth 2.0 resource-server support, Spring
+Web, and Actuator are present in the current Maven foundation. Supabase now supersedes the earlier
+custom Spring password and session plan; Spring Security implements the bearer-token verification
+boundary for the local Auth issuer.
 
 There are no HTTP controllers in the current schema-first slice. The planned API will expose JSON
 over HTTPS under `/api/v1`, publish an OpenAPI contract, and return DTOs rather than persistence
@@ -54,13 +56,16 @@ reviewable when the model evolves, and Hibernate runs with `ddl-auto=validate` s
 mapping mismatch without modifying the schema. Inventory balances and their immutable movement
 history live in the same database transaction as order completion to prevent overselling.
 
-The fully local, self-hosted Supabase Auth service is the authentication issuer; the hosted
-Supabase platform is not used. Local Auth performs sign-in and owns access/refresh session
-lifecycle. Spring Security is configured as an OAuth 2.0 resource server and validates access JWTs
-against the asymmetric public JWKS served on the private Compose network, expected local issuer,
-and `authenticated` audience. Validation has no runtime internet dependency. Spring does not
-receive a signing secret, mint a second application JWT, or expose application
-login/password/refresh endpoints.
+The fully local, self-hosted Supabase Auth service (GoTrue) is the authentication issuer; the
+hosted Supabase platform is not used. GoTrue performs sign-in and owns access/refresh session
+lifecycle. Kong is the local gateway which exposes GoTrue at `/auth/v1` and gives tokens the stable
+issuer `http://localhost:8000/auth/v1`. Spring Security is configured as an OAuth 2.0 resource
+server and validates access JWTs against GoTrue's asymmetric ES256 public JWKS at
+`kong:8000/auth/v1/.well-known/jwks.json`, the expected issuer, and the `authenticated` audience.
+Validation has no runtime internet dependency. Spring does not receive a signing secret, mint a
+second application JWT, or expose application login/password/refresh endpoints. The decision and
+its deferred identity migration are recorded in
+[ADR 0003](decisions/0003-local-supabase-auth.md).
 
 Authentication does not grant domain access by itself. Authorization will be resolved from current
 server-side account mappings, memberships, and location assignments rather than trusting mutable
@@ -70,11 +75,30 @@ external-user mapping and legacy-column lifecycle.
 
 ## Local infrastructure
 
-Docker Compose runs a trimmed local Supabase stack (the official Postgres and GoTrue images), the
-Spring backend, and the frontend workspace. Postgres uses a persistent named volume, every service
-has a health check, and dependency conditions prevent the application from starting before its
-local infrastructure is ready. Flyway remains the only application schema-change mechanism; the
-Supabase Auth service owns its own schema.
+Docker Compose runs a trimmed local Supabase stack, the Spring backend, and the frontend
+workspace. Postgres uses a persistent named volume, every service has a health check, and
+dependency conditions prevent the application from starting before its local infrastructure is
+ready. Flyway remains the only application schema-change mechanism; the Supabase Auth service owns
+its own schema.
+
+| Component | Local implementation | Responsibility |
+| --- | --- | --- |
+| Database | `supabase/postgres:17.6.1.136`, host port `54322` | One PostgreSQL instance for application data and the isolated GoTrue schema; Flyway owns application migrations. |
+| Authentication | GoTrue `supabase/gotrue:v2.189.0` | Local sign-in, access tokens, refresh sessions, and the asymmetric signing key. |
+| Auth gateway | Kong `kong:3.9.1`, host port `8000` | Routes `/auth/v1` to GoTrue and exposes its issuer and public JWKS consistently. |
+| Application API | Spring Boot 4.1 on Java 21, host port `8080` | Modular-monolith workflows, authorization, Flyway migrations, and access-token validation. |
+| Frontend workspace | Node `24.16.0` and pnpm `11.9.0`, host port `4173` | Current health/placeholder process; future home for the React SPA. |
+
+Inside Compose, the backend connects to PostgreSQL at `db:5432` and fetches public signing keys
+from Kong at `kong:8000`; it does not call a hosted service. Host ports bind to `127.0.0.1` only.
+The concrete setup and endpoint checks are documented in
+[Local Docker development](../development/local-docker.md).
+
+The committed `.env.example` contains only non-secret defaults. A local generator creates a random
+JWT secret and an ES256 private JWK, writing them to standard output so they can be appended to the
+ignored `.env` file. No private signing key, access token, or production credential belongs in the
+repository. Local email confirmation is automatic because this focused development stack has no
+SMTP service; it is not a production email design.
 
 Hosting is intentionally local-only. The backend and Supabase services share a private Compose
 network, and Spring discovers public signing keys from the local gateway without a runtime internet
@@ -85,9 +109,15 @@ future work.
 ## Tooling and testing
 
 The Maven wrapper pins the backend build environment. Backend tests use JUnit 5, Spring Boot Test,
-AssertJ, and Testcontainers against PostgreSQL. The
-current integration suite verifies Flyway migrations, Hibernate mappings, relational invariants,
-immutable history, idempotent order completion, and concurrent protection against overselling.
+AssertJ, and Testcontainers against PostgreSQL. The current integration suite verifies Flyway
+migrations, Hibernate mappings, relational invariants, immutable history, idempotent order
+completion, and concurrent protection against overselling. The local Auth key generator has a
+Node test (`node --test infra/supabase/generate-local-auth-keys.test.mjs`) to ensure generated
+JWKs remain acceptable to GoTrue.
+
+Developers need a Java 21 JDK, Node 24 for the local generator, and a Docker-compatible runtime
+for Compose and Testcontainers. The backend verification command is `cd backend && ./mvnw verify`;
+it requires Docker because its integration tests start PostgreSQL with Testcontainers.
 
 Frontend linting, type checking, component tests, end-to-end tests, and production builds will be
 added with the frontend implementation.
