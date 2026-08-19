@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import { useCart } from "../cart/CartContext";
 import { CustomerHeader } from "./CustomerHeader";
 import { demoDrinks } from "./demoCatalog";
 import { DrinkArtwork } from "./DrinkArtwork";
@@ -11,13 +12,14 @@ import "./catalog.css";
 const categories = ["All", "Milk tea", "Fruit tea", "Tea latte"] as const;
 
 export function ShopPage() {
+  const { itemCount } = useCart();
   const [category, setCategory] = useState<"All" | DrinkCategory>("All");
   const drinks = category === "All" ? demoDrinks : demoDrinks.filter((drink) => drink.category === category);
 
   return (
     <div className="customer-shell">
       <a className="skip-link" href="#menu-title">Skip to menu</a>
-      <CustomerHeader />
+      <CustomerHeader itemCount={itemCount} />
       <main aria-label="Guest shop" className="shop-main">
         <div className="shop-heading">
           <div>

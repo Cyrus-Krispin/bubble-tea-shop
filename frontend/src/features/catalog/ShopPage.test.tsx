@@ -2,11 +2,16 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
 
+import { CartProvider } from "../cart/CartProvider";
 import { ShopPage } from "./ShopPage";
+
+function renderShop() {
+  render(<MemoryRouter><CartProvider><ShopPage /></CartProvider></MemoryRouter>);
+}
 
 describe("ShopPage", () => {
   it("shows available drinks with their starting prices", () => {
-    render(<MemoryRouter><ShopPage /></MemoryRouter>);
+    renderShop();
 
     expect(screen.getByRole("heading", { name: "Moonlit Milk Tea" })).toBeVisible();
     expect(screen.getByRole("link", { name: /Customize Moonlit Milk Tea/ })).toHaveAttribute(
@@ -17,7 +22,7 @@ describe("ShopPage", () => {
   });
 
   it("filters the menu by category", () => {
-    render(<MemoryRouter><ShopPage /></MemoryRouter>);
+    renderShop();
 
     fireEvent.click(screen.getByRole("button", { name: "Fruit tea" }));
 
@@ -26,7 +31,7 @@ describe("ShopPage", () => {
   });
 
   it("marks sold-out drinks without offering customization", () => {
-    render(<MemoryRouter><ShopPage /></MemoryRouter>);
+    renderShop();
 
     expect(screen.getByText("Sold out", { selector: ".product-status" })).toBeVisible();
     expect(screen.queryByRole("link", { name: /Customize Cloudberry Taro/ })).not.toBeInTheDocument();

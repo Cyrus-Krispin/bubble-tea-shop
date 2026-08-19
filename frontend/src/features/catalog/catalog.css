@@ -237,8 +237,272 @@
   font-weight: 800;
 }
 
+.secondary-link,
+.back-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  color: var(--color-forest-strong);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.secondary-link {
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-forest);
+  border-radius: var(--radius-control);
+}
+
+.not-found {
+  width: min(100% - 2rem, 44rem);
+  margin: 0 auto;
+  padding: var(--space-10) 0;
+}
+
+.not-found h1 {
+  max-width: 14ch;
+}
+
+.not-found > p:not(.eyebrow) {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.customize-layout {
+  display: grid;
+  width: min(100% - 3rem, 78rem);
+  grid-template-columns: minmax(20rem, 0.82fr) minmax(34rem, 1.18fr);
+  gap: clamp(var(--space-6), 6vw, var(--space-10));
+  align-items: start;
+  margin: 0 auto;
+  padding: var(--space-6) 0 var(--space-10);
+}
+
+.drink-feature {
+  position: sticky;
+  top: var(--space-4);
+  padding: 0 var(--space-5) var(--space-5);
+  text-align: center;
+}
+
+.drink-feature .back-link {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.drink-feature .drink-art {
+  max-height: 28rem;
+}
+
+.drink-feature h1 {
+  max-width: none;
+  margin-bottom: var(--space-3);
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+}
+
+.drink-feature > p:last-child {
+  max-width: 30rem;
+  margin: 0 auto;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.customizer {
+  padding: clamp(var(--space-5), 4vw, var(--space-8));
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 0.25rem 1rem rgb(35 51 43 / 5%);
+}
+
+.customizer-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.customizer-heading h2 {
+  margin-bottom: 0;
+}
+
+.customizer-heading > strong {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+}
+
+.customizer fieldset {
+  min-width: 0;
+  margin: var(--space-5) 0 0;
+  padding: var(--space-5) 0 0;
+  border: 0;
+  border-top: 1px dashed var(--color-line);
+}
+
+.customizer legend {
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.customizer legend small {
+  margin-left: var(--space-2);
+  color: var(--color-muted);
+  font-family: var(--font-interface);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.option-row {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  margin-top: var(--space-3);
+  background: var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+}
+
+.option-row--three { grid-template-columns: repeat(3, 1fr); }
+.option-row--four { grid-template-columns: repeat(4, 1fr); }
+.option-row--five { grid-template-columns: repeat(5, 1fr); }
+
+.option-row label {
+  position: relative;
+  display: grid;
+  min-height: 3.25rem;
+  place-content: center;
+  padding: var(--space-2);
+  text-align: center;
+  background: var(--color-canvas);
+  cursor: pointer;
+}
+
+.option-row input,
+.topping-row input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.option-row label:has(input:checked) {
+  color: var(--color-canvas);
+  background: var(--color-forest-strong);
+}
+
+.option-row label:has(input:focus-visible),
+.topping-row label:has(input:focus-visible) {
+  outline: 3px solid var(--color-apricot-strong);
+  outline-offset: -3px;
+}
+
+.option-row small {
+  margin-top: 0.15rem;
+  color: inherit;
+  font-size: 0.7rem;
+}
+
+.topping-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.topping-row label {
+  position: relative;
+  display: grid;
+  min-height: 8.5rem;
+  place-items: center;
+  align-content: center;
+  gap: 0.2rem;
+  padding: var(--space-3);
+  text-align: center;
+  background: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.topping-row label:has(input:checked) {
+  border: 2px solid var(--color-forest-strong);
+  box-shadow: inset 0 0 0 2px var(--color-canvas);
+}
+
+.topping-row label:has(input:checked)::after {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  content: "✓";
+  color: var(--color-canvas);
+  background: var(--color-forest-strong);
+  border-radius: 50%;
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.topping-icon {
+  width: 3rem;
+  font-size: 2.5rem;
+  line-height: 1;
+  text-shadow: 0.45rem 0 currentcolor, -0.45rem 0 currentcolor;
+}
+
+.topping-icon--pearls { color: #3a2a23; }
+.topping-icon--grass-jelly { color: #26312b; }
+.topping-icon--aloe { color: #9eb78d; }
+.topping-row small { color: var(--color-muted); }
+
+.customizer-action {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px dashed var(--color-line);
+}
+
+.preview-disclaimer {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.customizer-action button {
+  width: 100%;
+  min-height: 3.5rem;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-canvas);
+  font-weight: 800;
+  background: var(--color-apricot-strong);
+  border: 1px solid var(--color-apricot-strong);
+  border-radius: var(--radius-control);
+}
+
+.customizer-action button:hover {
+  background: #a73e0e;
+}
+
+.added-message {
+  margin: var(--space-3) 0 0;
+  color: var(--color-forest-strong);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.added-message a {
+  color: var(--color-apricot-strong);
+}
+
 @media (max-width: 68rem) {
   .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .customize-layout {
+    width: min(100% - 2rem, 54rem);
+    grid-template-columns: 1fr;
+  }
+  .drink-feature { position: static; }
+  .drink-feature .drink-art { max-height: 22rem; }
 }
 
 @media (max-width: 44rem) {
@@ -255,6 +519,18 @@
   .demo-note { margin-top: var(--space-4); }
   .product-grid { grid-template-columns: 1fr; }
   .drink-art { max-height: 17rem; }
+  .customize-layout { padding-top: var(--space-3); }
+  .drink-feature { padding: 0; text-align: left; }
+  .drink-feature .drink-art { max-height: 18rem; }
+  .customizer { padding: var(--space-4); }
+  .option-row--four { grid-template-columns: repeat(2, 1fr); }
+  .topping-row { grid-template-columns: 1fr; }
+  .topping-row label {
+    min-height: 4.5rem;
+    grid-template-columns: 3.5rem 1fr auto;
+    justify-items: start;
+    text-align: left;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

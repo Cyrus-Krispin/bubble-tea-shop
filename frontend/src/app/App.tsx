@@ -1,6 +1,8 @@
 import { Link, Navigate, Route, Routes } from "react-router";
 
 import { StaffSignInPage } from "../features/auth/StaffSignInPage";
+import { CartProvider } from "../features/cart/CartProvider";
+import { DrinkPage } from "../features/catalog/DrinkPage";
 import { ShopPage } from "../features/catalog/ShopPage";
 
 function WelcomePage() {
@@ -33,11 +35,14 @@ function WelcomePage() {
 
 export function App() {
   return (
-    <Routes>
-      <Route path="/" element={<WelcomePage />} />
-      <Route path="/shop" element={<ShopPage />} />
-      <Route path="/staff/sign-in" element={<StaffSignInPage />} />
-      <Route path="*" element={<Navigate replace to="/" />} />
-    </Routes>
+    <CartProvider>
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/shop/drinks/:drinkId" element={<DrinkPage />} />
+        <Route path="/staff/sign-in" element={<StaffSignInPage />} />
+        <Route path="*" element={<Navigate replace to="/" />} />
+      </Routes>
+    </CartProvider>
   );
 }
