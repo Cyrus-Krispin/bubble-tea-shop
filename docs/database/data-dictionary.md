@@ -6,7 +6,7 @@
 |---|---|---|
 | `organization` | Top-level business owner. | Retained permanently in MVP. |
 | `location` | Physical stock/order boundary, public menu slug, timezone, and currency. | Deactivated with `active=false`. |
-| `account` | Phase 1 application identity record; future Supabase linkage is not yet modeled. | Disabled rather than deleted. |
+| `account` | Application identity mapped optionally and uniquely to a Supabase Auth subject; it grants no organization access by itself. | Disabled rather than deleted. |
 | `organization_membership` | Owner/manager role inside an organization. | Deactivated to remove access. |
 | `location_assignment` | Manager-to-location access. | Rows added or removed with audit at service layer. |
 | `refresh_session` | Legacy custom-session structure superseded by the Supabase direction. | Implemented in V1; later migration is undecided. |

@@ -6,6 +6,13 @@
 - A location and ingredient from different organizations cannot form an inventory balance.
 - An offering cannot combine a location, variant, or recipe version from different organizations.
 
+## Identity
+
+- A non-null Supabase Auth subject maps to at most one application account.
+- Customer account provisioning derives the subject from a verified JWT and creates no
+  organization membership.
+- An account without an active membership has no staff or owner authorization.
+
 ## Recipes and offerings
 
 - A non-null location public slug resolves globally to one location; product public slugs are
@@ -44,3 +51,5 @@
 - Applied migrations are immutable. Corrections use a new numbered migration.
 - V2 contains the local MVP guest catalog seed. Runtime catalog values are read through Spring,
   not duplicated in the browser.
+- V4 adds the Supabase subject mapping and makes legacy application-owned credential columns
+  optional without editing V1.

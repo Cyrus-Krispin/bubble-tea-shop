@@ -4,20 +4,20 @@
 
 The fully local, self-hosted Supabase Auth service is the authentication issuer, superseding the
 earlier plan for Spring to verify passwords, issue access tokens, and rotate application-owned
-refresh sessions. Spring now implements the bearer-token validation boundary; sign-in UI and
-application identity mapping remain later work.
+refresh sessions. Spring implements bearer-token validation and customer identity provisioning;
+owner/manager membership resolution remains later work.
 
-The Phase 1 schema still contains `account.password_hash` and `refresh_session`, with matching JPA
-entities. Those structures document implemented database state, not the target authentication
-design. Flyway V1 is immutable, so a later versioned migration must reconcile them after the
-identity mapping and migration lifecycle have been decided.
+The Phase 1 schema still contains legacy credential and refresh-session columns. Flyway V4 keeps
+the immutable V1 columns for compatibility, makes the application-owned credential fields
+optional, and adds the unique Supabase `auth_subject` mapping. Supabase remains the only password
+and browser-session owner; the unused `refresh_session` lifecycle remains a later decision.
 
 ## Authentication
 
 - The fully local, self-hosted Supabase Auth service is the authentication issuer. No hosted
   Supabase project is used. Local Auth owns sign-in, password handling, access-token issuance,
   refresh rotation, and logout/session lifecycle.
-- The React client will send the Supabase access token to Spring as an
+- The React client sends the Supabase access token to Spring as an
   `Authorization: Bearer <token>` header. Spring does not mint another application JWT.
 - Browser sign-in uses the local gateway base URL; the Supabase client appends `/auth/v1` itself.
   Kong allows Auth CORS requests only from the local frontend origin and only with the request
@@ -26,10 +26,12 @@ identity mapping and migration lifecycle have been decided.
   `authenticated` audience, and standard token timestamps before accepting a request.
 - Only asymmetric Supabase signing keys are supported. The backend never receives or stores the
   legacy JWT secret, a secret/service-role key, a refresh token, or a raw access token.
-- The token subject (`sub`) is the external Supabase user identifier. A later identity increment
-  will map it to the application's account and load current memberships from PostgreSQL.
+- The token subject (`sub`) is mapped uniquely to `account.auth_subject` when a customer provisions
+  an application account. The endpoint takes no role or organization input and creates no
+  membership.
 - The existing password and refresh-session columns predate this issuer decision and are not used
-  by this integration. Removing or repurposing them requires a later versioned migration.
+  by this integration. V4 makes the credential fields optional; removing legacy columns or the
+  refresh-session table requires a later versioned migration.
 - Future customer face authentication is an alternative credential check before normal token
   issuance by the authentication issuer; the matching component never issues JWTs. See
   [`face-authentication.md`](face-authentication.md).
@@ -60,15 +62,16 @@ HS256 tokens and never receives `JWT_SECRET`, `JWT_KEYS`, `JWT_JWKS`, an API sec
 or a raw user token. The exact Compose services and generated local secrets belong to the separate
 local-stack infrastructure change, not this backend integration.
 
-The current slice protects the API boundary and includes a frontend email/password sign-in form.
+The current slice protects the API boundary, includes frontend staff email/password sign-in, and
+provides the authenticated Spring endpoint required by self-service customer registration.
 Read-only `GET /api/v1/guest/**` catalog requests are explicitly public; later guest order writes
 must validate all identifiers and recalculate prices on the server.
 The browser client delegates session persistence and refresh to Supabase Auth; it does not log or
 manually store access or refresh tokens. It adds no Spring login, refresh, logout, or password
 endpoint and does not treat `role`, `user_metadata`, organization, location, or other token claims
 as application authorization evidence.
-Self-service Auth signup is disabled; staff provisioning belongs to the later owner/bootstrap
-workflow.
+Self-service Auth signup creates customer identities only. Staff provisioning still belongs to the
+later owner/bootstrap workflow, and Spring never derives staff access from signup metadata.
 
 ## Authorization
 
@@ -85,8 +88,7 @@ workflow.
 
 ## Browser and service boundary
 
-- Supabase's client library will own browser session persistence and refresh behavior when the
-  frontend authentication increment is implemented.
+- Supabase's client library owns browser session persistence and refresh behavior.
 - Access tokens must not be logged or placed in URLs.
 - Authentication failures use generic messages so username enumeration is not exposed.
 - Audit records retain the acting account identifier where a staff action caused a state change.

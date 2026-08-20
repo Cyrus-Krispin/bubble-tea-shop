@@ -2,8 +2,8 @@
 
 ## Goal
 
-Enable one bubble tea location to maintain recipes and stock, accept guest cash orders, complete
-orders without overselling inventory, and delegate management access safely.
+Enable one bubble tea location to maintain recipes and stock, accept guest or signed-in customer
+cash orders, complete orders without overselling inventory, and delegate management access safely.
 
 The schema is location-aware so a later multi-location release does not require re-owning catalog,
 stock, staff, or order data.
@@ -28,6 +28,12 @@ stock, staff, or order data.
 - Places an order without an account.
 - Selects cash as the MVP payment method.
 
+### Registered customer
+
+- Creates an optional account without receiving staff or owner access.
+- Can still use the same customer ordering experience as a guest.
+- Will receive account-linked order history when order placement is implemented.
+
 ## In-scope workflows
 
 1. Create an ingredient and record its starting quantity as an `OPENING` movement.
@@ -35,16 +41,17 @@ stock, staff, or order data.
 3. Create a recipe draft, add ingredient quantities, and publish an immutable version.
 4. Create products and size variants, assign published recipes and location-specific prices, and
    enable sugar, ice, milk, or topping choices.
-5. Place a guest order with immutable product, option, price, and consumption snapshots.
-6. Move a pending order to completed. Completion deducts its consumption snapshot atomically.
-7. View current inventory balances and historical movements.
+5. Create or sign in to an optional customer account without creating an organization membership.
+6. Place a guest or account-linked order with immutable product, option, price, and consumption
+   snapshots.
+7. Move a pending order to completed. Completion deducts its consumption snapshot atomically.
+8. View current inventory balances and historical movements.
 
 ## Deferred
 
-- Customer accounts, profiles, favorites, discounts, order history, and customer cancellation.
+- Extended customer profiles, favorites, discounts, order history UI, and customer cancellation.
 - Card payment providers, refunds, taxation, and promotions.
 - Consumption forecasting, projected low-stock alerts, and supplier ordering.
 - Cash-flow dashboards, purchase orders, and detailed cost-of-goods accounting.
 - Multiple active currencies, translations, and multiple active locations.
 - Inventory reservations, delivery lots, expiry dates, and FIFO consumption.
-

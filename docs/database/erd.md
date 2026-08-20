@@ -5,14 +5,15 @@ tables to support composite foreign keys that reject cross-organization referenc
 slugs and presentation metadata to the existing location/product relationships and seeds the local
 guest catalog; it does not introduce another entity relationship.
 
-The identity diagram reflects the implemented V1 schema. Its `REFRESH_SESSION` relationship belongs
-to the superseded custom-auth design and is not the target Supabase session model. A later migration
-will reconcile it after the Supabase identity mapping has been selected.
+V4 maps an application `ACCOUNT` to at most one external Supabase Auth subject. The
+`REFRESH_SESSION` relationship belongs to the superseded custom-auth design and is not the target
+Supabase session model; its later removal or archival is still undecided.
 
 ## Identity
 
 ```mermaid
 erDiagram
+    SUPABASE_AUTH_USER o|--o| ACCOUNT : maps_to
     ORGANIZATION ||--o{ LOCATION : owns
     ORGANIZATION ||--o{ ORGANIZATION_MEMBERSHIP : grants
     ACCOUNT ||--o{ ORGANIZATION_MEMBERSHIP : receives

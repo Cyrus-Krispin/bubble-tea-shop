@@ -2,13 +2,12 @@
 
 This page is a human-readable reference for the current PostgreSQL schema. The executable sources
 of truth are the ordered scripts in
-[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 and V2. When the
+[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 through V4. When the
 migrations and this page disagree, the migrations win and this page must be corrected.
 
 The V1 `account` credential fields and `refresh_session` table reflect the superseded
-application-owned authentication design. They remain documented because they are implemented
-schema. Local Supabase Auth is now the selected authentication issuer; a new migration will be
-needed after the identity mapping and legacy-data lifecycle are decided.
+application-owned authentication design. V4 adds the selected local Supabase Auth subject mapping
+and makes the legacy credential fields optional. The refresh-session lifecycle remains undecided.
 
 ## Legend
 
@@ -154,15 +153,17 @@ non-blank name, lowercase kebab-case public slug, and three-letter uppercase cur
 | Column | Type | Nullability | Default | Key |
 |---|---|---|---|---|
 | `id` | `uuid` | NN | `gen_random_uuid()` | PK |
-| `username` | `varchar(100)` | NN | — | — |
-| `normalized_username` | `varchar(100)` | NN | — | UQ |
-| `password_hash` | `varchar(255)` | NN | — | — |
+| `username` | `varchar(100)` | Nullable | — | — |
+| `normalized_username` | `varchar(100)` | Nullable | — | UQ |
+| `password_hash` | `varchar(255)` | Nullable | — | — |
+| `auth_subject` | `uuid` | Nullable | — | UQ |
 | `enabled` | `boolean` | NN | `true` | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
-Checks: username and password hash must not be blank; normalized username must equal
-`lower(btrim(username))`.
+Non-null legacy usernames and password hashes must not be blank; a non-null normalized username
+must equal `lower(btrim(username))`. A non-null Auth subject uniquely identifies the corresponding
+Supabase user.
 
 ### `organization_membership`
 

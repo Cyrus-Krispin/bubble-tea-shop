@@ -56,6 +56,17 @@ resources `404`, state conflicts `409`, and unexpected failures `500`.
 - Domain APIs remain Spring endpoints; the frontend does not write application tables directly
   through Supabase data APIs.
 
+## Customer account
+
+`POST /api/v1/customer/account` is an authenticated, bodyless, idempotent provisioning endpoint.
+It derives the external identity and display email from the verified Supabase token, creates the
+application `account` on the first request, and returns the existing account afterward. The first
+response is `201`; later responses are `200`.
+
+The endpoint never accepts or creates an organization, location, role, or membership. Invalid
+identity claims return `401` with `CUSTOMER_IDENTITY_INVALID`; a disabled application account
+returns `403` with `CUSTOMER_ACCOUNT_DISABLED`.
+
 ## Guest catalog
 
 These read-only endpoints are public so a guest can browse without a Supabase session:
