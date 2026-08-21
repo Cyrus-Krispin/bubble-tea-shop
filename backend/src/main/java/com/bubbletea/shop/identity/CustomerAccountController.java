@@ -1,5 +1,12 @@
 package com.bubbletea.shop.identity;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/customer/account")
+@Tag(name = "Customer account")
 public class CustomerAccountController {
     private final CustomerAccountService accounts;
 
@@ -26,6 +34,36 @@ public class CustomerAccountController {
     }
 
     @PostMapping
+    @Operation(
+        operationId = "provisionCustomerAccount",
+        summary = "Provision the authenticated customer account",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Existing customer account",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = CustomerAccountDto.class))),
+        @ApiResponse(
+            responseCode = "201",
+            description = "Customer account created",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = CustomerAccountDto.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Invalid authenticated identity",
+            content = @Content(
+                mediaType = "application/problem+json",
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Customer account disabled",
+            content = @Content(
+                mediaType = "application/problem+json",
+                schema = @Schema(implementation = ProblemDetail.class)))
+    })
     ResponseEntity<CustomerAccountDto> provision(@AuthenticationPrincipal Jwt jwt) {
         UUID authSubject = authSubject(jwt);
         String email = email(jwt);

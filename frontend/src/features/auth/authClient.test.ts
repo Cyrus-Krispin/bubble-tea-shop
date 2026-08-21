@@ -80,10 +80,15 @@ describe("signInWithEmailAndPassword", () => {
       password: "a-long-customer-password",
     })).resolves.toEqual({ verificationRequired: false });
 
-    const accountCall = fetchMock.mock.calls.find((call) =>
-      String(call[0]).endsWith("/api/v1/customer/account"));
-    expect(accountCall?.[1]?.method).toBe("POST");
-    expect(new Headers(accountCall?.[1]?.headers).get("authorization"))
+    const accountCall = fetchMock.mock.calls.find((call) => {
+      const input = call[0];
+      const request = input instanceof Request ? input : new Request(input, call[1]);
+      return request.url.endsWith("/api/v1/customer/account");
+    });
+    const accountRequest = accountCall?.[0];
+    expect(accountRequest).toBeInstanceOf(Request);
+    expect((accountRequest as Request).method).toBe("POST");
+    expect((accountRequest as Request).headers.get("authorization"))
       .toBe("Bearer test-access-token");
   });
 

@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -85,5 +86,11 @@ class CustomerAccountApiIntegrationTest {
     void anonymousCustomerCannotProvisionAnAccount() throws Exception {
         mvc.perform(post("/api/v1/customer/account"))
             .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void openApiPublicationIsDisabledByDefault() throws Exception {
+        mvc.perform(get("/v3/api-docs"))
+            .andExpect(status().isNotFound());
     }
 }

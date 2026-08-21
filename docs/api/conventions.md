@@ -5,8 +5,18 @@ conventions as controllers are introduced.
 
 ## Contract
 
-- Spring DTOs are the current contract source. OpenAPI generation and generated frontend types are
-  the next contract-tooling increment.
+- Spring controllers and DTOs are the contract source. The generated OpenAPI 3.1 snapshot is
+  committed as [`openapi.json`](openapi.json), and `frontend/src/api/generated.ts` is generated
+  from that snapshot. Production frontend calls to Spring use the typed `openapi-fetch` client;
+  runtime response validation remains at trust boundaries.
+- The backend contract test fails when Spring's generated document differs from the committed
+  snapshot. Frontend `pnpm typecheck` runs `pnpm api:check` first and fails when generated types
+  drift from the snapshot.
+- Update a deliberate contract change with
+  `./mvnw -Dtest=OpenApiContractIntegrationTest -Dopenapi.update=true test` in `backend/`, then run
+  `pnpm api:generate` in `frontend/`. Review both generated diffs before committing them.
+- OpenAPI publication is disabled in the running application by default. Set
+  `OPENAPI_DOCS_ENABLED=true` only in a controlled environment that needs `/v3/api-docs`.
 - JPA entities never cross the HTTP boundary.
 - Breaking changes require a versioning decision and migration note.
 

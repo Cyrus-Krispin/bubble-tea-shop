@@ -1,24 +1,13 @@
-export type StaffRole = "OWNER" | "MANAGER";
+import createClient from "openapi-fetch";
 
-export type StaffLocation = {
-  id: string;
-  name: string;
-  timezone: string;
-  defaultLocale: string;
-  currencyCode: string;
-};
+import type { components, paths } from "../../api/generated";
 
-export type StaffMembership = {
-  organizationId: string;
-  organizationName: string;
-  role: StaffRole;
-  locations: StaffLocation[];
-};
+type Schemas = components["schemas"];
 
-export type StaffContext = {
-  accountId: string;
-  memberships: StaffMembership[];
-};
+export type StaffRole = Schemas["StaffMembership"]["role"];
+export type StaffLocation = Schemas["StaffLocation"];
+export type StaffMembership = Schemas["StaffMembership"];
+export type StaffContext = Schemas["StaffContext"];
 
 export type StaffContextErrorCode =
   | "STAFF_IDENTITY_INVALID"
@@ -103,20 +92,23 @@ export async function getStaffContext(
   accessToken: string,
   signal?: AbortSignal,
 ): Promise<StaffContext> {
-  const response = await fetch("/api/v1/staff/context", {
+  const client = createClient<paths>({ baseUrl: window.location.origin });
+  const { data, error, response } = await client.GET("/api/v1/staff/context", {
     headers: { Authorization: `Bearer ${accessToken}` },
     signal,
   });
 
-  if (!response.ok) {
+  if (data === undefined) {
     let code: StaffContextErrorCode = "STAFF_CONTEXT_UNAVAILABLE";
     try {
-      code = knownProblemCode(object(await response.json()).code);
+      const problem = object(error);
+      const properties = problem.properties === undefined ? undefined : object(problem.properties);
+      code = knownProblemCode(properties?.code ?? problem.code);
     } catch {
       // A malformed error body is intentionally reduced to a generic client state.
     }
     throw new StaffContextError(code, response.status);
   }
 
-  return context(await response.json());
+  return context(data);
 }

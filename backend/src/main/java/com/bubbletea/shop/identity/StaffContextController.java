@@ -1,5 +1,12 @@
 package com.bubbletea.shop.identity;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/staff/context")
+@Tag(name = "Staff access")
 public class StaffContextController {
     private final StaffContextService staffContext;
 
@@ -24,6 +32,30 @@ public class StaffContextController {
     }
 
     @GetMapping
+    @Operation(
+        operationId = "getStaffContext",
+        summary = "Resolve the caller's current staff scope",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "200",
+            description = "Current active staff scope",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = StaffContextService.StaffContext.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Missing or invalid authenticated identity",
+            content = @Content(
+                mediaType = "application/problem+json",
+                schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "No active staff access",
+            content = @Content(
+                mediaType = "application/problem+json",
+                schema = @Schema(implementation = ProblemDetail.class)))
+    })
     StaffContextService.StaffContext get(@AuthenticationPrincipal Jwt jwt) {
         return staffContext.resolve(authSubject(jwt));
     }

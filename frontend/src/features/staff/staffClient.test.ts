@@ -28,10 +28,11 @@ describe("staffClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(getStaffContext("verified-access-token")).resolves.toEqual(context);
-    expect(fetchMock).toHaveBeenCalledWith("/api/v1/staff/context", {
-      headers: { Authorization: "Bearer verified-access-token" },
-      signal: undefined,
-    });
+    const request = fetchMock.mock.calls[0]?.[0];
+    expect(request).toBeInstanceOf(Request);
+    expect((request as Request).url).toBe("http://localhost:3000/api/v1/staff/context");
+    expect((request as Request).headers.get("authorization"))
+      .toBe("Bearer verified-access-token");
   });
 
   it("rejects malformed responses instead of inventing staff scope", async () => {

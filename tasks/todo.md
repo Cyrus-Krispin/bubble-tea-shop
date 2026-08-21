@@ -19,7 +19,7 @@ relevant full suite, focused commit, and push.
 
 ## Phase 2 — API and Design-System Contracts
 
-- [ ] Generate OpenAPI and a typed frontend client; fail CI on drift.
+- [x] Generate OpenAPI and a typed frontend client; fail verification on drift.
 - [ ] Add reusable accessible field, button, table, dialog, pagination, and problem-state primitives.
 - [ ] Add Storybook coverage for interactive primitives if it remains the smallest executable
   design contract.

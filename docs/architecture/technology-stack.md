@@ -7,7 +7,7 @@ implemented from choices that remain planned for later delivery phases.
 
 ## Frontend
 
-The frontend is planned as a single React application written in TypeScript and built with Vite.
+The frontend is a single React application written in TypeScript and built with Vite.
 React and TypeScript provide enough flexibility to support the public menu, staff workflows, owner
 administration, and display views without introducing separate frontend applications. Vite keeps
 the development loop lightweight, while pnpm manages the workspace on Node.js.
@@ -15,8 +15,9 @@ the development loop lightweight, while pnpm manages the workspace on Node.js.
 Tailwind CSS is the intended styling approach because it makes UI iteration fast and works well
 with AI-assisted implementation. Radix-based components will provide accessible behavior beneath
 the shop's own design system, TanStack Query will manage server state, and Storybook will support
-isolated component development. The frontend will consume a typed client generated from the
-Spring OpenAPI contract so that API changes remain visible at compile time.
+isolated component development. The frontend consumes Spring APIs through `openapi-fetch` using
+types generated from the committed Spring OpenAPI contract, so API changes remain visible during
+verification and compilation.
 
 The frontend now contains the React, TypeScript, and Vite foundation, declarative client-side
 routing, separate customer and staff authentication routes that use the local Supabase Auth
@@ -24,8 +25,8 @@ gateway, and a guest ordering preview. The guest menu and customization routes l
 availability, prices, and options from Spring. The current order remains in memory and checkout
 stays disabled until Spring owns order placement and final total calculation. It includes linting,
 type checking, Vitest component tests, and a containerized SPA build.
-Tailwind, Radix, TanStack Query, Storybook, and generated OpenAPI client code remain selected choices
-for later increments rather than installed production code.
+Tailwind, Radix, TanStack Query, and Storybook remain selected choices for later increments rather
+than installed production code.
 
 ## Backend and API
 
@@ -42,10 +43,10 @@ Web, and Actuator are present in the current Maven foundation. Supabase now supe
 custom Spring password and session plan; Spring Security implements the bearer-token verification
 boundary for the local Auth issuer.
 
-The first controllers expose the public, read-only guest menu under `/api/v1/guest`. They return
-purpose-built DTOs rather than persistence entities and read catalog state through the catalog
-application service. OpenAPI publication and generated frontend client code remain planned contract
-tooling.
+The implemented controllers return purpose-built DTOs rather than persistence entities. Springdoc
+generates an OpenAPI 3.1 document for contract verification, but publication is disabled by default
+at runtime. A committed snapshot and generated immutable TypeScript types make backend-to-frontend
+contract drift fail verification.
 
 ## Data and authentication
 

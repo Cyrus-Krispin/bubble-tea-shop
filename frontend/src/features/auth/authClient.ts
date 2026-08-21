@@ -1,5 +1,7 @@
 import { createClient, type Session } from "@supabase/supabase-js";
+import createOpenApiClient from "openapi-fetch";
 
+import type { paths } from "../../api/generated";
 import type { AuthSession, Credentials } from "./types";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? "http://localhost:8000";
@@ -54,14 +56,14 @@ async function provisionAuthenticatedCustomer(accessToken: string): Promise<void
 }
 
 async function provisionCustomerAccount(accessToken: string): Promise<void> {
-  const response = await fetch(new URL("/api/v1/customer/account", window.location.origin), {
+  const client = createOpenApiClient<paths>({ baseUrl: window.location.origin });
+  const { data } = await client.POST("/api/v1/customer/account", {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    method: "POST",
   });
 
-  if (!response.ok) {
+  if (data === undefined) {
     throw new Error("Customer account provisioning failed.");
   }
 }

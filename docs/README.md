@@ -26,7 +26,8 @@ The Flyway migration remains the executable source of truth for the database.
 - [`database/erd.md`](database/erd.md) — entity relationship diagrams.
 - [`database/data-dictionary.md`](database/data-dictionary.md) — tables and lifecycle rules.
 - [`database/invariants.md`](database/invariants.md) — transactional and data integrity rules.
-- [`api/conventions.md`](api/conventions.md) — future HTTP and OpenAPI conventions.
+- [`api/conventions.md`](api/conventions.md) — HTTP conventions and contract workflow.
+- [`api/openapi.json`](api/openapi.json) — generated OpenAPI 3.1 contract snapshot.
 - [`../frontend/docs/visual-style-guide.md`](../frontend/docs/visual-style-guide.md) — selected
   customer ordering visual direction and frontend interaction guidance.
 - [`delivery/roadmap.md`](delivery/roadmap.md) — incremental delivery order and acceptance gates.

@@ -1,0 +1,554 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Bubble Tea Shop API",
+    "description" : "Spring-owned HTTP contract for guest ordering and staff operations.",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "http://localhost",
+    "description" : "Generated server url"
+  } ],
+  "paths" : {
+    "/api/v1/customer/account" : {
+      "post" : {
+        "tags" : [ "Customer account" ],
+        "summary" : "Provision the authenticated customer account",
+        "operationId" : "provisionCustomerAccount",
+        "responses" : {
+          "200" : {
+            "description" : "Existing customer account",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerAccountDto"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Customer account created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerAccountDto"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Invalid authenticated identity",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Customer account disabled",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/context" : {
+      "get" : {
+        "tags" : [ "Staff access" ],
+        "summary" : "Resolve the caller's current staff scope",
+        "operationId" : "getStaffContext",
+        "responses" : {
+          "200" : {
+            "description" : "Current active staff scope",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffContext"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid authenticated identity",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "No active staff access",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/guest/menu" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "Load the configured guest menu",
+        "operationId" : "getCurrentGuestMenu",
+        "responses" : {
+          "404" : {
+            "description" : "Configured catalog resource unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Current guest menu",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Menu"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/menu/products/{productSlug}" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "Load a product from the configured guest menu",
+        "operationId" : "getCurrentGuestProduct",
+        "parameters" : [ {
+          "name" : "productSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Catalog product unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Guest product configuration",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/locations/{locationSlug}/menu" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "Load a guest menu by location",
+        "operationId" : "getGuestLocationMenu",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Catalog location unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Guest location menu",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Menu"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/locations/{locationSlug}/menu/products/{productSlug}" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "Load a guest product by location",
+        "operationId" : "getGuestLocationProduct",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Catalog product unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Guest product configuration",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ProblemDetail" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "detail" : {
+            "type" : "string"
+          },
+          "instance" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          }
+        }
+      },
+      "CustomerAccountDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "StaffContext" : {
+        "type" : "object",
+        "properties" : {
+          "accountId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "memberships" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffMembership"
+            }
+          }
+        }
+      },
+      "StaffLocation" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "timezone" : {
+            "type" : "string"
+          },
+          "defaultLocale" : {
+            "type" : "string"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StaffMembership" : {
+        "type" : "object",
+        "properties" : {
+          "organizationId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "organizationName" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "OWNER", "MANAGER" ]
+          },
+          "locations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffLocation"
+            }
+          }
+        }
+      },
+      "Location" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "currency" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Menu" : {
+        "type" : "object",
+        "properties" : {
+          "location" : {
+            "$ref" : "#/components/schemas/Location"
+          },
+          "products" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProductSummary"
+            }
+          }
+        }
+      },
+      "Money" : {
+        "type" : "object",
+        "properties" : {
+          "amountMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "currency" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ProductSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "artworkKey" : {
+            "type" : "string"
+          },
+          "startingPrice" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "available" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "OptionChoice" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "isDefault" : {
+            "type" : "boolean"
+          },
+          "priceDelta" : {
+            "$ref" : "#/components/schemas/Money"
+          }
+        }
+      },
+      "OptionGroup" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "minimumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "maximumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "choices" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OptionChoice"
+            }
+          }
+        }
+      },
+      "Product" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "artworkKey" : {
+            "type" : "string"
+          },
+          "variants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Variant"
+            }
+          }
+        }
+      },
+      "Variant" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "isDefault" : {
+            "type" : "boolean"
+          },
+          "available" : {
+            "type" : "boolean"
+          },
+          "price" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "optionGroups" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OptionGroup"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}

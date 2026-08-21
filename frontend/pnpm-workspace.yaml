@@ -7,3 +7,6 @@ minimumReleaseAgeExclude:
   - '@vitest/spy@4.1.11'
   - '@vitest/utils@4.1.11'
   - vitest@4.1.11
+peerDependencyRules:
+  allowedVersions:
+    "openapi-typescript@7.13.0>typescript": "6"

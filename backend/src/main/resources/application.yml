@@ -40,3 +40,7 @@ management:
     health:
       probes:
         enabled: true
+
+springdoc:
+  api-docs:
+    enabled: ${OPENAPI_DOCS_ENABLED:false}
