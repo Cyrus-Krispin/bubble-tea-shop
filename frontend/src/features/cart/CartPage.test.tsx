@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { expectNoAccessibilityViolations } from "../../test/accessibility";
 vi.mock("./orderClient", () => ({
   placeGuestOrder: vi.fn(),
   OrderError: class OrderError extends Error {
@@ -58,7 +59,7 @@ function SeedControl() {
 }
 
 function renderCart() {
-  render(
+  return render(
     <MemoryRouter>
       <CartProvider><SeedControl /><CartPage /></CartProvider>
     </MemoryRouter>,
@@ -79,11 +80,12 @@ describe("CartPage", () => {
     expect(screen.getByRole("link", { name: "Browse the menu" })).toHaveAttribute("href", "/shop");
   });
 
-  it("reviews items, updates quantity, and removes a line", () => {
-    renderCart();
+  it("reviews items, updates quantity, and removes a line", async () => {
+    const { container } = renderCart();
     fireEvent.click(screen.getByRole("button", { name: "Seed item" }));
 
     expect(screen.getByRole("heading", { name: "Moonlit Milk Tea" })).toBeVisible();
+    await expectNoAccessibilityViolations(container);
     expect(screen.getByText("Medium · 50% · Less ice · Pearls")).toBeVisible();
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$7.20");
 

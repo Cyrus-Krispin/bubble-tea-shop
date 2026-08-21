@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { expectNoAccessibilityViolations } from "../../test/accessibility";
 vi.mock("./auditClient", () => ({ listAuditEvents: vi.fn() }));
 
 import AuditPage from "./AuditPage";
@@ -80,9 +81,10 @@ describe("AuditPage", () => {
   });
 
   it("renders organization-wide and guest operational activity", async () => {
-    renderPage();
+    const { container } = renderPage();
 
     expect(await screen.findByText("Moonlit Milk Tea")).toBeInTheDocument();
+    await expectNoAccessibilityViolations(container);
     expect(screen.getByText("Organization-wide")).toBeInTheDocument();
     expect(screen.getByText("System / guest")).toBeInTheDocument();
     expect(screen.getByText("PENDING → COMPLETED")).toBeInTheDocument();

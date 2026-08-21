@@ -8,6 +8,7 @@ import {
 import { MemoryRouter, Outlet, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { expectNoAccessibilityViolations } from "../../test/accessibility";
 vi.mock("./inventoryClient", () => ({
   getInventoryBalances: vi.fn(),
   getInventoryMovements: vi.fn(),
@@ -119,9 +120,10 @@ describe("InventoryManagementPage", () => {
   });
 
   it("loads balances and immutable history within the server-provided staff scope", async () => {
-    renderPage();
+    const { container } = renderPage();
 
     expect(await screen.findByText("4.000000 g")).toBeInTheDocument();
+    await expectNoAccessibilityViolations(container);
     expect(screen.getByText("Low stock")).toBeInTheDocument();
     expect(screen.getByText("PO-42")).toBeInTheDocument();
     expect(getInventoryBalances).toHaveBeenCalledWith(

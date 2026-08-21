@@ -8,6 +8,7 @@ import {
 import { MemoryRouter, Outlet, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { expectNoAccessibilityViolations } from "../../test/accessibility";
 vi.mock("./orderOperationsClient", () => ({
   listStaffOrders: vi.fn(),
   getStaffOrder: vi.fn(),
@@ -135,7 +136,7 @@ describe("OrderOperationsPage", () => {
   });
 
   it("loads the pending location queue and server-owned detail", async () => {
-    renderPage();
+    const { container } = renderPage();
 
     expect(await screen.findByText("BT0000000001")).toBeInTheDocument();
     expect(listStaffOrders).toHaveBeenCalledWith(
@@ -147,6 +148,7 @@ describe("OrderOperationsPage", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "View BT0000000001" }));
     expect(await screen.findByText(/Moonlit Milk Tea/)).toBeInTheDocument();
+    await expectNoAccessibilityViolations(container);
     expect(screen.getByText("2.500000 g needed")).toBeInTheDocument();
     expect(getStaffOrder).toHaveBeenCalledWith(
       "staff-token",

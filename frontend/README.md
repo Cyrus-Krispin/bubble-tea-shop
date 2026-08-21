@@ -25,7 +25,8 @@ secret or service-role credential.
 
 - `src/app/` — application routing, shared customer shell, and top-level providers.
 - `src/features/` — domain-oriented authentication, catalog, customization, and current-order UI.
-- `src/design-system/` — future reusable component primitives and Storybook.
+- `src/components/ui/` — reusable accessible interface primitives.
+- `src/test/accessibility.ts` — shared axe-core WCAG test gate.
 
 The browser talks to Supabase Auth only for session lifecycle. Guest catalog calls use same-origin
 Spring endpoints under `/api/v1/guest`; Nginx and the Vite development server proxy `/api` to the

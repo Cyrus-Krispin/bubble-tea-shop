@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { catalogMenu } from "../../test/catalogFixtures";
+import { expectNoAccessibilityViolations } from "../../test/accessibility";
 import { CartProvider } from "../cart/CartProvider";
 import { getGuestMenu } from "./catalogClient";
 import { ShopPage } from "./ShopPage";
@@ -13,16 +14,17 @@ vi.mock("./catalogClient", () => ({
 }));
 
 function renderShop() {
-  render(<MemoryRouter><CartProvider><ShopPage /></CartProvider></MemoryRouter>);
+  return render(<MemoryRouter><CartProvider><ShopPage /></CartProvider></MemoryRouter>);
 }
 
 describe("ShopPage", () => {
   beforeEach(() => vi.mocked(getGuestMenu).mockResolvedValue(catalogMenu));
 
   it("shows database-backed drinks with their starting prices", async () => {
-    renderShop();
+    const { container } = renderShop();
 
     expect(await screen.findByRole("heading", { name: "Moonlit Milk Tea" })).toBeVisible();
+    await expectNoAccessibilityViolations(container);
     expect(screen.getByRole("link", { name: /Customize Moonlit Milk Tea/ })).toHaveAttribute(
       "href",
       "/shop/drinks/moonlit-milk-tea",

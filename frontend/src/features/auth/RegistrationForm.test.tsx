@@ -1,13 +1,16 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { expectNoAccessibilityViolations } from "../../test/accessibility";
 import { RegistrationForm } from "./RegistrationForm";
 
 describe("RegistrationForm", () => {
   it("creates a customer account with matching credentials", async () => {
     const register = vi.fn().mockResolvedValue({ verificationRequired: false });
 
-    render(<RegistrationForm onRegister={register} />);
+    const { container } = render(<RegistrationForm onRegister={register} />);
+
+    await expectNoAccessibilityViolations(container);
 
     fireEvent.change(screen.getByLabelText("Email address"), {
       target: { value: "  customer@example.test  " },

@@ -43,7 +43,7 @@ healthy database.
 ## Phase 4 — Operational polish
 
 - Audit API and staff timeline workspace. (Implemented.)
-- Accessibility checks.
+- Automated accessibility checks for representative customer and staff surfaces. (Implemented.)
 - Observability. (Implemented.)
 - Backup/restore runbook and verified logical recovery scripts. (Implemented.)
 - Production container image builds. (Implemented.)

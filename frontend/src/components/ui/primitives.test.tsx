@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { expectNoAccessibilityViolations } from "../../test/accessibility";
 import { Button } from "./Button";
 import { DataTable } from "./DataTable";
 import { Dialog } from "./Dialog";
@@ -53,7 +54,7 @@ describe("interface primitives", () => {
   });
 
   it("opens a labelled modal dialog and returns control to its trigger", async () => {
-    render(
+    const { container } = render(
       <Dialog
         description="This cannot be undone."
         title="Archive ingredient?"
@@ -67,6 +68,7 @@ describe("interface primitives", () => {
     fireEvent.click(trigger);
     expect(await screen.findByRole("dialog", { name: "Archive ingredient?" })).toBeInTheDocument();
     expect(screen.getByText("This cannot be undone.")).toBeInTheDocument();
+    await expectNoAccessibilityViolations(container);
     fireEvent.click(screen.getByRole("button", { name: "Close dialog" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     await waitFor(() => expect(trigger).toHaveFocus());

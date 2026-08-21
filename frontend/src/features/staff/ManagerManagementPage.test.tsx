@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { MemoryRouter, Outlet, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { expectNoAccessibilityViolations } from "../../test/accessibility";
 vi.mock("./managerClient", () => ({
   listManagers: vi.fn(),
   addOrReactivateManager: vi.fn(),
@@ -73,8 +74,9 @@ describe("ManagerManagementPage", () => {
   });
 
   it("loads owner-scoped managers and grants access to a registered email", async () => {
-    renderPage();
+    const { container } = renderPage();
     expect(await screen.findByText("manager@example.test")).toBeInTheDocument();
+    await expectNoAccessibilityViolations(container);
     expect(listManagers).toHaveBeenCalledWith(
       "owner-token", organizationId, { page: 0, size: 25 }, expect.any(AbortSignal),
     );
