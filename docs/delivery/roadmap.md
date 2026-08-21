@@ -21,9 +21,11 @@ healthy database.
 - Resolve verified Supabase identities to active owner/manager memberships and location
   assignments in Spring.
 - Add a protected staff-context endpoint as the first authenticated vertical slice.
-- Ingredient, recipe-version, menu, and option management APIs.
-- OpenAPI generation and typed frontend client.
-- First design-system tokens, form primitives, and Storybook.
+- Ingredient and recipe-version management APIs and staff workspaces. (Implemented.)
+- Menu and option management APIs and staff workspaces.
+- OpenAPI generation and typed frontend client. (Implemented.)
+- First design-system tokens and form primitives. (Implemented.)
+- Storybook component documentation.
 
 ## Phase 3 — Inventory and ordering
 

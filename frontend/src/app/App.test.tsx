@@ -35,6 +35,22 @@ vi.mock("../features/staff/ingredientClient", () => ({
   },
   updateIngredient: vi.fn(),
 }));
+vi.mock("../features/staff/recipeClient", () => ({
+  archiveRecipe: vi.fn(),
+  createRecipe: vi.fn(),
+  createRecipeVersion: vi.fn(),
+  getRecipe: vi.fn(),
+  getRecipes: vi.fn(),
+  publishRecipeVersion: vi.fn(),
+  RecipeError: class RecipeError extends Error {
+    constructor(public code: string, public status: number) {
+      super(code);
+    }
+  },
+  replaceRecipeDraft: vi.fn(),
+  retireRecipeVersion: vi.fn(),
+  updateRecipe: vi.fn(),
+}));
 
 import { App } from "./App";
 import { getCurrentAuthSession } from "../features/auth/authClient";
@@ -47,6 +63,18 @@ import {
   IngredientError,
   updateIngredient,
 } from "../features/staff/ingredientClient";
+import {
+  archiveRecipe,
+  createRecipe,
+  createRecipeVersion,
+  getRecipe,
+  getRecipes,
+  publishRecipeVersion,
+  RecipeError,
+  replaceRecipeDraft,
+  retireRecipeVersion,
+  updateRecipe,
+} from "../features/staff/recipeClient";
 
 const managedIngredient = {
   id: "a20d5547-69bb-4cb1-b9cc-d699629c49dc",
@@ -58,6 +86,32 @@ const managedIngredient = {
   archived: false,
   createdAt: "2026-08-22T00:00:00Z",
   updatedAt: "2026-08-22T00:00:00Z",
+};
+
+const managedRecipeVersion = {
+  id: "532f1ca8-d9b9-493d-b428-4f924fd582aa",
+  versionNumber: 1,
+  status: "DRAFT" as const,
+  version: 0,
+  createdAt: "2026-08-22T00:00:00Z",
+  publishedAt: null,
+  components: [{
+    ingredientId: managedIngredient.id,
+    ingredientName: managedIngredient.name,
+    baseUnit: managedIngredient.baseUnit,
+    quantity: "12.500000",
+  }],
+};
+
+const managedRecipe = {
+  id: "f4ad6804-c531-4229-86f4-30180d33b5ac",
+  name: "Classic Milk Tea",
+  description: "House black tea",
+  version: 0,
+  archived: false,
+  createdAt: "2026-08-22T00:00:00Z",
+  updatedAt: "2026-08-22T00:00:00Z",
+  versions: [managedRecipeVersion],
 };
 
 describe("App", () => {
@@ -76,6 +130,33 @@ describe("App", () => {
     vi.mocked(createIngredient).mockResolvedValue(managedIngredient);
     vi.mocked(updateIngredient).mockResolvedValue({ ...managedIngredient, version: 1 });
     vi.mocked(archiveIngredient).mockResolvedValue({ ...managedIngredient, version: 1, archived: true });
+    vi.mocked(getRecipes).mockResolvedValue({
+      items: [{
+        id: managedRecipe.id,
+        name: managedRecipe.name,
+        description: managedRecipe.description,
+        version: 0,
+        archived: false,
+        latestVersionNumber: 1,
+        latestStatus: "DRAFT",
+      }],
+      page: 0,
+      size: 25,
+      totalItems: 1,
+      totalPages: 1,
+    });
+    vi.mocked(getRecipe).mockResolvedValue(managedRecipe);
+    vi.mocked(createRecipe).mockResolvedValue(managedRecipe);
+    vi.mocked(updateRecipe).mockResolvedValue({ ...managedRecipe, version: 1 });
+    vi.mocked(archiveRecipe).mockResolvedValue({ ...managedRecipe, archived: true, version: 1 });
+    vi.mocked(createRecipeVersion).mockResolvedValue(managedRecipeVersion);
+    vi.mocked(replaceRecipeDraft).mockResolvedValue({ ...managedRecipeVersion, version: 1 });
+    vi.mocked(publishRecipeVersion).mockResolvedValue({
+      ...managedRecipeVersion, status: "PUBLISHED", version: 1,
+    });
+    vi.mocked(retireRecipeVersion).mockResolvedValue({
+      ...managedRecipeVersion, status: "RETIRED", version: 1,
+    });
   });
 
   it("offers optional customer account creation without blocking guest ordering", () => {
@@ -314,6 +395,222 @@ describe("App", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(/changed since you opened it/i);
     await waitFor(() => expect(getIngredients).toHaveBeenCalledTimes(2));
+  });
+
+  it("lists and creates recipes inside server-returned organization scope", async () => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue({
+      accessToken: "staff-token",
+      email: "owner@example.test",
+    });
+    vi.mocked(getStaffContext).mockResolvedValue({
+      accountId: "35f942a3-0591-4973-83ef-8889f608184e",
+      memberships: [{
+        organizationId: "88b23060-cbc4-4218-9938-63d75f6f324c",
+        organizationName: "Bubble Tea Operations",
+        role: "OWNER",
+        locations: [],
+      }],
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/staff/catalog/recipes"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Recipes" })).toBeVisible();
+    expect(await screen.findByRole("cell", { name: "Classic Milk Tea" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Manage" })).toHaveAttribute(
+      "href",
+      `/staff/catalog/recipes/${managedRecipe.id}?organizationId=88b23060-cbc4-4218-9938-63d75f6f324c`,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Add recipe" }));
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Brown Sugar Milk" } });
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "Caramelized brown sugar" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Create recipe" }));
+
+    await waitFor(() => expect(createRecipe).toHaveBeenCalledWith(
+      "staff-token",
+      "88b23060-cbc4-4218-9938-63d75f6f324c",
+      { name: "Brown Sugar Milk", description: "Caramelized brown sugar" },
+    ));
+  });
+
+  it("edits a draft formula using live ingredients", async () => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue({
+      accessToken: "staff-token",
+      email: "owner@example.test",
+    });
+    vi.mocked(getStaffContext).mockResolvedValue({
+      accountId: "35f942a3-0591-4973-83ef-8889f608184e",
+      memberships: [{
+        organizationId: "88b23060-cbc4-4218-9938-63d75f6f324c",
+        organizationName: "Bubble Tea Operations",
+        role: "OWNER",
+        locations: [],
+      }],
+    });
+
+    render(
+      <MemoryRouter initialEntries={[
+        `/staff/catalog/recipes/${managedRecipe.id}?organizationId=88b23060-cbc4-4218-9938-63d75f6f324c`,
+      ]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Classic Milk Tea" })).toBeVisible();
+    expect(screen.getByText("Assam Tea")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Edit formula" }));
+    fireEvent.change(screen.getByLabelText("Quantity 1"), { target: { value: "15.000000" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save formula" }));
+
+    await waitFor(() => expect(replaceRecipeDraft).toHaveBeenCalledWith(
+      "staff-token",
+      "88b23060-cbc4-4218-9938-63d75f6f324c",
+      managedRecipe.id,
+      managedRecipeVersion.id,
+      {
+        version: 0,
+        components: [{ ingredientId: managedIngredient.id, quantity: "15.000000" }],
+      },
+    ));
+  });
+
+  it("reloads recipe state and explains a formula version conflict", async () => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue({
+      accessToken: "staff-token", email: "owner@example.test",
+    });
+    vi.mocked(getStaffContext).mockResolvedValue({
+      accountId: "35f942a3-0591-4973-83ef-8889f608184e",
+      memberships: [{
+        organizationId: "88b23060-cbc4-4218-9938-63d75f6f324c",
+        organizationName: "Bubble Tea Operations",
+        role: "OWNER",
+        locations: [],
+      }],
+    });
+    vi.mocked(replaceRecipeDraft).mockRejectedValueOnce(
+      new RecipeError("RECIPE_VERSION_CONFLICT", 409),
+    );
+    render(
+      <MemoryRouter initialEntries={[
+        `/staff/catalog/recipes/${managedRecipe.id}?organizationId=88b23060-cbc4-4218-9938-63d75f6f324c`,
+      ]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole("heading", { level: 1, name: "Classic Milk Tea" });
+    fireEvent.click(screen.getByRole("button", { name: "Edit formula" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save formula" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/changed since you opened it/i);
+    await waitFor(() => expect(getRecipe).toHaveBeenCalledTimes(2));
+  });
+
+  it("updates recipe metadata and confirms publication and archival", async () => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue({
+      accessToken: "staff-token", email: "owner@example.test",
+    });
+    vi.mocked(getStaffContext).mockResolvedValue({
+      accountId: "35f942a3-0591-4973-83ef-8889f608184e",
+      memberships: [{
+        organizationId: "88b23060-cbc4-4218-9938-63d75f6f324c",
+        organizationName: "Bubble Tea Operations",
+        role: "OWNER",
+        locations: [],
+      }],
+    });
+    render(
+      <MemoryRouter initialEntries={[
+        `/staff/catalog/recipes/${managedRecipe.id}?organizationId=88b23060-cbc4-4218-9938-63d75f6f324c`,
+      ]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole("heading", { level: 1, name: "Classic Milk Tea" });
+    fireEvent.click(screen.getByRole("button", { name: "Edit details" }));
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "House Milk Tea" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save details" }));
+    await waitFor(() => expect(updateRecipe).toHaveBeenCalledWith(
+      "staff-token",
+      "88b23060-cbc4-4218-9938-63d75f6f324c",
+      managedRecipe.id,
+      { name: "House Milk Tea", description: "House black tea", version: 0 },
+    ));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Publish" }));
+    fireEvent.click(screen.getByRole("button", { name: "Publish version" }));
+    await waitFor(() => expect(publishRecipeVersion).toHaveBeenCalledWith(
+      "staff-token",
+      "88b23060-cbc4-4218-9938-63d75f6f324c",
+      managedRecipe.id,
+      managedRecipeVersion.id,
+      0,
+    ));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Archive" }));
+    fireEvent.click(screen.getByRole("button", { name: "Archive recipe" }));
+    await waitFor(() => expect(archiveRecipe).toHaveBeenCalledWith(
+      "staff-token",
+      "88b23060-cbc4-4218-9938-63d75f6f324c",
+      managedRecipe.id,
+      0,
+    ));
+  });
+
+  it("creates a next draft and retires an unused published version", async () => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue({
+      accessToken: "staff-token", email: "owner@example.test",
+    });
+    vi.mocked(getStaffContext).mockResolvedValue({
+      accountId: "35f942a3-0591-4973-83ef-8889f608184e",
+      memberships: [{
+        organizationId: "88b23060-cbc4-4218-9938-63d75f6f324c",
+        organizationName: "Bubble Tea Operations",
+        role: "OWNER",
+        locations: [],
+      }],
+    });
+    const publishedVersion = {
+      ...managedRecipeVersion,
+      status: "PUBLISHED" as const,
+      version: 2,
+      publishedAt: "2026-08-22T01:00:00Z",
+    };
+    vi.mocked(getRecipe).mockResolvedValue({ ...managedRecipe, versions: [publishedVersion] });
+    render(
+      <MemoryRouter initialEntries={[
+        `/staff/catalog/recipes/${managedRecipe.id}?organizationId=88b23060-cbc4-4218-9938-63d75f6f324c`,
+      ]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole("heading", { level: 1, name: "Classic Milk Tea" });
+    fireEvent.click(screen.getByRole("button", { name: "New draft" }));
+    fireEvent.click(screen.getByRole("button", { name: "Create next draft" }));
+    await waitFor(() => expect(createRecipeVersion).toHaveBeenCalledWith(
+      "staff-token",
+      "88b23060-cbc4-4218-9938-63d75f6f324c",
+      managedRecipe.id,
+      0,
+    ));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Retire" }));
+    fireEvent.click(screen.getByRole("button", { name: "Retire version" }));
+    await waitFor(() => expect(retireRecipeVersion).toHaveBeenCalledWith(
+      "staff-token",
+      "88b23060-cbc4-4218-9938-63d75f6f324c",
+      managedRecipe.id,
+      managedRecipeVersion.id,
+      2,
+    ));
   });
 
   it("keeps a configured guest drink through to the current order", async () => {

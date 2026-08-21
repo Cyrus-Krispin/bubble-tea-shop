@@ -14,6 +14,16 @@ import { StaffWorkspacePage } from "../features/staff/StaffWorkspacePage";
 import { StaffLayout } from "../features/staff/StaffLayout";
 
 const IngredientManagementPage = lazy(() => import("../features/staff/IngredientManagementPage"));
+const RecipeManagementPage = lazy(() => import("../features/staff/RecipeManagementPage"));
+const RecipeDetailPage = lazy(() => import("../features/staff/RecipeDetailPage"));
+
+function CatalogLoading({ label }: { label: string }) {
+  return (
+    <main aria-label={label} className="staff-status">
+      <p role="status">Loading catalog tools…</p>
+    </main>
+  );
+}
 
 function WelcomePage() {
   return (
@@ -60,8 +70,18 @@ export function App() {
           <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<StaffWorkspacePage />} />
             <Route path="catalog/ingredients" element={(
-              <Suspense fallback={<main aria-label="Ingredient management" className="staff-status"><p role="status">Loading catalog tools…</p></main>}>
+              <Suspense fallback={<CatalogLoading label="Ingredient management" />}>
                 <IngredientManagementPage />
+              </Suspense>
+            )} />
+            <Route path="catalog/recipes" element={(
+              <Suspense fallback={<CatalogLoading label="Recipe management" />}>
+                <RecipeManagementPage />
+              </Suspense>
+            )} />
+            <Route path="catalog/recipes/:recipeId" element={(
+              <Suspense fallback={<CatalogLoading label="Recipe detail" />}>
+                <RecipeDetailPage />
               </Suspense>
             )} />
           </Route>
