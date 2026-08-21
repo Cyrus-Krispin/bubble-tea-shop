@@ -76,8 +76,28 @@ Email accounts are auto-confirmed because no SMTP service is part of this focuse
 The local Auth service enforces the same eight-character password minimum shown by the customer
 registration form; browser validation is only usability feedback, not the security boundary.
 Self-service signup is for customers only: application roles still require a server-owned
-organization membership created by the future owner/bootstrap workflow. Kong permits Auth browser
+organization membership created by the owner bootstrap command below. Kong permits Auth browser
 requests only from the known local frontend origins on ports `4173` and `5173`.
+
+## Bootstrap the first owner
+
+Register the owner through the normal account screen first so Supabase Auth and Spring provision
+the application account. Obtain that identity's UUID (`sub` in its verified access token) and the
+target organization UUID, then run a one-shot backend container:
+
+```bash
+docker compose run --rm \
+  -e OWNER_BOOTSTRAP_ENABLED=true \
+  -e OWNER_BOOTSTRAP_AUTH_SUBJECT=<uuid> \
+  -e OWNER_BOOTSTRAP_ORGANIZATION_ID=<uuid> \
+  backend --spring.main.web-application-type=none
+```
+
+The command succeeds if it creates the active owner membership or if that exact active owner
+membership already exists. It fails closed for missing or disabled accounts, missing organizations,
+manager memberships, and inactive memberships. It never creates an Auth identity, promotes a role,
+or reactivates access. Remove the three bootstrap variables after the one-shot command; never place
+them in a committed environment file or enable bootstrap on the long-running backend service.
 
 The Supabase image tags are copied from a tested official Docker Compose release. Update the
 Postgres and GoTrue tags together only after reviewing Supabase release notes and running the full

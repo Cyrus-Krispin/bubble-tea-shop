@@ -17,6 +17,11 @@ spring:
           time_zone: UTC
 
 app:
+  bootstrap:
+    owner:
+      enabled: ${OWNER_BOOTSTRAP_ENABLED:false}
+      auth-subject: ${OWNER_BOOTSTRAP_AUTH_SUBJECT:}
+      organization-id: ${OWNER_BOOTSTRAP_ORGANIZATION_ID:}
   catalog:
     guest-location-slug: ${GUEST_LOCATION_SLUG:orchard-central}
   security:
