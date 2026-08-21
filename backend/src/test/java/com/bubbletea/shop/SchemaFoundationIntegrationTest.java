@@ -221,6 +221,12 @@ class SchemaFoundationIntegrationTest {
         assertThat(jdbc.queryForObject(
             "SELECT status FROM customer_order WHERE id = ?",
             String.class, orderId)).isEqualTo("COMPLETED");
+        assertThat(jdbc.queryForObject(
+            "SELECT status FROM payment WHERE customer_order_id = ?",
+            String.class, orderId)).isEqualTo("PAID");
+        assertThat(jdbc.queryForObject(
+            "SELECT recorded_by_account_id FROM payment WHERE customer_order_id = ?",
+            UUID.class, orderId)).isEqualTo(fixture.accountId());
         assertThatThrownBy(() -> jdbc.update("""
             UPDATE order_item SET product_name_snapshot = 'Changed'
              WHERE customer_order_id = ?
@@ -337,6 +343,13 @@ class SchemaFoundationIntegrationTest {
             )
             VALUES (?, ?, ?, 1, 'Milk Tea', 'Medium', 1, 500, 500)
             """, itemId, fixture.organizationId(), orderId);
+        jdbc.update("""
+            INSERT INTO payment (
+                id, organization_id, customer_order_id, method, status,
+                amount_minor, currency_code
+            )
+            VALUES (?, ?, ?, 'CASH', 'PENDING', 500, 'SGD')
+            """, UUID.randomUUID(), fixture.organizationId(), orderId);
         jdbc.update("""
             INSERT INTO order_item_consumption (
                 id, organization_id, order_item_id, ingredient_id, quantity

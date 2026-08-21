@@ -6,7 +6,8 @@ The fully local, self-hosted Supabase Auth service is the authentication issuer,
 earlier plan for Spring to verify passwords, issue access tokens, and rotate application-owned
 refresh sessions. Spring implements bearer-token validation, customer identity provisioning, the
 operator-only owner bootstrap, and a staff context endpoint backed by server-owned scope
-resolution. Staff management workflows remain later increments.
+resolution. Catalog, inventory, and order operations use that scope; staff membership management
+remains a later increment.
 
 The Phase 1 schema still contains legacy credential and refresh-session columns. Flyway V4 keeps
 the immutable V1 columns for compatibility, makes the application-owned credential fields
@@ -90,6 +91,10 @@ access from signup metadata.
 - Client-provided organization IDs, location IDs, roles, prices, inventory values, or Supabase
   metadata are never accepted as authorization evidence.
 - The React application does not call Supabase data APIs to bypass Spring domain workflows.
+- Staff order reads and completion are scoped through current server-owned memberships and active
+  location assignments. Completion accepts no client-owned payment, price, inventory, actor, or
+  status fields; the authenticated account is recorded as the cash-accepting actor in the same
+  transaction as payment, order, history, and inventory changes.
 
 ## Browser and service boundary
 

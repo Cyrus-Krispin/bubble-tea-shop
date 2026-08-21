@@ -570,11 +570,15 @@ present. Rows are immutable through a database trigger.
 | `amount_minor` | `bigint` | NN | — | — |
 | `currency_code` | `varchar(3)` | NN | — | — |
 | `external_reference` | `varchar(255)` | Nullable | — | — |
+| `paid_at` | `timestamptz` | Nullable | — | Required exactly when status is `PAID` |
+| `recorded_by_account_id` | `uuid` | Nullable | — | FK → `account.id`; required for paid cash |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
 Method is `CASH` or `CARD`; status is `PENDING`, `PAID`, `FAILED`, or `REFUNDED`. Amount is
-non-negative and currency is a three-letter uppercase code.
+non-negative and currency is a three-letter uppercase code. Each order has at most one payment.
+Paid status agrees with `paid_at`, and a paid cash record identifies the staff account that
+accepted it.
 
 ## Supporting indexes
 
@@ -585,6 +589,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `uq_inventory_sale_order_ingredient` | `inventory_movement` | `(customer_order_id, ingredient_id) WHERE movement_type = 'SALE'` | Prevent duplicate sale deductions. |
 | `uq_inventory_opening_location_ingredient` | `inventory_movement` | `(location_id, ingredient_id) WHERE movement_type = 'OPENING'` | Permit one opening movement per location and ingredient. |
 | `uq_customer_order_location_placement_key` | `customer_order` | `(location_id, placement_key) WHERE placement_key IS NOT NULL` | Prevent duplicate checkout writes. |
+| `uq_payment_customer_order` | `payment` | `(customer_order_id)` | Permit at most one payment state machine per order. |
 | `idx_location_active` | `location` | `(organization_id, active)` | Active location lookup. |
 | `uq_location_public_slug` | `location` | `(public_slug) WHERE public_slug IS NOT NULL` | Resolve a public shop URL to one location. |
 | `idx_membership_active` | `organization_membership` | `(organization_id, role, active)` | Active role lookup. |

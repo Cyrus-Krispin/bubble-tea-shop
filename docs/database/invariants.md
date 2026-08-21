@@ -77,8 +77,11 @@
   payment, totals, and optional verified customer account are resolved by Spring, never trusted
   from checkout input.
 - A pending order does not reserve stock.
+- Every placed order has one payment. Paid status agrees with its paid timestamp, and paid cash
+  identifies the staff account that accepted it.
 - Completion locks the order and affected balances, checks all ingredients, deducts all or none, appends
-  status history, and commits once.
+  sale movements and status history, marks the cash payment paid with its accepting actor, and
+  commits once.
 - Repeating completion for an already-completed order succeeds as an idempotent no-op.
 - A shortage leaves both the order and every inventory row unchanged.
 - Completed and cancelled timestamps must agree with current status.
@@ -102,3 +105,4 @@
   movement history.
 - V9 adds location-scoped checkout idempotency, sequence-backed public order numbers, and complete
   recipe and topping-consumption data for the versioned local guest catalog seed.
+- V10 enforces one payment per order and records paid time plus the staff actor accepting cash.

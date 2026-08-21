@@ -52,7 +52,7 @@ Movement types:
 | `order_item_option` | Selected option name and price snapshots. | Immutable after placement. |
 | `order_item_consumption` | Final positive ingredient quantities for the complete line. | Immutable after placement. |
 | `order_status_history` | Actor and timestamp for every transition. | Append-only at service layer. |
-| `payment` | Cash/card-compatible payment record. | Status transitions are audited by application workflow. |
+| `payment` | One cash/card-compatible payment record per order. | Pending cash becomes paid atomically with completion; paid time and accepting actor are retained. |
 
 ## Shared representations
 

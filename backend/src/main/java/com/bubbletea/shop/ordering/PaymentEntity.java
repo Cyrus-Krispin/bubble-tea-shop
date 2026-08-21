@@ -39,6 +39,12 @@ public class PaymentEntity {
     @Column(name = "external_reference")
     String externalReference;
 
+    @Column(name = "paid_at")
+    Instant paidAt;
+
+    @Column(name = "recorded_by_account_id")
+    UUID recordedByAccountId;
+
     @Column(name = "created_at", nullable = false)
     Instant createdAt;
 

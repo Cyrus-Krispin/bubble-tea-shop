@@ -18,6 +18,7 @@ satisfiable across atomic default and ingredient-effect changes.
 V8 adds a partial uniqueness guard for one opening inventory movement per location and ingredient.
 V9 adds location-scoped guest-checkout idempotency and replaces placeholder guest offerings with
 published recipe versions that have ingredient and topping-consumption data.
+V10 makes payment ownership one-to-one and adds the paid timestamp and cash-accepting staff actor.
 
 ## Identity
 
@@ -75,6 +76,6 @@ erDiagram
     ORDER_ITEM ||--|{ ORDER_ITEM_CONSUMPTION : snapshots
     INGREDIENT ||--o{ ORDER_ITEM_CONSUMPTION : consumes
     CUSTOMER_ORDER ||--o{ ORDER_STATUS_HISTORY : transitions
-    CUSTOMER_ORDER ||--o{ PAYMENT : paid_by
+    CUSTOMER_ORDER ||--|| PAYMENT : paid_by
     CUSTOMER_ORDER o|--o{ INVENTORY_MOVEMENT : causes
 ```

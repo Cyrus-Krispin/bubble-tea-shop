@@ -384,6 +384,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/orders/{orderId}/completion": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Collect cash and complete an order atomically */
+        readonly post: operations["completeStaffOrder"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/offerings": {
         readonly parameters: {
             readonly query?: never;
@@ -483,6 +500,40 @@ export interface paths {
         readonly put?: never;
         /** Provision the authenticated customer account */
         readonly post: operations["provisionCustomerAccount"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/orders": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List location orders */
+        readonly get: operations["listStaffOrders"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/orders/{orderId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get an order with stock requirements */
+        readonly get: operations["getStaffOrder"];
+        readonly put?: never;
+        readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -909,6 +960,58 @@ export interface components {
             readonly displayOrder?: number;
             readonly defaultVariant?: boolean;
         };
+        readonly OrderDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly publicOrderNumber: string;
+            /** @enum {string} */
+            readonly status: "PENDING" | "COMPLETED" | "CANCELLED";
+            readonly paymentMethod: string;
+            readonly paymentStatus: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly subtotalMinor: number;
+            /** Format: int64 */
+            readonly totalMinor: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly completedAt: string | null;
+            /** Format: date-time */
+            readonly paidAt: string | null;
+            readonly lines: readonly components["schemas"]["OrderLine"][];
+            readonly requirements: readonly components["schemas"]["StockRequirement"][];
+        };
+        readonly OrderLine: {
+            /** Format: int32 */
+            readonly lineNumber: number;
+            readonly productName: string;
+            readonly variantName: string;
+            /** Format: int32 */
+            readonly quantity: number;
+            /** Format: int64 */
+            readonly unitPriceMinor: number;
+            /** Format: int64 */
+            readonly lineTotalMinor: number;
+            readonly options: readonly components["schemas"]["OrderOption"][];
+        };
+        readonly OrderOption: {
+            /** Format: int32 */
+            readonly selectionNumber: number;
+            readonly groupName: string;
+            readonly choiceName: string;
+            /** Format: int64 */
+            readonly priceDeltaMinor: number;
+        };
+        readonly StockRequirement: {
+            /** Format: uuid */
+            readonly ingredientId: string;
+            readonly ingredientName: string;
+            readonly baseUnit: string;
+            readonly requiredQuantity: string;
+            readonly availableQuantity: string;
+            readonly sufficient: boolean;
+        };
         readonly CreateOfferingRequest: {
             /** Format: uuid */
             readonly variantId: string;
@@ -1088,6 +1191,35 @@ export interface components {
             readonly archived: boolean;
             /** Format: int32 */
             readonly activeVariantCount: number;
+        };
+        readonly OrderPage: {
+            readonly items: readonly components["schemas"]["OrderSummary"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int32 */
+            readonly totalPages: number;
+        };
+        readonly OrderSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly publicOrderNumber: string;
+            /** @enum {string} */
+            readonly status: "PENDING" | "COMPLETED" | "CANCELLED";
+            readonly paymentMethod: string;
+            readonly paymentStatus: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly totalMinor: number;
+            /** Format: int32 */
+            readonly itemQuantity: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly completedAt: string | null;
         };
         readonly StaffInventoryMovementPage: {
             readonly items: readonly components["schemas"]["StaffInventoryMovement"][];
@@ -2176,6 +2308,35 @@ export interface operations {
             readonly 409: components["responses"]["Problem"];
         };
     };
+    readonly completeStaffOrder: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+                readonly orderId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Completed or previously completed order */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
     readonly listMenuOfferings: {
         readonly parameters: {
             readonly query?: {
@@ -2576,6 +2737,67 @@ export interface operations {
                     readonly "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
+        };
+    };
+    readonly listStaffOrders: {
+        readonly parameters: {
+            readonly query?: {
+                readonly status?: "PENDING" | "COMPLETED" | "CANCELLED";
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Order page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["OrderPage"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly getStaffOrder: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+                readonly orderId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Order detail */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
         };
     };
     readonly listInventoryBalances: {
