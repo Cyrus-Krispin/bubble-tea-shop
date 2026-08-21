@@ -4,8 +4,9 @@
 
 The fully local, self-hosted Supabase Auth service is the authentication issuer, superseding the
 earlier plan for Spring to verify passwords, issue access tokens, and rotate application-owned
-refresh sessions. Spring implements bearer-token validation and customer identity provisioning;
-owner/manager membership resolution remains later work.
+refresh sessions. Spring implements bearer-token validation, customer identity provisioning, the
+operator-only owner bootstrap, and server-owned staff-scope resolution. The staff context HTTP
+endpoint and staff management workflows remain later increments.
 
 The Phase 1 schema still contains legacy credential and refresh-session columns. Flyway V4 keeps
 the immutable V1 columns for compatibility, makes the application-owned credential fields
@@ -71,8 +72,9 @@ The browser client delegates session persistence and refresh to Supabase Auth; i
 manually store access or refresh tokens. It adds no Spring login, refresh, logout, or password
 endpoint and does not treat `role`, `user_metadata`, organization, location, or other token claims
 as application authorization evidence.
-Self-service Auth signup creates customer identities only. Staff provisioning still belongs to the
-later owner/bootstrap workflow, and Spring never derives staff access from signup metadata.
+Self-service Auth signup creates customer identities only. Staff access requires the explicit,
+operator-only owner bootstrap or a later owner-managed workflow, and Spring never derives staff
+access from signup metadata.
 
 ## Authorization
 

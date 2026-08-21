@@ -13,7 +13,7 @@ relevant full suite, focused commit, and push.
 ## Phase 1 — Staff Access
 
 - [x] Specify and implement idempotent owner bootstrap.
-- [ ] Resolve active staff membership and assignments from the authenticated subject.
+- [x] Resolve active staff membership and assignments from the authenticated subject.
 - [ ] Expose `GET /api/v1/staff/context` with deny-by-default authorization.
 - [ ] Add frontend staff session/context guard and navigation.
 
