@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
-import { Link, useOutletContext } from "react-router";
+import { useOutletContext } from "react-router";
 
 import {
   Button,
@@ -10,6 +10,7 @@ import {
   ProblemState,
   type DataTableColumn,
 } from "../../components/ui";
+import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import {
   archiveIngredient,
@@ -296,10 +297,7 @@ export default function IngredientManagementPage() {
 
   return (
     <main aria-label="Ingredient management" className="staff-main" id="staff-workspace">
-      <nav aria-label="Catalog sections" className="catalog-section-nav">
-        <Link aria-current="page" to="/staff/catalog/ingredients">Ingredients</Link>
-        <Link to="/staff/catalog/recipes">Recipes</Link>
-      </nav>
+      <CatalogSectionNav />
       <div className="ingredient-page-heading">
         <div>
           <p className="eyebrow">Catalog management</p>

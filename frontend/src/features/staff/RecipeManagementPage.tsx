@@ -10,6 +10,7 @@ import {
   ProblemState,
   type DataTableColumn,
 } from "../../components/ui";
+import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import {
   createRecipe,
@@ -179,10 +180,7 @@ export default function RecipeManagementPage() {
 
   return (
     <main aria-label="Recipe management" className="staff-main" id="staff-workspace">
-      <nav aria-label="Catalog sections" className="catalog-section-nav">
-        <Link to="/staff/catalog/ingredients">Ingredients</Link>
-        <Link aria-current="page" to="/staff/catalog/recipes">Recipes</Link>
-      </nav>
+      <CatalogSectionNav />
       <div className="ingredient-page-heading">
         <div>
           <p className="eyebrow">Catalog management</p>

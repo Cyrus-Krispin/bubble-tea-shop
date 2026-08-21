@@ -91,8 +91,11 @@
 
 .catalog-section-nav {
   display: flex;
+  max-width: 100%;
+  min-width: 0;
   gap: var(--space-2);
   margin-bottom: var(--space-6);
+  overflow-x: auto;
   border-bottom: 1px solid var(--color-line);
 }
 
@@ -147,6 +150,7 @@
 .ingredient-results,
 .ingredient-form {
   display: grid;
+  min-width: 0;
   gap: var(--space-5);
 }
 
@@ -162,7 +166,8 @@
 
 .recipe-form,
 .formula-rows,
-.recipe-version-list {
+.recipe-version-list,
+.option-choice-list {
   display: grid;
   gap: var(--space-5);
 }
@@ -198,6 +203,67 @@
   background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
+}
+
+.option-choice-card {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+}
+
+.option-choice-card h3 {
+  margin: 0 0 var(--space-2);
+}
+
+.menu-variant-card {
+  padding: clamp(var(--space-4), 4vw, var(--space-6));
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.menu-subsection {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-line);
+}
+
+.menu-subsection h3 {
+  margin: 0;
+}
+
+.menu-subsection-heading,
+.menu-location-card {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.menu-location-grid {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.menu-location-card {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+}
+
+.menu-location-card p {
+  margin: var(--space-1) 0 0;
+}
+
+.menu-field-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .recipe-status {
@@ -245,6 +311,12 @@
   grid-template-columns: minmax(12rem, 2fr) minmax(9rem, 1fr) auto;
   gap: var(--space-3);
   align-items: end;
+}
+
+.menu-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
 }
 
 .staff-back-link {
@@ -363,13 +435,17 @@
 
   .recipe-detail-heading,
   .recipe-history-heading,
-  .recipe-version-heading {
+  .recipe-version-heading,
+  .menu-subsection-heading,
+  .menu-location-card,
+  .option-choice-card {
     flex-direction: column;
   }
 
   .ingredient-toolbar,
   .ingredient-search,
-  .formula-row {
+  .formula-row,
+  .menu-field-grid {
     grid-template-columns: 1fr;
   }
 }

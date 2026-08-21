@@ -23,7 +23,7 @@ healthy database.
 - Add a protected staff-context endpoint as the first authenticated vertical slice.
 - Ingredient and recipe-version management APIs and staff workspaces. (Implemented.)
 - Menu and option management APIs. (Implemented.)
-- Menu and option staff workspaces.
+- Menu and option staff workspaces. (Implemented.)
 - OpenAPI generation and typed frontend client. (Implemented.)
 - First design-system tokens and form primitives. (Implemented.)
 - Storybook component documentation.

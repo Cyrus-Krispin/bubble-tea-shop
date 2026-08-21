@@ -16,6 +16,10 @@ import { StaffLayout } from "../features/staff/StaffLayout";
 const IngredientManagementPage = lazy(() => import("../features/staff/IngredientManagementPage"));
 const RecipeManagementPage = lazy(() => import("../features/staff/RecipeManagementPage"));
 const RecipeDetailPage = lazy(() => import("../features/staff/RecipeDetailPage"));
+const MenuManagementPage = lazy(() => import("../features/staff/MenuManagementPage"));
+const OptionManagementPage = lazy(() => import("../features/staff/OptionManagementPage"));
+const OptionGroupDetailPage = lazy(() => import("../features/staff/OptionGroupDetailPage"));
+const MenuProductDetailPage = lazy(() => import("../features/staff/MenuProductDetailPage"));
 
 function CatalogLoading({ label }: { label: string }) {
   return (
@@ -69,6 +73,7 @@ export function App() {
           <Route path="/staff/sign-in" element={<StaffSignInPage />} />
           <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<StaffWorkspacePage />} />
+            <Route path="catalog" element={<Navigate replace to="/staff/catalog/ingredients" />} />
             <Route path="catalog/ingredients" element={(
               <Suspense fallback={<CatalogLoading label="Ingredient management" />}>
                 <IngredientManagementPage />
@@ -82,6 +87,26 @@ export function App() {
             <Route path="catalog/recipes/:recipeId" element={(
               <Suspense fallback={<CatalogLoading label="Recipe detail" />}>
                 <RecipeDetailPage />
+              </Suspense>
+            )} />
+            <Route path="catalog/menu" element={(
+              <Suspense fallback={<CatalogLoading label="Menu management" />}>
+                <MenuManagementPage />
+              </Suspense>
+            )} />
+            <Route path="catalog/menu/:productId" element={(
+              <Suspense fallback={<CatalogLoading label="Menu product detail" />}>
+                <MenuProductDetailPage />
+              </Suspense>
+            )} />
+            <Route path="catalog/options" element={(
+              <Suspense fallback={<CatalogLoading label="Option management" />}>
+                <OptionManagementPage />
+              </Suspense>
+            )} />
+            <Route path="catalog/options/:groupId" element={(
+              <Suspense fallback={<CatalogLoading label="Option group detail" />}>
+                <OptionGroupDetailPage />
               </Suspense>
             )} />
           </Route>
