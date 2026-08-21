@@ -46,10 +46,10 @@ Balance lists use zero-based `page`, bounded `size`, optional literal `query`, a
 `includeArchived=false` by default. Movement history supports optional `ingredientId` and
 `movementType` filters and is ordered newest first, then by ID for deterministic pagination.
 
-Validation returns `400 INVENTORY_INVALID`; denied location scope returns `403`; missing or
-cross-scope locations and ingredients return `404 INVENTORY_NOT_FOUND`; a duplicate opening or
-state race returns `409 INVENTORY_STATE_CONFLICT`; and a movement that would make stock negative
-returns `409 INVENTORY_INSUFFICIENT_STOCK` with no balance or movement change.
+Validation returns `400 INVENTORY_INVALID`; any inaccessible location scope returns `403`; missing,
+archived, or cross-scope ingredients return `404 INVENTORY_NOT_FOUND`; a duplicate opening or state
+race returns `409 INVENTORY_STATE_CONFLICT`; and a movement that would make stock negative returns
+`409 INVENTORY_INSUFFICIENT_STOCK` with no balance or movement change.
 
 ## Staff workspace
 

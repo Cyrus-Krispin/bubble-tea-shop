@@ -15,6 +15,7 @@ recipe, and serializes offering activation with recipe retirement or archival.
 V7 extends optimistic versions and catalog auditing to products, variants, offerings, option
 definitions, and variant-choice configuration. Deferred validation keeps available menus
 satisfiable across atomic default and ingredient-effect changes.
+V8 adds a partial uniqueness guard for one opening inventory movement per location and ingredient.
 
 ## Identity
 

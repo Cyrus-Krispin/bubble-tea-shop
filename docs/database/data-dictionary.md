@@ -37,11 +37,11 @@
 
 Movement types:
 
-- `OPENING`: positive initial stock.
+- `OPENING`: positive initial stock; at most one per location and ingredient.
 - `RECEIPT`: positive delivery.
 - `SALE`: negative completed-order consumption.
 - `REVERSAL`: positive compensation tied to an order.
-- `ADJUSTMENT`: signed correction after a physical count.
+- `ADJUSTMENT`: signed correction after a physical count with a required application-level note.
 
 ## Orders
 

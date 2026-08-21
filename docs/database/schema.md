@@ -2,7 +2,7 @@
 
 This page is a human-readable reference for the current PostgreSQL schema. The executable sources
 of truth are the ordered scripts in
-[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 through V7. When the
+[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 through V8. When the
 migrations and this page disagree, the migrations win and this page must be corrected.
 
 The V1 `account` credential fields and `refresh_session` table reflect the superseded
@@ -578,6 +578,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 | Index | Table | Columns / predicate | Purpose |
 |---|---|---|---|
 | `uq_inventory_sale_order_ingredient` | `inventory_movement` | `(customer_order_id, ingredient_id) WHERE movement_type = 'SALE'` | Prevent duplicate sale deductions. |
+| `uq_inventory_opening_location_ingredient` | `inventory_movement` | `(location_id, ingredient_id) WHERE movement_type = 'OPENING'` | Permit one opening movement per location and ingredient. |
 | `idx_location_active` | `location` | `(organization_id, active)` | Active location lookup. |
 | `uq_location_public_slug` | `location` | `(public_slug) WHERE public_slug IS NOT NULL` | Resolve a public shop URL to one location. |
 | `idx_membership_active` | `organization_membership` | `(organization_id, role, active)` | Active role lookup. |
@@ -601,6 +602,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `idx_offering_catalog` | `menu_variant_offering` | `(location_id, available, menu_variant_id)` | Location menu lookup. |
 | `idx_inventory_balance_stock` | `inventory_balance` | `(location_id, quantity)` | Stock-level lookup. |
 | `idx_inventory_movement_history` | `inventory_movement` | `(location_id, ingredient_id, created_at DESC)` | Movement history. |
+| `idx_inventory_movement_location_type_time` | `inventory_movement` | `(location_id, movement_type, created_at DESC, id DESC)` | Deterministic location/type history pagination. |
 | `idx_customer_order_status_time` | `customer_order` | `(location_id, status, created_at DESC)` | Order queue and history. |
 | `idx_order_item_order` | `order_item` | `(customer_order_id)` | Load order lines. |
 | `idx_order_history_order_time` | `order_status_history` | `(customer_order_id, changed_at)` | Load order transitions. |

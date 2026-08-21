@@ -57,6 +57,9 @@
 
 - Movements are insert-only and non-zero.
 - Opening, receipt, and reversal movements are positive; sale movements are negative.
+- Each location and ingredient has at most one opening movement.
+- Manual adjustments require an explanatory note; receipt cost currency is derived from the
+  authorized location.
 - Sale and reversal movements reference an order.
 - The balance and its movement are written in the same transaction.
 - Balance quantity cannot become negative.
@@ -88,3 +91,5 @@
   constraint, expanded catalog auditing, and offering-safe recipe lifecycle triggers.
 - V7 adds menu/option optimistic concurrency, case-insensitive scoped names, expanded catalog
   auditing, location-safe offering management, and database-enforced available-menu validity.
+- V8 enforces one opening movement per location/ingredient and indexes deterministic location/type
+  movement history.

@@ -402,6 +402,24 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/movements": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List immutable movement history */
+        readonly get: operations["listInventoryMovements"];
+        readonly put?: never;
+        /** Record a manual stock movement */
+        readonly post: operations["createInventoryMovement"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/ingredients": {
         readonly parameters: {
             readonly query?: never;
@@ -448,6 +466,23 @@ export interface paths {
         readonly put?: never;
         /** Provision the authenticated customer account */
         readonly post: operations["provisionCustomerAccount"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/balances": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List location inventory balances */
+        readonly get: operations["listInventoryBalances"];
+        readonly put?: never;
+        readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -866,6 +901,38 @@ export interface components {
             readonly priceMinor?: number;
             readonly available?: boolean;
         };
+        readonly CreateInventoryMovementRequest: {
+            /** Format: uuid */
+            readonly ingredientId: string;
+            /** @enum {string} */
+            readonly movementType: "OPENING" | "RECEIPT" | "ADJUSTMENT";
+            readonly quantityDelta: string;
+            readonly sourceReference?: string;
+            readonly note?: string;
+            /** Format: int64 */
+            readonly totalCostMinor?: number;
+        };
+        readonly StaffInventoryMovement: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly ingredientId: string;
+            readonly ingredientName: string;
+            /** @enum {string} */
+            readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
+            /** @enum {string} */
+            readonly movementType: "OPENING" | "RECEIPT" | "SALE" | "REVERSAL" | "ADJUSTMENT";
+            readonly quantityDelta: string;
+            /** Format: uuid */
+            readonly customerOrderId: string | null;
+            readonly sourceReference: string | null;
+            readonly note: string | null;
+            /** Format: int64 */
+            readonly totalCostMinor: number | null;
+            readonly currencyCode: string | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
         readonly CreateIngredientRequest: {
             readonly name: string;
             readonly sku?: string | null;
@@ -961,6 +1028,45 @@ export interface components {
             readonly archived: boolean;
             /** Format: int32 */
             readonly activeVariantCount: number;
+        };
+        readonly StaffInventoryMovementPage: {
+            readonly items: readonly components["schemas"]["StaffInventoryMovement"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int64 */
+            readonly totalPages: number;
+        };
+        readonly StaffInventoryBalance: {
+            /** Format: uuid */
+            readonly ingredientId: string;
+            readonly ingredientName: string;
+            readonly sku: string | null;
+            /** @enum {string} */
+            readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
+            readonly quantity: string;
+            readonly reorderThreshold: string | null;
+            readonly belowReorderThreshold: boolean;
+            /** Format: int64 */
+            readonly version: number;
+            readonly openingRecorded: boolean;
+            readonly ingredientArchived: boolean;
+            /** Format: date-time */
+            readonly updatedAt: string | null;
+        };
+        readonly StaffInventoryBalancePage: {
+            readonly items: readonly components["schemas"]["StaffInventoryBalance"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int64 */
+            readonly totalPages: number;
         };
         readonly IngredientPage: {
             readonly items: readonly components["schemas"]["Ingredient"][];
@@ -2072,6 +2178,71 @@ export interface operations {
             readonly 409: components["responses"]["Problem"];
         };
     };
+    readonly listInventoryMovements: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+                readonly ingredientId?: string;
+                readonly movementType?: "OPENING" | "RECEIPT" | "SALE" | "REVERSAL" | "ADJUSTMENT";
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Inventory movement page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["StaffInventoryMovementPage"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly createInventoryMovement: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateInventoryMovementRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Inventory movement recorded */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["StaffInventoryMovement"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
     readonly listIngredients: {
         readonly parameters: {
             readonly query?: {
@@ -2305,6 +2476,39 @@ export interface operations {
                     readonly "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
+        };
+    };
+    readonly listInventoryBalances: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+                readonly query?: string;
+                readonly includeArchived?: boolean;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Inventory balance page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["StaffInventoryBalancePage"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
         };
     };
     readonly getStaffContext: {

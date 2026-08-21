@@ -30,7 +30,7 @@ healthy database.
 
 ## Phase 3 — Inventory and ordering
 
-- Stock level and movement APIs.
+- Stock level and movement APIs. (Implemented.)
 - Guest menu read APIs backed by a versioned local catalog seed. (Implemented.)
 - Guest order-placement APIs with consumption snapshots and server-recalculated totals, enabling
   the frontend's currently disabled checkout handoff.

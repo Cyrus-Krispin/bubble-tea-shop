@@ -2031,6 +2031,159 @@
         } ]
       }
     },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/movements" : {
+      "get" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "List immutable movement history",
+        "operationId" : "listInventoryMovements",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "ingredientId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "movementType",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "OPENING", "RECEIPT", "SALE", "REVERSAL", "ADJUSTMENT" ]
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Inventory movement page",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffInventoryMovementPage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "Record a manual stock movement",
+        "operationId" : "createInventoryMovement",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateInventoryMovementRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Inventory movement recorded",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffInventoryMovement"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/v1/staff/organizations/{organizationId}/ingredients" : {
       "get" : {
         "tags" : [ "Ingredient management" ],
@@ -2350,6 +2503,98 @@
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/balances" : {
+      "get" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "List location inventory balances",
+        "operationId" : "listInventoryBalances",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          }
+        }, {
+          "name" : "includeArchived",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Inventory balance page",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffInventoryBalancePage"
                 }
               }
             }
@@ -3416,6 +3661,86 @@
         },
         "required" : [ "recipeVersionId", "variantId" ]
       },
+      "CreateInventoryMovementRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "movementType" : {
+            "type" : "string",
+            "enum" : [ "OPENING", "RECEIPT", "ADJUSTMENT" ]
+          },
+          "quantityDelta" : {
+            "type" : "string",
+            "pattern" : "^-?(0|[0-9]+)(\\.[0-9]{1,6})?$"
+          },
+          "sourceReference" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "note" : {
+            "type" : "string",
+            "maxLength" : 4000,
+            "minLength" : 0
+          },
+          "totalCostMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "ingredientId", "movementType", "quantityDelta" ]
+      },
+      "StaffInventoryMovement" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientName" : {
+            "type" : "string"
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "movementType" : {
+            "type" : "string",
+            "enum" : [ "OPENING", "RECEIPT", "SALE", "REVERSAL", "ADJUSTMENT" ]
+          },
+          "quantityDelta" : {
+            "type" : "string"
+          },
+          "customerOrderId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "sourceReference" : {
+            "type" : [ "string", "null" ]
+          },
+          "note" : {
+            "type" : [ "string", "null" ]
+          },
+          "totalCostMinor" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "currencyCode" : {
+            "type" : [ "string", "null" ]
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "CreateIngredientRequest" : {
         "type" : "object",
         "properties" : {
@@ -3650,6 +3975,102 @@
           "activeVariantCount" : {
             "type" : "integer",
             "format" : "int32"
+          }
+        }
+      },
+      "StaffInventoryMovementPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffInventoryMovement"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "StaffInventoryBalance" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientName" : {
+            "type" : "string"
+          },
+          "sku" : {
+            "type" : [ "string", "null" ]
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "quantity" : {
+            "type" : "string"
+          },
+          "reorderThreshold" : {
+            "type" : [ "string", "null" ]
+          },
+          "belowReorderThreshold" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "openingRecorded" : {
+            "type" : "boolean"
+          },
+          "ingredientArchived" : {
+            "type" : "boolean"
+          },
+          "updatedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          }
+        }
+      },
+      "StaffInventoryBalancePage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffInventoryBalance"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },
