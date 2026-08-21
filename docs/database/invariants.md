@@ -36,6 +36,22 @@
 - Recipe and version mutations append actor-attributed `catalog_change` rows in the same transaction.
 - An available offering references an active product/variant and a published, non-archived recipe.
 - Offering currency must equal location currency.
+- Menu products, variants, offerings, option groups, choices, and variant-choice links use
+  non-negative optimistic versions. Their names are unique in their ownership scope without regard
+  to case.
+- Available offerings prevent product, variant, participating option-group, and participating
+  option-choice archival.
+- Every contributing option group on an available variant satisfies its minimum enabled-choice
+  count. Required groups have one enabled active default choice, and default selections never
+  exceed the group's maximum.
+- Enabled option effects for available offerings use active ingredients. Option configuration
+  validation is deferred to the transaction boundary so atomic default reassignment and complete
+  effect replacement never expose an invalid intermediate state.
+- Offering activation and option reconfiguration lock the same product/variant rows before recipe
+  and ingredient rows so concurrent catalog writes cannot bypass available-menu validation.
+- Offering currency is derived from the authorized active location by Spring; clients do not
+  submit it. Managers can mutate offerings only for actively assigned locations.
+- Menu and option mutations append actor-attributed `catalog_change` rows in the same transaction.
 
 ## Inventory
 
@@ -70,3 +86,5 @@
   catalog change auditing.
 - V6 adds recipe/version optimistic concurrency, case-insensitive recipe names, the single-draft
   constraint, expanded catalog auditing, and offering-safe recipe lifecycle triggers.
+- V7 adds menu/option optimistic concurrency, case-insensitive scoped names, expanded catalog
+  auditing, location-safe offering management, and database-enforced available-menu validity.

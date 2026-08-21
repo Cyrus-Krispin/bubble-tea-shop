@@ -39,6 +39,110 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get an option group and choices */
+        readonly get: operations["getOptionGroup"];
+        /** Update an active option group */
+        readonly put: operations["updateOptionGroup"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}/choices/{choiceId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Update an active option choice */
+        readonly put: operations["updateOptionChoice"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get a menu product workspace */
+        readonly get: operations["getMenuProduct"];
+        /** Update active product metadata */
+        readonly put: operations["updateMenuProduct"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/variants/{variantId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Update an active product variant */
+        readonly put: operations["updateMenuVariant"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/variants/{variantId}/choices/{choiceId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Replace a variant choice price and ingredient effects */
+        readonly put: operations["configureVariantOptionChoice"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/offerings/{offeringId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Update a location offering */
+        readonly put: operations["updateMenuOffering"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/ingredients/{ingredientId}": {
         readonly parameters: {
             readonly query?: never;
@@ -136,6 +240,162 @@ export interface paths {
         readonly put?: never;
         /** Archive an unused recipe */
         readonly post: operations["archiveRecipe"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/option-groups": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List organization option groups */
+        readonly get: operations["listOptionGroups"];
+        readonly put?: never;
+        /** Create an option group */
+        readonly post: operations["createOptionGroup"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}/choices": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Create an option choice */
+        readonly post: operations["createOptionChoice"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}/choices/{choiceId}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Archive an unused option choice */
+        readonly post: operations["archiveOptionChoice"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Archive an unused option group */
+        readonly post: operations["archiveOptionGroup"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/menu-products": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List organization menu products */
+        readonly get: operations["listMenuProducts"];
+        readonly put?: never;
+        /** Create a menu product */
+        readonly post: operations["createMenuProduct"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/variants": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Create a product variant */
+        readonly post: operations["createMenuVariant"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/variants/{variantId}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Archive an unused product variant */
+        readonly post: operations["archiveMenuVariant"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Archive an unused menu product */
+        readonly post: operations["archiveMenuProduct"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/offerings": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List offerings at an assigned location */
+        readonly get: operations["listMenuOfferings"];
+        readonly put?: never;
+        /** Create a location offering */
+        readonly post: operations["createMenuOffering"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -349,6 +609,186 @@ export interface components {
             readonly version: number;
             readonly components: readonly components["schemas"]["ComponentRequest"][];
         };
+        readonly UpdateGroupRequest: {
+            readonly name: string;
+            /** Format: int32 */
+            readonly minimumSelections?: number;
+            /** Format: int32 */
+            readonly maximumSelections?: number;
+            /** Format: int32 */
+            readonly displayOrder?: number;
+            /** Format: int64 */
+            readonly version: number;
+        };
+        readonly StaffOptionChoice: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            /** Format: int32 */
+            readonly displayOrder: number;
+            readonly defaultChoice: boolean;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+        };
+        readonly StaffOptionGroupDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            /** Format: int32 */
+            readonly minimumSelections: number;
+            /** Format: int32 */
+            readonly maximumSelections: number;
+            /** Format: int32 */
+            readonly displayOrder: number;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+            readonly choices: readonly components["schemas"]["StaffOptionChoice"][];
+        };
+        readonly UpdateChoiceRequest: {
+            readonly name: string;
+            /** Format: int32 */
+            readonly displayOrder?: number;
+            readonly defaultChoice?: boolean;
+            /** Format: int64 */
+            readonly version: number;
+        };
+        readonly UpdateProductRequest: {
+            readonly publicSlug: string;
+            readonly name: string;
+            readonly description?: string | null;
+            readonly imageUrl?: string | null;
+            readonly category?: string | null;
+            readonly artworkKey?: string | null;
+            /** Format: int32 */
+            readonly displayOrder?: number;
+            /** Format: int64 */
+            readonly version: number;
+        };
+        readonly StaffMenuOffering: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly locationId: string;
+            readonly locationName: string;
+            /** Format: uuid */
+            readonly variantId: string;
+            readonly variantName: string;
+            /** Format: uuid */
+            readonly recipeVersionId: string;
+            readonly recipeName: string;
+            /** Format: int32 */
+            readonly recipeVersionNumber: number;
+            /** Format: int64 */
+            readonly priceMinor: number;
+            readonly currencyCode: string;
+            readonly available: boolean;
+            /** Format: int64 */
+            readonly version: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+        };
+        readonly StaffMenuProductDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly publicSlug: string;
+            readonly name: string;
+            readonly description: string | null;
+            readonly category: string | null;
+            readonly artworkKey: string | null;
+            readonly imageUrl: string | null;
+            /** Format: int32 */
+            readonly displayOrder: number;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+            readonly variants: readonly components["schemas"]["StaffMenuVariant"][];
+            readonly offerings: readonly components["schemas"]["StaffMenuOffering"][];
+        };
+        readonly StaffMenuVariant: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            /** Format: int32 */
+            readonly displayOrder: number;
+            readonly defaultVariant: boolean;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+            readonly choices: readonly components["schemas"]["StaffVariantOptionChoice"][];
+        };
+        readonly StaffOptionIngredientEffect: {
+            /** Format: uuid */
+            readonly ingredientId: string;
+            readonly ingredientName: string;
+            readonly baseUnit: string;
+            readonly quantityDelta: string;
+        };
+        readonly StaffVariantOptionChoice: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly choiceId: string;
+            readonly choiceName: string;
+            /** Format: uuid */
+            readonly groupId: string;
+            readonly groupName: string;
+            /** Format: int64 */
+            readonly priceDeltaMinor: number;
+            readonly enabled: boolean;
+            /** Format: int64 */
+            readonly version: number;
+            readonly ingredientEffects: readonly components["schemas"]["StaffOptionIngredientEffect"][];
+        };
+        readonly UpdateVariantRequest: {
+            readonly name: string;
+            /** Format: int32 */
+            readonly displayOrder?: number;
+            readonly defaultVariant?: boolean;
+            /** Format: int64 */
+            readonly version: number;
+        };
+        readonly ConfigurationRequest: {
+            readonly enabled?: boolean;
+            /** Format: int64 */
+            readonly priceDeltaMinor?: number;
+            /** Format: int64 */
+            readonly version?: number | null;
+            readonly ingredientEffects: readonly components["schemas"]["IngredientEffectRequest"][];
+        };
+        readonly IngredientEffectRequest: {
+            /** Format: uuid */
+            readonly ingredientId: string;
+            readonly quantityDelta: string;
+        };
+        readonly UpdateOfferingRequest: {
+            /** Format: uuid */
+            readonly recipeVersionId: string;
+            /** Format: int64 */
+            readonly priceMinor?: number;
+            readonly available?: boolean;
+            /** Format: int64 */
+            readonly version: number;
+        };
         readonly UpdateIngredientRequest: {
             readonly name: string;
             readonly sku?: string | null;
@@ -385,6 +825,46 @@ export interface components {
         readonly VersionRequest: {
             /** Format: int64 */
             readonly version: number;
+        };
+        readonly GroupRequest: {
+            readonly name: string;
+            /** Format: int32 */
+            readonly minimumSelections?: number;
+            /** Format: int32 */
+            readonly maximumSelections?: number;
+            /** Format: int32 */
+            readonly displayOrder?: number;
+        };
+        readonly ChoiceRequest: {
+            readonly name: string;
+            /** Format: int32 */
+            readonly displayOrder?: number;
+            readonly defaultChoice?: boolean;
+        };
+        readonly ProductRequest: {
+            readonly publicSlug: string;
+            readonly name: string;
+            readonly description?: string | null;
+            readonly imageUrl?: string | null;
+            readonly category?: string | null;
+            readonly artworkKey?: string | null;
+            /** Format: int32 */
+            readonly displayOrder?: number;
+        };
+        readonly CreateVariantRequest: {
+            readonly name: string;
+            /** Format: int32 */
+            readonly displayOrder?: number;
+            readonly defaultVariant?: boolean;
+        };
+        readonly CreateOfferingRequest: {
+            /** Format: uuid */
+            readonly variantId: string;
+            /** Format: uuid */
+            readonly recipeVersionId: string;
+            /** Format: int64 */
+            readonly priceMinor?: number;
+            readonly available?: boolean;
         };
         readonly CreateIngredientRequest: {
             readonly name: string;
@@ -426,6 +906,61 @@ export interface components {
             /** Format: int32 */
             readonly latestVersionNumber: number;
             readonly latestStatus: string;
+        };
+        readonly StaffOptionGroupPage: {
+            readonly items: readonly components["schemas"]["StaffOptionGroupSummary"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int64 */
+            readonly totalPages: number;
+        };
+        readonly StaffOptionGroupSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            /** Format: int32 */
+            readonly minimumSelections: number;
+            /** Format: int32 */
+            readonly maximumSelections: number;
+            /** Format: int32 */
+            readonly displayOrder: number;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: int32 */
+            readonly activeChoiceCount: number;
+        };
+        readonly StaffMenuProductPage: {
+            readonly items: readonly components["schemas"]["StaffMenuProductSummary"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int64 */
+            readonly totalPages: number;
+        };
+        readonly StaffMenuProductSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly publicSlug: string;
+            readonly name: string;
+            readonly description: string | null;
+            readonly category: string | null;
+            readonly artworkKey: string | null;
+            readonly imageUrl: string | null;
+            /** Format: int32 */
+            readonly displayOrder: number;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: int32 */
+            readonly activeVariantCount: number;
         };
         readonly IngredientPage: {
             readonly items: readonly components["schemas"]["Ingredient"][];
@@ -629,6 +1164,261 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["RecipeVersion"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly getOptionGroup: {
+        readonly parameters: {
+            readonly query?: {
+                readonly includeArchivedChoices?: boolean;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly groupId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Option group detail */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffOptionGroupDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly updateOptionGroup: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly groupId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateGroupRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Option group updated */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffOptionGroupDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly updateOptionChoice: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly groupId: string;
+                readonly choiceId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateChoiceRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Option choice updated */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffOptionGroupDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly getMenuProduct: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly productId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Product detail */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuProductDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly updateMenuProduct: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly productId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateProductRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Product updated */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuProductDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly updateMenuVariant: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly productId: string;
+                readonly variantId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateVariantRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Variant updated */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuProductDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly configureVariantOptionChoice: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly productId: string;
+                readonly variantId: string;
+                readonly choiceId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ConfigurationRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Variant choice configured */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffVariantOptionChoice"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly updateMenuOffering: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+                readonly offeringId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateOfferingRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Offering updated */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuOffering"];
                 };
             };
             readonly 400: components["responses"]["Problem"];
@@ -891,6 +1681,388 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["RecipeDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly listOptionGroups: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+                readonly query?: string;
+                readonly includeArchived?: boolean;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Option group page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffOptionGroupPage"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly createOptionGroup: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["GroupRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Option group created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffOptionGroupDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly createOptionChoice: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly groupId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ChoiceRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Option choice created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffOptionGroupDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly archiveOptionChoice: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly groupId: string;
+                readonly choiceId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Option choice archived or already archived */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffOptionGroupDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly archiveOptionGroup: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly groupId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Option group archived or already archived */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffOptionGroupDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly listMenuProducts: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+                readonly query?: string;
+                readonly includeArchived?: boolean;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Product page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuProductPage"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly createMenuProduct: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ProductRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Product created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuProductDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly createMenuVariant: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly productId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateVariantRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Variant created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuProductDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly archiveMenuVariant: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly productId: string;
+                readonly variantId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Variant archived or already archived */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuProductDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly archiveMenuProduct: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly productId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Product archived or already archived */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuProductDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly listMenuOfferings: {
+        readonly parameters: {
+            readonly query?: {
+                readonly variantId?: string;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Location offerings */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": readonly components["schemas"]["StaffMenuOffering"][];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly createMenuOffering: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateOfferingRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Offering created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["StaffMenuOffering"];
                 };
             };
             readonly 400: components["responses"]["Problem"];

@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -29,6 +30,10 @@ public class MenuVariantOptionChoiceEntity {
     @Column(nullable = false)
     boolean enabled;
 
+    @Version
+    @Column(nullable = false)
+    long version;
+
     @Column(name = "created_at", nullable = false)
     Instant createdAt;
 
@@ -38,4 +43,3 @@ public class MenuVariantOptionChoiceEntity {
     protected MenuVariantOptionChoiceEntity() {
     }
 }
-

@@ -12,6 +12,9 @@ Supabase session model; its later removal or archival is still undecided.
 V5 adds optimistic versions and durable, actor-attributed change records for ingredient management.
 V6 extends those controls to recipe metadata and formula versions, permits only one draft per
 recipe, and serializes offering activation with recipe retirement or archival.
+V7 extends optimistic versions and catalog auditing to products, variants, offerings, option
+definitions, and variant-choice configuration. Deferred validation keeps available menus
+satisfiable across atomic default and ingredient-effect changes.
 
 ## Identity
 

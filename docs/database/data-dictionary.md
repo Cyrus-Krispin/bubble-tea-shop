@@ -16,16 +16,16 @@
 | Table | Purpose | Lifecycle |
 |---|---|---|
 | `ingredient` | Organization stock item in one immutable base unit, protected by an optimistic version. | Archived after use, but not while consumed by an available offering. |
-| `catalog_change` | Actor-attributed audit event for ingredient, recipe, and recipe-version mutations. | Append-only at the service layer and retained permanently. |
+| `catalog_change` | Actor-attributed audit event for ingredient, recipe, menu, offering, and option mutations. | Append-only at the service layer and retained permanently. |
 | `recipe` | Stable recipe name and description with optimistic concurrency. | Archived only when no available offering uses any version. |
 | `recipe_version` | Numbered draft/published/retired formula revision with optimistic concurrency. | One draft per recipe; published content is immutable and an offered version cannot retire. |
 | `recipe_component` | Positive base-unit quantity of an ingredient. | Editable only while version is draft. |
-| `menu_product` | Customer-facing drink identity, public slug, category, artwork key, and display order. | Archived after use. |
-| `menu_variant` | Size/form of a menu product, including its optional default marker. | Archived after use. |
-| `menu_variant_offering` | Location price, availability, and recipe assignment. | Updated when price/availability changes. |
-| `option_group` | Selection limits and display order for a choice family. | Archived after use. |
-| `option_choice` | Value within an option group, including its optional default marker. | Archived after use. |
-| `menu_variant_option_choice` | Variant-specific enablement and price delta. | Disabled rather than deleted after use. |
+| `menu_product` | Optimistically versioned customer-facing drink identity, public slug, category, artwork key, and display order. | Archived only when no available offering uses a variant. |
+| `menu_variant` | Optimistically versioned size/form of a menu product, including its optional default marker. | Archived only when it has no available offering. |
+| `menu_variant_offering` | Optimistically versioned location price, availability, currency, and recipe assignment. | Updated when price, recipe, or availability changes. |
+| `option_group` | Optimistically versioned selection limits and display order for a choice family. | Archived only when not enabled by an available offering. |
+| `option_choice` | Optimistically versioned value within an option group, including its optional default marker. | Archived only when not enabled by an available offering. |
+| `menu_variant_option_choice` | Optimistically versioned variant-specific enablement and price delta. | Disabled rather than deleted after use. |
 | `option_choice_ingredient_effect` | Signed ingredient delta caused by a choice. | Copied into order consumption at placement. |
 
 ## Inventory

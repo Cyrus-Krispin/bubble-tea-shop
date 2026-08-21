@@ -2,7 +2,7 @@
 
 This page is a human-readable reference for the current PostgreSQL schema. The executable sources
 of truth are the ordered scripts in
-[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 through V4. When the
+[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 through V7. When the
 migrations and this page disagree, the migrations win and this page must be corrected.
 
 The V1 `account` credential fields and `refresh_session` table reflect the superseded
@@ -251,10 +251,11 @@ enabled option effect.
 | `actor_account_id` | `uuid` | NN | — | FK → `account.id` |
 | `occurred_at` | `timestamptz` | NN | `now()` | — |
 
-V6 supports `INGREDIENT`, `RECIPE`, and `RECIPE_VERSION` entities and the actions `CREATE`, `UPDATE`,
-`ARCHIVE`, `CREATE_VERSION`, `UPDATE_DRAFT`, `PUBLISH`, and `RETIRE`. The entity ID is a logical
-reference rather than a polymorphic foreign key. Application services append the audit row in the
-same transaction as the mutation.
+V7 supports `INGREDIENT`, `RECIPE`, `RECIPE_VERSION`, `MENU_PRODUCT`, `MENU_VARIANT`,
+`MENU_OFFERING`, `OPTION_GROUP`, `OPTION_CHOICE`, and `VARIANT_OPTION_CHOICE` entities. Actions are
+`CREATE`, `UPDATE`, `ARCHIVE`, `CREATE_VERSION`, `UPDATE_DRAFT`, `PUBLISH`, `RETIRE`, and
+`CONFIGURE`. The entity ID is a logical reference rather than a polymorphic foreign key.
+Application services append the audit row in the same transaction as the mutation.
 
 ### `recipe`
 
@@ -316,6 +317,7 @@ Primary key: `(recipe_version_id, ingredient_id)`. Quantity must be positive.
 | `category` | `varchar(80)` | Nullable | — | — |
 | `artwork_key` | `varchar(40)` | Nullable | — | — |
 | `display_order` | `integer` | NN | `0` | — |
+| `version` | `bigint` | NN | `0` | Optimistic version |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
@@ -334,6 +336,7 @@ artwork key use lowercase kebab case; display order is non-negative.
 | `name` | `varchar(100)` | NN | — | UQ with `menu_product_id` |
 | `display_order` | `integer` | NN | `0` | — |
 | `is_default` | `boolean` | NN | `false` | Partial UQ with `menu_product_id` when true and active |
+| `version` | `bigint` | NN | `0` | Optimistic version |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
@@ -353,6 +356,7 @@ per product. Name must not be blank and display order must be non-negative.
 | `price_minor` | `bigint` | NN | — | — |
 | `currency_code` | `varchar(3)` | NN | — | — |
 | `available` | `boolean` | NN | `true` | — |
+| `version` | `bigint` | NN | `0` | Optimistic version |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
@@ -369,6 +373,7 @@ currency is a three-letter uppercase code.
 | `minimum_selections` | `integer` | NN | `0` | — |
 | `maximum_selections` | `integer` | NN | `1` | — |
 | `display_order` | `integer` | NN | `0` | — |
+| `version` | `bigint` | NN | `0` | Optimistic version |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
@@ -386,6 +391,7 @@ display order must be non-negative.
 | `name` | `varchar(120)` | NN | — | UQ with `option_group_id` |
 | `display_order` | `integer` | NN | `0` | — |
 | `is_default` | `boolean` | NN | `false` | Partial UQ with `option_group_id` when true and active |
+| `version` | `bigint` | NN | `0` | Optimistic version |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
@@ -403,6 +409,7 @@ per option group. Name must not be blank and display order must be non-negative.
 | `option_choice_id` | `uuid` | NN | — | FK with `organization_id` → `option_choice`; UQ with `menu_variant_id` |
 | `price_delta_minor` | `bigint` | NN | `0` | — |
 | `enabled` | `boolean` | NN | `true` | — |
+| `version` | `bigint` | NN | `0` | Optimistic version |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
@@ -586,6 +593,11 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `uq_menu_product_public_slug_organization` | `menu_product` | `(organization_id, public_slug) WHERE public_slug IS NOT NULL` | Resolve a product URL inside an organization. |
 | `uq_menu_variant_default_product` | `menu_variant` | `(menu_product_id) WHERE is_default AND archived_at IS NULL` | Keep one active default size per product. |
 | `uq_option_choice_default_group` | `option_choice` | `(option_group_id) WHERE is_default AND archived_at IS NULL` | Keep one active default choice per option group. |
+| `uq_menu_product_name_organization_ci` | `menu_product` | `(organization_id, lower(name))` | Prevent case-insensitive duplicate product names. |
+| `uq_menu_product_public_slug_organization_ci` | `menu_product` | `(organization_id, lower(public_slug)) WHERE public_slug IS NOT NULL` | Prevent case-insensitive duplicate product slugs. |
+| `uq_menu_variant_name_product_ci` | `menu_variant` | `(menu_product_id, lower(name))` | Prevent case-insensitive duplicate variant names. |
+| `uq_option_group_name_organization_ci` | `option_group` | `(organization_id, lower(name))` | Prevent case-insensitive duplicate option-group names. |
+| `uq_option_choice_name_group_ci` | `option_choice` | `(option_group_id, lower(name))` | Prevent case-insensitive duplicate choice names. |
 | `idx_offering_catalog` | `menu_variant_offering` | `(location_id, available, menu_variant_id)` | Location menu lookup. |
 | `idx_inventory_balance_stock` | `inventory_balance` | `(location_id, quantity)` | Stock-level lookup. |
 | `idx_inventory_movement_history` | `inventory_movement` | `(location_id, ingredient_id, created_at DESC)` | Movement history. |

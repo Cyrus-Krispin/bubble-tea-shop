@@ -23,4 +23,15 @@ public class CatalogStaffAccessService {
         if (!allowed) throw new StaffAccessDeniedException();
         return context;
     }
+
+    public StaffContextService.StaffContext authorizeLocation(UUID subject, UUID organizationId,
+                                                               UUID locationId) {
+        StaffContextService.StaffContext context = authorize(subject, organizationId);
+        boolean allowed = context.memberships().stream()
+            .filter(membership -> membership.organizationId().equals(organizationId))
+            .flatMap(membership -> membership.locations().stream())
+            .anyMatch(location -> location.id().equals(locationId));
+        if (!allowed) throw new StaffAccessDeniedException();
+        return context;
+    }
 }
