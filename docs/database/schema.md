@@ -33,6 +33,9 @@ erDiagram
     REFRESH_SESSION o|--o| REFRESH_SESSION : replaces
 
     ORGANIZATION ||--o{ INGREDIENT : owns
+    ORGANIZATION ||--o{ CATALOG_CHANGE : records
+    ACCOUNT ||--o{ CATALOG_CHANGE : performs
+    INGREDIENT ||--o{ CATALOG_CHANGE : audited_by
     ORGANIZATION ||--o{ RECIPE : owns
     RECIPE ||--o{ RECIPE_VERSION : versions
     ACCOUNT o|--o{ RECIPE_VERSION : creates
@@ -83,6 +86,8 @@ erDiagram
 | `refresh_session.account_id` | `account.id` | Legacy session belongs to an account. |
 | `refresh_session.replaced_by_session_id` | `refresh_session.id` | Legacy rotated session points to its replacement. |
 | `ingredient.organization_id` | `organization.id` | Organization owns the ingredient. |
+| `catalog_change.organization_id` | `organization.id` | Change record belongs to an organization. |
+| `catalog_change.actor_account_id` | `account.id` | Account performed the catalog mutation. |
 | `recipe.organization_id` | `organization.id` | Organization owns the recipe. |
 | `recipe_version.(recipe_id, organization_id)` | `recipe.(id, organization_id)` | Version belongs to a recipe in the same organization. |
 | `recipe_version.created_by_account_id` | `account.id` | Optional account that created the version. |
@@ -223,12 +228,30 @@ Checks: expiry is after creation; a session cannot replace itself.
 | `sku` | `varchar(80)` | Nullable | — | UQ with `organization_id` |
 | `base_unit` | `varchar(20)` | NN | — | — |
 | `reorder_threshold` | `numeric(19,6)` | Nullable | — | — |
+| `version` | `bigint` | NN | `0` | — |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
-Unique: `(id, organization_id)`, `(organization_id, name)`, and `(organization_id, sku)`.
-`base_unit` is `GRAM`, `MILLILITER`, or `EACH`; reorder threshold is non-negative when present.
+Unique: `(id, organization_id)`, case-insensitive `(organization_id, name)`, and case-insensitive
+`(organization_id, sku)` when SKU is non-null. `base_unit` is `GRAM`, `MILLILITER`, or `EACH` and
+is immutable after creation; reorder threshold and version are non-negative.
+
+### `catalog_change`
+
+| Column | Type | Nullability | Default | Key |
+|---|---|---|---|---|
+| `id` | `uuid` | NN | `gen_random_uuid()` | PK |
+| `organization_id` | `uuid` | NN | — | FK → `organization.id` |
+| `entity_type` | `varchar(40)` | NN | — | — |
+| `entity_id` | `uuid` | NN | — | Logical catalog entity reference |
+| `action` | `varchar(20)` | NN | — | — |
+| `actor_account_id` | `uuid` | NN | — | FK → `account.id` |
+| `occurred_at` | `timestamptz` | NN | `now()` | — |
+
+V5 supports `INGREDIENT` entities and `CREATE`, `UPDATE`, and `ARCHIVE` actions. The entity ID is a
+logical reference so the table can later cover additional catalog entity types without a polymorphic
+foreign key. Application services append the audit row in the same transaction as the mutation.
 
 ### `recipe`
 
@@ -545,6 +568,9 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `idx_membership_active` | `organization_membership` | `(organization_id, role, active)` | Active role lookup. |
 | `idx_refresh_session_account_active` | `refresh_session` | `(account_id, expires_at) WHERE revoked_at IS NULL` | Legacy active-session lookup. |
 | `idx_ingredient_active` | `ingredient` | `(organization_id, name) WHERE archived_at IS NULL` | Active ingredient listing. |
+| `uq_ingredient_name_organization_ci` | `ingredient` | `(organization_id, lower(name))` | Prevent case-insensitive duplicate ingredient names. |
+| `uq_ingredient_sku_organization_ci` | `ingredient` | `(organization_id, lower(sku)) WHERE sku IS NOT NULL` | Prevent case-insensitive duplicate ingredient SKUs. |
+| `idx_catalog_change_entity` | `catalog_change` | `(organization_id, entity_type, entity_id, occurred_at DESC)` | Load an entity's audit history. |
 | `idx_recipe_active` | `recipe` | `(organization_id, name) WHERE archived_at IS NULL` | Active recipe listing. |
 | `idx_menu_product_active` | `menu_product` | `(organization_id, name) WHERE archived_at IS NULL` | Active product listing. |
 | `uq_menu_product_public_slug_organization` | `menu_product` | `(organization_id, public_slug) WHERE public_slug IS NOT NULL` | Resolve a product URL inside an organization. |

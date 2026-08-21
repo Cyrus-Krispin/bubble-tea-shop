@@ -42,7 +42,9 @@ public class IngredientEntity {
     @Column(name = "updated_at", nullable = false)
     Instant updatedAt;
 
+    @Column(nullable = false)
+    long version;
+
     protected IngredientEntity() {
     }
 }
-

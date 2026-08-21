@@ -15,7 +15,8 @@
 
 | Table | Purpose | Lifecycle |
 |---|---|---|
-| `ingredient` | Organization stock item in one base unit. | Archived after use. |
+| `ingredient` | Organization stock item in one immutable base unit, protected by an optimistic version. | Archived after use. |
+| `catalog_change` | Actor-attributed audit event for a catalog entity mutation. | Append-only at the service layer and retained permanently. |
 | `recipe` | Stable recipe name and description. | Archived after use. |
 | `recipe_version` | Numbered draft/published/retired formula revision. | Published content is immutable. |
 | `recipe_component` | Positive base-unit quantity of an ingredient. | Editable only while version is draft. |
@@ -60,3 +61,4 @@ Movement types:
 - Money: signed or non-negative `bigint` minor units as appropriate, plus `varchar(3)` ISO code.
 - Time: `timestamptz` in UTC.
 - Archival: nullable `archived_at`; historical foreign keys remain valid.
+- Optimistic concurrency: non-negative `bigint` versions supplied by staff clients and incremented on mutation.

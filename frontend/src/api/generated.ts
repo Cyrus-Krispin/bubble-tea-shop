@@ -4,6 +4,58 @@
  */
 
 export interface paths {
+    readonly "/api/v1/staff/organizations/{organizationId}/ingredients/{ingredientId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Update an active ingredient */
+        readonly put: operations["updateIngredient"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/ingredients": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List ingredients in an authorized organization */
+        readonly get: operations["listIngredients"];
+        readonly put?: never;
+        /** Create an ingredient */
+        readonly post: operations["createIngredient"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/ingredients/{ingredientId}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Archive an ingredient */
+        readonly post: operations["archiveIngredient"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/customer/account": {
         readonly parameters: {
             readonly query?: never;
@@ -123,12 +175,57 @@ export interface components {
                 readonly [key: string]: unknown;
             };
         };
+        readonly UpdateIngredientRequest: {
+            readonly name: string;
+            readonly sku?: string;
+            readonly reorderThreshold?: string;
+            /** Format: int64 */
+            readonly version: number;
+        };
+        readonly Ingredient: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly sku: string | null;
+            /** @enum {string} */
+            readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
+            readonly reorderThreshold: string | null;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+        };
+        readonly CreateIngredientRequest: {
+            readonly name: string;
+            readonly sku?: string;
+            /** @enum {string} */
+            readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
+            readonly reorderThreshold?: string;
+        };
+        readonly ArchiveIngredientRequest: {
+            /** Format: int64 */
+            readonly version: number;
+        };
         readonly CustomerAccountDto: {
             /** Format: uuid */
             readonly id: string;
             readonly email: string;
             /** Format: date-time */
             readonly createdAt: string;
+        };
+        readonly IngredientPage: {
+            readonly items: readonly components["schemas"]["Ingredient"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int64 */
+            readonly totalPages: number;
         };
         readonly StaffContext: {
             /** Format: uuid */
@@ -229,6 +326,266 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    readonly updateIngredient: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly ingredientId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateIngredientRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Ingredient updated */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Ingredient"];
+                };
+            };
+            /** @description Invalid ingredient input */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Missing or invalid authenticated identity */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description No active catalog access */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Ingredient not found in this organization */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Ingredient conflict or stale version */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    readonly listIngredients: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+                readonly query?: string;
+                readonly includeArchived?: boolean;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Ingredient page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["IngredientPage"];
+                };
+            };
+            /** @description Invalid pagination or search input */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Missing or invalid authenticated identity */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description No active catalog access */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    readonly createIngredient: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateIngredientRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Ingredient created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Ingredient"];
+                };
+            };
+            /** @description Invalid ingredient input */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Missing or invalid authenticated identity */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description No active catalog access */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Ingredient name or SKU already exists */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    readonly archiveIngredient: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly ingredientId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ArchiveIngredientRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Ingredient archived or already archived */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Ingredient"];
+                };
+            };
+            /** @description Invalid version */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Missing or invalid authenticated identity */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description No active catalog access */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Ingredient not found in this organization */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Ingredient version is stale */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
     readonly provisionCustomerAccount: {
         readonly parameters: {
             readonly query?: never;

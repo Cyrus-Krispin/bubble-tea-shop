@@ -9,6 +9,8 @@ V4 maps an application `ACCOUNT` to at most one external Supabase Auth subject. 
 `REFRESH_SESSION` relationship belongs to the superseded custom-auth design and is not the target
 Supabase session model; its later removal or archival is still undecided.
 
+V5 adds optimistic versions and durable, actor-attributed change records for ingredient management.
+
 ## Identity
 
 ```mermaid
@@ -27,6 +29,9 @@ erDiagram
 ```mermaid
 erDiagram
     ORGANIZATION ||--o{ INGREDIENT : owns
+    ORGANIZATION ||--o{ CATALOG_CHANGE : records
+    ACCOUNT ||--o{ CATALOG_CHANGE : performs
+    INGREDIENT ||--o{ CATALOG_CHANGE : audited_by
     ORGANIZATION ||--o{ RECIPE : owns
     RECIPE ||--o{ RECIPE_VERSION : versions
     RECIPE_VERSION ||--o{ RECIPE_COMPONENT : contains

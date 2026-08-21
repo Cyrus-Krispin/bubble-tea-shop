@@ -15,6 +15,11 @@
 
 ## Recipes and offerings
 
+- Ingredient names and non-null SKUs are unique per organization without regard to case.
+- An ingredient's base unit is immutable after creation. Updates and archival require the current
+  optimistic version; successful mutations increment it exactly once.
+- Ingredient creation, update, and archival append an actor-attributed `catalog_change` row in the
+  same transaction. Retrying an already-completed archive is an idempotent no-op.
 - A non-null location public slug resolves globally to one location; product public slugs are
   unique inside their organization.
 - Public slugs and artwork keys use lowercase kebab case. Each product has at most one active
@@ -53,3 +58,5 @@
   not duplicated in the browser.
 - V4 adds the Supabase subject mapping and makes legacy application-owned credential columns
   optional without editing V1.
+- V5 adds ingredient optimistic versions, case-insensitive organization uniqueness, and durable
+  catalog change auditing.

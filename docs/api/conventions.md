@@ -107,3 +107,18 @@ or duplicate that domain value. The menu is a bounded singleton resource for one
 inactive locations and products return `404` problem details with `CATALOG_NOT_FOUND` or
 `CATALOG_PRODUCT_NOT_FOUND`. All other `/api/**` routes keep their configured authentication or
 deny-by-default rule.
+
+## Ingredient management
+
+Staff ingredient endpoints are scoped beneath
+`/api/v1/staff/organizations/{organizationId}/ingredients`. Authorized owners and managers with at
+least one active location assignment can list, search, create, update, and archive ingredients.
+The server derives the caller and verifies organization scope; the path organization is never
+trusted as authorization evidence.
+
+Lists use zero-based `page`, bounded `size` (1–100), optional `query`, and `includeArchived=false`
+by default. Create normalizes surrounding whitespace and uppercases non-null SKUs. Base units are
+immutable after creation. Update and archive bodies require the current `version`; stale versions
+return `409` with `INGREDIENT_VERSION_CONFLICT`. Archive is retry-safe, historical rows remain
+addressable when explicitly requested, and every successful mutation records the acting account in
+the durable catalog audit table.
