@@ -83,6 +83,8 @@ erDiagram
 | `organization_membership.account_id` | `account.id` | Membership is granted to an account. |
 | `location_assignment.(membership_id, organization_id)` | `organization_membership.(id, organization_id)` | Assignment belongs to a membership in the same organization. |
 | `location_assignment.(location_id, organization_id)` | `location.(id, organization_id)` | Assignment targets a location in the same organization. |
+| `staff_access_change.(membership_id, organization_id)` | `organization_membership.(id, organization_id)` | Access event belongs to a membership in the same organization. |
+| `staff_access_change.actor_account_id` | `account.id` | Owner account performed the access mutation. |
 | `refresh_session.account_id` | `account.id` | Legacy session belongs to an account. |
 | `refresh_session.replaced_by_session_id` | `refresh_session.id` | Legacy rotated session points to its replacement. |
 | `ingredient.organization_id` | `organization.id` | Organization owns the ingredient. |
@@ -162,13 +164,15 @@ non-blank name, lowercase kebab-case public slug, and three-letter uppercase cur
 | `normalized_username` | `varchar(100)` | Nullable | — | UQ |
 | `password_hash` | `varchar(255)` | Nullable | — | — |
 | `auth_subject` | `uuid` | Nullable | — | UQ |
+| `email` | `varchar(254)` | Nullable | — | Case-insensitive partial UQ |
 | `enabled` | `boolean` | NN | `true` | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
 Non-null legacy usernames and password hashes must not be blank; a non-null normalized username
 must equal `lower(btrim(username))`. A non-null Auth subject uniquely identifies the corresponding
-Supabase user.
+Supabase user. A non-null verified email is normalized to `lower(btrim(email))`, contains `@`, and
+is unique without regard to case.
 
 ### `organization_membership`
 
@@ -179,11 +183,12 @@ Supabase user.
 | `account_id` | `uuid` | NN | — | FK → `account.id`; UQ with `organization_id` |
 | `role` | `varchar(20)` | NN | — | — |
 | `active` | `boolean` | NN | `true` | — |
+| `version` | `bigint` | NN | `0` | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
 Unique: `(id, organization_id)` and `(organization_id, account_id)`. Role is `OWNER` or
-`MANAGER`.
+`MANAGER`; version is non-negative.
 
 ### `location_assignment`
 
@@ -195,6 +200,20 @@ Unique: `(id, organization_id)` and `(organization_id, account_id)`. Role is `OW
 | `created_at` | `timestamptz` | NN | `now()` | — |
 
 Primary key: `(membership_id, location_id)`.
+
+### `staff_access_change`
+
+| Column | Type | Nullability | Default | Key |
+|---|---|---|---|---|
+| `id` | `uuid` | NN | `gen_random_uuid()` | PK |
+| `organization_id` | `uuid` | NN | — | FK → `organization.id`; composite FK component |
+| `membership_id` | `uuid` | NN | — | FK with `organization_id` → `organization_membership` |
+| `action` | `varchar(30)` | NN | — | — |
+| `actor_account_id` | `uuid` | NN | — | FK → `account.id` |
+| `occurred_at` | `timestamptz` | NN | `now()` | — |
+
+Actions are `CREATE`, `REACTIVATE`, `UPDATE_ASSIGNMENTS`, or `DEACTIVATE`. Update and deletion are
+rejected by a database trigger.
 
 ### `refresh_session`
 
@@ -593,6 +612,8 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `idx_location_active` | `location` | `(organization_id, active)` | Active location lookup. |
 | `uq_location_public_slug` | `location` | `(public_slug) WHERE public_slug IS NOT NULL` | Resolve a public shop URL to one location. |
 | `idx_membership_active` | `organization_membership` | `(organization_id, role, active)` | Active role lookup. |
+| `uq_account_email_ci` | `account` | `(lower(email)) WHERE email IS NOT NULL` | Resolve one registered account by verified email. |
+| `idx_staff_access_change_timeline` | `staff_access_change` | `(organization_id, occurred_at DESC, id DESC)` | Deterministic owner audit pagination. |
 | `idx_refresh_session_account_active` | `refresh_session` | `(account_id, expires_at) WHERE revoked_at IS NULL` | Legacy active-session lookup. |
 | `idx_ingredient_active` | `ingredient` | `(organization_id, name) WHERE archived_at IS NULL` | Active ingredient listing. |
 | `uq_ingredient_name_organization_ci` | `ingredient` | `(organization_id, lower(name))` | Prevent case-insensitive duplicate ingredient names. |

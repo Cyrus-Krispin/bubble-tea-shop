@@ -10,8 +10,13 @@
 
 - A non-null Supabase Auth subject maps to at most one application account.
 - Customer account provisioning derives the subject from a verified JWT and creates no
-  organization membership.
+  organization membership; it persists the normalized verified email for owner grants.
 - An account without an active membership has no staff or owner authorization.
+- Verified account emails are unique without regard to case. Owners can grant or reactivate only
+  manager memberships in their organization and only with distinct active same-organization
+  locations.
+- Manager membership changes lock the membership, require the current non-negative version, update
+  all assignments atomically, and append an immutable actor-attributed staff-access change.
 
 ## Recipes and offerings
 
@@ -113,3 +118,5 @@
 - V10 enforces one payment per order and records paid time plus the staff actor accepting cash.
 - V11 makes catalog audit rows database-enforced immutable and indexes deterministic organization
   timelines for catalog and order status events.
+- V12 stores verified account emails, adds manager membership optimistic versions, and adds the
+  immutable staff-access change ledger used by owner management.

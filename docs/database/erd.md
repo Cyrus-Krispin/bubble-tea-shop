@@ -21,6 +21,8 @@ published recipe versions that have ingredient and topping-consumption data.
 V10 makes payment ownership one-to-one and adds the paid timestamp and cash-accepting staff actor.
 V11 makes catalog change rows database-enforced immutable and adds deterministic organization
 timeline indexes for catalog and order-status audit reads; it introduces no new relationships.
+V12 persists verified account emails, versions manager memberships, and adds the immutable
+staff-access change ledger.
 
 ## Identity
 
@@ -32,6 +34,8 @@ erDiagram
     ACCOUNT ||--o{ ORGANIZATION_MEMBERSHIP : receives
     ORGANIZATION_MEMBERSHIP ||--o{ LOCATION_ASSIGNMENT : scoped_by
     LOCATION ||--o{ LOCATION_ASSIGNMENT : allows
+    ORGANIZATION_MEMBERSHIP ||--o{ STAFF_ACCESS_CHANGE : changed_by_event
+    ACCOUNT ||--o{ STAFF_ACCESS_CHANGE : performs
     ACCOUNT ||--o{ REFRESH_SESSION : has_legacy_session
 ```
 

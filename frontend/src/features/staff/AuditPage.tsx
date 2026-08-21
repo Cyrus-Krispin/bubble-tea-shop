@@ -157,6 +157,7 @@ export default function AuditPage() {
             <option value="CATALOG">Catalog</option>
             <option value="INVENTORY">Inventory</option>
             <option value="ORDER">Orders</option>
+            <option value="STAFF">Staff access</option>
           </select>
         </Field>
         <Button

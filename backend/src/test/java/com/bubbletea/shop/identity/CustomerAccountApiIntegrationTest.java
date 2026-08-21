@@ -75,6 +75,10 @@ class CustomerAccountApiIntegrationTest {
             Integer.class,
             authSubject)).isEqualTo(1);
         assertThat(jdbc.queryForObject(
+            "SELECT email FROM account WHERE auth_subject = ?",
+            String.class,
+            authSubject)).isEqualTo("customer@example.test");
+        assertThat(jdbc.queryForObject(
             "SELECT count(*) FROM organization_membership membership "
                 + "JOIN account ON account.id = membership.account_id "
                 + "WHERE account.auth_subject = ?",

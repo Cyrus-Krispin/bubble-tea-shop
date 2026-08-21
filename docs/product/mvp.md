@@ -32,7 +32,7 @@ stock, staff, or order data.
 
 - Creates an optional account without receiving staff or owner access.
 - Can still use the same customer ordering experience as a guest.
-- Will receive account-linked order history when order placement is implemented.
+- Account-linked orders are retained for a later order-history interface.
 
 ## In-scope workflows
 

@@ -73,4 +73,16 @@ describe("auditClient", () => {
     await expect(listAuditEvents("token", "org", { page: 0, size: 50 }))
       .rejects.toThrow("invalid staff audit response");
   });
+
+  it("accepts owner-only staff access events", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      items: [{ ...auditEvent, category: "STAFF", entityType: "MANAGER_MEMBERSHIP" }],
+      page: 0,
+      size: 50,
+      totalItems: 1,
+      totalPages: 1,
+    }), { status: 200 })));
+    await expect(listAuditEvents("token", "org", { category: "STAFF", page: 0, size: 50 }))
+      .resolves.toMatchObject({ items: [{ category: "STAFF" }] });
+  });
 });

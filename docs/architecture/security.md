@@ -75,9 +75,10 @@ The browser client delegates session persistence and refresh to Supabase Auth; i
 manually store access or refresh tokens. It adds no Spring login, refresh, logout, or password
 endpoint and does not treat `role`, `user_metadata`, organization, location, or other token claims
 as application authorization evidence.
-Self-service Auth signup creates customer identities only. Staff access requires the explicit,
-operator-only owner bootstrap or a later owner-managed workflow, and Spring never derives staff
-access from signup metadata.
+Self-service Auth signup creates customer identities only. Initial owner access requires the
+explicit operator-only bootstrap. An authenticated owner may subsequently grant, scope,
+deactivate, or reactivate manager access for existing verified application accounts through the
+Spring API. Spring never derives staff access from signup metadata.
 
 ## Authorization
 

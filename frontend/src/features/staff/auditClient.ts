@@ -53,7 +53,7 @@ function positiveInteger(value: unknown): number {
 }
 
 function category(value: unknown): AuditCategory {
-  if (value !== "CATALOG" && value !== "INVENTORY" && value !== "ORDER") invalid();
+  if (value !== "CATALOG" && value !== "INVENTORY" && value !== "ORDER" && value !== "STAFF") invalid();
   return value;
 }
 

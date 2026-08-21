@@ -80,6 +80,10 @@ export function StaffLayout() {
           <NavLink to="/staff/inventory">Inventory</NavLink>
           <NavLink to="/staff/orders">Orders</NavLink>
           <NavLink to="/staff/audit">Audit</NavLink>
+          {visibleState.status === "ready"
+            && visibleState.context.memberships.some((membership) => membership.role === "OWNER")
+            ? <NavLink to="/staff/managers">Team</NavLink>
+            : null}
         </nav>
         <div className="staff-account">
           <span>{session.email}</span>

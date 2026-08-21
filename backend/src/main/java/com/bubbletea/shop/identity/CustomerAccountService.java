@@ -16,23 +16,18 @@ public class CustomerAccountService {
     }
 
     @Transactional
-    public ProvisioningResult provision(UUID authSubject) {
+    public ProvisioningResult provision(UUID authSubject, String email) {
         UUID accountId = UUID.randomUUID();
-        boolean created = jdbc.sql("""
-                INSERT INTO account (id, auth_subject)
-                VALUES (:accountId, :authSubject)
-                ON CONFLICT (auth_subject) DO NOTHING
+        AccountRecord account = jdbc.sql("""
+                INSERT INTO account (id, auth_subject, email)
+                VALUES (:accountId, :authSubject, :email)
+                ON CONFLICT (auth_subject) DO UPDATE
+                    SET email = EXCLUDED.email
+                RETURNING id, enabled, created_at
                 """)
             .param("accountId", accountId)
             .param("authSubject", authSubject)
-            .update() == 1;
-
-        AccountRecord account = jdbc.sql("""
-                SELECT id, enabled, created_at
-                  FROM account
-                 WHERE auth_subject = :authSubject
-                """)
-            .param("authSubject", authSubject)
+            .param("email", email)
             .query((rs, rowNum) -> new AccountRecord(
                 rs.getObject("id", UUID.class),
                 rs.getBoolean("enabled"),
@@ -43,7 +38,7 @@ public class CustomerAccountService {
             throw new CustomerAccountDisabledException();
         }
 
-        return new ProvisioningResult(account.id(), account.createdAt(), created);
+        return new ProvisioningResult(account.id(), account.createdAt(), account.id().equals(accountId));
     }
 
     private record AccountRecord(UUID id, boolean enabled, Instant createdAt) {

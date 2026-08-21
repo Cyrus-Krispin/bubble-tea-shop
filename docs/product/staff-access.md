@@ -137,5 +137,6 @@ the request.
 
 ## Open Questions
 
-None for the MVP. Manager invitation/deactivation UI belongs to the subsequent owner-management
-slice; production secret storage and deployment command wrappers belong to operational hardening.
+None for the MVP. Owner-managed manager grants, assignment replacement, deactivation, and
+reactivation are specified in `owner-manager-management.md`; production secret storage and
+deployment command wrappers belong to operational hardening.

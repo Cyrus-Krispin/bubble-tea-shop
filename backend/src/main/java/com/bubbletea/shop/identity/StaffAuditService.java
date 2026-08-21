@@ -33,12 +33,13 @@ public class StaffAuditService {
         String placeholders = String.join(",", locationIds.stream().map(ignored -> "?").toList());
         String inventoryScope = owner ? "" : locationScope.formatted("movement", placeholders);
         String orderScope = owner ? "" : locationScope.formatted("orders", placeholders);
-        String union = unionSql(inventoryScope, orderScope);
+        String union = unionSql(inventoryScope, orderScope, owner);
 
         List<Object> unionParameters = new ArrayList<>();
         unionParameters.add(organizationId);
         unionParameters.add(organizationId);
         if (!owner) unionParameters.addAll(locationIds);
+        if (owner) unionParameters.add(organizationId);
         unionParameters.add(organizationId);
         if (!owner) unionParameters.addAll(locationIds);
 
@@ -71,8 +72,8 @@ public class StaffAuditService {
             .orElseThrow(StaffAccessDeniedException::new);
     }
 
-    private String unionSql(String inventoryScope, String orderScope) {
-        return """
+    private String unionSql(String inventoryScope, String orderScope, boolean owner) {
+        String operationalEvents = """
             SELECT change.id, 'CATALOG' AS category, change.action,
                    change.entity_type, change.entity_id,
                    COALESCE(ingredient.name, recipe.name, product.name, variant.name,
@@ -118,6 +119,23 @@ public class StaffAuditService {
          LEFT JOIN account actor ON actor.id = history.changed_by_account_id
              WHERE history.organization_id = ?
             """ + orderScope;
+        if (!owner) return operationalEvents;
+        return operationalEvents + """
+            UNION ALL
+            SELECT change.id, 'STAFF', change.action,
+                   'MANAGER_MEMBERSHIP', change.membership_id,
+                   COALESCE(account.email, account.username,
+                            'Account ' || left(account.id::text, 8)),
+                   NULL::uuid, NULL::varchar, change.actor_account_id,
+                   COALESCE(actor.email, actor.username,
+                            'Staff ' || left(change.actor_account_id::text, 8)),
+                   change.occurred_at, NULL::text
+              FROM staff_access_change change
+              JOIN organization_membership membership ON membership.id = change.membership_id
+              JOIN account ON account.id = membership.account_id
+              JOIN account actor ON actor.id = change.actor_account_id
+             WHERE change.organization_id = ?
+            """;
     }
 
     private AuditEvent map(ResultSet rs, int rowNumber) throws SQLException {
@@ -136,7 +154,7 @@ public class StaffAuditService {
             rs.getString("detail"));
     }
 
-    public enum AuditCategory { CATALOG, INVENTORY, ORDER }
+    public enum AuditCategory { CATALOG, INVENTORY, ORDER, STAFF }
 
     public record AuditEvent(
         UUID id,

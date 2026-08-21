@@ -41,7 +41,7 @@ export function CustomerAccountPage() {
           <section className="account-panel" aria-labelledby="details-heading">
             <h2 id="details-heading">Account details</h2>
             <dl><div><dt>Email</dt><dd>{session.email}</dd></div></dl>
-            <p className="account-note">Order history will appear here after checkout is implemented.</p>
+            <p className="account-note">Account-linked order history is planned for a later release.</p>
             {signOutFailed ? <p className="form-message form-message--error" role="alert">We couldn&apos;t sign you out. Please try again.</p> : null}
             <Button onClick={handleSignOut} variant="secondary">Sign out</Button>
           </section>

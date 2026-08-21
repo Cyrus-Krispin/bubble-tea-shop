@@ -67,7 +67,7 @@ public class CustomerAccountController {
     ResponseEntity<CustomerAccountDto> provision(@AuthenticationPrincipal Jwt jwt) {
         UUID authSubject = authSubject(jwt);
         String email = email(jwt);
-        CustomerAccountService.ProvisioningResult result = accounts.provision(authSubject);
+        CustomerAccountService.ProvisioningResult result = accounts.provision(authSubject, email);
         CustomerAccountDto body = new CustomerAccountDto(result.id(), email, result.createdAt());
 
         return ResponseEntity.status(result.created() ? HttpStatus.CREATED : HttpStatus.OK)

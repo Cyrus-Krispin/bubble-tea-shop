@@ -126,6 +126,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/managers/{membershipId}/assignments": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Replace an active manager's assigned locations */
+        readonly put: operations["replaceOrganizationManagerAssignments"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/offerings/{offeringId}": {
         readonly parameters: {
             readonly query?: never;
@@ -378,6 +395,41 @@ export interface paths {
         readonly put?: never;
         /** Archive an unused menu product */
         readonly post: operations["archiveMenuProduct"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/managers": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List manager memberships as an owner */
+        readonly get: operations["listOrganizationManagers"];
+        readonly put?: never;
+        /** Add or reactivate a registered customer as a manager */
+        readonly post: operations["addOrReactivateOrganizationManager"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/managers/{membershipId}/deactivate": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Deactivate a manager membership */
+        readonly post: operations["deactivateOrganizationManager"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -900,6 +952,31 @@ export interface components {
             readonly ingredientId: string;
             readonly quantityDelta: string;
         };
+        readonly AssignmentRequest: {
+            /** Format: int64 */
+            readonly version: number;
+            readonly locationIds: readonly string[];
+        };
+        readonly ManagerLocation: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+        };
+        readonly ManagerSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly accountId: string;
+            readonly email: string;
+            readonly active: boolean;
+            /** Format: int64 */
+            readonly version: number;
+            readonly locations: readonly components["schemas"]["ManagerLocation"][];
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+        };
         readonly UpdateOfferingRequest: {
             /** Format: uuid */
             readonly recipeVersionId: string;
@@ -976,6 +1053,11 @@ export interface components {
             /** Format: int32 */
             readonly displayOrder?: number;
             readonly defaultVariant?: boolean;
+        };
+        readonly AddManagerRequest: {
+            /** Format: email */
+            readonly email: string;
+            readonly locationIds: readonly string[];
         };
         readonly OrderDetail: {
             /** Format: uuid */
@@ -1209,6 +1291,17 @@ export interface components {
             /** Format: int32 */
             readonly activeVariantCount: number;
         };
+        readonly ManagerPage: {
+            readonly items: readonly components["schemas"]["ManagerSummary"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int32 */
+            readonly totalPages: number;
+        };
         readonly OrderPage: {
             readonly items: readonly components["schemas"]["OrderSummary"][];
             /** Format: int32 */
@@ -1292,7 +1385,7 @@ export interface components {
             /** Format: uuid */
             readonly id: string;
             /** @enum {string} */
-            readonly category: "CATALOG" | "INVENTORY" | "ORDER";
+            readonly category: "CATALOG" | "INVENTORY" | "ORDER" | "STAFF";
             readonly action: string;
             readonly entityType: string;
             /** Format: uuid */
@@ -1739,6 +1832,33 @@ export interface operations {
             readonly 403: components["responses"]["Problem"];
             readonly 404: components["responses"]["Problem"];
             readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly replaceOrganizationManagerAssignments: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly membershipId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["AssignmentRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ManagerSummary"];
+                };
+            };
         };
     };
     readonly updateMenuOffering: {
@@ -2356,6 +2476,93 @@ export interface operations {
             readonly 409: components["responses"]["Problem"];
         };
     };
+    readonly listOrganizationManagers: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ManagerPage"];
+                };
+            };
+        };
+    };
+    readonly addOrReactivateOrganizationManager: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["AddManagerRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Manager reactivated */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ManagerSummary"];
+                };
+            };
+            /** @description Manager created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ManagerSummary"];
+                };
+            };
+        };
+    };
+    readonly deactivateOrganizationManager: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly membershipId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ManagerSummary"];
+                };
+            };
+        };
+    };
     readonly completeStaffOrder: {
         readonly parameters: {
             readonly query?: never;
@@ -2884,7 +3091,7 @@ export interface operations {
     readonly listStaffAuditEvents: {
         readonly parameters: {
             readonly query?: {
-                readonly category?: "CATALOG" | "INVENTORY" | "ORDER";
+                readonly category?: "CATALOG" | "INVENTORY" | "ORDER" | "STAFF";
                 readonly page?: number;
                 readonly size?: number;
             };

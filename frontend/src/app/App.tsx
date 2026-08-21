@@ -23,6 +23,7 @@ const MenuProductDetailPage = lazy(() => import("../features/staff/MenuProductDe
 const InventoryManagementPage = lazy(() => import("../features/staff/InventoryManagementPage"));
 const OrderOperationsPage = lazy(() => import("../features/staff/OrderOperationsPage"));
 const AuditPage = lazy(() => import("../features/staff/AuditPage"));
+const ManagerManagementPage = lazy(() => import("../features/staff/ManagerManagementPage"));
 
 function CatalogLoading({ label }: { label: string }) {
   return (
@@ -125,6 +126,11 @@ export function App() {
             <Route path="audit" element={(
               <Suspense fallback={<CatalogLoading label="Audit timeline" />}>
                 <AuditPage />
+              </Suspense>
+            )} />
+            <Route path="managers" element={(
+              <Suspense fallback={<CatalogLoading label="Manager access" />}>
+                <ManagerManagementPage />
               </Suspense>
             )} />
           </Route>

@@ -20,6 +20,7 @@ healthy database.
   optional without editing V1; decide the unused refresh-session table separately.
 - Resolve verified Supabase identities to active owner/manager memberships and location
   assignments in Spring.
+- Owner manager membership and location-assignment management. (Implemented.)
 - Add a protected staff-context endpoint as the first authenticated vertical slice.
 - Ingredient and recipe-version management APIs and staff workspaces. (Implemented.)
 - Menu and option management APIs. (Implemented.)

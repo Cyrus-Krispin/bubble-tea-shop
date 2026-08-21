@@ -8,6 +8,8 @@ The Flyway migration remains the executable source of truth for the database.
 - [`product/mvp.md`](product/mvp.md) — MVP scope, roles, workflows, and deferred stories.
 - [`product/staff-access.md`](product/staff-access.md) — owner bootstrap and server-resolved staff
   authorization contract.
+- [`product/owner-manager-management.md`](product/owner-manager-management.md) — owner-only manager
+  membership and location-assignment lifecycle.
 - [`product/catalog-management.md`](product/catalog-management.md) — staff catalog authorization,
   ingredient lifecycle, concurrency, and audit contract.
 - [`product/inventory-management.md`](product/inventory-management.md) — location-scoped balances,

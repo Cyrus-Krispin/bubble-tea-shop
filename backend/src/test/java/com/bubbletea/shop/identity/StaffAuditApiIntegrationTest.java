@@ -52,13 +52,15 @@ class StaffAuditApiIntegrationTest {
 
         mvc.perform(get(path(fixture) + "?size=10").with(token(fixture)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.totalItems").value(3))
-            .andExpect(jsonPath("$.items[0].category").value("ORDER"))
-            .andExpect(jsonPath("$.items[0].entityLabel").value("AUDIT-001"))
-            .andExpect(jsonPath("$.items[1].category").value("INVENTORY"))
-            .andExpect(jsonPath("$.items[1].detail").value("5.000000 GRAM"))
-            .andExpect(jsonPath("$.items[2].id").value(catalogEvent.toString()))
-            .andExpect(jsonPath("$.items[2].entityLabel").value("Audit Tea"));
+            .andExpect(jsonPath("$.totalItems").value(4))
+            .andExpect(jsonPath("$.items[0].category").value("STAFF"))
+            .andExpect(jsonPath("$.items[0].entityType").value("MANAGER_MEMBERSHIP"))
+            .andExpect(jsonPath("$.items[1].category").value("ORDER"))
+            .andExpect(jsonPath("$.items[1].entityLabel").value("AUDIT-001"))
+            .andExpect(jsonPath("$.items[2].category").value("INVENTORY"))
+            .andExpect(jsonPath("$.items[2].detail").value("5.000000 GRAM"))
+            .andExpect(jsonPath("$.items[3].id").value(catalogEvent.toString()))
+            .andExpect(jsonPath("$.items[3].entityLabel").value("Audit Tea"));
 
         mvc.perform(get(path(fixture) + "?category=CATALOG").with(token(fixture)))
             .andExpect(status().isOk())
@@ -159,6 +161,19 @@ class StaffAuditApiIntegrationTest {
                 to_status, changed_by_account_id)
             VALUES (?, ?, NULL, 'PENDING', ?)
             """, fixture.organization(), order, fixture.account());
+        UUID managerAccount = UUID.randomUUID();
+        UUID managerMembership = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, email, enabled) VALUES (?, ?, true)",
+            managerAccount, "audit-manager-" + managerAccount.toString().substring(0, 8) + "@example.test");
+        jdbc.update("""
+            INSERT INTO organization_membership (id, organization_id, account_id, role)
+            VALUES (?, ?, ?, 'MANAGER')
+            """, managerMembership, fixture.organization(), managerAccount);
+        jdbc.update("""
+            INSERT INTO staff_access_change
+                (organization_id, membership_id, action, actor_account_id, occurred_at)
+            VALUES (?, ?, 'CREATE', ?, now() + interval '1 minute')
+            """, fixture.organization(), managerMembership, fixture.account());
         return catalogEvent;
     }
 
