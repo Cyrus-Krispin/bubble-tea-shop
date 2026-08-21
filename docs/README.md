@@ -14,6 +14,8 @@ The Flyway migration remains the executable source of truth for the database.
   immutable movements, and manual stock workflow contract.
 - [`product/guest-order-placement.md`](product/guest-order-placement.md) — server-priced guest
   checkout, immutable snapshots, and idempotent placement contract.
+- [`product/staff-order-operations.md`](product/staff-order-operations.md) — authorized order queue,
+  atomic cash collection, and inventory-safe completion contract.
 - [`product/glossary.md`](product/glossary.md) — shared domain language.
 - [`architecture/overview.md`](architecture/overview.md) — system shape and module responsibilities.
 - [`architecture/technology-stack.md`](architecture/technology-stack.md) — selected technologies,
