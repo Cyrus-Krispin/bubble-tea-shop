@@ -49,6 +49,11 @@ disable it. Do not leave bootstrap enabled in the long-running service.
    the selected platform and image entrypoint support it.
 7. Send application and ingress logs to access-controlled centralized storage with retention and
    alerting. Never log tokens, passwords, raw biometric material, or customer secrets.
+8. Enforce request body limits and rate limits at the trusted ingress, with stricter policies for
+   Auth and `POST /api/v1/guest/orders`. Preserve a trustworthy client address only at that proxy,
+   return `429` when a limit is exceeded, and monitor rejection volume without using customer data
+   as metric labels.
+9. Set HSTS at the TLS-terminating ingress. Do not enable it on the local HTTP-only Compose stack.
 
 ## Release and rollback
 

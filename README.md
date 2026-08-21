@@ -5,14 +5,15 @@ Schema-first monorepo for a bubble tea shop management and ordering platform.
 ## Repository layout
 
 - `backend/` — Spring Boot modular monolith and Flyway migrations.
-- `frontend/` — React/Vite application workspace (UI implementation follows the schema slice).
+- `frontend/` — React/Vite customer ordering and staff operations SPA.
 - `docs/` — product, architecture, database, API, and delivery documentation.
-- `infra/` — infrastructure notes and future deployment assets.
+- `infra/` — local Auth/database assets and backup/restore tooling.
 
 ## Quick start
 
 ```bash
 cp .env.example .env
+node infra/supabase/generate-local-auth-keys.mjs >> .env
 docker compose up --build
 ```
 

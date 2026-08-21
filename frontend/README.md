@@ -1,8 +1,8 @@
 # Frontend
 
-The frontend is a React, TypeScript, and Vite single-page application. It contains a customer-first
-ordering preview, optional customer accounts, and staff email/password sign-in through the local
-Supabase Auth gateway.
+The frontend is a React, TypeScript, and Vite single-page application. It contains customer cash
+ordering, optional customer accounts, and authorized staff operations through the local Supabase
+Auth gateway and Spring API.
 
 ## Commands
 
@@ -31,15 +31,15 @@ secret or service-role credential.
 - `src/test/accessibility.ts` — shared axe-core WCAG test gate.
 - `.storybook/` — React/Vite component catalog configuration.
 
-The browser talks to Supabase Auth only for session lifecycle. Guest catalog calls use same-origin
-Spring endpoints under `/api/v1/guest`; Nginx and the Vite development server proxy `/api` to the
-backend. The browser must not call Supabase data APIs directly. OpenAPI client generation remains a
-later contract-tooling increment.
+The browser talks to Supabase Auth only for session lifecycle. Domain calls use same-origin Spring
+endpoints under `/api/v1`; Nginx and the Vite development server proxy `/api` to the backend. The
+browser must not call Supabase data APIs directly. API clients use generated immutable TypeScript
+types from the committed Spring OpenAPI contract.
 
 Self-service registration is enabled for customer accounts. After Supabase establishes a session,
 the frontend calls Spring's authenticated, bodyless account-provisioning endpoint. Signup never
-creates a role or organization membership. Staff accounts still require the later owner/bootstrap
-workflow.
+creates a role or organization membership. The first owner requires the one-shot bootstrap command;
+owners can then grant, scope, deactivate, and reactivate registered manager accounts.
 
 ## Implemented routes
 
@@ -51,11 +51,18 @@ workflow.
 - `/account/sign-in` — customer sign-in and application-account provisioning.
 - `/account` — session-aware customer account summary and sign-out.
 - `/staff/sign-in` — existing staff authentication flow.
+- `/staff` — server-scoped operations overview.
+- `/staff/catalog/*` — ingredient, recipe, menu, variant, option-group, and choice management.
+- `/staff/inventory` — current balances and immutable manual movement history.
+- `/staff/orders` — authorized pending queue, detail, cash collection, and completion.
+- `/staff/audit` — role-scoped operational audit timeline.
+- `/staff/managers` — owner-only manager membership and location assignment management.
 
 The customer routes fetch products, location, prices, availability, variants, option defaults, and
 price deltas from Spring. Responses are validated before rendering, and failures show loading/error
-states without a runtime fallback catalog. Cart totals remain previews, checkout is disabled, and
-no order or inventory reservation is created until the guest ordering API exists.
+states without a runtime fallback catalog. Cart totals remain previews until Spring validates the
+submitted identifiers and returns the authoritative cash-order total. Ambiguous failures reuse the
+same idempotency key so retries cannot create duplicate orders.
 
 ## Documentation
 

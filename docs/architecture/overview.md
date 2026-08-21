@@ -12,7 +12,7 @@ flowchart LR
     DB[("PostgreSQL<br/>local Compose today")]
 
     UI -->|"JSON over HTTPS<br/>generated OpenAPI client"| API
-    UI -.->|"local sign-in/session<br/>(planned frontend slice)"| AUTH
+    UI -->|"sign-in and session lifecycle"| AUTH
     API -.->|"JWKS discovery<br/>private Compose network"| AUTH
     API --> DB
 ```
@@ -31,17 +31,17 @@ PostgreSQL owns relational integrity; Spring owns workflows and server-side auth
 | `inventory` | Balances, immutable movements, manual stock transactions | identity and catalog identifiers |
 | `ordering` | Order snapshots, payments, status history, completion | identity, catalog, inventory |
 
-Entities are persistence details and must not be returned directly from future controllers.
+Entities are persistence details and are not returned directly from controllers.
 Cross-module changes go through application services rather than writing another module's tables
 from controllers.
 
 ## Frontend direction
 
-The future frontend is one React/TypeScript/Vite SPA:
+The frontend is one React/TypeScript/Vite SPA:
 
 - `app` owns routing and providers.
 - `features` groups screens and behavior by backend domain.
-- `design-system` owns tokens and accessible Radix-based components.
+- `components/ui` owns tokens and accessible Radix-based components.
 - Guest catalog pages load server-owned values from Spring; TanStack Query remains planned for
   broader server-state caching.
 - The API client is generated from Spring's OpenAPI document.

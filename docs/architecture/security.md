@@ -7,7 +7,7 @@ earlier plan for Spring to verify passwords, issue access tokens, and rotate app
 refresh sessions. Spring implements bearer-token validation, customer identity provisioning, the
 operator-only owner bootstrap, and a staff context endpoint backed by server-owned scope
 resolution. Catalog, inventory, and order operations use that scope; staff membership management
-remains a later increment.
+is owner-only and records immutable actor-attributed access changes.
 
 The Phase 1 schema still contains legacy credential and refresh-session columns. Flyway V4 keeps
 the immutable V1 columns for compatibility, makes the application-owned credential fields

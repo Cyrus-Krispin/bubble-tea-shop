@@ -1,3 +1,5 @@
+allowBuilds:
+  esbuild@0.28.2: true
 minimumReleaseAgeExclude:
   - '@vitest/expect@4.1.11'
   - '@vitest/mocker@4.1.11'
