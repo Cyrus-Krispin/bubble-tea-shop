@@ -93,6 +93,47 @@
   border-radius: var(--radius-card);
 }
 
+.audit-toolbar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(12rem, 1fr)) auto;
+  gap: var(--space-4);
+  align-items: end;
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.audit-category {
+  display: inline-flex;
+  width: max-content;
+  padding: 0.3rem var(--space-2);
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--color-canvas);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+}
+
+.audit-category--catalog {
+  color: var(--color-forest-strong);
+  background: var(--color-mint);
+}
+
+.audit-category--inventory {
+  color: #6b4500;
+  background: #fff5d6;
+}
+
+.audit-category--order {
+  color: #51317a;
+  background: #f3edff;
+}
+
 .order-workspace,
 .order-line-list,
 .order-requirement-list {
@@ -614,6 +655,7 @@
   }
 
   .order-toolbar,
+  .audit-toolbar,
   .order-detail-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -670,6 +712,7 @@
   }
 
   .order-toolbar,
+  .audit-toolbar,
   .order-detail-grid {
     grid-template-columns: 1fr;
   }

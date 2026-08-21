@@ -16,7 +16,7 @@
 | Table | Purpose | Lifecycle |
 |---|---|---|
 | `ingredient` | Organization stock item in one immutable base unit, protected by an optimistic version. | Archived after use, but not while consumed by an available offering. |
-| `catalog_change` | Actor-attributed audit event for ingredient, recipe, menu, offering, and option mutations. | Append-only at the service layer and retained permanently. |
+| `catalog_change` | Actor-attributed audit event for ingredient, recipe, menu, offering, and option mutations. | Database-enforced append-only and retained permanently. |
 | `recipe` | Stable recipe name and description with optimistic concurrency. | Archived only when no available offering uses any version. |
 | `recipe_version` | Numbered draft/published/retired formula revision with optimistic concurrency. | One draft per recipe; published content is immutable and an offered version cannot retire. |
 | `recipe_component` | Positive base-unit quantity of an ingredient. | Editable only while version is draft. |
@@ -51,7 +51,7 @@ Movement types:
 | `order_item` | Product, variant, quantity, and price snapshots. | Immutable after placement. |
 | `order_item_option` | Selected option name and price snapshots. | Immutable after placement. |
 | `order_item_consumption` | Final positive ingredient quantities for the complete line. | Immutable after placement. |
-| `order_status_history` | Actor and timestamp for every transition. | Append-only at service layer. |
+| `order_status_history` | Actor and timestamp for every transition. | Database-enforced append-only and retained as an operational audit source. |
 | `payment` | One cash/card-compatible payment record per order. | Pending cash becomes paid atomically with completion; paid time and accepting actor are retained. |
 
 ## Shared representations

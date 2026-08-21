@@ -85,6 +85,11 @@
 - Repeating completion for an already-completed order succeeds as an idempotent no-op.
 - A shortage leaves both the order and every inventory row unchanged.
 - Completed and cancelled timestamps must agree with current status.
+- Catalog changes, inventory movements, and order status transitions form the durable operational
+  audit timeline. Owners can read their full organization; managers can read organization-wide
+  catalog events and operational events only for assigned locations.
+- Catalog changes, inventory movements, and order status history are database-enforced append-only;
+  update and deletion are rejected.
 
 ## Migration policy
 
@@ -106,3 +111,5 @@
 - V9 adds location-scoped checkout idempotency, sequence-backed public order numbers, and complete
   recipe and topping-consumption data for the versioned local guest catalog seed.
 - V10 enforces one payment per order and records paid time plus the staff actor accepting cash.
+- V11 makes catalog audit rows database-enforced immutable and indexes deterministic organization
+  timelines for catalog and order status events.

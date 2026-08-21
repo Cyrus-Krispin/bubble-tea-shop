@@ -557,6 +557,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/audit-events": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List the caller's authorized audit timeline */
+        readonly get: operations["listStaffAuditEvents"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/context": {
         readonly parameters: {
             readonly query?: never;
@@ -1269,6 +1286,37 @@ export interface components {
             /** Format: int64 */
             readonly totalItems: number;
             /** Format: int64 */
+            readonly totalPages: number;
+        };
+        readonly AuditEvent: {
+            /** Format: uuid */
+            readonly id: string;
+            /** @enum {string} */
+            readonly category: "CATALOG" | "INVENTORY" | "ORDER";
+            readonly action: string;
+            readonly entityType: string;
+            /** Format: uuid */
+            readonly entityId: string;
+            readonly entityLabel: string;
+            /** Format: uuid */
+            readonly locationId: string | null;
+            readonly locationName: string | null;
+            /** Format: uuid */
+            readonly actorAccountId: string | null;
+            readonly actorLabel: string | null;
+            /** Format: date-time */
+            readonly occurredAt: string;
+            readonly detail: string | null;
+        };
+        readonly AuditPage: {
+            readonly items: readonly components["schemas"]["AuditEvent"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int32 */
             readonly totalPages: number;
         };
         readonly StaffContext: {
@@ -2831,6 +2879,32 @@ export interface operations {
             readonly 403: components["responses"]["Problem"];
             readonly 404: components["responses"]["Problem"];
             readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly listStaffAuditEvents: {
+        readonly parameters: {
+            readonly query?: {
+                readonly category?: "CATALOG" | "INVENTORY" | "ORDER";
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Newest-first audit events */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["AuditPage"];
+                };
+            };
         };
     };
     readonly getStaffContext: {

@@ -19,6 +19,8 @@ V8 adds a partial uniqueness guard for one opening inventory movement per locati
 V9 adds location-scoped guest-checkout idempotency and replaces placeholder guest offerings with
 published recipe versions that have ingredient and topping-consumption data.
 V10 makes payment ownership one-to-one and adds the paid timestamp and cash-accepting staff actor.
+V11 makes catalog change rows database-enforced immutable and adds deterministic organization
+timeline indexes for catalog and order-status audit reads; it introduces no new relationships.
 
 ## Identity
 

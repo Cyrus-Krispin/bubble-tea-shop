@@ -16,6 +16,8 @@ The Flyway migration remains the executable source of truth for the database.
   checkout, immutable snapshots, and idempotent placement contract.
 - [`product/staff-order-operations.md`](product/staff-order-operations.md) — authorized order queue,
   atomic cash collection, and inventory-safe completion contract.
+- [`product/audit-views.md`](product/audit-views.md) — role-scoped, read-only operational audit
+  timeline contract.
 - [`product/glossary.md`](product/glossary.md) — shared domain language.
 - [`architecture/overview.md`](architecture/overview.md) — system shape and module responsibilities.
 - [`architecture/technology-stack.md`](architecture/technology-stack.md) — selected technologies,

@@ -598,6 +598,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `uq_ingredient_name_organization_ci` | `ingredient` | `(organization_id, lower(name))` | Prevent case-insensitive duplicate ingredient names. |
 | `uq_ingredient_sku_organization_ci` | `ingredient` | `(organization_id, lower(sku)) WHERE sku IS NOT NULL` | Prevent case-insensitive duplicate ingredient SKUs. |
 | `idx_catalog_change_entity` | `catalog_change` | `(organization_id, entity_type, entity_id, occurred_at DESC)` | Load an entity's audit history. |
+| `idx_catalog_change_timeline` | `catalog_change` | `(organization_id, occurred_at DESC, id DESC)` | Deterministic organization audit pagination. |
 | `idx_recipe_active` | `recipe` | `(organization_id, name) WHERE archived_at IS NULL` | Active recipe listing. |
 | `uq_recipe_name_organization_ci` | `recipe` | `(organization_id, lower(name))` | Prevent case-insensitive duplicate recipe names. |
 | `uq_recipe_single_draft` | `recipe_version` | `(recipe_id) WHERE status = 'DRAFT'` | Keep at most one editable draft per recipe. |
@@ -617,6 +618,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `idx_customer_order_status_time` | `customer_order` | `(location_id, status, created_at DESC)` | Order queue and history. |
 | `idx_order_item_order` | `order_item` | `(customer_order_id)` | Load order lines. |
 | `idx_order_history_order_time` | `order_status_history` | `(customer_order_id, changed_at)` | Load order transitions. |
+| `idx_order_status_history_timeline` | `order_status_history` | `(organization_id, changed_at DESC, id DESC)` | Deterministic organization audit pagination. |
 | `idx_payment_order` | `payment` | `(customer_order_id)` | Load order payments. |
 
 ## Keeping this reference current

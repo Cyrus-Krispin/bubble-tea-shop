@@ -22,6 +22,7 @@ const OptionGroupDetailPage = lazy(() => import("../features/staff/OptionGroupDe
 const MenuProductDetailPage = lazy(() => import("../features/staff/MenuProductDetailPage"));
 const InventoryManagementPage = lazy(() => import("../features/staff/InventoryManagementPage"));
 const OrderOperationsPage = lazy(() => import("../features/staff/OrderOperationsPage"));
+const AuditPage = lazy(() => import("../features/staff/AuditPage"));
 
 function CatalogLoading({ label }: { label: string }) {
   return (
@@ -119,6 +120,11 @@ export function App() {
             <Route path="orders" element={(
               <Suspense fallback={<CatalogLoading label="Order operations" />}>
                 <OrderOperationsPage />
+              </Suspense>
+            )} />
+            <Route path="audit" element={(
+              <Suspense fallback={<CatalogLoading label="Audit timeline" />}>
+                <AuditPage />
               </Suspense>
             )} />
           </Route>
