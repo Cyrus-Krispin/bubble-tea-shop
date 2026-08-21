@@ -78,7 +78,7 @@ export function StaffLayout() {
           <NavLink end to="/staff">Overview</NavLink>
           <NavLink to="/staff/catalog">Catalog</NavLink>
           <NavLink to="/staff/inventory">Inventory</NavLink>
-          <span aria-disabled="true">Orders</span>
+          <NavLink to="/staff/orders">Orders</NavLink>
         </nav>
         <div className="staff-account">
           <span>{session.email}</span>

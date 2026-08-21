@@ -35,8 +35,8 @@ healthy database.
 - Guest menu read APIs backed by a versioned local catalog seed. (Implemented.)
 - Guest order-placement APIs with consumption snapshots and server-recalculated totals. (Implemented.)
 - Guest cash checkout with idempotent retry and server-confirmed order details. (Implemented.)
-- Staff order queue and completion UI.
-- Cash payment recording and shortage conflict UX.
+- Staff order queue and completion UI. (Implemented.)
+- Cash payment recording and shortage conflict UX. (Implemented.)
 - End-to-end tests from order placement through inventory deduction.
 
 ## Phase 4 — Operational polish
