@@ -66,4 +66,4 @@ relevant full suite, focused commit, and push.
 - [x] Hardened images/config, non-root runtime, and secret/config validation.
 - [x] Backup/restore, deployment, incident, rollback, and alert runbooks.
 - [x] Browser E2E, WCAG checks, responsive checks, and performance budgets.
-- [ ] Clean-checkout release candidate verification and production-readiness review.
+- [x] Clean-checkout release candidate verification and production-readiness review.
