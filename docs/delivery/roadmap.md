@@ -34,6 +34,7 @@ healthy database.
 - Inventory balance, manual movement, and immutable history staff workspace. (Implemented.)
 - Guest menu read APIs backed by a versioned local catalog seed. (Implemented.)
 - Guest order-placement APIs with consumption snapshots and server-recalculated totals. (Implemented.)
+- Guest cash checkout with idempotent retry and server-confirmed order details. (Implemented.)
 - Staff order queue and completion UI.
 - Cash payment recording and shortage conflict UX.
 - End-to-end tests from order placement through inventory deduction.

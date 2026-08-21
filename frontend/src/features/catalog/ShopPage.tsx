@@ -37,7 +37,7 @@ export function ShopPage() {
             <h1 id="menu-title">Choose your brew</h1>
             <p>Small-batch tea, bright ingredients, and plenty of room to make it yours.</p>
           </div>
-          <p className="location-note"><strong>{state.data.location.name}</strong> · Checkout opens when live ordering is connected.</p>
+          <p className="location-note"><strong>{state.data.location.name}</strong> · Order online and pay cash at pickup.</p>
         </div>
         <div className="category-filter" aria-label="Filter drinks" role="group">
           {categories.map((option) => (

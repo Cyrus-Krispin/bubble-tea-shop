@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { cartReducer, initialCartState, type CartDraft } from "./cartReducer";
+import {
+  cartReducer,
+  initialCartState,
+  MAX_LINE_QUANTITY,
+  MAX_ORDER_QUANTITY,
+  type CartDraft,
+} from "./cartReducer";
 
 const moonlit: CartDraft = {
   drinkId: "moonlit-milk-tea",
@@ -45,5 +51,21 @@ describe("cartReducer", () => {
     const state = cartReducer(added, { type: "decrement", itemId: added.items[0].id });
 
     expect(state.items).toEqual([]);
+  });
+
+  it("caps line and order quantities at the checkout contract limits", () => {
+    const lineAtLimit = { ...moonlit, id: "line", quantity: MAX_LINE_QUANTITY };
+    expect(cartReducer({ items: [lineAtLimit] }, { type: "increment", itemId: "line" }))
+      .toEqual({ items: [lineAtLimit] });
+
+    const fullOrder = {
+      items: [
+        { ...moonlit, id: "one", quantity: MAX_LINE_QUANTITY },
+        { ...moonlit, id: "two", quantity: MAX_LINE_QUANTITY },
+        { ...moonlit, id: "three", quantity: MAX_ORDER_QUANTITY - (MAX_LINE_QUANTITY * 2) },
+      ],
+    };
+    expect(cartReducer(fullOrder, { type: "increment", itemId: "three" })).toEqual(fullOrder);
+    expect(cartReducer(fullOrder, { type: "add", draft: moonlit })).toEqual(fullOrder);
   });
 });
