@@ -5,7 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { catalogMenu, catalogProduct } from "../test/catalogFixtures";
 
 vi.mock("../features/auth/authClient", () => ({
+  getCurrentAuthSession: vi.fn().mockResolvedValue(null),
+  signInCustomer: vi.fn(),
   signInWithEmailAndPassword: vi.fn(),
+  signOut: vi.fn(),
+  signUpCustomer: vi.fn(),
+  subscribeToAuthState: vi.fn().mockReturnValue(() => undefined),
 }));
 vi.mock("../features/catalog/catalogClient", () => ({
   getGuestMenu: vi.fn(),
@@ -13,12 +18,54 @@ vi.mock("../features/catalog/catalogClient", () => ({
 }));
 
 import { App } from "./App";
+import { getCurrentAuthSession } from "../features/auth/authClient";
 import { getGuestMenu, getGuestProduct } from "../features/catalog/catalogClient";
 
 describe("App", () => {
   beforeEach(() => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue(null);
     vi.mocked(getGuestMenu).mockResolvedValue(catalogMenu);
     vi.mocked(getGuestProduct).mockResolvedValue(catalogProduct);
+  });
+
+  it("offers optional customer account creation without blocking guest ordering", () => {
+    render(
+      <MemoryRouter initialEntries={["/account/create"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("main")).toHaveAccessibleName("Create customer account");
+    expect(screen.getByRole("heading", { level: 1, name: "Save your tea journey" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Continue as guest" })).toHaveAttribute("href", "/shop");
+  });
+
+  it("shows the signed-in customer account without granting a staff role", async () => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue({ email: "customer@example.test" });
+
+    render(
+      <MemoryRouter initialEntries={["/account"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("customer@example.test")).toBeVisible();
+    expect(screen.getByText("Customer account")).toBeVisible();
+    expect(screen.queryByText("Owner")).not.toBeInTheDocument();
+    expect(screen.queryByText("Manager")).not.toBeInTheDocument();
+  });
+
+  it("does not offer registration to an already signed-in account", async () => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue({ email: "customer@example.test" });
+
+    render(
+      <MemoryRouter initialEntries={["/account/create"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("customer@example.test")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Create account" })).not.toBeInTheDocument();
   });
 
   it("lets a customer continue to the guest shop", async () => {

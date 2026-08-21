@@ -1,7 +1,8 @@
 # Frontend
 
 The frontend is a React, TypeScript, and Vite single-page application. It contains a customer-first
-guest ordering preview and staff email/password sign-in through the local Supabase Auth gateway.
+ordering preview, optional customer accounts, and staff email/password sign-in through the local
+Supabase Auth gateway.
 
 ## Commands
 
@@ -14,10 +15,11 @@ pnpm lint
 pnpm build
 ```
 
-Vite listens on <http://localhost:4173>. `VITE_SUPABASE_URL` defaults to the local Auth gateway at
-`http://localhost:8000`; the Supabase client appends `/auth/v1`. `VITE_SUPABASE_ANON_KEY` is optional with the current local
-gateway configuration; it is a public client configuration value, not a secret or service-role
-credential.
+Vite listens on <http://localhost:5173> during direct development; the Compose Nginx frontend uses
+<http://localhost:4173>. `VITE_SUPABASE_URL` defaults to the local Auth gateway at
+`http://localhost:8000`; the Supabase client appends `/auth/v1`. `VITE_SUPABASE_ANON_KEY` is
+optional with the current local gateway configuration; it is public client configuration, not a
+secret or service-role credential.
 
 ## Structure
 
@@ -30,8 +32,10 @@ Spring endpoints under `/api/v1/guest`; Nginx and the Vite development server pr
 backend. The browser must not call Supabase data APIs directly. OpenAPI client generation remains a
 later contract-tooling increment.
 
-Self-service registration is disabled in the local Auth service. Staff accounts must be provisioned
-by a later owner/bootstrap workflow; this screen intentionally supports sign-in only.
+Self-service registration is enabled for customer accounts. After Supabase establishes a session,
+the frontend calls Spring's authenticated, bodyless account-provisioning endpoint. Signup never
+creates a role or organization membership. Staff accounts still require the later owner/bootstrap
+workflow.
 
 ## Implemented routes
 
@@ -39,6 +43,9 @@ by a later owner/bootstrap workflow; this screen intentionally supports sign-in 
 - `/shop` — responsive database-backed menu with category filters and sold-out treatment.
 - `/shop/drinks/:drinkId` — accessible size, sweetness, ice, and topping customization.
 - `/cart` — in-memory current-order review with quantity and removal controls.
+- `/account/create` — optional customer email/password registration.
+- `/account/sign-in` — customer sign-in and application-account provisioning.
+- `/account` — session-aware customer account summary and sign-out.
 - `/staff/sign-in` — existing staff authentication flow.
 
 The customer routes fetch products, location, prices, availability, variants, option defaults, and

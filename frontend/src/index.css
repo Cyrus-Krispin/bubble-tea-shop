@@ -269,6 +269,10 @@ h2 {
   border-color: #496b35;
 }
 
+.field-group small {
+  color: var(--color-muted);
+}
+
 .login-form button {
   min-height: 3rem;
   padding: 0.75rem 1rem;
@@ -306,6 +310,66 @@ h2 {
 .access-help {
   margin: 1.5rem 0 0;
   font-size: 0.875rem;
+}
+
+.account-page {
+  width: min(100% - 3rem, 52rem);
+  margin: 0 auto;
+  padding: var(--space-8) 0 var(--space-10);
+}
+
+.account-page h1 {
+  max-width: none;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+}
+
+.account-panel {
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.account-panel dl,
+.account-panel dl div {
+  margin: 0;
+}
+
+.account-panel dt {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.account-panel dd {
+  margin: var(--space-2) 0 var(--space-5);
+  font-size: 1.125rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.account-note {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.secondary-button {
+  min-height: 2.75rem;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-ink);
+  font-weight: 750;
+  background: var(--color-canvas);
+  border: 1px solid var(--color-forest);
+  border-radius: var(--radius-control);
 }
 
 @media (max-width: 48rem) {

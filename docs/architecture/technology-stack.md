@@ -19,11 +19,11 @@ isolated component development. The frontend will consume a typed client generat
 Spring OpenAPI contract so that API changes remain visible at compile time.
 
 The frontend now contains the React, TypeScript, and Vite foundation, declarative client-side
-routing, a staff sign-in screen that uses the local Supabase Auth gateway, and a customer guest
-ordering preview. The guest menu and customization routes load catalog, availability, prices, and
-options from Spring. The current order remains in memory and checkout stays disabled until Spring
-owns order placement and final total calculation. It includes linting, type checking, Vitest
-component tests, and a containerized SPA build.
+routing, separate customer and staff authentication routes that use the local Supabase Auth
+gateway, and a guest ordering preview. The guest menu and customization routes load catalog,
+availability, prices, and options from Spring. The current order remains in memory and checkout
+stays disabled until Spring owns order placement and final total calculation. It includes linting,
+type checking, Vitest component tests, and a containerized SPA build.
 Tailwind, Radix, TanStack Query, Storybook, and generated OpenAPI client code remain selected choices
 for later increments rather than installed production code.
 
@@ -72,11 +72,11 @@ second application JWT, or expose application login/password/refresh endpoints. 
 its deferred identity migration are recorded in
 [ADR 0003](decisions/0003-local-supabase-auth.md).
 
-Authentication does not grant domain access by itself. Authorization will be resolved from current
-server-side account mappings, memberships, and location assignments rather than trusting mutable
-user metadata or client-provided claims. The existing account and refresh-session schema predates
-the Supabase issuer decision and remains unchanged until a later identity migration defines the
-external-user mapping and legacy-column lifecycle.
+Authentication does not grant domain access by itself. Customer signup provisions only the
+server-side account mapping; authorization is resolved from current memberships and location
+assignments rather than mutable user metadata or client-provided claims. V4 defines the external
+user mapping and makes legacy credential columns optional; the legacy refresh-session lifecycle is
+still undecided.
 
 ## Local infrastructure
 
@@ -92,7 +92,7 @@ its own schema.
 | Authentication | GoTrue `supabase/gotrue:v2.189.0` | Local sign-in, access tokens, refresh sessions, and the asymmetric signing key. |
 | Auth gateway | Kong `kong:3.9.1`, host port `8000` | Routes `/auth/v1` to GoTrue and exposes its issuer and public JWKS consistently. |
 | Application API | Spring Boot 4.1 on Java 21, host port `8080` | Modular-monolith workflows, authorization, Flyway migrations, and access-token validation. |
-| Frontend workspace | Node `24.16.0`, pnpm `11.9.0`, and Nginx, host port `4173` | React SPA build, guest ordering preview, and staff sign-in. |
+| Frontend workspace | Node `24.16.0`, pnpm `11.9.0`, and Nginx, host port `4173` | React SPA build, guest ordering preview, customer accounts, and staff sign-in. |
 
 Inside Compose, the backend connects to PostgreSQL at `db:5432` and fetches public signing keys
 from Kong at `kong:8000`; it does not call a hosted service. Host ports bind to `127.0.0.1` only.

@@ -62,8 +62,9 @@ HS256 tokens and never receives `JWT_SECRET`, `JWT_KEYS`, `JWT_JWKS`, an API sec
 or a raw user token. The exact Compose services and generated local secrets belong to the separate
 local-stack infrastructure change, not this backend integration.
 
-The current slice protects the API boundary, includes frontend staff email/password sign-in, and
-provides the authenticated Spring endpoint required by self-service customer registration.
+The current slice protects the API boundary, includes separate customer registration/sign-in and
+staff sign-in routes, and provisions the application account after Supabase returns a customer
+session.
 Read-only `GET /api/v1/guest/**` catalog requests are explicitly public; later guest order writes
 must validate all identifiers and recalculate prices on the server.
 The browser client delegates session persistence and refresh to Supabase Auth; it does not log or

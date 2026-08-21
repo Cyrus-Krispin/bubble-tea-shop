@@ -5,10 +5,10 @@ relevant full suite, focused commit, and push.
 
 ## Phase 0 — Current Customer Account Slice
 
-- [ ] Audit existing uncommitted customer-auth work for security, accessibility, and race failures.
-- [ ] Add/fix tests first for identified behavior gaps.
-- [ ] Verify frontend suite and Compose-backed customer provisioning.
-- [ ] Review, commit, and push the customer-account increment.
+- [x] Audit existing uncommitted customer-auth work for security, accessibility, and race failures.
+- [x] Add/fix tests first for identified behavior gaps.
+- [x] Verify frontend suite and Compose-backed customer provisioning.
+- [x] Review, commit, and push the customer-account increment.
 
 ## Phase 1 — Staff Access
 
