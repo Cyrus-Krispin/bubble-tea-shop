@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, NavLink } from "react-router";
 
+import { Button, ProblemState } from "../../components/ui";
 import { signOut } from "../auth/authClient";
 import { useAuth } from "../auth/useAuth";
 import {
@@ -90,7 +91,7 @@ export function StaffWorkspacePage() {
         </nav>
         <div className="staff-account">
           <span>{session.email}</span>
-          <button className="secondary-button" onClick={handleSignOut} type="button">Sign out</button>
+          <Button onClick={handleSignOut} size="compact" variant="secondary">Sign out</Button>
         </div>
       </header>
 
@@ -102,20 +103,17 @@ export function StaffWorkspacePage() {
           <p role="status">Loading your access…</p>
         ) : null}
         {visibleContextState.status === "error" ? (
-          <section className="staff-state" aria-labelledby="staff-error-title">
-            <h2 id="staff-error-title">{accessError ? "No active staff access" : "Workspace unavailable"}</h2>
-            <p>{accessError
+          <ProblemState
+            actionLabel={accessError ? "Sign out" : "Try again"}
+            message={accessError
               ? "Your identity is signed in, but it does not have an active staff membership."
-              : "We couldn’t load your current permissions. Try again before using staff tools."}</p>
-            {accessError ? (
-              <button className="secondary-button" onClick={handleSignOut} type="button">Sign out</button>
-            ) : (
-              <button className="secondary-button" onClick={() => {
-                setContextState({ status: "loading" });
-                setRequestVersion((value) => value + 1);
-              }} type="button">Try again</button>
-            )}
-          </section>
+              : "We couldn’t load your current permissions. Try again before using staff tools."}
+            onRetry={accessError ? handleSignOut : () => {
+              setContextState({ status: "loading" });
+              setRequestVersion((value) => value + 1);
+            }}
+            title={accessError ? "No active staff access" : "Workspace unavailable"}
+          />
         ) : null}
         {visibleContextState.status === "ready" ? (
           <div className="staff-memberships">

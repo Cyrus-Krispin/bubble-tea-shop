@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
+import { ProblemState } from "../../components/ui";
 import { useCart } from "../cart/CartContext";
 import { DrinkArtwork } from "./DrinkArtwork";
 import { formatMoney } from "./formatMoney";
@@ -90,8 +91,9 @@ function CatalogStatus({
     <div className="customer-shell">
       <CustomerHeader itemCount={itemCount} />
       <main className="catalog-status" aria-live="polite">
-        <p>{message}</p>
-        {retry ? <button onClick={retry} type="button">Try again</button> : null}
+        {retry === undefined ? <p role="status">{message}</p> : (
+          <ProblemState message={message} onRetry={retry} title="Menu unavailable" />
+        )}
       </main>
     </div>
   );

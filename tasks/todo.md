@@ -20,9 +20,9 @@ relevant full suite, focused commit, and push.
 ## Phase 2 — API and Design-System Contracts
 
 - [x] Generate OpenAPI and a typed frontend client; fail verification on drift.
-- [ ] Add reusable accessible field, button, table, dialog, pagination, and problem-state primitives.
-- [ ] Add Storybook coverage for interactive primitives if it remains the smallest executable
-  design contract.
+- [x] Add reusable accessible field, button, table, dialog, pagination, and problem-state primitives.
+- [x] Cover primitive interaction and accessibility contracts in Vitest; defer Storybook until
+  isolated visual review is needed beyond the smaller executable component suite.
 
 ## Phase 3 — Catalog Management
 

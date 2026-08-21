@@ -13,11 +13,12 @@ administration, and display views without introducing separate frontend applicat
 the development loop lightweight, while pnpm manages the workspace on Node.js.
 
 Tailwind CSS is the intended styling approach because it makes UI iteration fast and works well
-with AI-assisted implementation. Radix-based components will provide accessible behavior beneath
-the shop's own design system, TanStack Query will manage server state, and Storybook will support
-isolated component development. The frontend consumes Spring APIs through `openapi-fetch` using
-types generated from the committed Spring OpenAPI contract, so API changes remain visible during
-verification and compilation.
+with AI-assisted implementation. The first reusable interface layer now provides buttons, fields,
+tables, dialogs, pagination, and problem states; Radix supplies the dialog's focus and modal
+behavior. TanStack Query remains planned for server state, while Vitest interaction tests are the
+current executable component contract. The frontend consumes Spring APIs through `openapi-fetch`
+using types generated from the committed Spring OpenAPI contract, so API changes remain visible
+during verification and compilation.
 
 The frontend now contains the React, TypeScript, and Vite foundation, declarative client-side
 routing, separate customer and staff authentication routes that use the local Supabase Auth
@@ -25,8 +26,8 @@ gateway, and a guest ordering preview. The guest menu and customization routes l
 availability, prices, and options from Spring. The current order remains in memory and checkout
 stays disabled until Spring owns order placement and final total calculation. It includes linting,
 type checking, Vitest component tests, and a containerized SPA build.
-Tailwind, Radix, TanStack Query, and Storybook remain selected choices for later increments rather
-than installed production code.
+Tailwind and TanStack Query remain selected choices for later increments. Storybook is deferred
+until isolated visual review adds value beyond the smaller component test suite.
 
 ## Backend and API
 

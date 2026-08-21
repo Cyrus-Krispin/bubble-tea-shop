@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
+import { Button } from "../../components/ui";
 import { signOut } from "./authClient";
 import { useAuth } from "./useAuth";
 
@@ -42,7 +43,7 @@ export function CustomerAccountPage() {
             <dl><div><dt>Email</dt><dd>{session.email}</dd></div></dl>
             <p className="account-note">Order history will appear here after checkout is implemented.</p>
             {signOutFailed ? <p className="form-message form-message--error" role="alert">We couldn&apos;t sign you out. Please try again.</p> : null}
-            <button className="secondary-button" onClick={handleSignOut} type="button">Sign out</button>
+            <Button onClick={handleSignOut} variant="secondary">Sign out</Button>
           </section>
         ) : null}
       </main>
