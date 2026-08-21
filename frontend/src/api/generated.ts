@@ -455,6 +455,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/guest/orders": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Place an idempotent pending cash order */
+        readonly post: operations["placeGuestOrder"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/customer/account": {
         readonly parameters: {
             readonly query?: never;
@@ -943,6 +960,49 @@ export interface components {
         readonly ArchiveIngredientRequest: {
             /** Format: int64 */
             readonly version: number;
+        };
+        readonly CreateGuestOrderLineRequest: {
+            /** Format: uuid */
+            readonly variantId: string;
+            /** Format: int32 */
+            readonly quantity?: number;
+            readonly optionChoiceIds: readonly string[];
+        };
+        readonly CreateGuestOrderRequest: {
+            readonly items: readonly components["schemas"]["CreateGuestOrderLineRequest"][];
+        };
+        readonly GuestOrder: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly publicOrderNumber: string;
+            readonly status: string;
+            readonly paymentMethod: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly subtotalMinor: number;
+            /** Format: int64 */
+            readonly totalMinor: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+            readonly replayed: boolean;
+            readonly items: readonly components["schemas"]["GuestOrderLine"][];
+        };
+        readonly GuestOrderLine: {
+            readonly productName: string;
+            readonly variantName: string;
+            /** Format: int32 */
+            readonly quantity: number;
+            /** Format: int64 */
+            readonly unitPriceMinor: number;
+            /** Format: int64 */
+            readonly lineTotalMinor: number;
+            readonly options: readonly components["schemas"]["GuestOrderOption"][];
+        };
+        readonly GuestOrderOption: {
+            readonly groupName: string;
+            readonly choiceName: string;
+            /** Format: int64 */
+            readonly priceDeltaMinor: number;
         };
         readonly CustomerAccountDto: {
             /** Format: uuid */
@@ -2429,6 +2489,46 @@ export interface operations {
                     readonly "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
+        };
+    };
+    readonly placeGuestOrder: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly "Idempotency-Key": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateGuestOrderRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Existing order replayed */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["GuestOrder"];
+                };
+            };
+            /** @description Order placed */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["GuestOrder"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+            readonly 503: components["responses"]["Problem"];
         };
     };
     readonly provisionCustomerAccount: {

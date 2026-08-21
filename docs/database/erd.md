@@ -16,6 +16,8 @@ V7 extends optimistic versions and catalog auditing to products, variants, offer
 definitions, and variant-choice configuration. Deferred validation keeps available menus
 satisfiable across atomic default and ingredient-effect changes.
 V8 adds a partial uniqueness guard for one opening inventory movement per location and ingredient.
+V9 adds location-scoped guest-checkout idempotency and replaces placeholder guest offerings with
+published recipe versions that have ingredient and topping-consumption data.
 
 ## Identity
 

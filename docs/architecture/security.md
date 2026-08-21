@@ -66,8 +66,10 @@ local-stack infrastructure change, not this backend integration.
 The current slice protects the API boundary, includes separate customer registration/sign-in and
 staff sign-in routes, and provisions the application account after Supabase returns a customer
 session.
-Read-only `GET /api/v1/guest/**` catalog requests are explicitly public; later guest order writes
-must validate all identifiers and recalculate prices on the server.
+Guest catalog reads and `POST /api/v1/guest/orders` are explicitly public. Order placement accepts
+an optional verified bearer token only to resolve an enabled customer account; it validates all
+catalog identifiers and recalculates prices, totals, currency, payment, and consumption on the
+server.
 The browser client delegates session persistence and refresh to Supabase Auth; it does not log or
 manually store access or refresh tokens. It adds no Spring login, refresh, logout, or password
 endpoint and does not treat `role`, `user_metadata`, organization, location, or other token claims

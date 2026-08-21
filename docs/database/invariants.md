@@ -69,6 +69,13 @@
 ## Orders
 
 - Placement snapshots names, prices, selected choices, currency, and final ingredient consumption.
+- Positive line and selection ordinals preserve deterministic cart order across initial responses
+  and idempotent replays.
+- Placement keys are unique per location; matching retries return the existing order, while a
+  different normalized request or customer identity cannot reuse the key.
+- The configured active location, catalog availability, published recipe, price, currency, cash
+  payment, totals, and optional verified customer account are resolved by Spring, never trusted
+  from checkout input.
 - A pending order does not reserve stock.
 - Completion locks the order and affected balances, checks all ingredients, deducts all or none, appends
   status history, and commits once.
@@ -93,3 +100,5 @@
   auditing, location-safe offering management, and database-enforced available-menu validity.
 - V8 enforces one opening movement per location/ingredient and indexes deterministic location/type
   movement history.
+- V9 adds location-scoped checkout idempotency, sequence-backed public order numbers, and complete
+  recipe and topping-consumption data for the versioned local guest catalog seed.

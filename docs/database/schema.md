@@ -2,7 +2,7 @@
 
 This page is a human-readable reference for the current PostgreSQL schema. The executable sources
 of truth are the ordered scripts in
-[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 through V8. When the
+[`db/migration`](../../backend/src/main/resources/db/migration/), currently V1 through V9. When the
 migrations and this page disagree, the migrations win and this page must be corrected.
 
 The V1 `account` credential fields and `refresh_session` table reflect the superseded
@@ -476,6 +476,8 @@ pairing are enforced with checks. Rows are immutable through a database trigger.
 | `organization_id` | `uuid` | NN | — | Composite FK/UQ component |
 | `location_id` | `uuid` | NN | — | FK with `organization_id` → `location`; UQ with order number |
 | `customer_account_id` | `uuid` | Nullable | — | FK → `account.id` |
+| `placement_key` | `uuid` | Nullable | — | Partial UQ with `location_id` |
+| `placement_fingerprint` | `varchar(64)` | Nullable | — | Paired with `placement_key` |
 | `public_order_number` | `varchar(32)` | NN | — | UQ with `location_id` |
 | `status` | `varchar(20)` | NN | `'PENDING'` | — |
 | `payment_method` | `varchar(20)` | NN | — | — |
@@ -487,9 +489,10 @@ pairing are enforced with checks. Rows are immutable through a database trigger.
 | `cancelled_at` | `timestamptz` | Nullable | — | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
-Unique: `(id, organization_id)` and `(location_id, public_order_number)`. Status is `PENDING`,
-`COMPLETED`, or `CANCELLED`; payment method is `CASH` or `CARD`. Amounts are non-negative and status
-timestamps must agree with the current status.
+Unique: `(id, organization_id)`, `(location_id, public_order_number)`, and, when present,
+`(location_id, placement_key)`. Placement key and lowercase SHA-256 fingerprint are both null or
+both present. Status is `PENDING`, `COMPLETED`, or `CANCELLED`; payment method is `CASH` or `CARD`.
+Amounts are non-negative and status timestamps must agree with the current status.
 
 ### `order_item`
 
@@ -499,6 +502,7 @@ timestamps must agree with the current status.
 | `organization_id` | `uuid` | NN | — | Composite FK/UQ component |
 | `customer_order_id` | `uuid` | NN | — | FK with `organization_id` → `customer_order` |
 | `menu_variant_id` | `uuid` | Nullable | — | FK with `organization_id` → `menu_variant` |
+| `line_number` | `integer` | NN | — | UQ with `customer_order_id` |
 | `product_name_snapshot` | `varchar(160)` | NN | — | — |
 | `variant_name_snapshot` | `varchar(100)` | NN | — | — |
 | `quantity` | `integer` | NN | — | — |
@@ -517,6 +521,7 @@ must be non-negative. Rows are immutable through a database trigger.
 | `organization_id` | `uuid` | NN | — | Composite FK component |
 | `order_item_id` | `uuid` | NN | — | FK with `organization_id` → `order_item` |
 | `option_choice_id` | `uuid` | Nullable | — | FK with `organization_id` → `option_choice` |
+| `selection_number` | `integer` | NN | — | UQ with `order_item_id` |
 | `group_name_snapshot` | `varchar(120)` | NN | — | — |
 | `choice_name_snapshot` | `varchar(120)` | NN | — | — |
 | `price_delta_minor` | `bigint` | NN | `0` | — |
@@ -579,6 +584,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 |---|---|---|---|
 | `uq_inventory_sale_order_ingredient` | `inventory_movement` | `(customer_order_id, ingredient_id) WHERE movement_type = 'SALE'` | Prevent duplicate sale deductions. |
 | `uq_inventory_opening_location_ingredient` | `inventory_movement` | `(location_id, ingredient_id) WHERE movement_type = 'OPENING'` | Permit one opening movement per location and ingredient. |
+| `uq_customer_order_location_placement_key` | `customer_order` | `(location_id, placement_key) WHERE placement_key IS NOT NULL` | Prevent duplicate checkout writes. |
 | `idx_location_active` | `location` | `(organization_id, active)` | Active location lookup. |
 | `uq_location_public_slug` | `location` | `(public_slug) WHERE public_slug IS NOT NULL` | Resolve a public shop URL to one location. |
 | `idx_membership_active` | `organization_membership` | `(organization_id, role, active)` | Active role lookup. |

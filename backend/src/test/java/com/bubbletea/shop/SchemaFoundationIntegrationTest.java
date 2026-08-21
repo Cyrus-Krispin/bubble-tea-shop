@@ -332,10 +332,10 @@ class SchemaFoundationIntegrationTest {
             """, orderId, fixture.organizationId(), fixture.locationId(), publicNumber);
         jdbc.update("""
             INSERT INTO order_item (
-                id, organization_id, customer_order_id, product_name_snapshot,
+                id, organization_id, customer_order_id, line_number, product_name_snapshot,
                 variant_name_snapshot, quantity, unit_price_minor, line_total_minor
             )
-            VALUES (?, ?, ?, 'Milk Tea', 'Medium', 1, 500, 500)
+            VALUES (?, ?, ?, 1, 'Milk Tea', 'Medium', 1, 500, 500)
             """, itemId, fixture.organizationId(), orderId);
         jdbc.update("""
             INSERT INTO order_item_consumption (
