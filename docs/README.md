@@ -43,6 +43,10 @@ The Flyway migration remains the executable source of truth for the database.
   frontend Docker workflow.
 - [`development/continuous-integration.md`](development/continuous-integration.md) — required CI
   checks and their local equivalents.
+- [`operations/backup-restore.md`](operations/backup-restore.md) — PostgreSQL backup policy,
+  recovery safeguards, and restore drills.
+- [`operations/deployment.md`](operations/deployment.md) — production image, configuration,
+  network, release, and rollback contract.
 
 ## Documentation rules
 

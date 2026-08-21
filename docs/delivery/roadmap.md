@@ -41,7 +41,9 @@ healthy database.
 
 ## Phase 4 — Operational polish
 
-- Audit views, accessibility checks, observability, and backup/restore runbook.
+- Audit views and accessibility checks.
+- Observability.
+- Backup/restore runbook and verified logical recovery scripts. (Implemented.)
 - Production container image builds. (Implemented.)
 - CI gates for backend tests, frontend types/tests, OpenAPI drift, infrastructure tests, and
   container builds. (Implemented.)

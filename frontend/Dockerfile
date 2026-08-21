@@ -14,7 +14,14 @@ RUN pnpm build
 
 FROM nginx:1.27.5-alpine3.21
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENV NGINX_ENVSUBST_FILTER=SUPABASE_CONNECT_SRC \
+    SUPABASE_CONNECT_SRC=http://localhost:8000
+
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 
+RUN touch /run/nginx.pid \
+    && chown -R nginx:nginx /etc/nginx/conf.d /var/cache/nginx /run/nginx.pid
+
+USER nginx
 EXPOSE 4173

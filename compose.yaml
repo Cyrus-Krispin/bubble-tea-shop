@@ -123,6 +123,8 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_SUPABASE_URL: http://localhost:${KONG_PORT:-8000}
+    environment:
+      SUPABASE_CONNECT_SRC: http://localhost:${KONG_PORT:-8000}
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-4173}:4173"
     depends_on:
