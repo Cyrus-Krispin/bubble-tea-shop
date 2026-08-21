@@ -90,5 +90,7 @@ export async function signOut(): Promise<void> {
 
 function summarizeSession(session: Session | null): AuthSession | null {
   const email = session?.user.email;
-  return email === undefined ? null : { email };
+  return email === undefined || session === null
+    ? null
+    : { accessToken: session.access_token, email };
 }

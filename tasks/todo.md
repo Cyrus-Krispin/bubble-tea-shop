@@ -15,7 +15,7 @@ relevant full suite, focused commit, and push.
 - [x] Specify and implement idempotent owner bootstrap.
 - [x] Resolve active staff membership and assignments from the authenticated subject.
 - [x] Expose `GET /api/v1/staff/context` with deny-by-default authorization.
-- [ ] Add frontend staff session/context guard and navigation.
+- [x] Add frontend staff session/context guard and navigation.
 
 ## Phase 2 — API and Design-System Contracts
 

@@ -86,6 +86,7 @@ OWNER_BOOTSTRAP_ORGANIZATION_ID=<uuid> \
 - `backend/src/main/java/com/bubbletea/shop/identity/` owns bootstrap and staff-context logic.
 - `backend/src/main/java/com/bubbletea/shop/identity/security/` owns token verification only.
 - `backend/src/test/java/com/bubbletea/shop/identity/` contains PostgreSQL-backed contract tests.
+- `frontend/src/features/staff/` owns runtime response validation and the guarded workspace.
 - `docs/architecture/security.md` and `docs/api/conventions.md` record the shipped boundary.
 
 ## Code Style
@@ -115,6 +116,8 @@ the request.
   disabled/unmapped identities, no membership, invalid subjects, public rejection, and stable
   problem details.
 - Existing JWT decoder and customer-account tests remain green.
+- Frontend tests cover signed-out redirects, server-returned scope, malformed responses, and denied
+  customer-only identities without fallback roles or locations.
 
 ## Boundaries
 

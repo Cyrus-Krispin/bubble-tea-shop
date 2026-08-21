@@ -1,9 +1,23 @@
-import { Link } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 
 import { LoginForm } from "./LoginForm";
 import { signInWithEmailAndPassword } from "./authClient";
+import type { Credentials } from "./types";
+import { useAuth } from "./useAuth";
 
 export function StaffSignInPage() {
+  const navigate = useNavigate();
+  const { isLoading, session } = useAuth();
+
+  if (!isLoading && session !== null) {
+    return <Navigate replace to="/staff" />;
+  }
+
+  async function handleSignIn(credentials: Credentials) {
+    await signInWithEmailAndPassword(credentials);
+    navigate("/staff");
+  }
+
   return (
     <div className="app-shell">
       <a className="skip-link" href="#staff-sign-in">Skip to sign in</a>
@@ -27,7 +41,7 @@ export function StaffSignInPage() {
           <p className="card-kicker">Staff access</p>
           <h2 id="sign-in-heading">Welcome back</h2>
           <p className="card-copy">Sign in with the email and password assigned to you.</p>
-          <LoginForm onSignIn={signInWithEmailAndPassword} />
+          <LoginForm onSignIn={handleSignIn} />
           <p className="access-help">Need access? Ask the shop owner to add your staff membership.</p>
         </section>
       </main>

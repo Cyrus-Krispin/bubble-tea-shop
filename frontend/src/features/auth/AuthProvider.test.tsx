@@ -44,7 +44,7 @@ describe("AuthProvider", () => {
 
   it("does not overwrite a fresh auth event with a stale initial lookup", async () => {
     let resolveInitialSession: ((value: null) => void) | undefined;
-    let authListener: ((session: { email: string } | null) => void) | undefined;
+    let authListener: ((session: { accessToken: string; email: string } | null) => void) | undefined;
     vi.mocked(getCurrentAuthSession).mockReturnValue(new Promise((resolve) => {
       resolveInitialSession = resolve;
     }));
@@ -60,7 +60,7 @@ describe("AuthProvider", () => {
     );
 
     await act(async () => {
-      authListener?.({ email: "customer@example.test" });
+      authListener?.({ accessToken: "fresh-token", email: "customer@example.test" });
     });
     expect(screen.getByText("Signed in as customer@example.test")).toBeVisible();
 

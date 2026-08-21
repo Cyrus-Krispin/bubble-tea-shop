@@ -9,6 +9,7 @@ import { CartPage } from "../features/cart/CartPage";
 import { CartProvider } from "../features/cart/CartProvider";
 import { DrinkPage } from "../features/catalog/DrinkPage";
 import { ShopPage } from "../features/catalog/ShopPage";
+import { StaffWorkspacePage } from "../features/staff/StaffWorkspacePage";
 
 function WelcomePage() {
   return (
@@ -52,6 +53,7 @@ export function App() {
           <Route path="/account/create" element={<CustomerRegistrationPage />} />
           <Route path="/account/sign-in" element={<CustomerSignInPage />} />
           <Route path="/staff/sign-in" element={<StaffSignInPage />} />
+          <Route path="/staff" element={<StaffWorkspacePage />} />
           <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
       </CartProvider>
