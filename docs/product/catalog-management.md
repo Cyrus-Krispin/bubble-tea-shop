@@ -48,6 +48,56 @@ by default. Decimal quantities cross JSON boundaries as strings. Validation retu
 scope returns `403`, absent or cross-scope resources return `404`, and uniqueness or stale-version
 conflicts return stable `409` problem details.
 
+## Recipe and version lifecycle
+
+A recipe is the stable organization-owned identity used by staff. Its versions contain the actual
+ingredient formula. Recipe metadata and formula content have separate optimistic versions so two
+staff members cannot silently overwrite each other.
+
+- Creating a recipe also creates its empty version 1 draft in the same transaction.
+- A recipe has at most one draft at a time. Creating the next draft increments the version number
+  under a recipe-row lock and clones the latest published formula by default. An explicit source
+  version must belong to the same recipe and already be published or retired.
+- Replacing a draft formula is atomic. The request is the complete desired component set; ingredient
+  IDs must be unique, active, and owned by the same organization, and quantities must be positive
+  decimal strings in each ingredient's immutable base unit.
+- Empty drafts are allowed while editing, but publishing requires at least one component.
+- Publishing changes only `DRAFT` to `PUBLISHED`, sets `published_at`, and permanently freezes the
+  component rows. Existing published versions remain published because offerings reference a
+  specific version; publishing a newer formula never rewrites an offering implicitly.
+- Retirement changes only `PUBLISHED` to `RETIRED`. It is rejected while any available offering
+  references the version. Retired versions remain readable for historical offerings and orders.
+- Recipe names and descriptions can change while the recipe is active. Archival is retry-safe and
+  rejected while an available offering references any of its versions. Archival never deletes the
+  recipe, its versions, or components.
+- Every successful recipe metadata, version, formula, publication, retirement, and archival mutation
+  appends an actor-attributed catalog audit row in the same transaction.
+
+### Recipe routes
+
+The recipe slice uses authenticated organization-scoped routes:
+
+- `GET /api/v1/staff/organizations/{organizationId}/recipes`
+- `POST /api/v1/staff/organizations/{organizationId}/recipes`
+- `GET /api/v1/staff/organizations/{organizationId}/recipes/{recipeId}`
+- `PUT /api/v1/staff/organizations/{organizationId}/recipes/{recipeId}`
+- `POST /api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/archive`
+- `POST /api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions`
+- `PUT /api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/draft`
+- `POST /api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/publish`
+- `POST /api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/retire`
+
+Lists use the same zero-based pagination, bounded size, literal substring search, deterministic
+case-insensitive ordering, and explicit archive filter as ingredients. Recipe detail returns every
+version in descending version-number order and each component with its ingredient name, base unit,
+and exact decimal-string quantity. Requests never accept an actor, organization ownership, version
+status, ingredient unit, or publication timestamp from the browser.
+
+State or optimistic-version conflicts return `409` with `RECIPE_STATE_CONFLICT` or
+`RECIPE_VERSION_CONFLICT`. Duplicate normalized names return `RECIPE_CONFLICT`; invalid formulas
+return `RECIPE_INVALID`; absent and cross-organization IDs return `RECIPE_NOT_FOUND` without
+revealing foreign resources.
+
 ## Acceptance criteria
 
 - PostgreSQL-backed integration tests prove owner and eligible-manager access plus denial for
@@ -57,3 +107,9 @@ conflicts return stable `409` problem details.
 - The generated OpenAPI snapshot and frontend types remain drift-free.
 - The staff UI lists, creates, edits, and archives ingredients using the shared field, button,
   table, dialog, pagination, and problem-state primitives.
+- Integration tests prove draft replacement, same-organization ingredient validation, atomic
+  publication, published-formula immutability, single-draft concurrency, offering-dependent
+  retirement/archival denial, and audit attribution.
+- The staff recipe UI supports list/search, metadata editing, formula composition from live
+  ingredients, publish confirmation, next-draft creation, retirement, and archival with explicit
+  conflict recovery.
