@@ -37,7 +37,7 @@ healthy database.
 - Guest cash checkout with idempotent retry and server-confirmed order details. (Implemented.)
 - Staff order queue and completion UI. (Implemented.)
 - Cash payment recording and shortage conflict UX. (Implemented.)
-- End-to-end tests from order placement through inventory deduction.
+- End-to-end tests from order placement through inventory deduction. (Implemented.)
 
 ## Phase 4 — Operational polish
 

@@ -35,6 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class GuestOrderPlacementApiIntegrationTest {
+    private static final UUID ORGANIZATION =
+        UUID.fromString("10000000-0000-0000-0000-000000000001");
+    private static final UUID LOCATION =
+        UUID.fromString("20000000-0000-0000-0000-000000000001");
     private static final UUID MEDIUM_MILK_TEA =
         UUID.fromString("50000000-0000-0000-0000-000000000002");
     private static final UUID SWEETNESS_50 =
@@ -105,6 +109,60 @@ class GuestOrderPlacementApiIntegrationTest {
              WHERE item.customer_order_id = ?
                AND consumption.ingredient_id = '90000000-0000-0000-0000-000000000007'
             """, BigDecimal.class, orderId)).isEqualByComparingTo("100.000000");
+    }
+
+    @Test
+    void placesThenCompletesOrderAcrossGuestAndStaffApisWithExactInventoryDeduction() throws Exception {
+        UUID subject = UUID.randomUUID();
+        UUID account = UUID.randomUUID();
+        UUID placementKey = UUID.randomUUID();
+        UUID blackTea = UUID.fromString("90000000-0000-0000-0000-000000000001");
+        UUID freshMilk = UUID.fromString("90000000-0000-0000-0000-000000000005");
+        UUID pearls = UUID.fromString("90000000-0000-0000-0000-000000000007");
+
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", account, subject);
+        jdbc.update("""
+            INSERT INTO organization_membership (organization_id, account_id, role, active)
+            VALUES (?, ?, 'OWNER', true)
+            """, ORGANIZATION, account);
+        jdbc.update("""
+            INSERT INTO inventory_balance (organization_id, location_id, ingredient_id, quantity)
+            VALUES (?, ?, ?, 100), (?, ?, ?, 1000), (?, ?, ?, 500)
+            """, ORGANIZATION, LOCATION, blackTea,
+            ORGANIZATION, LOCATION, freshMilk,
+            ORGANIZATION, LOCATION, pearls);
+
+        mvc.perform(post("/api/v1/guest/orders")
+                .header("Idempotency-Key", placementKey)
+                .contentType("application/json")
+                .content(orderBody(1)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.status").value("PENDING"))
+            .andExpect(jsonPath("$.totalMinor").value(720));
+
+        UUID orderId = jdbc.queryForObject(
+            "SELECT id FROM customer_order WHERE placement_key = ?", UUID.class, placementKey);
+        String staffPath = "/api/v1/staff/organizations/%s/locations/%s/orders/%s/completion"
+            .formatted(ORGANIZATION, LOCATION, orderId);
+        mvc.perform(post(staffPath).with(jwt().jwt(token -> token.subject(subject.toString()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("COMPLETED"))
+            .andExpect(jsonPath("$.paymentStatus").value("PAID"));
+
+        assertThat(balance(blackTea)).isEqualByComparingTo("92.000000");
+        assertThat(balance(freshMilk)).isEqualByComparingTo("800.000000");
+        assertThat(balance(pearls)).isEqualByComparingTo("450.000000");
+        assertThat(jdbc.queryForObject("""
+            SELECT count(*) FROM inventory_movement
+             WHERE customer_order_id = ? AND movement_type = 'SALE'
+            """, Integer.class, orderId)).isEqualTo(3);
+        assertThat(jdbc.queryForObject("""
+            SELECT recorded_by_account_id FROM payment WHERE customer_order_id = ?
+            """, UUID.class, orderId)).isEqualTo(account);
+        assertThat(jdbc.queryForObject("""
+            SELECT count(*) FROM order_status_history
+             WHERE customer_order_id = ? AND to_status = 'COMPLETED'
+            """, Integer.class, orderId)).isEqualTo(1);
     }
 
     @Test
@@ -210,5 +268,12 @@ class GuestOrderPlacementApiIntegrationTest {
             {"items":[{"variantId":"%s","quantity":%d,
             "optionChoiceIds":["%s","%s","%s"]}]}
             """.formatted(MEDIUM_MILK_TEA, quantity, SWEETNESS_50, LESS_ICE, PEARLS);
+    }
+
+    private BigDecimal balance(UUID ingredientId) {
+        return jdbc.queryForObject("""
+            SELECT quantity FROM inventory_balance
+             WHERE location_id = ? AND ingredient_id = ?
+            """, BigDecimal.class, LOCATION, ingredientId);
     }
 }
