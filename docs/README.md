@@ -8,6 +8,8 @@ The Flyway migration remains the executable source of truth for the database.
 - [`product/mvp.md`](product/mvp.md) — MVP scope, roles, workflows, and deferred stories.
 - [`product/staff-access.md`](product/staff-access.md) — owner bootstrap and server-resolved staff
   authorization contract.
+- [`product/catalog-management.md`](product/catalog-management.md) — staff catalog authorization,
+  ingredient lifecycle, concurrency, and audit contract.
 - [`product/glossary.md`](product/glossary.md) — shared domain language.
 - [`architecture/overview.md`](architecture/overview.md) — system shape and module responsibilities.
 - [`architecture/technology-stack.md`](architecture/technology-stack.md) — selected technologies,
