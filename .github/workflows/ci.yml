@@ -62,6 +62,9 @@ jobs:
       - name: Build
         working-directory: frontend
         run: pnpm build
+      - name: Build Storybook
+        working-directory: frontend
+        run: pnpm build-storybook
 
   infrastructure:
     name: Infrastructure verification

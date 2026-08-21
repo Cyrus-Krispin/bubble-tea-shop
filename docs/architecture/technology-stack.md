@@ -26,8 +26,8 @@ gateway, and a guest ordering preview. The guest menu and customization routes l
 availability, prices, and options from Spring. The current order remains in memory and checkout
 stays disabled until Spring owns order placement and final total calculation. It includes linting,
 type checking, Vitest component tests, and a containerized SPA build.
-Tailwind and TanStack Query remain selected choices for later increments. Storybook is deferred
-until isolated visual review adds value beyond the smaller component test suite.
+TanStack Query remains a selected choice for a later server-state refactor. Storybook now provides
+isolated documentation and accessibility inspection for the reusable interface primitives.
 
 ## Backend and API
 

@@ -13,6 +13,8 @@ pnpm test
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm storybook
+pnpm build-storybook
 ```
 
 Vite listens on <http://localhost:5173> during direct development; the Compose Nginx frontend uses
@@ -27,6 +29,7 @@ secret or service-role credential.
 - `src/features/` — domain-oriented authentication, catalog, customization, and current-order UI.
 - `src/components/ui/` — reusable accessible interface primitives.
 - `src/test/accessibility.ts` — shared axe-core WCAG test gate.
+- `.storybook/` — React/Vite component catalog configuration.
 
 The browser talks to Supabase Auth only for session lifecycle. Guest catalog calls use same-origin
 Spring endpoints under `/api/v1/guest`; Nginx and the Vite development server proxy `/api` to the
@@ -58,6 +61,8 @@ no order or inventory reservation is created until the guest ordering API exists
 
 - [`docs/visual-style-guide.md`](docs/visual-style-guide.md) — selected visual direction for the
   customer ordering experience and its separation from staff operations.
+- [`../docs/development/storybook.md`](../docs/development/storybook.md) — component documentation
+  workflow and contribution rules.
 
 The Docker image builds the SPA and serves it through Nginx on port 4173 with a health endpoint at
 `/health`.

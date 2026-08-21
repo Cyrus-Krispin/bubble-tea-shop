@@ -27,7 +27,7 @@ healthy database.
 - Menu and option staff workspaces. (Implemented.)
 - OpenAPI generation and typed frontend client. (Implemented.)
 - First design-system tokens and form primitives. (Implemented.)
-- Storybook component documentation.
+- Storybook component documentation. (Implemented.)
 
 ## Phase 3 — Inventory and ordering
 

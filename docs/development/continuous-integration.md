@@ -8,7 +8,7 @@ pull request. It grants read-only repository access and cancels superseded runs 
 | Job | Gate |
 | --- | --- |
 | Backend verification | Java 21 build, all unit and PostgreSQL Testcontainers integration tests, Flyway validation, and packaging through `./mvnw verify`. |
-| Frontend verification | Frozen dependency install, Vitest, generated OpenAPI drift check, TypeScript, ESLint, and the Vite production build. |
+| Frontend verification | Frozen dependency install, Vitest accessibility/component tests, generated OpenAPI drift check, TypeScript, ESLint, the Vite production build, and the static Storybook catalog. |
 | Infrastructure verification | Node tests for local Supabase Auth key generation. |
 | Container builds | Backend and frontend multi-stage Docker images, only after all preceding verification jobs pass. |
 
@@ -29,6 +29,7 @@ pnpm test
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm build-storybook
 
 cd ..
 node --test infra/supabase/generate-local-auth-keys.test.mjs

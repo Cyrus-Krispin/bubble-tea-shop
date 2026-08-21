@@ -49,6 +49,8 @@ The Flyway migration remains the executable source of truth for the database.
   checks and their local equivalents.
 - [`development/accessibility.md`](development/accessibility.md) — automated WCAG checks and the
   required real-browser review boundary.
+- [`development/storybook.md`](development/storybook.md) — isolated component documentation and
+  static catalog build workflow.
 - [`operations/backup-restore.md`](operations/backup-restore.md) — PostgreSQL backup policy,
   recovery safeguards, and restore drills.
 - [`operations/deployment.md`](operations/deployment.md) — production image, configuration,

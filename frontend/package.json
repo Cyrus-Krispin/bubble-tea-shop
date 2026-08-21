@@ -13,10 +13,12 @@
     "build": "tsc -b && vite build",
     "api:check": "openapi-typescript ../docs/api/openapi.json -o src/api/generated.ts --properties-required-by-default --immutable --check",
     "api:generate": "openapi-typescript ../docs/api/openapi.json -o src/api/generated.ts --properties-required-by-default --immutable",
+    "build-storybook": "storybook build",
     "typecheck": "pnpm api:check && tsc -b",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "storybook": "storybook dev -p 6006"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.1.23",
@@ -28,6 +30,9 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@storybook/addon-a11y": "10.5.10",
+    "@storybook/addon-docs": "10.5.10",
+    "@storybook/react-vite": "10.5.10",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.2",
     "@types/node": "24.10.1",
@@ -41,6 +46,7 @@
     "globals": "17.11.0",
     "jsdom": "30.0.1",
     "openapi-typescript": "7.13.0",
+    "storybook": "10.5.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.67.0",
     "vite": "8.2.1",
