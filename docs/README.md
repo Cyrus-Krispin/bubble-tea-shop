@@ -10,6 +10,8 @@ The Flyway migration remains the executable source of truth for the database.
   authorization contract.
 - [`product/catalog-management.md`](product/catalog-management.md) — staff catalog authorization,
   ingredient lifecycle, concurrency, and audit contract.
+- [`product/inventory-management.md`](product/inventory-management.md) — location-scoped balances,
+  immutable movements, and manual stock workflow contract.
 - [`product/glossary.md`](product/glossary.md) — shared domain language.
 - [`architecture/overview.md`](architecture/overview.md) — system shape and module responsibilities.
 - [`architecture/technology-stack.md`](architecture/technology-stack.md) — selected technologies,
