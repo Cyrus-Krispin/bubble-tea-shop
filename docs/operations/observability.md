@@ -6,6 +6,12 @@ response includes `X-Request-Id`; a safe incoming value is preserved, otherwise 
 The same value appears as `request.id` in structured logs so ingress, frontend reports, and backend
 events can be correlated without logging tokens or request bodies.
 
+Spring creates W3C-compatible spans through Micrometer and OpenTelemetry. Trace export is disabled
+unless `OTEL_TRACING_ENABLED=true`; production should send OTLP/HTTP to an access-controlled
+collector using `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`. The default sample probability is 10% and is
+configured with `OTEL_TRACES_SAMPLER_ARG`. Trace and span IDs are added to the structured logging
+context, but business/customer identifiers must not be attached as span attributes.
+
 ## Health and metrics
 
 | Endpoint | Use |
@@ -46,7 +52,6 @@ Tune thresholds after collecting a representative baseline. Before launch, confi
 
 ## Incident handling
 
-Start with the alert timestamp and a request ID, then correlate ingress and backend logs. Confirm
-whether the fault is global, organization-scoped, or location-scoped without copying raw tokens or
-customer payloads into tickets. Record mitigation, affected interval, recovery evidence, and a
-follow-up owner. Database recovery follows [`backup-restore.md`](backup-restore.md).
+Follow [`incident-response.md`](incident-response.md). Start with the alert timestamp and a request
+or trace ID, then correlate ingress, backend, and database signals without copying raw tokens or
+customer payloads into tickets. Database recovery follows [`backup-restore.md`](backup-restore.md).

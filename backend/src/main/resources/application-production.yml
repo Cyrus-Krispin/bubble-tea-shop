@@ -22,3 +22,8 @@ logging:
     ecs:
       service:
         environment: production
+
+management:
+  opentelemetry:
+    resource-attributes:
+      deployment.environment.name: production

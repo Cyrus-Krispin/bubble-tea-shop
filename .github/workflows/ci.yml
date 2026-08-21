@@ -80,22 +80,48 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24.16.0
-      - name: Test local Auth key generation
-        run: node --test infra/supabase/generate-local-auth-keys.test.mjs
+      - name: Test local Auth infrastructure
+        run: >-
+          node --test
+          infra/supabase/generate-local-auth-keys.test.mjs
+          infra/supabase/kong/kong.test.mjs
 
-  containers:
-    name: Container builds
+  release-candidate:
+    name: Container and browser release gate
     needs: [backend, frontend, infrastructure]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
-      - name: Build backend image
-        run: docker build --tag bubble-tea-backend:ci backend
-      - name: Build frontend image
-        run: >-
-          docker build
-          --build-arg VITE_SUPABASE_URL=https://auth.invalid.example
-          --tag bubble-tea-frontend:ci
-          frontend
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.9.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.16.0
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install browser test dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        working-directory: frontend
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Generate ephemeral local Auth keys
+        run: |
+          cp .env.example .env
+          node infra/supabase/generate-local-auth-keys.mjs >> .env
+      - name: Build and start release stack
+        run: docker compose up --detach --build --wait
+      - name: Run desktop and mobile release browser gate
+        working-directory: frontend
+        run: pnpm e2e
+      - name: Capture failed stack logs
+        if: failure()
+        run: docker compose logs --no-color --tail=300
+      - name: Stop release stack
+        if: always()
+        run: docker compose down --volumes

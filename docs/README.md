@@ -57,6 +57,8 @@ The Flyway migration remains the executable source of truth for the database.
   network, release, and rollback contract.
 - [`operations/observability.md`](operations/observability.md) — structured logs, request
   correlation, health, metrics, dashboards, and alerting.
+- [`operations/incident-response.md`](operations/incident-response.md) — incident severity,
+  command, containment, recovery, communications, and post-incident procedure.
 
 ## Documentation rules
 

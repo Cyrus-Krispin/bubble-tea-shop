@@ -4,6 +4,7 @@ import com.bubbletea.shop.inventory.InsufficientStockException;
 import com.bubbletea.shop.inventory.InventoryLedgerService;
 import com.bubbletea.shop.inventory.InventoryMovementType;
 import com.bubbletea.shop.ordering.OrderCompletionService;
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,6 +49,14 @@ class SchemaFoundationIntegrationTest {
 
     @Autowired
     OrderCompletionService orderCompletion;
+
+    @Autowired
+    Tracer tracer;
+
+    @Test
+    void configuresAnOpenTelemetryTracer() {
+        assertThat(tracer).isNotNull();
+    }
 
     @Test
     void flywayCreatesAllMvpTablesAndHibernateValidatesThem() {

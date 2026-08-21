@@ -14,6 +14,7 @@
     "api:check": "openapi-typescript ../docs/api/openapi.json -o src/api/generated.ts --properties-required-by-default --immutable --check",
     "api:generate": "openapi-typescript ../docs/api/openapi.json -o src/api/generated.ts --properties-required-by-default --immutable",
     "build-storybook": "storybook build",
+    "e2e": "playwright test",
     "typecheck": "pnpm api:check && tsc -b",
     "lint": "eslint .",
     "test": "vitest run",
@@ -30,6 +31,8 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1",
     "@storybook/addon-a11y": "10.5.10",
     "@storybook/addon-docs": "10.5.10",
     "@storybook/react-vite": "10.5.10",

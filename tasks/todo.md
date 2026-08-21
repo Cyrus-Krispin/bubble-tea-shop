@@ -26,44 +26,44 @@ relevant full suite, focused commit, and push.
 
 ## Phase 3 — Catalog Management
 
-- [ ] Ingredient create/list/update/archive slice.
-- [ ] Recipe draft and component editing slice.
-- [ ] Immutable recipe publishing/version browsing slice.
-- [ ] Product and variant management slice.
-- [ ] Location offering, price, and availability slice.
-- [ ] Option group, choice, default, and ingredient-effect slice.
+- [x] Ingredient create/list/update/archive slice.
+- [x] Recipe draft and component editing slice.
+- [x] Immutable recipe publishing/version browsing slice.
+- [x] Product and variant management slice.
+- [x] Location offering, price, and availability slice.
+- [x] Option group, choice, default, and ingredient-effect slice.
 
 ## Phase 4 — Inventory
 
-- [ ] Paginated stock balance and movement history reads.
-- [ ] Opening movement workflow.
-- [ ] Receipt movement workflow.
-- [ ] Adjustment workflow with reason and audit actor.
-- [ ] Staff inventory UI and conflict/error states.
+- [x] Paginated stock balance and movement history reads.
+- [x] Opening movement workflow.
+- [x] Receipt movement workflow.
+- [x] Adjustment workflow with reason and audit actor.
+- [x] Staff inventory UI and conflict/error states.
 
 ## Phase 5 — Order Placement
 
-- [ ] Contract and migration for idempotent order placement.
-- [ ] Server-owned offering/option validation and total calculation.
-- [ ] Immutable price, product, option, recipe, and consumption snapshots.
-- [ ] Pending cash payment and stable order receipt.
-- [ ] Guest checkout UI integration and retry-safe conflict handling.
-- [ ] Optional authenticated customer linkage.
+- [x] Contract and migration for idempotent order placement.
+- [x] Server-owned offering/option validation and total calculation.
+- [x] Immutable price, product, option, recipe, and consumption snapshots.
+- [x] Pending cash payment and stable order receipt.
+- [x] Guest checkout UI integration and retry-safe conflict handling.
+- [x] Optional authenticated customer linkage.
 
 ## Phase 6 — Staff Orders
 
-- [ ] Authorized paginated order queue and detail endpoints.
-- [ ] Pending-to-completed atomic inventory deduction endpoint.
-- [ ] Cash payment recording and shortage problem details.
-- [ ] Staff queue/detail/completion UI.
-- [ ] End-to-end order-to-inventory concurrency coverage.
+- [x] Authorized paginated order queue and detail endpoints.
+- [x] Pending-to-completed atomic inventory deduction endpoint.
+- [x] Cash payment recording and shortage problem details.
+- [x] Staff queue/detail/completion UI.
+- [x] End-to-end order-to-inventory concurrency coverage.
 
 ## Phase 7 — Production Readiness
 
-- [ ] Correlation IDs, structured logs, RED metrics, traces, and safe actuator endpoints.
-- [ ] Security headers, limits, gateway throttling, and dependency/security audits.
-- [ ] CI for backend, frontend, OpenAPI drift, audits, and container builds.
-- [ ] Hardened images/config, non-root runtime, and secret/config validation.
-- [ ] Backup/restore, deployment, incident, rollback, and alert runbooks.
-- [ ] Browser E2E, WCAG checks, responsive checks, and performance budgets.
+- [x] Correlation IDs, structured logs, RED metrics, traces, and safe actuator endpoints.
+- [x] Security headers, limits, gateway throttling, and dependency/security audits.
+- [x] CI for backend, frontend, OpenAPI drift, audits, and container builds.
+- [x] Hardened images/config, non-root runtime, and secret/config validation.
+- [x] Backup/restore, deployment, incident, rollback, and alert runbooks.
+- [x] Browser E2E, WCAG checks, responsive checks, and performance budgets.
 - [ ] Clean-checkout release candidate verification and production-readiness review.

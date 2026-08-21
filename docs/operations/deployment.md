@@ -31,6 +31,9 @@ Provide these values through the platform's secret or configuration service:
 | `GUEST_LOCATION_SLUG` | The one active public MVP location. |
 | `OPENAPI_DOCS_ENABLED` | Keep `false` unless API documentation is deliberately exposed to a protected network. |
 | `SPRING_PROFILES_ACTIVE` | Set to `production` to require production credentials and enable ECS JSON logs. |
+| `OTEL_TRACING_ENABLED` | Set to `true` only after an OTLP collector is reachable. It is fail-safe disabled by default. |
+| `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | OTLP/HTTP trace endpoint, including `/v1/traces`; use TLS outside a private trusted network. |
+| `OTEL_TRACES_SAMPLER_ARG` | Fraction from `0.0` to `1.0`; begin at `0.1` and tune for volume and incident needs. |
 
 Run owner bootstrap as an audited one-off task with temporary `OWNER_BOOTSTRAP_*` values, then
 disable it. Do not leave bootstrap enabled in the long-running service.
@@ -63,4 +66,5 @@ plus staff completion smoke tests. Production rollout should be gradual where su
 
 Application rollback is allowed only while the previous image remains schema-compatible. Database
 rollback uses the documented recovery procedure rather than editing or deleting an applied Flyway
-migration. See [`backup-restore.md`](backup-restore.md).
+migration. See [`incident-response.md`](incident-response.md) and
+[`backup-restore.md`](backup-restore.md).

@@ -32,6 +32,26 @@ app:
       audience: ${LOCAL_SUPABASE_AUTH_AUDIENCE:authenticated}
 
 management:
+  logging:
+    export:
+      otlp:
+        enabled: false
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  tracing:
+    sampling:
+      probability: ${OTEL_TRACES_SAMPLER_ARG:0.1}
+    export:
+      otlp:
+        enabled: ${OTEL_TRACING_ENABLED:false}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+          timeout: ${OTEL_EXPORTER_OTLP_TRACES_TIMEOUT:10s}
   endpoints:
     web:
       exposure:
