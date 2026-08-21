@@ -177,8 +177,8 @@ export interface components {
         };
         readonly UpdateIngredientRequest: {
             readonly name: string;
-            readonly sku?: string;
-            readonly reorderThreshold?: string;
+            readonly sku?: string | null;
+            readonly reorderThreshold?: string | null;
             /** Format: int64 */
             readonly version: number;
         };
@@ -200,10 +200,10 @@ export interface components {
         };
         readonly CreateIngredientRequest: {
             readonly name: string;
-            readonly sku?: string;
+            readonly sku?: string | null;
             /** @enum {string} */
             readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
-            readonly reorderThreshold?: string;
+            readonly reorderThreshold?: string | null;
         };
         readonly ArchiveIngredientRequest: {
             /** Format: int64 */

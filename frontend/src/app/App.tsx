@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Link, Navigate, Route, Routes } from "react-router";
 
 import { StaffSignInPage } from "../features/auth/StaffSignInPage";
@@ -10,6 +11,9 @@ import { CartProvider } from "../features/cart/CartProvider";
 import { DrinkPage } from "../features/catalog/DrinkPage";
 import { ShopPage } from "../features/catalog/ShopPage";
 import { StaffWorkspacePage } from "../features/staff/StaffWorkspacePage";
+import { StaffLayout } from "../features/staff/StaffLayout";
+
+const IngredientManagementPage = lazy(() => import("../features/staff/IngredientManagementPage"));
 
 function WelcomePage() {
   return (
@@ -53,7 +57,14 @@ export function App() {
           <Route path="/account/create" element={<CustomerRegistrationPage />} />
           <Route path="/account/sign-in" element={<CustomerSignInPage />} />
           <Route path="/staff/sign-in" element={<StaffSignInPage />} />
-          <Route path="/staff" element={<StaffWorkspacePage />} />
+          <Route path="/staff" element={<StaffLayout />}>
+            <Route index element={<StaffWorkspacePage />} />
+            <Route path="catalog/ingredients" element={(
+              <Suspense fallback={<main aria-label="Ingredient management" className="staff-status"><p role="status">Loading catalog tools…</p></main>}>
+                <IngredientManagementPage />
+              </Suspense>
+            )} />
+          </Route>
           <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
       </CartProvider>

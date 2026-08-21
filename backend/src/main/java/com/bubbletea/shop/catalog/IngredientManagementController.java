@@ -195,16 +195,16 @@ public class IngredientManagementController {
 
     record CreateIngredientRequest(
         @NotBlank @Size(max = 160) String name,
-        @Size(max = 80) String sku,
+        @Schema(nullable = true) @Size(max = 80) String sku,
         @NotNull BaseUnit baseUnit,
-        @Pattern(regexp = QUANTITY_PATTERN) String reorderThreshold
+        @Schema(nullable = true) @Pattern(regexp = QUANTITY_PATTERN) String reorderThreshold
     ) {
     }
 
     record UpdateIngredientRequest(
         @NotBlank @Size(max = 160) String name,
-        @Size(max = 80) String sku,
-        @Pattern(regexp = QUANTITY_PATTERN) String reorderThreshold,
+        @Schema(nullable = true) @Size(max = 80) String sku,
+        @Schema(nullable = true) @Pattern(regexp = QUANTITY_PATTERN) String reorderThreshold,
         @NotNull @PositiveOrZero Long version
     ) {
     }
