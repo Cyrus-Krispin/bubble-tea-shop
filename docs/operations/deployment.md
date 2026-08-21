@@ -30,6 +30,7 @@ Provide these values through the platform's secret or configuration service:
 | `LOCAL_SUPABASE_AUTH_AUDIENCE` | Expected token audience, normally `authenticated`. |
 | `GUEST_LOCATION_SLUG` | The one active public MVP location. |
 | `OPENAPI_DOCS_ENABLED` | Keep `false` unless API documentation is deliberately exposed to a protected network. |
+| `SPRING_PROFILES_ACTIVE` | Set to `production` to require production credentials and enable ECS JSON logs. |
 
 Run owner bootstrap as an audited one-off task with temporary `OWNER_BOOTSTRAP_*` values, then
 disable it. Do not leave bootstrap enabled in the long-running service.
