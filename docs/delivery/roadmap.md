@@ -41,8 +41,10 @@ healthy database.
 
 ## Phase 4 — Operational polish
 
-- Audit views, accessibility checks, observability, backup/restore runbook, and production images.
-- CI gates for backend tests, frontend types/tests, OpenAPI drift, and container builds.
+- Audit views, accessibility checks, observability, and backup/restore runbook.
+- Production container image builds. (Implemented.)
+- CI gates for backend tests, frontend types/tests, OpenAPI drift, infrastructure tests, and
+  container builds. (Implemented.)
 
 ## Later releases
 

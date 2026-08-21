@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Verify backend
+        working-directory: backend
+        run: ./mvnw --batch-mode verify
+
+  frontend:
+    name: Frontend verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.9.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.16.0
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install dependencies
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+      - name: Test
+        working-directory: frontend
+        run: pnpm test
+      - name: Check types and OpenAPI drift
+        working-directory: frontend
+        run: pnpm typecheck
+      - name: Lint
+        working-directory: frontend
+        run: pnpm lint
+      - name: Build
+        working-directory: frontend
+        run: pnpm build
+
+  infrastructure:
+    name: Infrastructure verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.16.0
+      - name: Test local Auth key generation
+        run: node --test infra/supabase/generate-local-auth-keys.test.mjs
+
+  containers:
+    name: Container builds
+    needs: [backend, frontend, infrastructure]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Build backend image
+        run: docker build --tag bubble-tea-backend:ci backend
+      - name: Build frontend image
+        run: >-
+          docker build
+          --build-arg VITE_SUPABASE_URL=https://auth.invalid.example
+          --tag bubble-tea-frontend:ci
+          frontend

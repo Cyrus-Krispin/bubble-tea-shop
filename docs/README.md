@@ -41,6 +41,8 @@ The Flyway migration remains the executable source of truth for the database.
 - [`delivery/roadmap.md`](delivery/roadmap.md) — incremental delivery order and acceptance gates.
 - [`development/local-docker.md`](development/local-docker.md) — local Supabase, backend, and
   frontend Docker workflow.
+- [`development/continuous-integration.md`](development/continuous-integration.md) — required CI
+  checks and their local equivalents.
 
 ## Documentation rules
 
