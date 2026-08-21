@@ -67,6 +67,20 @@ The endpoint never accepts or creates an organization, location, role, or member
 identity claims return `401` with `CUSTOMER_IDENTITY_INVALID`; a disabled application account
 returns `403` with `CUSTOMER_ACCOUNT_DISABLED`.
 
+## Staff context
+
+`GET /api/v1/staff/context` is authenticated and bodyless. It derives the caller from the verified
+token subject and returns every active organization membership in deterministic name order. Owner
+memberships include every active organization location; manager memberships include only active
+locations with a current database assignment. Each location includes its ID, name, timezone,
+default locale, and currency code.
+
+The endpoint accepts no organization, location, role, or assignment input. Missing authentication
+is rejected by the security filter. A missing or non-UUID token subject returns `401` with
+`STAFF_IDENTITY_INVALID`; an unmapped identity or identity without active staff membership returns
+`403` with `STAFF_ACCESS_DENIED`; and a disabled mapped account returns `403` with
+`STAFF_ACCOUNT_DISABLED`.
+
 ## Guest catalog
 
 These read-only endpoints are public so a guest can browse without a Supabase session:
