@@ -20,11 +20,12 @@ const MenuManagementPage = lazy(() => import("../features/staff/MenuManagementPa
 const OptionManagementPage = lazy(() => import("../features/staff/OptionManagementPage"));
 const OptionGroupDetailPage = lazy(() => import("../features/staff/OptionGroupDetailPage"));
 const MenuProductDetailPage = lazy(() => import("../features/staff/MenuProductDetailPage"));
+const InventoryManagementPage = lazy(() => import("../features/staff/InventoryManagementPage"));
 
 function CatalogLoading({ label }: { label: string }) {
   return (
     <main aria-label={label} className="staff-status">
-      <p role="status">Loading catalog tools…</p>
+      <p role="status">Loading staff tools…</p>
     </main>
   );
 }
@@ -107,6 +108,11 @@ export function App() {
             <Route path="catalog/options/:groupId" element={(
               <Suspense fallback={<CatalogLoading label="Option group detail" />}>
                 <OptionGroupDetailPage />
+              </Suspense>
+            )} />
+            <Route path="inventory" element={(
+              <Suspense fallback={<CatalogLoading label="Inventory management" />}>
+                <InventoryManagementPage />
               </Suspense>
             )} />
           </Route>

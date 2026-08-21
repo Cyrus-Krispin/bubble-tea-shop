@@ -107,8 +107,8 @@ public class InventoryManagementService {
         long total = jdbc.sql("""
                 SELECT count(*) FROM inventory_movement
                  WHERE organization_id = :organizationId AND location_id = :locationId
-                   AND (:ingredientId IS NULL OR ingredient_id = :ingredientId)
-                   AND (:movementType IS NULL OR movement_type = :movementType)
+                   AND (CAST(:ingredientId AS uuid) IS NULL OR ingredient_id = :ingredientId)
+                   AND (CAST(:movementType AS text) IS NULL OR movement_type = :movementType)
                 """)
             .param("organizationId", organizationId).param("locationId", locationId)
             .param("ingredientId", ingredientId, Types.OTHER)
@@ -124,8 +124,8 @@ public class InventoryManagementService {
                                  AND ingredient.organization_id = movement.organization_id
                  WHERE movement.organization_id = :organizationId
                    AND movement.location_id = :locationId
-                   AND (:ingredientId IS NULL OR movement.ingredient_id = :ingredientId)
-                   AND (:movementType IS NULL OR movement.movement_type = :movementType)
+                   AND (CAST(:ingredientId AS uuid) IS NULL OR movement.ingredient_id = :ingredientId)
+                   AND (CAST(:movementType AS text) IS NULL OR movement.movement_type = :movementType)
               ORDER BY movement.created_at DESC, movement.id DESC
                  LIMIT :size OFFSET :offset
                 """)

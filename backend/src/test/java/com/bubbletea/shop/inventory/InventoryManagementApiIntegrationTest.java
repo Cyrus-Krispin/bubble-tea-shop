@@ -64,6 +64,9 @@ class InventoryManagementApiIntegrationTest {
             .andExpect(jsonPath("$.items[0].quantity").value("0"))
             .andExpect(jsonPath("$.items[0].belowReorderThreshold").value(true))
             .andExpect(jsonPath("$.items[0].openingRecorded").value(false));
+        mvc.perform(get(movementPath(), owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalItems").value(0))
+            .andExpect(jsonPath("$.items").isEmpty());
 
         UUID opening = record(owner, locationId, """
             {"ingredientId":"%s","movementType":"OPENING","quantityDelta":"10.000000",

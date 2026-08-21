@@ -77,7 +77,7 @@ export function StaffLayout() {
         <nav aria-label="Staff navigation">
           <NavLink end to="/staff">Overview</NavLink>
           <NavLink to="/staff/catalog">Catalog</NavLink>
-          <span aria-disabled="true">Inventory</span>
+          <NavLink to="/staff/inventory">Inventory</NavLink>
           <span aria-disabled="true">Orders</span>
         </nav>
         <div className="staff-account">
