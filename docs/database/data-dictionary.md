@@ -15,10 +15,10 @@
 
 | Table | Purpose | Lifecycle |
 |---|---|---|
-| `ingredient` | Organization stock item in one immutable base unit, protected by an optimistic version. | Archived after use. |
-| `catalog_change` | Actor-attributed audit event for a catalog entity mutation. | Append-only at the service layer and retained permanently. |
-| `recipe` | Stable recipe name and description. | Archived after use. |
-| `recipe_version` | Numbered draft/published/retired formula revision. | Published content is immutable. |
+| `ingredient` | Organization stock item in one immutable base unit, protected by an optimistic version. | Archived after use, but not while consumed by an available offering. |
+| `catalog_change` | Actor-attributed audit event for ingredient, recipe, and recipe-version mutations. | Append-only at the service layer and retained permanently. |
+| `recipe` | Stable recipe name and description with optimistic concurrency. | Archived only when no available offering uses any version. |
+| `recipe_version` | Numbered draft/published/retired formula revision with optimistic concurrency. | One draft per recipe; published content is immutable and an offered version cannot retire. |
 | `recipe_component` | Positive base-unit quantity of an ingredient. | Editable only while version is draft. |
 | `menu_product` | Customer-facing drink identity, public slug, category, artwork key, and display order. | Archived after use. |
 | `menu_variant` | Size/form of a menu product, including its optional default marker. | Archived after use. |

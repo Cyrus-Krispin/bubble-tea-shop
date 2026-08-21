@@ -38,6 +38,9 @@ public class RecipeVersionEntity {
     @Column(name = "published_at")
     Instant publishedAt;
 
+    @Column(nullable = false)
+    long version;
+
     protected RecipeVersionEntity() {
     }
 
@@ -45,4 +48,3 @@ public class RecipeVersionEntity {
         DRAFT, PUBLISHED, RETIRED
     }
 }
-

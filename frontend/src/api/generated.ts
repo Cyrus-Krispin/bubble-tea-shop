@@ -4,6 +4,41 @@
  */
 
 export interface paths {
+    readonly "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get recipe metadata and version history */
+        readonly get: operations["getRecipe"];
+        /** Update active recipe metadata */
+        readonly put: operations["updateRecipe"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/draft": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        /** Replace a draft formula atomically */
+        readonly put: operations["replaceRecipeDraft"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/ingredients/{ingredientId}": {
         readonly parameters: {
             readonly query?: never;
@@ -15,6 +50,92 @@ export interface paths {
         /** Update an active ingredient */
         readonly put: operations["updateIngredient"];
         readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/recipes": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List recipes in an authorized organization */
+        readonly get: operations["listRecipes"];
+        readonly put?: never;
+        /** Create a recipe with an empty draft */
+        readonly post: operations["createRecipe"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Create the next recipe draft */
+        readonly post: operations["createRecipeVersion"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/retire": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Retire an unused published version */
+        readonly post: operations["retireRecipeVersion"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/publish": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Publish and freeze a recipe draft */
+        readonly post: operations["publishRecipeVersion"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Archive an unused recipe */
+        readonly post: operations["archiveRecipe"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -175,6 +296,59 @@ export interface components {
                 readonly [key: string]: unknown;
             };
         };
+        readonly UpdateRecipeRequest: {
+            readonly name: string;
+            readonly description?: string | null;
+            /** Format: int64 */
+            readonly version: number;
+        };
+        readonly RecipeComponent: {
+            /** Format: uuid */
+            readonly ingredientId: string;
+            readonly ingredientName: string;
+            /** @enum {string} */
+            readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
+            readonly quantity: string;
+        };
+        readonly RecipeDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly description: string | null;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+            readonly versions: readonly components["schemas"]["RecipeVersion"][];
+        };
+        readonly RecipeVersion: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: int32 */
+            readonly versionNumber: number;
+            /** @enum {string} */
+            readonly status: "DRAFT" | "PUBLISHED" | "RETIRED";
+            /** Format: int64 */
+            readonly version: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly publishedAt: string | null;
+            readonly components: readonly components["schemas"]["RecipeComponent"][];
+        };
+        readonly ComponentRequest: {
+            /** Format: uuid */
+            readonly ingredientId: string;
+            readonly quantity: string;
+        };
+        readonly UpdateDraftRequest: {
+            /** Format: int64 */
+            readonly version: number;
+            readonly components: readonly components["schemas"]["ComponentRequest"][];
+        };
         readonly UpdateIngredientRequest: {
             readonly name: string;
             readonly sku?: string | null;
@@ -198,6 +372,20 @@ export interface components {
             /** Format: date-time */
             readonly updatedAt: string;
         };
+        readonly CreateRecipeRequest: {
+            readonly name: string;
+            readonly description?: string | null;
+        };
+        readonly CreateVersionRequest: {
+            /** Format: int64 */
+            readonly version: number;
+            /** Format: uuid */
+            readonly sourceVersionId?: string | null;
+        };
+        readonly VersionRequest: {
+            /** Format: int64 */
+            readonly version: number;
+        };
         readonly CreateIngredientRequest: {
             readonly name: string;
             readonly sku?: string | null;
@@ -215,6 +403,29 @@ export interface components {
             readonly email: string;
             /** Format: date-time */
             readonly createdAt: string;
+        };
+        readonly RecipePage: {
+            readonly items: readonly components["schemas"]["RecipeSummary"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int64 */
+            readonly totalPages: number;
+        };
+        readonly RecipeSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly description: string | null;
+            /** Format: int64 */
+            readonly version: number;
+            readonly archived: boolean;
+            /** Format: int32 */
+            readonly latestVersionNumber: number;
+            readonly latestStatus: string;
         };
         readonly IngredientPage: {
             readonly items: readonly components["schemas"]["Ingredient"][];
@@ -318,7 +529,17 @@ export interface components {
             readonly optionGroups: readonly components["schemas"]["OptionGroup"][];
         };
     };
-    responses: never;
+    responses: {
+        /** @description Problem details */
+        readonly Problem: {
+            headers: {
+                readonly [name: string]: unknown;
+            };
+            content: {
+                readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+            };
+        };
+    };
     parameters: never;
     requestBodies: never;
     headers: never;
@@ -326,6 +547,97 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    readonly getRecipe: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly recipeId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Recipe detail */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipeDetail"];
+                };
+            };
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+        };
+    };
+    readonly updateRecipe: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly recipeId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateRecipeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Recipe updated */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipeDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly replaceRecipeDraft: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly recipeId: string;
+                readonly versionId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateDraftRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Draft formula replaced */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipeVersion"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
     readonly updateIngredient: {
         readonly parameters: {
             readonly query?: never;
@@ -396,6 +708,196 @@ export interface operations {
                     readonly "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
+        };
+    };
+    readonly listRecipes: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+                readonly query?: string;
+                readonly includeArchived?: boolean;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Recipe page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipePage"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+        };
+    };
+    readonly createRecipe: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateRecipeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Recipe created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipeDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly createRecipeVersion: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly recipeId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateVersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Draft version created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipeVersion"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly retireRecipeVersion: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly recipeId: string;
+                readonly versionId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Recipe version retired */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipeVersion"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly publishRecipeVersion: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly recipeId: string;
+                readonly versionId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Recipe version published */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipeVersion"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly archiveRecipe: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly recipeId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VersionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Recipe archived or already archived */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["RecipeDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
         };
     };
     readonly listIngredients: {

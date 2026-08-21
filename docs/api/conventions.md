@@ -122,3 +122,18 @@ immutable after creation. Update and archive bodies require the current `version
 return `409` with `INGREDIENT_VERSION_CONFLICT`. Archive is retry-safe, historical rows remain
 addressable when explicitly requested, and every successful mutation records the acting account in
 the durable catalog audit table.
+
+## Recipe management
+
+Staff recipe endpoints are scoped beneath
+`/api/v1/staff/organizations/{organizationId}/recipes` and use the same owner/assigned-manager
+authorization boundary as ingredient management. Recipe creation atomically creates an empty
+version 1 draft. Metadata commands carry the recipe `version`; draft, publish, and retire commands
+carry the recipe-version `version`.
+
+Draft replacement sends the complete formula as unique active ingredient IDs and positive decimal
+strings. Published and retired formulas are immutable. New drafts may clone a published or retired
+version, publication requires a non-empty formula, and an available menu offering blocks version
+retirement and recipe archival. State conflicts use `RECIPE_STATE_CONFLICT`, stale writes use
+`RECIPE_VERSION_CONFLICT`, invalid input uses `RECIPE_INVALID`, and cross-organization identifiers
+resolve as `RECIPE_NOT_FOUND`.

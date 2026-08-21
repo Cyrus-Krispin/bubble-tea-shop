@@ -236,6 +236,8 @@ Checks: expiry is after creation; a session cannot replace itself.
 Unique: `(id, organization_id)`, case-insensitive `(organization_id, name)`, and case-insensitive
 `(organization_id, sku)` when SKU is non-null. `base_unit` is `GRAM`, `MILLILITER`, or `EACH` and
 is immutable after creation; reorder threshold and version are non-negative.
+Archival is rejected while an available offering consumes the ingredient through its recipe or an
+enabled option effect.
 
 ### `catalog_change`
 
@@ -249,9 +251,10 @@ is immutable after creation; reorder threshold and version are non-negative.
 | `actor_account_id` | `uuid` | NN | — | FK → `account.id` |
 | `occurred_at` | `timestamptz` | NN | `now()` | — |
 
-V5 supports `INGREDIENT` entities and `CREATE`, `UPDATE`, and `ARCHIVE` actions. The entity ID is a
-logical reference so the table can later cover additional catalog entity types without a polymorphic
-foreign key. Application services append the audit row in the same transaction as the mutation.
+V6 supports `INGREDIENT`, `RECIPE`, and `RECIPE_VERSION` entities and the actions `CREATE`, `UPDATE`,
+`ARCHIVE`, `CREATE_VERSION`, `UPDATE_DRAFT`, `PUBLISH`, and `RETIRE`. The entity ID is a logical
+reference rather than a polymorphic foreign key. Application services append the audit row in the
+same transaction as the mutation.
 
 ### `recipe`
 
@@ -261,11 +264,13 @@ foreign key. Application services append the audit row in the same transaction a
 | `organization_id` | `uuid` | NN | — | FK → `organization.id`; UQ component |
 | `name` | `varchar(160)` | NN | — | UQ with `organization_id` |
 | `description` | `text` | Nullable | — | — |
+| `version` | `bigint` | NN | `0` | — |
 | `archived_at` | `timestamptz` | Nullable | — | — |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
-Unique: `(id, organization_id)` and `(organization_id, name)`. Name must not be blank.
+Unique: `(id, organization_id)` and case-insensitive `(organization_id, name)`. Name must not be
+blank and version is non-negative. An available offering referencing any version blocks archival.
 
 ### `recipe_version`
 
@@ -276,12 +281,15 @@ Unique: `(id, organization_id)` and `(organization_id, name)`. Name must not be 
 | `recipe_id` | `uuid` | NN | — | FK with `organization_id` → `recipe`; UQ with `version_number` |
 | `version_number` | `integer` | NN | — | UQ with `recipe_id` |
 | `status` | `varchar(20)` | NN | `'DRAFT'` | — |
+| `version` | `bigint` | NN | `0` | — |
 | `created_by_account_id` | `uuid` | Nullable | — | FK → `account.id` |
 | `created_at` | `timestamptz` | NN | `now()` | — |
 | `published_at` | `timestamptz` | Nullable | — | — |
 
-Unique: `(id, organization_id)` and `(recipe_id, version_number)`. Version number is positive.
-Status is `DRAFT`, `PUBLISHED`, or `RETIRED`; only draft versions have no publication timestamp.
+Unique: `(id, organization_id)` and `(recipe_id, version_number)`, plus one partial unique draft per
+recipe. Version number is positive and optimistic version is non-negative. Status is `DRAFT`,
+`PUBLISHED`, or `RETIRED`; only draft versions have no publication timestamp. An available offering
+blocks retirement.
 
 ### `recipe_component`
 
@@ -572,6 +580,8 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `uq_ingredient_sku_organization_ci` | `ingredient` | `(organization_id, lower(sku)) WHERE sku IS NOT NULL` | Prevent case-insensitive duplicate ingredient SKUs. |
 | `idx_catalog_change_entity` | `catalog_change` | `(organization_id, entity_type, entity_id, occurred_at DESC)` | Load an entity's audit history. |
 | `idx_recipe_active` | `recipe` | `(organization_id, name) WHERE archived_at IS NULL` | Active recipe listing. |
+| `uq_recipe_name_organization_ci` | `recipe` | `(organization_id, lower(name))` | Prevent case-insensitive duplicate recipe names. |
+| `uq_recipe_single_draft` | `recipe_version` | `(recipe_id) WHERE status = 'DRAFT'` | Keep at most one editable draft per recipe. |
 | `idx_menu_product_active` | `menu_product` | `(organization_id, name) WHERE archived_at IS NULL` | Active product listing. |
 | `uq_menu_product_public_slug_organization` | `menu_product` | `(organization_id, public_slug) WHERE public_slug IS NOT NULL` | Resolve a product URL inside an organization. |
 | `uq_menu_variant_default_product` | `menu_variant` | `(menu_product_id) WHERE is_default AND archived_at IS NULL` | Keep one active default size per product. |

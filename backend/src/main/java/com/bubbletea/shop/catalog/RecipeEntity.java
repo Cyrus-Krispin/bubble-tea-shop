@@ -32,7 +32,9 @@ public class RecipeEntity {
     @Column(name = "updated_at", nullable = false)
     Instant updatedAt;
 
+    @Column(nullable = false)
+    long version;
+
     protected RecipeEntity() {
     }
 }
-

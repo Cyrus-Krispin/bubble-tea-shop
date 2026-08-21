@@ -26,6 +26,14 @@
   default variant, and each option group has at most one active default choice.
 - Component quantities are strictly positive and use the ingredient's base unit.
 - Components of a published or retired recipe version cannot be inserted, changed, or deleted.
+- Recipe names are unique per organization without regard to case. Recipe metadata and recipe
+  versions have separate non-negative optimistic versions.
+- Each recipe has at most one draft. A draft may be empty, but publication requires active,
+  same-organization ingredients and at least one positive component.
+- An available offering prevents its recipe version from retiring and prevents its parent recipe
+  or any consumed ingredient from being archived. Offering activation and those lifecycle mutations
+  lock the same recipe and ingredient rows so concurrent transactions cannot bypass the invariant.
+- Recipe and version mutations append actor-attributed `catalog_change` rows in the same transaction.
 - An available offering references an active product/variant and a published, non-archived recipe.
 - Offering currency must equal location currency.
 
@@ -60,3 +68,5 @@
   optional without editing V1.
 - V5 adds ingredient optimistic versions, case-insensitive organization uniqueness, and durable
   catalog change auditing.
+- V6 adds recipe/version optimistic concurrency, case-insensitive recipe names, the single-draft
+  constraint, expanded catalog auditing, and offering-safe recipe lifecycle triggers.

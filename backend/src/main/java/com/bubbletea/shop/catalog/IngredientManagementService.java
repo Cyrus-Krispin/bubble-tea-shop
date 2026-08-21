@@ -1,6 +1,5 @@
 package com.bubbletea.shop.catalog;
 
-import com.bubbletea.shop.identity.StaffAccessDeniedException;
 import com.bubbletea.shop.identity.StaffContextService;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -20,11 +19,11 @@ import java.util.UUID;
 @Service
 public class IngredientManagementService {
     private final JdbcClient jdbc;
-    private final StaffContextService staffContext;
+    private final CatalogStaffAccessService access;
 
-    public IngredientManagementService(JdbcClient jdbc, StaffContextService staffContext) {
+    public IngredientManagementService(JdbcClient jdbc, CatalogStaffAccessService access) {
         this.jdbc = jdbc;
-        this.staffContext = staffContext;
+        this.access = access;
     }
 
     @Transactional(readOnly = true)
@@ -118,13 +117,7 @@ public class IngredientManagementService {
     }
 
     private StaffContextService.StaffContext authorize(UUID subject, UUID organizationId) {
-        StaffContextService.StaffContext context = staffContext.resolve(subject);
-        boolean allowed = context.memberships().stream().anyMatch(membership ->
-            membership.organizationId().equals(organizationId)
-                && (membership.role() == StaffContextService.StaffRole.OWNER
-                    || !membership.locations().isEmpty()));
-        if (!allowed) throw new StaffAccessDeniedException();
-        return context;
+        return access.authorize(subject, organizationId);
     }
 
     private Ingredient find(UUID organizationId, UUID ingredientId) {
