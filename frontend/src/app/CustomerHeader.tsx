@@ -9,7 +9,7 @@ export function CustomerHeader({ itemCount = 0 }: { itemCount?: number }) {
   return (
     <header className="customer-header">
       <Link className="customer-brand" to="/" aria-label="Bubble Tea Shop menu">
-        <span className="brand-monogram" aria-hidden="true">BT</span>
+        <img alt="" aria-hidden="true" className="brand-icon" height="40" src="/app-icon-192.png" width="40" />
         <span><strong>Bubble Tea Shop</strong><small>Fresh tea · made to order</small></span>
       </Link>
       <nav aria-label="Customer navigation">

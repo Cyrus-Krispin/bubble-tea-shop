@@ -75,7 +75,7 @@ export function StaffLayout() {
       <a className="skip-link" href="#staff-workspace">Skip to workspace</a>
       <aside className="staff-header" aria-label="Staff workspace navigation">
         <Link className="staff-brand" to="/staff" aria-label="Bubble Tea Shop staff home">
-          <span className="brand-mark" aria-hidden="true">BT</span>
+          <img alt="" aria-hidden="true" className="brand-icon" height="40" src="/app-icon-192.png" width="40" />
           <span><strong>Bubble Tea Shop</strong><small>Operations</small></span>
         </Link>
         <p className="staff-nav-label">Workspace</p>

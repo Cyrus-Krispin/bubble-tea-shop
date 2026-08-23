@@ -26,7 +26,7 @@ export function StaffSignInPage() {
       <a className="skip-link" href="#staff-sign-in">Skip to sign in</a>
       <header className="app-header">
         <Link className="brand" to="/" aria-label="Bubble Tea Shop home">
-          <span className="brand-mark" aria-hidden="true">BT</span>
+          <img alt="" aria-hidden="true" className="brand-icon" height="40" src="/app-icon-192.png" width="40" />
           <span><strong>Bubble Tea Shop</strong><span>Operations</span></span>
         </Link>
       </header>

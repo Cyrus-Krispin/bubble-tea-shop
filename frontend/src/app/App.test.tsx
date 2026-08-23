@@ -239,6 +239,7 @@ describe("App", () => {
     );
 
     expect(await screen.findByRole("main", { name: "Guest shop" })).toBeVisible();
+    expect(document.querySelector("img.brand-icon")).toHaveAttribute("src", "/app-icon-192.png");
     expect(screen.getByRole("heading", { level: 1, name: "Drinks made your way" })).toBeVisible();
     expect(screen.getByRole("heading", { level: 2, name: "Moonlit Milk Tea" })).toBeVisible();
   });

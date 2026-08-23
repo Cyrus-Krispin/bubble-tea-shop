@@ -26,12 +26,6 @@
   border-bottom: 1px solid var(--color-line);
 }
 
-.staff-brand .brand-mark {
-  color: var(--color-surface);
-  background: var(--color-primary);
-  border-radius: var(--radius-control);
-}
-
 .staff-brand strong,
 .staff-brand small { display: block; }
 

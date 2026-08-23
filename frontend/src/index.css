@@ -161,19 +161,12 @@ h2 {
   text-decoration: none;
 }
 
-.brand-mark,
-.brand-monogram {
-  display: grid;
+.brand-icon {
+  display: block;
   width: 2.5rem;
   height: 2.5rem;
   flex: 0 0 auto;
-  place-items: center;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  background: var(--color-ink);
-  border-radius: 50%;
+  object-fit: contain;
 }
 
 .brand strong,
@@ -292,7 +285,5 @@ h2 {
 
 @media (forced-colors: active) {
   :focus-visible { outline-color: Highlight; }
-  .primary-link,
-  .brand-mark,
-  .brand-monogram { color: HighlightText; background: Highlight; border-color: Highlight; }
+  .primary-link { color: HighlightText; background: Highlight; border-color: Highlight; }
 }
