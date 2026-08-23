@@ -1,66 +1,14 @@
-export type Money = {
-  amountMinor: number;
-  currency: string;
-};
+import type { components } from "../../api/generated";
 
-export type CatalogLocation = {
-  id: string;
-  slug: string;
-  name: string;
-  currency: string;
-};
+type Schemas = components["schemas"];
 
-export type CatalogProductSummary = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  category: string;
-  artworkKey: string;
-  startingPrice: Money;
-  available: boolean;
-};
-
-export type CatalogMenu = {
-  location: CatalogLocation;
-  products: CatalogProductSummary[];
-};
-
-export type CatalogOptionChoice = {
-  id: string;
-  name: string;
-  displayOrder: number;
-  isDefault: boolean;
-  priceDelta: Money;
-};
-
-export type CatalogOptionGroup = {
-  id: string;
-  name: string;
-  minimumSelections: number;
-  maximumSelections: number;
-  displayOrder: number;
-  choices: CatalogOptionChoice[];
-};
-
-export type CatalogVariant = {
-  id: string;
-  name: string;
-  displayOrder: number;
-  isDefault: boolean;
-  available: boolean;
-  price: Money;
-  optionGroups: CatalogOptionGroup[];
-};
-
-export type CatalogProduct = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  category: string;
-  artworkKey: string;
-  variants: CatalogVariant[];
-};
+export type Money = Schemas["Money"];
+export type CatalogLocation = Schemas["Location"];
+export type CatalogProductSummary = Schemas["ProductSummary"];
+export type CatalogMenu = Schemas["Menu"];
+export type CatalogOptionChoice = Schemas["OptionChoice"];
+export type CatalogOptionGroup = Schemas["OptionGroup"];
+export type CatalogVariant = Schemas["Variant"];
+export type CatalogProduct = Schemas["Product"];
 
 export type DrinkArtworkProduct = Pick<CatalogProductSummary, "name" | "artworkKey">;

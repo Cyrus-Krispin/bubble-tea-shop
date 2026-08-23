@@ -23,6 +23,9 @@ public class OrderItemEntity {
     @Column(name = "menu_variant_id")
     UUID menuVariantId;
 
+    @Column(name = "line_number", nullable = false)
+    int lineNumber;
+
     @Column(name = "product_name_snapshot", nullable = false, length = 160)
     String productNameSnapshot;
 
@@ -44,4 +47,3 @@ public class OrderItemEntity {
     protected OrderItemEntity() {
     }
 }
-

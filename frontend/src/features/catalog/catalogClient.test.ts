@@ -11,7 +11,9 @@ describe("catalogClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(getGuestMenu()).resolves.toEqual(catalogMenu);
-    expect(fetchMock).toHaveBeenCalledWith("/api/v1/guest/menu", { signal: undefined });
+    const request = fetchMock.mock.calls[0]?.[0];
+    expect(request).toBeInstanceOf(Request);
+    expect((request as Request).url).toBe("http://localhost:3000/api/v1/guest/menu");
   });
 
   it("encodes product slugs and validates the response", async () => {
@@ -19,7 +21,10 @@ describe("catalogClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(getGuestProduct("milk tea/one")).resolves.toEqual(catalogProduct);
-    expect(fetchMock).toHaveBeenCalledWith("/api/v1/guest/menu/products/milk%20tea%2Fone", { signal: undefined });
+    const request = fetchMock.mock.calls[0]?.[0];
+    expect(request).toBeInstanceOf(Request);
+    expect((request as Request).url)
+      .toBe("http://localhost:3000/api/v1/guest/menu/products/milk%20tea%2Fone");
   });
 
   it("rejects malformed catalog responses instead of using fallback data", async () => {

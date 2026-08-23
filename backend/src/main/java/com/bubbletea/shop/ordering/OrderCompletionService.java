@@ -23,15 +23,40 @@ public class OrderCompletionService {
 
     @Transactional
     public CompletionResult complete(UUID orderId, UUID actorAccountId) {
-        OrderRecord order = findAndLockOrder(orderId);
+        return complete(orderId, null, null, actorAccountId);
+    }
+
+    @Transactional
+    public CompletionResult completeScoped(
+        UUID orderId,
+        UUID organizationId,
+        UUID locationId,
+        UUID actorAccountId
+    ) {
+        return complete(orderId, organizationId, locationId, actorAccountId);
+    }
+
+    private CompletionResult complete(
+        UUID orderId,
+        UUID organizationId,
+        UUID locationId,
+        UUID actorAccountId
+    ) {
+        OrderRecord order = organizationId == null
+            ? findAndLockOrder(orderId)
+            : findAndLockScopedOrder(orderId, organizationId, locationId);
+        PaymentRecord payment = findAndLockPayment(orderId);
         if (order.status() == OrderStatus.COMPLETED) {
+            if (!payment.matches(order, "PAID")) throw new InvalidOrderStateException(orderId);
             return new CompletionResult(orderId, true);
         }
         if (order.status() != OrderStatus.PENDING) {
             throw new InvalidOrderTransitionException(orderId, order.status());
         }
+        if (!payment.matches(order, "PENDING")) throw new InvalidOrderStateException(orderId);
 
         List<Consumption> consumption = loadConsumption(orderId);
+        if (consumption.isEmpty()) throw new InvalidOrderStateException(orderId);
         Map<UUID, BigDecimal> available = lockBalances(order.locationId(), consumption);
         Map<UUID, InsufficientStockException.StockShortage> shortages = findShortages(consumption, available);
         if (!shortages.isEmpty()) {
@@ -63,6 +88,13 @@ public class OrderCompletionService {
                 order.publicOrderNumber());
         }
 
+        int paymentChanged = jdbc.update("""
+            UPDATE payment
+               SET status = 'PAID', paid_at = now(), recorded_by_account_id = ?, updated_at = now()
+             WHERE id = ? AND status = 'PENDING'
+            """, actorAccountId, payment.id());
+        if (paymentChanged != 1) throw new InvalidOrderStateException(orderId);
+
         int changed = jdbc.update("""
             UPDATE customer_order
                SET status = 'COMPLETED', completed_at = now(), updated_at = now()
@@ -87,7 +119,8 @@ public class OrderCompletionService {
 
     private OrderRecord findAndLockOrder(UUID orderId) {
         List<OrderRecord> orders = jdbc.query("""
-            SELECT organization_id, location_id, public_order_number, status
+            SELECT organization_id, location_id, public_order_number, status,
+                   payment_method, currency_code, total_minor
               FROM customer_order
              WHERE id = ?
              FOR UPDATE
@@ -96,12 +129,52 @@ public class OrderCompletionService {
                 rs.getObject("organization_id", UUID.class),
                 rs.getObject("location_id", UUID.class),
                 rs.getString("public_order_number"),
-                OrderStatus.valueOf(rs.getString("status"))),
+                OrderStatus.valueOf(rs.getString("status")),
+                rs.getString("payment_method"),
+                rs.getString("currency_code"),
+                rs.getLong("total_minor")),
             orderId);
         if (orders.isEmpty()) {
             throw new OrderNotFoundException(orderId);
         }
         return orders.getFirst();
+    }
+
+    private OrderRecord findAndLockScopedOrder(UUID orderId, UUID organizationId, UUID locationId) {
+        List<OrderRecord> orders = jdbc.query("""
+            SELECT organization_id, location_id, public_order_number, status,
+                   payment_method, currency_code, total_minor
+              FROM customer_order
+             WHERE id = ? AND organization_id = ? AND location_id = ?
+             FOR UPDATE
+            """,
+            (rs, rowNum) -> new OrderRecord(
+                rs.getObject("organization_id", UUID.class),
+                rs.getObject("location_id", UUID.class),
+                rs.getString("public_order_number"),
+                OrderStatus.valueOf(rs.getString("status")),
+                rs.getString("payment_method"),
+                rs.getString("currency_code"),
+                rs.getLong("total_minor")),
+            orderId, organizationId, locationId);
+        if (orders.isEmpty()) throw new OrderNotFoundException(orderId);
+        return orders.getFirst();
+    }
+
+    private PaymentRecord findAndLockPayment(UUID orderId) {
+        List<PaymentRecord> payments = jdbc.query("""
+            SELECT id, method, status, amount_minor, currency_code
+              FROM payment
+             WHERE customer_order_id = ?
+             FOR UPDATE
+            """,
+            (rs, rowNum) -> new PaymentRecord(
+                rs.getObject("id", UUID.class), rs.getString("method"),
+                rs.getString("status"), rs.getLong("amount_minor"),
+                rs.getString("currency_code")),
+            orderId);
+        if (payments.size() != 1) throw new InvalidOrderStateException(orderId);
+        return payments.getFirst();
     }
 
     private List<Consumption> loadConsumption(UUID orderId) {
@@ -169,8 +242,22 @@ public class OrderCompletionService {
         UUID organizationId,
         UUID locationId,
         String publicOrderNumber,
-        OrderStatus status
+        OrderStatus status,
+        String paymentMethod,
+        String currencyCode,
+        long totalMinor
     ) {
+    }
+
+    private record PaymentRecord(UUID id, String method, String status,
+                                 long amountMinor, String currencyCode) {
+        boolean matches(OrderRecord order, String expectedStatus) {
+            return method.equals("CASH")
+                && method.equals(order.paymentMethod())
+                && status.equals(expectedStatus)
+                && amountMinor == order.totalMinor()
+                && currencyCode.equals(order.currencyCode());
+        }
     }
 
     private record Consumption(UUID ingredientId, BigDecimal quantity) {
@@ -179,4 +266,3 @@ public class OrderCompletionService {
     public record CompletionResult(UUID orderId, boolean alreadyCompleted) {
     }
 }
-

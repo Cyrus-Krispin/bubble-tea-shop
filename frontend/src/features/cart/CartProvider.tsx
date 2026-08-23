@@ -13,6 +13,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     incrementItem: (itemId: string) => dispatch({ type: "increment", itemId }),
     decrementItem: (itemId: string) => dispatch({ type: "decrement", itemId }),
     removeItem: (itemId: string) => dispatch({ type: "remove", itemId }),
+    clearCart: () => dispatch({ type: "clear" }),
   }), [state.items]);
 
   return (

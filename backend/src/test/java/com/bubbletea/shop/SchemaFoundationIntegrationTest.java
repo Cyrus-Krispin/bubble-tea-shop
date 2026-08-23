@@ -4,6 +4,7 @@ import com.bubbletea.shop.inventory.InsufficientStockException;
 import com.bubbletea.shop.inventory.InventoryLedgerService;
 import com.bubbletea.shop.inventory.InventoryMovementType;
 import com.bubbletea.shop.ordering.OrderCompletionService;
+import io.micrometer.tracing.Tracer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,6 +49,14 @@ class SchemaFoundationIntegrationTest {
 
     @Autowired
     OrderCompletionService orderCompletion;
+
+    @Autowired
+    Tracer tracer;
+
+    @Test
+    void configuresAnOpenTelemetryTracer() {
+        assertThat(tracer).isNotNull();
+    }
 
     @Test
     void flywayCreatesAllMvpTablesAndHibernateValidatesThem() {
@@ -221,6 +230,12 @@ class SchemaFoundationIntegrationTest {
         assertThat(jdbc.queryForObject(
             "SELECT status FROM customer_order WHERE id = ?",
             String.class, orderId)).isEqualTo("COMPLETED");
+        assertThat(jdbc.queryForObject(
+            "SELECT status FROM payment WHERE customer_order_id = ?",
+            String.class, orderId)).isEqualTo("PAID");
+        assertThat(jdbc.queryForObject(
+            "SELECT recorded_by_account_id FROM payment WHERE customer_order_id = ?",
+            UUID.class, orderId)).isEqualTo(fixture.accountId());
         assertThatThrownBy(() -> jdbc.update("""
             UPDATE order_item SET product_name_snapshot = 'Changed'
              WHERE customer_order_id = ?
@@ -332,11 +347,18 @@ class SchemaFoundationIntegrationTest {
             """, orderId, fixture.organizationId(), fixture.locationId(), publicNumber);
         jdbc.update("""
             INSERT INTO order_item (
-                id, organization_id, customer_order_id, product_name_snapshot,
+                id, organization_id, customer_order_id, line_number, product_name_snapshot,
                 variant_name_snapshot, quantity, unit_price_minor, line_total_minor
             )
-            VALUES (?, ?, ?, 'Milk Tea', 'Medium', 1, 500, 500)
+            VALUES (?, ?, ?, 1, 'Milk Tea', 'Medium', 1, 500, 500)
             """, itemId, fixture.organizationId(), orderId);
+        jdbc.update("""
+            INSERT INTO payment (
+                id, organization_id, customer_order_id, method, status,
+                amount_minor, currency_code
+            )
+            VALUES (?, ?, ?, 'CASH', 'PENDING', 500, 'SGD')
+            """, UUID.randomUUID(), fixture.organizationId(), orderId);
         jdbc.update("""
             INSERT INTO order_item_consumption (
                 id, organization_id, order_item_id, ingredient_id, quantity

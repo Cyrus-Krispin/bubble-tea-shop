@@ -6,6 +6,20 @@ The Flyway migration remains the executable source of truth for the database.
 ## Index
 
 - [`product/mvp.md`](product/mvp.md) — MVP scope, roles, workflows, and deferred stories.
+- [`product/staff-access.md`](product/staff-access.md) — owner bootstrap and server-resolved staff
+  authorization contract.
+- [`product/owner-manager-management.md`](product/owner-manager-management.md) — owner-only manager
+  membership and location-assignment lifecycle.
+- [`product/catalog-management.md`](product/catalog-management.md) — staff catalog authorization,
+  ingredient lifecycle, concurrency, and audit contract.
+- [`product/inventory-management.md`](product/inventory-management.md) — location-scoped balances,
+  immutable movements, and manual stock workflow contract.
+- [`product/guest-order-placement.md`](product/guest-order-placement.md) — server-priced guest
+  checkout, immutable snapshots, and idempotent placement contract.
+- [`product/staff-order-operations.md`](product/staff-order-operations.md) — authorized order queue,
+  atomic cash collection, and inventory-safe completion contract.
+- [`product/audit-views.md`](product/audit-views.md) — role-scoped, read-only operational audit
+  timeline contract.
 - [`product/glossary.md`](product/glossary.md) — shared domain language.
 - [`architecture/overview.md`](architecture/overview.md) — system shape and module responsibilities.
 - [`architecture/technology-stack.md`](architecture/technology-stack.md) — selected technologies,
@@ -24,12 +38,27 @@ The Flyway migration remains the executable source of truth for the database.
 - [`database/erd.md`](database/erd.md) — entity relationship diagrams.
 - [`database/data-dictionary.md`](database/data-dictionary.md) — tables and lifecycle rules.
 - [`database/invariants.md`](database/invariants.md) — transactional and data integrity rules.
-- [`api/conventions.md`](api/conventions.md) — future HTTP and OpenAPI conventions.
+- [`api/conventions.md`](api/conventions.md) — HTTP conventions and contract workflow.
+- [`api/openapi.json`](api/openapi.json) — generated OpenAPI 3.1 contract snapshot.
 - [`../frontend/docs/visual-style-guide.md`](../frontend/docs/visual-style-guide.md) — selected
   customer ordering visual direction and frontend interaction guidance.
 - [`delivery/roadmap.md`](delivery/roadmap.md) — incremental delivery order and acceptance gates.
 - [`development/local-docker.md`](development/local-docker.md) — local Supabase, backend, and
   frontend Docker workflow.
+- [`development/continuous-integration.md`](development/continuous-integration.md) — required CI
+  checks and their local equivalents.
+- [`development/accessibility.md`](development/accessibility.md) — automated WCAG checks and the
+  required real-browser review boundary.
+- [`development/storybook.md`](development/storybook.md) — isolated component documentation and
+  static catalog build workflow.
+- [`operations/backup-restore.md`](operations/backup-restore.md) — PostgreSQL backup policy,
+  recovery safeguards, and restore drills.
+- [`operations/deployment.md`](operations/deployment.md) — production image, configuration,
+  network, release, and rollback contract.
+- [`operations/observability.md`](operations/observability.md) — structured logs, request
+  correlation, health, metrics, dashboards, and alerting.
+- [`operations/incident-response.md`](operations/incident-response.md) — incident severity,
+  command, containment, recovery, communications, and post-incident procedure.
 
 ## Documentation rules
 

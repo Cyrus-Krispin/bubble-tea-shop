@@ -6,25 +6,27 @@
 |---|---|---|
 | `organization` | Top-level business owner. | Retained permanently in MVP. |
 | `location` | Physical stock/order boundary, public menu slug, timezone, and currency. | Deactivated with `active=false`. |
-| `account` | Phase 1 application identity record; future Supabase linkage is not yet modeled. | Disabled rather than deleted. |
-| `organization_membership` | Owner/manager role inside an organization. | Deactivated to remove access. |
-| `location_assignment` | Manager-to-location access. | Rows added or removed with audit at service layer. |
+| `account` | Application identity mapped optionally and uniquely to a Supabase Auth subject and verified email; it grants no organization access by itself. | Disabled rather than deleted. |
+| `organization_membership` | Optimistically versioned owner/manager role inside an organization. | Deactivated to remove access; inactive manager memberships can be reactivated. |
+| `location_assignment` | Manager-to-location access. | Replaced atomically while history is retained in the access ledger. |
+| `staff_access_change` | Owner actor, manager membership, action, and timestamp for every manager-access mutation. | Database-enforced append-only and retained permanently. |
 | `refresh_session` | Legacy custom-session structure superseded by the Supabase direction. | Implemented in V1; later migration is undecided. |
 
 ## Catalog
 
 | Table | Purpose | Lifecycle |
 |---|---|---|
-| `ingredient` | Organization stock item in one base unit. | Archived after use. |
-| `recipe` | Stable recipe name and description. | Archived after use. |
-| `recipe_version` | Numbered draft/published/retired formula revision. | Published content is immutable. |
+| `ingredient` | Organization stock item in one immutable base unit, protected by an optimistic version. | Archived after use, but not while consumed by an available offering. |
+| `catalog_change` | Actor-attributed audit event for ingredient, recipe, menu, offering, and option mutations. | Database-enforced append-only and retained permanently. |
+| `recipe` | Stable recipe name and description with optimistic concurrency. | Archived only when no available offering uses any version. |
+| `recipe_version` | Numbered draft/published/retired formula revision with optimistic concurrency. | One draft per recipe; published content is immutable and an offered version cannot retire. |
 | `recipe_component` | Positive base-unit quantity of an ingredient. | Editable only while version is draft. |
-| `menu_product` | Customer-facing drink identity, public slug, category, artwork key, and display order. | Archived after use. |
-| `menu_variant` | Size/form of a menu product, including its optional default marker. | Archived after use. |
-| `menu_variant_offering` | Location price, availability, and recipe assignment. | Updated when price/availability changes. |
-| `option_group` | Selection limits and display order for a choice family. | Archived after use. |
-| `option_choice` | Value within an option group, including its optional default marker. | Archived after use. |
-| `menu_variant_option_choice` | Variant-specific enablement and price delta. | Disabled rather than deleted after use. |
+| `menu_product` | Optimistically versioned customer-facing drink identity, public slug, category, artwork key, and display order. | Archived only when no available offering uses a variant. |
+| `menu_variant` | Optimistically versioned size/form of a menu product, including its optional default marker. | Archived only when it has no available offering. |
+| `menu_variant_offering` | Optimistically versioned location price, availability, currency, and recipe assignment. | Updated when price, recipe, or availability changes. |
+| `option_group` | Optimistically versioned selection limits and display order for a choice family. | Archived only when not enabled by an available offering. |
+| `option_choice` | Optimistically versioned value within an option group, including its optional default marker. | Archived only when not enabled by an available offering. |
+| `menu_variant_option_choice` | Optimistically versioned variant-specific enablement and price delta. | Disabled rather than deleted after use. |
 | `option_choice_ingredient_effect` | Signed ingredient delta caused by a choice. | Copied into order consumption at placement. |
 
 ## Inventory
@@ -36,22 +38,22 @@
 
 Movement types:
 
-- `OPENING`: positive initial stock.
+- `OPENING`: positive initial stock; at most one per location and ingredient.
 - `RECEIPT`: positive delivery.
 - `SALE`: negative completed-order consumption.
 - `REVERSAL`: positive compensation tied to an order.
-- `ADJUSTMENT`: signed correction after a physical count.
+- `ADJUSTMENT`: signed correction after a physical count with a required application-level note.
 
 ## Orders
 
 | Table | Purpose | Lifecycle |
 |---|---|---|
-| `customer_order` | Guest or account-linked sale with money/status snapshots. | Pending, then completed or cancelled. |
+| `customer_order` | Idempotent guest or account-linked sale with money/status snapshots. | Pending, then completed or cancelled. |
 | `order_item` | Product, variant, quantity, and price snapshots. | Immutable after placement. |
 | `order_item_option` | Selected option name and price snapshots. | Immutable after placement. |
 | `order_item_consumption` | Final positive ingredient quantities for the complete line. | Immutable after placement. |
-| `order_status_history` | Actor and timestamp for every transition. | Append-only at service layer. |
-| `payment` | Cash/card-compatible payment record. | Status transitions are audited by application workflow. |
+| `order_status_history` | Actor and timestamp for every transition. | Database-enforced append-only and retained as an operational audit source. |
+| `payment` | One cash/card-compatible payment record per order. | Pending cash becomes paid atomically with completion; paid time and accepting actor are retained. |
 
 ## Shared representations
 
@@ -60,3 +62,4 @@ Movement types:
 - Money: signed or non-negative `bigint` minor units as appropriate, plus `varchar(3)` ISO code.
 - Time: `timestamptz` in UTC.
 - Archival: nullable `archived_at`; historical foreign keys remain valid.
+- Optimistic concurrency: non-negative `bigint` versions supplied by staff clients and incremented on mutation.

@@ -1,0 +1,29 @@
+spring:
+  config:
+    activate:
+      on-profile: production
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+
+app:
+  security:
+    supabase:
+      enabled: true
+      issuer: ${LOCAL_SUPABASE_AUTH_ISSUER_URI}
+      jwk-set-uri: ${LOCAL_SUPABASE_AUTH_JWK_SET_URI}
+      audience: ${LOCAL_SUPABASE_AUTH_AUDIENCE:authenticated}
+
+logging:
+  structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        environment: production
+
+management:
+  opentelemetry:
+    resource-attributes:
+      deployment.environment.name: production

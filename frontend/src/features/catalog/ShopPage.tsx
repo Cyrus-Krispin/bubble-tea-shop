@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
+import { ProblemState } from "../../components/ui";
 import { useCart } from "../cart/CartContext";
 import { DrinkArtwork } from "./DrinkArtwork";
 import { formatMoney } from "./formatMoney";
@@ -36,7 +37,7 @@ export function ShopPage() {
             <h1 id="menu-title">Choose your brew</h1>
             <p>Small-batch tea, bright ingredients, and plenty of room to make it yours.</p>
           </div>
-          <p className="location-note"><strong>{state.data.location.name}</strong> · Checkout opens when live ordering is connected.</p>
+          <p className="location-note"><strong>{state.data.location.name}</strong> · Order online and pay cash at pickup.</p>
         </div>
         <div className="category-filter" aria-label="Filter drinks" role="group">
           {categories.map((option) => (
@@ -90,8 +91,9 @@ function CatalogStatus({
     <div className="customer-shell">
       <CustomerHeader itemCount={itemCount} />
       <main className="catalog-status" aria-live="polite">
-        <p>{message}</p>
-        {retry ? <button onClick={retry} type="button">Try again</button> : null}
+        {retry === undefined ? <p role="status">{message}</p> : (
+          <ProblemState message={message} onRetry={retry} title="Menu unavailable" />
+        )}
       </main>
     </div>
   );

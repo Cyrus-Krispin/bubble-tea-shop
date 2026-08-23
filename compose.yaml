@@ -47,8 +47,8 @@ services:
       GOTRUE_DB_DRIVER: postgres
       GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD:-local-supabase-postgres}@db:5432/postgres
       GOTRUE_SITE_URL: http://localhost:${FRONTEND_PORT:-4173}
-      GOTRUE_URI_ALLOW_LIST: http://localhost:${FRONTEND_PORT:-4173}/*
-      GOTRUE_DISABLE_SIGNUP: "true"
+      GOTRUE_URI_ALLOW_LIST: http://localhost:${FRONTEND_PORT:-4173}/*,http://localhost:5173/*
+      GOTRUE_DISABLE_SIGNUP: "false"
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
@@ -57,6 +57,7 @@ services:
       GOTRUE_JWT_KEYS: ${JWT_KEYS:?Run the local Auth key generator before starting Compose.}
       GOTRUE_JWT_ISSUER: http://localhost:${KONG_PORT:-8000}/auth/v1
       GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_PASSWORD_MIN_LENGTH: 8
       GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
       GOTRUE_MAILER_AUTOCONFIRM: "true"
       GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
@@ -122,6 +123,8 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_SUPABASE_URL: http://localhost:${KONG_PORT:-8000}
+    environment:
+      SUPABASE_CONNECT_SRC: http://localhost:${KONG_PORT:-8000}
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-4173}:4173"
     depends_on:

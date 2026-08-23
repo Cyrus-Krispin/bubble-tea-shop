@@ -5,8 +5,18 @@ conventions as controllers are introduced.
 
 ## Contract
 
-- Spring DTOs are the current contract source. OpenAPI generation and generated frontend types are
-  the next contract-tooling increment.
+- Spring controllers and DTOs are the contract source. The generated OpenAPI 3.1 snapshot is
+  committed as [`openapi.json`](openapi.json), and `frontend/src/api/generated.ts` is generated
+  from that snapshot. Production frontend calls to Spring use the typed `openapi-fetch` client;
+  runtime response validation remains at trust boundaries.
+- The backend contract test fails when Spring's generated document differs from the committed
+  snapshot. Frontend `pnpm typecheck` runs `pnpm api:check` first and fails when generated types
+  drift from the snapshot.
+- Update a deliberate contract change with
+  `./mvnw -Dtest=OpenApiContractIntegrationTest -Dopenapi.update=true test` in `backend/`, then run
+  `pnpm api:generate` in `frontend/`. Review both generated diffs before committing them.
+- OpenAPI publication is disabled in the running application by default. Set
+  `OPENAPI_DOCS_ENABLED=true` only in a controlled environment that needs `/v3/api-docs`.
 - JPA entities never cross the HTTP boundary.
 - Breaking changes require a versioning decision and migration note.
 
@@ -56,6 +66,31 @@ resources `404`, state conflicts `409`, and unexpected failures `500`.
 - Domain APIs remain Spring endpoints; the frontend does not write application tables directly
   through Supabase data APIs.
 
+## Customer account
+
+`POST /api/v1/customer/account` is an authenticated, bodyless, idempotent provisioning endpoint.
+It derives the external identity and display email from the verified Supabase token, creates the
+application `account` on the first request, and returns the existing account afterward. The first
+response is `201`; later responses are `200`.
+
+The endpoint never accepts or creates an organization, location, role, or membership. Invalid
+identity claims return `401` with `CUSTOMER_IDENTITY_INVALID`; a disabled application account
+returns `403` with `CUSTOMER_ACCOUNT_DISABLED`.
+
+## Staff context
+
+`GET /api/v1/staff/context` is authenticated and bodyless. It derives the caller from the verified
+token subject and returns every active organization membership in deterministic name order. Owner
+memberships include every active organization location; manager memberships include only active
+locations with a current database assignment. Each location includes its ID, name, timezone,
+default locale, and currency code.
+
+The endpoint accepts no organization, location, role, or assignment input. Missing authentication
+is rejected by the security filter. A missing or non-UUID token subject returns `401` with
+`STAFF_IDENTITY_INVALID`; an unmapped identity or identity without active staff membership returns
+`403` with `STAFF_ACCESS_DENIED`; and a disabled mapped account returns `403` with
+`STAFF_ACCOUNT_DISABLED`.
+
 ## Guest catalog
 
 These read-only endpoints are public so a guest can browse without a Supabase session:
@@ -72,3 +107,33 @@ or duplicate that domain value. The menu is a bounded singleton resource for one
 inactive locations and products return `404` problem details with `CATALOG_NOT_FOUND` or
 `CATALOG_PRODUCT_NOT_FOUND`. All other `/api/**` routes keep their configured authentication or
 deny-by-default rule.
+
+## Ingredient management
+
+Staff ingredient endpoints are scoped beneath
+`/api/v1/staff/organizations/{organizationId}/ingredients`. Authorized owners and managers with at
+least one active location assignment can list, search, create, update, and archive ingredients.
+The server derives the caller and verifies organization scope; the path organization is never
+trusted as authorization evidence.
+
+Lists use zero-based `page`, bounded `size` (1–100), optional `query`, and `includeArchived=false`
+by default. Create normalizes surrounding whitespace and uppercases non-null SKUs. Base units are
+immutable after creation. Update and archive bodies require the current `version`; stale versions
+return `409` with `INGREDIENT_VERSION_CONFLICT`. Archive is retry-safe, historical rows remain
+addressable when explicitly requested, and every successful mutation records the acting account in
+the durable catalog audit table.
+
+## Recipe management
+
+Staff recipe endpoints are scoped beneath
+`/api/v1/staff/organizations/{organizationId}/recipes` and use the same owner/assigned-manager
+authorization boundary as ingredient management. Recipe creation atomically creates an empty
+version 1 draft. Metadata commands carry the recipe `version`; draft, publish, and retire commands
+carry the recipe-version `version`.
+
+Draft replacement sends the complete formula as unique active ingredient IDs and positive decimal
+strings. Published and retired formulas are immutable. New drafts may clone a published or retired
+version, publication requires a non-empty formula, and an available menu offering blocks version
+retirement and recipe archival. State conflicts use `RECIPE_STATE_CONFLICT`, stale writes use
+`RECIPE_VERSION_CONFLICT`, invalid input uses `RECIPE_INVALID`, and cross-organization identifiers
+resolve as `RECIPE_NOT_FOUND`.

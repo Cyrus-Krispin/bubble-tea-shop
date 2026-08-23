@@ -1,0 +1,5416 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Bubble Tea Shop API",
+    "description" : "Spring-owned HTTP contract for guest ordering and staff operations.",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "http://localhost",
+    "description" : "Generated server url"
+  } ],
+  "paths" : {
+    "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}" : {
+      "get" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "Get recipe metadata and version history",
+        "operationId" : "getRecipe",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "recipeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Recipe detail",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "Update active recipe metadata",
+        "operationId" : "updateRecipe",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "recipeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateRecipeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Recipe updated",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/draft" : {
+      "put" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "Replace a draft formula atomically",
+        "operationId" : "replaceRecipeDraft",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "recipeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "versionId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateDraftRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Draft formula replaced",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipeVersion"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}" : {
+      "get" : {
+        "tags" : [ "Option management" ],
+        "summary" : "Get an option group and choices",
+        "operationId" : "getOptionGroup",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "groupId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "includeArchivedChoices",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Option group detail",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffOptionGroupDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Option management" ],
+        "summary" : "Update an active option group",
+        "operationId" : "updateOptionGroup",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "groupId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateGroupRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Option group updated",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffOptionGroupDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}/choices/{choiceId}" : {
+      "put" : {
+        "tags" : [ "Option management" ],
+        "summary" : "Update an active option choice",
+        "operationId" : "updateOptionChoice",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "groupId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "choiceId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateChoiceRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Option choice updated",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffOptionGroupDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}" : {
+      "get" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Get a menu product workspace",
+        "operationId" : "getMenuProduct",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Product detail",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuProductDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Update active product metadata",
+        "operationId" : "updateMenuProduct",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateProductRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Product updated",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuProductDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/variants/{variantId}" : {
+      "put" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Update an active product variant",
+        "operationId" : "updateMenuVariant",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "variantId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateVariantRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Variant updated",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuProductDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/variants/{variantId}/choices/{choiceId}" : {
+      "put" : {
+        "tags" : [ "Option management" ],
+        "summary" : "Replace a variant choice price and ingredient effects",
+        "operationId" : "configureVariantOptionChoice",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "variantId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "choiceId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ConfigurationRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Variant choice configured",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffVariantOptionChoice"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/managers/{membershipId}/assignments" : {
+      "put" : {
+        "tags" : [ "Owner manager management" ],
+        "summary" : "Replace an active manager's assigned locations",
+        "operationId" : "replaceOrganizationManagerAssignments",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "membershipId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AssignmentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ManagerSummary"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/offerings/{offeringId}" : {
+      "put" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Update a location offering",
+        "operationId" : "updateMenuOffering",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "offeringId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateOfferingRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Offering updated",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuOffering"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/ingredients/{ingredientId}" : {
+      "put" : {
+        "tags" : [ "Ingredient management" ],
+        "summary" : "Update an active ingredient",
+        "operationId" : "updateIngredient",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "ingredientId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateIngredientRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Ingredient updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Ingredient"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid ingredient input",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid authenticated identity",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "No active catalog access",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ingredient not found in this organization",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Ingredient conflict or stale version",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/recipes" : {
+      "get" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "List recipes in an authorized organization",
+        "operationId" : "listRecipes",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          }
+        }, {
+          "name" : "includeArchived",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Recipe page",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipePage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "Create a recipe with an empty draft",
+        "operationId" : "createRecipe",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateRecipeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Recipe created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions" : {
+      "post" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "Create the next recipe draft",
+        "operationId" : "createRecipeVersion",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "recipeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateVersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Draft version created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipeVersion"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/retire" : {
+      "post" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "Retire an unused published version",
+        "operationId" : "retireRecipeVersion",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "recipeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "versionId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Recipe version retired",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipeVersion"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/versions/{versionId}/publish" : {
+      "post" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "Publish and freeze a recipe draft",
+        "operationId" : "publishRecipeVersion",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "recipeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "versionId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Recipe version published",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipeVersion"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}/archive" : {
+      "post" : {
+        "tags" : [ "Recipe management" ],
+        "summary" : "Archive an unused recipe",
+        "operationId" : "archiveRecipe",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "recipeId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Recipe archived or already archived",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RecipeDetail"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/option-groups" : {
+      "get" : {
+        "tags" : [ "Option management" ],
+        "summary" : "List organization option groups",
+        "operationId" : "listOptionGroups",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          }
+        }, {
+          "name" : "includeArchived",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Option group page",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffOptionGroupPage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Option management" ],
+        "summary" : "Create an option group",
+        "operationId" : "createOptionGroup",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/GroupRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "201" : {
+            "description" : "Option group created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffOptionGroupDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}/choices" : {
+      "post" : {
+        "tags" : [ "Option management" ],
+        "summary" : "Create an option choice",
+        "operationId" : "createOptionChoice",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "groupId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ChoiceRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "201" : {
+            "description" : "Option choice created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffOptionGroupDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}/choices/{choiceId}/archive" : {
+      "post" : {
+        "tags" : [ "Option management" ],
+        "summary" : "Archive an unused option choice",
+        "operationId" : "archiveOptionChoice",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "groupId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "choiceId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Option choice archived or already archived",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffOptionGroupDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/option-groups/{groupId}/archive" : {
+      "post" : {
+        "tags" : [ "Option management" ],
+        "summary" : "Archive an unused option group",
+        "operationId" : "archiveOptionGroup",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "groupId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Option group archived or already archived",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffOptionGroupDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/menu-products" : {
+      "get" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "List organization menu products",
+        "operationId" : "listMenuProducts",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          }
+        }, {
+          "name" : "includeArchived",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Product page",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuProductPage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Create a menu product",
+        "operationId" : "createMenuProduct",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProductRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "201" : {
+            "description" : "Product created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuProductDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/variants" : {
+      "post" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Create a product variant",
+        "operationId" : "createMenuVariant",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateVariantRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "201" : {
+            "description" : "Variant created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuProductDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/variants/{variantId}/archive" : {
+      "post" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Archive an unused product variant",
+        "operationId" : "archiveMenuVariant",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "variantId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Variant archived or already archived",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuProductDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/menu-products/{productId}/archive" : {
+      "post" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Archive an unused menu product",
+        "operationId" : "archiveMenuProduct",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Product archived or already archived",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuProductDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/managers" : {
+      "get" : {
+        "tags" : [ "Owner manager management" ],
+        "summary" : "List manager memberships as an owner",
+        "operationId" : "listOrganizationManagers",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ManagerPage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Owner manager management" ],
+        "summary" : "Add or reactivate a registered customer as a manager",
+        "operationId" : "addOrReactivateOrganizationManager",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AddManagerRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Manager reactivated",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ManagerSummary"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Manager created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ManagerSummary"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/managers/{membershipId}/deactivate" : {
+      "post" : {
+        "tags" : [ "Owner manager management" ],
+        "summary" : "Deactivate a manager membership",
+        "operationId" : "deactivateOrganizationManager",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "membershipId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VersionRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ManagerSummary"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/orders/{orderId}/completion" : {
+      "post" : {
+        "tags" : [ "Staff order operations" ],
+        "summary" : "Collect cash and complete an order atomically",
+        "operationId" : "completeStaffOrder",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "orderId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Completed or previously completed order",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/offerings" : {
+      "get" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "List offerings at an assigned location",
+        "operationId" : "listMenuOfferings",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "variantId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Location offerings",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/StaffMenuOffering"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Menu management" ],
+        "summary" : "Create a location offering",
+        "operationId" : "createMenuOffering",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateOfferingRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "201" : {
+            "description" : "Offering created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffMenuOffering"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/movements" : {
+      "get" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "List immutable movement history",
+        "operationId" : "listInventoryMovements",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "ingredientId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "movementType",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "OPENING", "RECEIPT", "SALE", "REVERSAL", "ADJUSTMENT" ]
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Inventory movement page",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffInventoryMovementPage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "Record a manual stock movement",
+        "operationId" : "createInventoryMovement",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateInventoryMovementRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Inventory movement recorded",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffInventoryMovement"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/ingredients" : {
+      "get" : {
+        "tags" : [ "Ingredient management" ],
+        "summary" : "List ingredients in an authorized organization",
+        "operationId" : "listIngredients",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          }
+        }, {
+          "name" : "includeArchived",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Ingredient page",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IngredientPage"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid pagination or search input",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid authenticated identity",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "No active catalog access",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "Ingredient management" ],
+        "summary" : "Create an ingredient",
+        "operationId" : "createIngredient",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateIngredientRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Ingredient created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Ingredient"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid ingredient input",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid authenticated identity",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "No active catalog access",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Ingredient name or SKU already exists",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/ingredients/{ingredientId}/archive" : {
+      "post" : {
+        "tags" : [ "Ingredient management" ],
+        "summary" : "Archive an ingredient",
+        "operationId" : "archiveIngredient",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "ingredientId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ArchiveIngredientRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Ingredient archived or already archived",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Ingredient"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid version",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid authenticated identity",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "No active catalog access",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Ingredient not found in this organization",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Ingredient version is stale",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/guest/orders" : {
+      "post" : {
+        "tags" : [ "Guest ordering" ],
+        "summary" : "Place an idempotent pending cash order",
+        "operationId" : "placeGuestOrder",
+        "parameters" : [ {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGuestOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Existing order replayed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GuestOrder"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Order placed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GuestOrder"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "503" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/api/v1/customer/account" : {
+      "post" : {
+        "tags" : [ "Customer account" ],
+        "summary" : "Provision the authenticated customer account",
+        "operationId" : "provisionCustomerAccount",
+        "responses" : {
+          "200" : {
+            "description" : "Existing customer account",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerAccountDto"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Customer account created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerAccountDto"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Invalid authenticated identity",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Customer account disabled",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/orders" : {
+      "get" : {
+        "tags" : [ "Staff order operations" ],
+        "summary" : "List location orders",
+        "operationId" : "listStaffOrders",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "PENDING", "COMPLETED", "CANCELLED" ]
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Order page",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrderPage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/orders/{orderId}" : {
+      "get" : {
+        "tags" : [ "Staff order operations" ],
+        "summary" : "Get an order with stock requirements",
+        "operationId" : "getStaffOrder",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "orderId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Order detail",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/balances" : {
+      "get" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "List location inventory balances",
+        "operationId" : "listInventoryBalances",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        }, {
+          "name" : "query",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          }
+        }, {
+          "name" : "includeArchived",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Inventory balance page",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffInventoryBalancePage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/audit-events" : {
+      "get" : {
+        "tags" : [ "Staff audit" ],
+        "summary" : "List the caller's authorized audit timeline",
+        "operationId" : "listStaffAuditEvents",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "category",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "CATALOG", "INVENTORY", "ORDER", "STAFF" ]
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 50,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Newest-first audit events",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AuditPage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/context" : {
+      "get" : {
+        "tags" : [ "Staff access" ],
+        "summary" : "Resolve the caller's current staff scope",
+        "operationId" : "getStaffContext",
+        "responses" : {
+          "200" : {
+            "description" : "Current active staff scope",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffContext"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Missing or invalid authenticated identity",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "No active staff access",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/guest/menu" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "Load the configured guest menu",
+        "operationId" : "getCurrentGuestMenu",
+        "responses" : {
+          "404" : {
+            "description" : "Configured catalog resource unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Current guest menu",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Menu"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/menu/products/{productSlug}" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "Load a product from the configured guest menu",
+        "operationId" : "getCurrentGuestProduct",
+        "parameters" : [ {
+          "name" : "productSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Catalog product unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Guest product configuration",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/locations/{locationSlug}/menu" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "Load a guest menu by location",
+        "operationId" : "getGuestLocationMenu",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Catalog location unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Guest location menu",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Menu"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/locations/{locationSlug}/menu/products/{productSlug}" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "Load a guest product by location",
+        "operationId" : "getGuestLocationProduct",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "404" : {
+            "description" : "Catalog product unavailable",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Guest product configuration",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ProblemDetail" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "detail" : {
+            "type" : "string"
+          },
+          "instance" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          }
+        }
+      },
+      "UpdateRecipeRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 4000,
+            "minLength" : 0
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "name", "version" ]
+      },
+      "RecipeComponent" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientName" : {
+            "type" : "string"
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "quantity" : {
+            "type" : "string"
+          }
+        }
+      },
+      "RecipeDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "versions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RecipeVersion"
+            }
+          }
+        }
+      },
+      "RecipeVersion" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "versionNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "DRAFT", "PUBLISHED", "RETIRED" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "publishedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          },
+          "components" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RecipeComponent"
+            }
+          }
+        }
+      },
+      "ComponentRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "quantity" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "^[0-9]+(\\.[0-9]{1,6})?$"
+          }
+        },
+        "required" : [ "ingredientId", "quantity" ]
+      },
+      "UpdateDraftRequest" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "components" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ComponentRequest"
+            },
+            "maxItems" : 100,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "components", "version" ]
+      },
+      "UpdateGroupRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "minimumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "maximumSelections" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 1
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "name", "version" ]
+      },
+      "StaffOptionChoice" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "defaultChoice" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "StaffOptionGroupDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "minimumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "maximumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "choices" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffOptionChoice"
+            }
+          }
+        }
+      },
+      "UpdateChoiceRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "defaultChoice" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "name", "version" ]
+      },
+      "UpdateProductRequest" : {
+        "type" : "object",
+        "properties" : {
+          "publicSlug" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0,
+            "pattern" : "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 4000,
+            "minLength" : 0
+          },
+          "imageUrl" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 2048,
+            "minLength" : 0
+          },
+          "category" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "artworkKey" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 40,
+            "minLength" : 0,
+            "pattern" : "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "name", "publicSlug", "version" ]
+      },
+      "StaffMenuOffering" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "locationId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "locationName" : {
+            "type" : "string"
+          },
+          "variantId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "variantName" : {
+            "type" : "string"
+          },
+          "recipeVersionId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "recipeName" : {
+            "type" : "string"
+          },
+          "recipeVersionNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "priceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "available" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "StaffMenuProductDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "publicSlug" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "category" : {
+            "type" : [ "string", "null" ]
+          },
+          "artworkKey" : {
+            "type" : [ "string", "null" ]
+          },
+          "imageUrl" : {
+            "type" : [ "string", "null" ]
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "variants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffMenuVariant"
+            }
+          },
+          "offerings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffMenuOffering"
+            }
+          }
+        }
+      },
+      "StaffMenuVariant" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "defaultVariant" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "choices" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffVariantOptionChoice"
+            }
+          }
+        }
+      },
+      "StaffOptionIngredientEffect" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientName" : {
+            "type" : "string"
+          },
+          "baseUnit" : {
+            "type" : "string"
+          },
+          "quantityDelta" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StaffVariantOptionChoice" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "choiceId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "choiceName" : {
+            "type" : "string"
+          },
+          "groupId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "groupName" : {
+            "type" : "string"
+          },
+          "priceDeltaMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "ingredientEffects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffOptionIngredientEffect"
+            }
+          }
+        }
+      },
+      "UpdateVariantRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "defaultVariant" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "name", "version" ]
+      },
+      "ConfigurationRequest" : {
+        "type" : "object",
+        "properties" : {
+          "enabled" : {
+            "type" : "boolean"
+          },
+          "priceDeltaMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "version" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "ingredientEffects" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/IngredientEffectRequest"
+            },
+            "maxItems" : 100,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "ingredientEffects" ]
+      },
+      "IngredientEffectRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "quantityDelta" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "^-?[0-9]+(?:\\.[0-9]{1,6})?$"
+          }
+        },
+        "required" : [ "ingredientId", "quantityDelta" ]
+      },
+      "AssignmentRequest" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64",
+            "minimum" : 0
+          },
+          "locationIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            },
+            "maxItems" : 100,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "locationIds", "version" ]
+      },
+      "ManagerLocation" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ManagerSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "accountId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "active" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "locations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ManagerLocation"
+            }
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "UpdateOfferingRequest" : {
+        "type" : "object",
+        "properties" : {
+          "recipeVersionId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "priceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "available" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "recipeVersionId", "version" ]
+      },
+      "UpdateIngredientRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "sku" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "reorderThreshold" : {
+            "type" : [ "string", "null" ],
+            "pattern" : "^(0|[0-9]+)(\\.[0-9]{1,6})?$"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "name", "version" ]
+      },
+      "Ingredient" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "sku" : {
+            "type" : [ "string", "null" ]
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "reorderThreshold" : {
+            "type" : [ "string", "null" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "CreateRecipeRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 4000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "name" ]
+      },
+      "CreateVersionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "sourceVersionId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "VersionRequest" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "GroupRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "minimumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "maximumSelections" : {
+            "type" : "integer",
+            "format" : "int32",
+            "minimum" : 1
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "name" ]
+      },
+      "ChoiceRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "defaultChoice" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "name" ]
+      },
+      "ProductRequest" : {
+        "type" : "object",
+        "properties" : {
+          "publicSlug" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0,
+            "pattern" : "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "description" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 4000,
+            "minLength" : 0
+          },
+          "imageUrl" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 2048,
+            "minLength" : 0
+          },
+          "category" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "artworkKey" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 40,
+            "minLength" : 0,
+            "pattern" : "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "required" : [ "name", "publicSlug" ]
+      },
+      "CreateVariantRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 100,
+            "minLength" : 0
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "defaultVariant" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "name" ]
+      },
+      "AddManagerRequest" : {
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string",
+            "format" : "email",
+            "maxLength" : 254,
+            "minLength" : 0
+          },
+          "locationIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            },
+            "maxItems" : 100,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "email", "locationIds" ]
+      },
+      "OrderDetail" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "publicOrderNumber" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "PENDING", "COMPLETED", "CANCELLED" ]
+          },
+          "paymentMethod" : {
+            "type" : "string"
+          },
+          "paymentStatus" : {
+            "type" : "string"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "subtotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "completedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          },
+          "paidAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          },
+          "lines" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OrderLine"
+            }
+          },
+          "requirements" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StockRequirement"
+            }
+          }
+        }
+      },
+      "OrderLine" : {
+        "type" : "object",
+        "properties" : {
+          "lineNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "productName" : {
+            "type" : "string"
+          },
+          "variantName" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "unitPriceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "lineTotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OrderOption"
+            }
+          }
+        }
+      },
+      "OrderOption" : {
+        "type" : "object",
+        "properties" : {
+          "selectionNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "groupName" : {
+            "type" : "string"
+          },
+          "choiceName" : {
+            "type" : "string"
+          },
+          "priceDeltaMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "StockRequirement" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientName" : {
+            "type" : "string"
+          },
+          "baseUnit" : {
+            "type" : "string"
+          },
+          "requiredQuantity" : {
+            "type" : "string"
+          },
+          "availableQuantity" : {
+            "type" : "string"
+          },
+          "sufficient" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "CreateOfferingRequest" : {
+        "type" : "object",
+        "properties" : {
+          "variantId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "recipeVersionId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "priceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "available" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "recipeVersionId", "variantId" ]
+      },
+      "CreateInventoryMovementRequest" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "movementType" : {
+            "type" : "string",
+            "enum" : [ "OPENING", "RECEIPT", "ADJUSTMENT" ]
+          },
+          "quantityDelta" : {
+            "type" : "string",
+            "pattern" : "^-?(0|[0-9]+)(\\.[0-9]{1,6})?$"
+          },
+          "sourceReference" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0
+          },
+          "note" : {
+            "type" : "string",
+            "maxLength" : 4000,
+            "minLength" : 0
+          },
+          "totalCostMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "ingredientId", "movementType", "quantityDelta" ]
+      },
+      "StaffInventoryMovement" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientName" : {
+            "type" : "string"
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "movementType" : {
+            "type" : "string",
+            "enum" : [ "OPENING", "RECEIPT", "SALE", "REVERSAL", "ADJUSTMENT" ]
+          },
+          "quantityDelta" : {
+            "type" : "string"
+          },
+          "customerOrderId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "sourceReference" : {
+            "type" : [ "string", "null" ]
+          },
+          "note" : {
+            "type" : [ "string", "null" ]
+          },
+          "totalCostMinor" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "currencyCode" : {
+            "type" : [ "string", "null" ]
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "CreateIngredientRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "sku" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "reorderThreshold" : {
+            "type" : [ "string", "null" ],
+            "pattern" : "^(0|[0-9]+)(\\.[0-9]{1,6})?$"
+          }
+        },
+        "required" : [ "baseUnit", "name" ]
+      },
+      "ArchiveIngredientRequest" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "CreateGuestOrderLineRequest" : {
+        "type" : "object",
+        "properties" : {
+          "variantId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 20,
+            "minimum" : 1
+          },
+          "optionChoiceIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            },
+            "maxItems" : 30,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "optionChoiceIds", "variantId" ]
+      },
+      "CreateGuestOrderRequest" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CreateGuestOrderLineRequest"
+            },
+            "maxItems" : 25,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "items" ]
+      },
+      "GuestOrder" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "publicOrderNumber" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "paymentMethod" : {
+            "type" : "string"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "subtotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "replayed" : {
+            "type" : "boolean"
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GuestOrderLine"
+            }
+          }
+        }
+      },
+      "GuestOrderLine" : {
+        "type" : "object",
+        "properties" : {
+          "productName" : {
+            "type" : "string"
+          },
+          "variantName" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "unitPriceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "lineTotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GuestOrderOption"
+            }
+          }
+        }
+      },
+      "GuestOrderOption" : {
+        "type" : "object",
+        "properties" : {
+          "groupName" : {
+            "type" : "string"
+          },
+          "choiceName" : {
+            "type" : "string"
+          },
+          "priceDeltaMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "CustomerAccountDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "RecipePage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RecipeSummary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "RecipeSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "latestVersionNumber" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "latestStatus" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StaffOptionGroupPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffOptionGroupSummary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "StaffOptionGroupSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "minimumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "maximumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "activeChoiceCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "StaffMenuProductPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffMenuProductSummary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "StaffMenuProductSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "publicSlug" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : [ "string", "null" ]
+          },
+          "category" : {
+            "type" : [ "string", "null" ]
+          },
+          "artworkKey" : {
+            "type" : [ "string", "null" ]
+          },
+          "imageUrl" : {
+            "type" : [ "string", "null" ]
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "archived" : {
+            "type" : "boolean"
+          },
+          "activeVariantCount" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "ManagerPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ManagerSummary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "OrderPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OrderSummary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "OrderSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "publicOrderNumber" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "PENDING", "COMPLETED", "CANCELLED" ]
+          },
+          "paymentMethod" : {
+            "type" : "string"
+          },
+          "paymentStatus" : {
+            "type" : "string"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "totalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "itemQuantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "completedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          }
+        }
+      },
+      "StaffInventoryMovementPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffInventoryMovement"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "StaffInventoryBalance" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientName" : {
+            "type" : "string"
+          },
+          "sku" : {
+            "type" : [ "string", "null" ]
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "quantity" : {
+            "type" : "string"
+          },
+          "reorderThreshold" : {
+            "type" : [ "string", "null" ]
+          },
+          "belowReorderThreshold" : {
+            "type" : "boolean"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "openingRecorded" : {
+            "type" : "boolean"
+          },
+          "ingredientArchived" : {
+            "type" : "boolean"
+          },
+          "updatedAt" : {
+            "type" : [ "string", "null" ],
+            "format" : "date-time"
+          }
+        }
+      },
+      "StaffInventoryBalancePage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffInventoryBalance"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "IngredientPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Ingredient"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "AuditEvent" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "category" : {
+            "type" : "string",
+            "enum" : [ "CATALOG", "INVENTORY", "ORDER", "STAFF" ]
+          },
+          "action" : {
+            "type" : "string"
+          },
+          "entityType" : {
+            "type" : "string"
+          },
+          "entityId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "entityLabel" : {
+            "type" : "string"
+          },
+          "locationId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "locationName" : {
+            "type" : [ "string", "null" ]
+          },
+          "actorAccountId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "actorLabel" : {
+            "type" : [ "string", "null" ]
+          },
+          "occurredAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "detail" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      },
+      "AuditPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AuditEvent"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "StaffContext" : {
+        "type" : "object",
+        "properties" : {
+          "accountId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "memberships" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffMembership"
+            }
+          }
+        }
+      },
+      "StaffLocation" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "timezone" : {
+            "type" : "string"
+          },
+          "defaultLocale" : {
+            "type" : "string"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StaffMembership" : {
+        "type" : "object",
+        "properties" : {
+          "organizationId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "organizationName" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "OWNER", "MANAGER" ]
+          },
+          "locations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/StaffLocation"
+            }
+          }
+        }
+      },
+      "Location" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "currency" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Menu" : {
+        "type" : "object",
+        "properties" : {
+          "location" : {
+            "$ref" : "#/components/schemas/Location"
+          },
+          "products" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProductSummary"
+            }
+          }
+        }
+      },
+      "Money" : {
+        "type" : "object",
+        "properties" : {
+          "amountMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "currency" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ProductSummary" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "artworkKey" : {
+            "type" : "string"
+          },
+          "startingPrice" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "available" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "OptionChoice" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "isDefault" : {
+            "type" : "boolean"
+          },
+          "priceDelta" : {
+            "$ref" : "#/components/schemas/Money"
+          }
+        }
+      },
+      "OptionGroup" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "minimumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "maximumSelections" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "choices" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OptionChoice"
+            }
+          }
+        }
+      },
+      "Product" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "artworkKey" : {
+            "type" : "string"
+          },
+          "variants" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Variant"
+            }
+          }
+        }
+      },
+      "Variant" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "displayOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "isDefault" : {
+            "type" : "boolean"
+          },
+          "available" : {
+            "type" : "boolean"
+          },
+          "price" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "optionGroups" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OptionGroup"
+            }
+          }
+        }
+      }
+    },
+    "responses" : {
+      "Problem" : {
+        "description" : "Problem details",
+        "content" : {
+          "application/problem+json" : {
+            "schema" : {
+              "$ref" : "#/components/schemas/ProblemDetail"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}

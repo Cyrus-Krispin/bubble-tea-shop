@@ -9,3 +9,7 @@ the Bubble Tea Shop application schema.
 This is not a production deployment definition. See
 [`../docs/development/local-docker.md`](../docs/development/local-docker.md) for the supported local
 workflow and security boundary.
+
+`postgres/backup.sh` and `postgres/restore.sh` are provider-independent logical backup helpers.
+Their production safeguards and required restore-drill process are documented in
+[`../docs/operations/backup-restore.md`](../docs/operations/backup-restore.md).

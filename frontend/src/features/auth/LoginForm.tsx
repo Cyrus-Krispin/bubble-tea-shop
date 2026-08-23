@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 
+import { Button, Field } from "../../components/ui";
 import type { Credentials } from "./types";
 
 export type { Credentials } from "./types";
@@ -31,31 +32,27 @@ export function LoginForm({ onSignIn }: LoginFormProps) {
 
   return (
     <form className="login-form" onSubmit={handleSubmit}>
-      <div className="field-group">
-        <label htmlFor="email">Email address</label>
+      <Field id="email" label="Email address">
         <input
           autoComplete="email"
-          id="email"
           name="email"
           onChange={(event) => setEmail(event.target.value)}
           required
           type="email"
           value={email}
         />
-      </div>
+      </Field>
 
-      <div className="field-group">
-        <label htmlFor="password">Password</label>
+      <Field id="password" label="Password">
         <input
           autoComplete="current-password"
-          id="password"
           name="password"
           onChange={(event) => setPassword(event.target.value)}
           required
           type="password"
           value={password}
         />
-      </div>
+      </Field>
 
       {status === "error" ? (
         <p className="form-message form-message--error" role="alert">
@@ -69,9 +66,7 @@ export function LoginForm({ onSignIn }: LoginFormProps) {
         </p>
       ) : null}
 
-      <button disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Signing in…" : "Sign in"}
-      </button>
+      <Button isLoading={isSubmitting} loadingLabel="Signing in" type="submit">Sign in</Button>
     </form>
   );
 }

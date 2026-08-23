@@ -23,6 +23,9 @@ public class OrderItemOptionEntity {
     @Column(name = "option_choice_id")
     UUID optionChoiceId;
 
+    @Column(name = "selection_number", nullable = false)
+    int selectionNumber;
+
     @Column(name = "group_name_snapshot", nullable = false, length = 120)
     String groupNameSnapshot;
 
@@ -38,4 +41,3 @@ public class OrderItemOptionEntity {
     protected OrderItemOptionEntity() {
     }
 }
-

@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -34,6 +35,10 @@ public class MenuVariantOfferingEntity {
 
     @Column(nullable = false)
     boolean available;
+
+    @Version
+    @Column(nullable = false)
+    long version;
 
     @Column(name = "created_at", nullable = false)
     Instant createdAt;

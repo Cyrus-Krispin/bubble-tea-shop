@@ -1,3 +1,6 @@
+import createClient from "openapi-fetch";
+
+import type { paths } from "../../api/generated";
 import type {
   CatalogLocation,
   CatalogMenu,
@@ -123,16 +126,22 @@ function product(value: unknown): CatalogProduct {
   };
 }
 
-async function get<T>(url: string, parse: (value: unknown) => T, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error("catalog could not be loaded");
-  return parse(await response.json());
+export async function getGuestMenu(signal?: AbortSignal): Promise<CatalogMenu> {
+  const client = createClient<paths>({ baseUrl: window.location.origin });
+  const { data } = await client.GET("/api/v1/guest/menu", { signal });
+  if (data === undefined) throw new Error("catalog could not be loaded");
+  return menu(data);
 }
 
-export function getGuestMenu(signal?: AbortSignal) {
-  return get("/api/v1/guest/menu", menu, signal);
-}
-
-export function getGuestProduct(productSlug: string, signal?: AbortSignal) {
-  return get(`/api/v1/guest/menu/products/${encodeURIComponent(productSlug)}`, product, signal);
+export async function getGuestProduct(
+  productSlug: string,
+  signal?: AbortSignal,
+): Promise<CatalogProduct> {
+  const client = createClient<paths>({ baseUrl: window.location.origin });
+  const { data } = await client.GET("/api/v1/guest/menu/products/{productSlug}", {
+    params: { path: { productSlug } },
+    signal,
+  });
+  if (data === undefined) throw new Error("catalog could not be loaded");
+  return product(data);
 }

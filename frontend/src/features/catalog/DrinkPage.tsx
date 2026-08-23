@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
+import { ProblemState } from "../../components/ui";
 import { useCart } from "../cart/CartContext";
 import { DrinkArtwork } from "./DrinkArtwork";
 import { formatMoney } from "./formatMoney";
@@ -205,10 +206,19 @@ function DrinkStatus({
   return (
     <div className="customer-shell">
       <CustomerHeader itemCount={itemCount} />
-      <main className="not-found" aria-labelledby="missing-drink-title">
-        <p className="eyebrow">Menu update</p>
-        <h1 id="missing-drink-title">{message}</h1>
-        {retry ? <button onClick={retry} type="button">Try again</button> : null}
+      <main aria-label="Drink status" className="not-found">
+        {retry === undefined ? (
+          <>
+            <p className="eyebrow">Menu update</p>
+            <h1>{message}</h1>
+          </>
+        ) : (
+          <ProblemState
+            message="Try again or return to the menu."
+            onRetry={retry}
+            title={message}
+          />
+        )}
         <Link className="secondary-link" to="/shop">Return to menu</Link>
       </main>
     </div>

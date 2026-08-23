@@ -11,11 +11,20 @@ services:
         strip_path: true
 
 plugins:
+  - name: rate-limiting
+    route: auth-v1
+    config:
+      limit_by: ip
+      minute: 120
+      policy: local
+      fault_tolerant: false
+      hide_client_headers: false
   - name: cors
     route: auth-v1
     config:
       origins:
         - http://localhost:4173
+        - http://localhost:5173
       methods:
         - GET
         - POST

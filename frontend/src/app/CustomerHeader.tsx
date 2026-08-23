@@ -1,8 +1,10 @@
 import { Link, NavLink } from "react-router";
+import { useAuth } from "../features/auth/useAuth";
 import "./CustomerHeader.css";
 
 export function CustomerHeader({ itemCount = 0 }: { itemCount?: number }) {
   const itemLabel = `${itemCount} ${itemCount === 1 ? "item" : "items"}`;
+  const { isLoading, session } = useAuth();
 
   return (
     <header className="customer-header">
@@ -13,6 +15,9 @@ export function CustomerHeader({ itemCount = 0 }: { itemCount?: number }) {
       <nav aria-label="Customer navigation">
         <NavLink to="/shop">Menu</NavLink>
         <span aria-disabled="true" className="nav-disabled">Track order</span>
+        <NavLink to={session === null ? "/account/sign-in" : "/account"}>
+          {session === null || isLoading ? "Sign in" : "Account"}
+        </NavLink>
         <Link className="order-link" to="/cart">Order <span aria-label={itemLabel}>{itemCount}</span></Link>
       </nav>
     </header>

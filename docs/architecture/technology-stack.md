@@ -7,25 +7,26 @@ implemented from choices that remain planned for later delivery phases.
 
 ## Frontend
 
-The frontend is planned as a single React application written in TypeScript and built with Vite.
+The frontend is a single React application written in TypeScript and built with Vite.
 React and TypeScript provide enough flexibility to support the public menu, staff workflows, owner
 administration, and display views without introducing separate frontend applications. Vite keeps
 the development loop lightweight, while pnpm manages the workspace on Node.js.
 
 Tailwind CSS is the intended styling approach because it makes UI iteration fast and works well
-with AI-assisted implementation. Radix-based components will provide accessible behavior beneath
-the shop's own design system, TanStack Query will manage server state, and Storybook will support
-isolated component development. The frontend will consume a typed client generated from the
-Spring OpenAPI contract so that API changes remain visible at compile time.
+with AI-assisted implementation. The first reusable interface layer now provides buttons, fields,
+tables, dialogs, pagination, and problem states; Radix supplies the dialog's focus and modal
+behavior. TanStack Query remains planned for server state, while Vitest interaction tests are the
+current executable component contract. The frontend consumes Spring APIs through `openapi-fetch`
+using types generated from the committed Spring OpenAPI contract, so API changes remain visible
+during verification and compilation.
 
-The frontend now contains the React, TypeScript, and Vite foundation, declarative client-side
-routing, a staff sign-in screen that uses the local Supabase Auth gateway, and a customer guest
-ordering preview. The guest menu and customization routes load catalog, availability, prices, and
-options from Spring. The current order remains in memory and checkout stays disabled until Spring
-owns order placement and final total calculation. It includes linting, type checking, Vitest
-component tests, and a containerized SPA build.
-Tailwind, Radix, TanStack Query, Storybook, and generated OpenAPI client code remain selected choices
-for later increments rather than installed production code.
+The frontend contains declarative client-side routing, separate customer and staff authentication,
+database-backed guest menu and customization, idempotent cash checkout, and authorized staff
+workspaces for catalog, inventory, orders, audit, and manager access. Spring owns order placement
+and authoritative totals. The frontend includes linting, type checking, automated accessibility
+and interaction tests, Storybook documentation, and a containerized production build.
+TanStack Query remains a selected choice for a later server-state refactor. Storybook now provides
+isolated documentation and accessibility inspection for the reusable interface primitives.
 
 ## Backend and API
 
@@ -42,10 +43,10 @@ Web, and Actuator are present in the current Maven foundation. Supabase now supe
 custom Spring password and session plan; Spring Security implements the bearer-token verification
 boundary for the local Auth issuer.
 
-The first controllers expose the public, read-only guest menu under `/api/v1/guest`. They return
-purpose-built DTOs rather than persistence entities and read catalog state through the catalog
-application service. OpenAPI publication and generated frontend client code remain planned contract
-tooling.
+The implemented controllers return purpose-built DTOs rather than persistence entities. Springdoc
+generates an OpenAPI 3.1 document for contract verification, but publication is disabled by default
+at runtime. A committed snapshot and generated immutable TypeScript types make backend-to-frontend
+contract drift fail verification.
 
 ## Data and authentication
 
@@ -69,14 +70,14 @@ server and validates access JWTs against GoTrue's asymmetric ES256 public JWKS a
 `kong:8000/auth/v1/.well-known/jwks.json`, the expected issuer, and the `authenticated` audience.
 Validation has no runtime internet dependency. Spring does not receive a signing secret, mint a
 second application JWT, or expose application login/password/refresh endpoints. The decision and
-its deferred identity migration are recorded in
+its identity migration are recorded in
 [ADR 0003](decisions/0003-local-supabase-auth.md).
 
-Authentication does not grant domain access by itself. Authorization will be resolved from current
-server-side account mappings, memberships, and location assignments rather than trusting mutable
-user metadata or client-provided claims. The existing account and refresh-session schema predates
-the Supabase issuer decision and remains unchanged until a later identity migration defines the
-external-user mapping and legacy-column lifecycle.
+Authentication does not grant domain access by itself. Customer signup provisions only the
+server-side account mapping; authorization is resolved from current memberships and location
+assignments rather than mutable user metadata or client-provided claims. V4 defines the external
+user mapping and makes legacy credential columns optional; the legacy refresh-session lifecycle is
+still undecided.
 
 ## Local infrastructure
 
@@ -92,7 +93,7 @@ its own schema.
 | Authentication | GoTrue `supabase/gotrue:v2.189.0` | Local sign-in, access tokens, refresh sessions, and the asymmetric signing key. |
 | Auth gateway | Kong `kong:3.9.1`, host port `8000` | Routes `/auth/v1` to GoTrue and exposes its issuer and public JWKS consistently. |
 | Application API | Spring Boot 4.1 on Java 21, host port `8080` | Modular-monolith workflows, authorization, Flyway migrations, and access-token validation. |
-| Frontend workspace | Node `24.16.0`, pnpm `11.9.0`, and Nginx, host port `4173` | React SPA build, guest ordering preview, and staff sign-in. |
+| Frontend workspace | Node `24.16.0`, pnpm `11.9.0`, and Nginx, host port `4173` | React SPA build, guest ordering, customer accounts, and staff operations. |
 
 Inside Compose, the backend connects to PostgreSQL at `db:5432` and fetches public signing keys
 from Kong at `kong:8000`; it does not call a hosted service. Host ports bind to `127.0.0.1` only.
@@ -105,11 +106,11 @@ ignored `.env` file. No private signing key, access token, or production credent
 repository. Local email confirmation is automatic because this focused development stack has no
 SMTP service; it is not a production email design.
 
-Hosting is intentionally local-only. The backend and Supabase services share a private Compose
-network, and Spring discovers public signing keys from the local gateway without a runtime internet
-dependency. No hosted Supabase project, region, production container platform, or deployment
-pipeline is selected. Production images, observability, backups, and CI deployment gates remain
-future work.
+Compose is intentionally local-only. The backend and Supabase services share a private network,
+and Spring discovers public signing keys from the local gateway without a runtime internet
+dependency. The repository builds production images and documents observability, recovery, and
+deployment requirements, while the target cloud, registry, DNS, managed identity deployment, and
+release authority remain environment-owned decisions.
 
 ## Tooling and testing
 
@@ -124,8 +125,8 @@ Developers need a Java 21 JDK, Node 24 for the local generator, and a Docker-com
 for Compose and Testcontainers. The backend verification command is `cd backend && ./mvnw verify`;
 it requires Docker because its integration tests start PostgreSQL with Testcontainers.
 
-The frontend uses ESLint, TypeScript, Vitest, React Testing Library, and Vite production builds.
-Browser end-to-end tests will be added with the first authenticated staff-context workflow.
+The frontend uses ESLint, TypeScript, Vitest, React Testing Library, axe-core, Storybook, and Vite
+production builds. Compose-backed browser smoke tests cover customer and authenticated staff flows.
 
 ## Experimental face authentication
 

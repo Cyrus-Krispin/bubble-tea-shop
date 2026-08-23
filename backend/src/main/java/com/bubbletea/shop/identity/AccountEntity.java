@@ -14,14 +14,17 @@ public class AccountEntity {
     @Id
     UUID id;
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     String username;
 
-    @Column(name = "normalized_username", nullable = false, length = 100)
+    @Column(name = "normalized_username", length = 100)
     String normalizedUsername;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     String passwordHash;
+
+    @Column(name = "auth_subject", unique = true)
+    UUID authSubject;
 
     @Column(nullable = false)
     boolean enabled;
@@ -35,4 +38,3 @@ public class AccountEntity {
     protected AccountEntity() {
     }
 }
-

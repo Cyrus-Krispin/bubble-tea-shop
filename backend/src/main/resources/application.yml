@@ -17,6 +17,11 @@ spring:
           time_zone: UTC
 
 app:
+  bootstrap:
+    owner:
+      enabled: ${OWNER_BOOTSTRAP_ENABLED:false}
+      auth-subject: ${OWNER_BOOTSTRAP_AUTH_SUBJECT:}
+      organization-id: ${OWNER_BOOTSTRAP_ORGANIZATION_ID:}
   catalog:
     guest-location-slug: ${GUEST_LOCATION_SLUG:orchard-central}
   security:
@@ -27,11 +32,44 @@ app:
       audience: ${LOCAL_SUPABASE_AUTH_AUDIENCE:authenticated}
 
 management:
+  logging:
+    export:
+      otlp:
+        enabled: false
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  tracing:
+    sampling:
+      probability: ${OTEL_TRACES_SAMPLER_ARG:0.1}
+    export:
+      otlp:
+        enabled: ${OTEL_TRACING_ENABLED:false}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+          timeout: ${OTEL_EXPORTER_OTLP_TRACES_TIMEOUT:10s}
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
   endpoint:
     health:
       probes:
         enabled: true
+      show-details: never
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+logging:
+  pattern:
+    correlation: "[%X{request.id:-}] "
+
+springdoc:
+  api-docs:
+    enabled: ${OPENAPI_DOCS_ENABLED:false}

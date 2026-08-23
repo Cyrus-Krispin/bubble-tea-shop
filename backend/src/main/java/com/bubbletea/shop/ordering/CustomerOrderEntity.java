@@ -25,6 +25,12 @@ public class CustomerOrderEntity {
     @Column(name = "customer_account_id")
     UUID customerAccountId;
 
+    @Column(name = "placement_key")
+    UUID placementKey;
+
+    @Column(name = "placement_fingerprint", length = 64)
+    String placementFingerprint;
+
     @Column(name = "public_order_number", nullable = false, length = 32)
     String publicOrderNumber;
 

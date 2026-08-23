@@ -5,7 +5,7 @@ The development runtime is intentionally local-only. One Compose project starts:
 - Supabase Postgres from the official `supabase/postgres` image;
 - Supabase Auth (GoTrue) from the official `supabase/gotrue` image;
 - the Spring Boot modular monolith; and
-- a React/Vite SPA served by Nginx, beginning with local staff sign-in.
+- a React/Vite SPA served by Nginx with guest ordering and separate customer/staff authentication.
 
 There is no standalone generic PostgreSQL container and no hosted Supabase project. Postgres is
 the single database in the stack, and Flyway in the Spring backend remains the authority for the
@@ -36,7 +36,7 @@ artifacts are already cached.
 
 | Service | URL | Purpose |
 | --- | --- | --- |
-| Frontend workspace | <http://localhost:4173> | React staff sign-in SPA; later staff and customer screens follow |
+| Frontend workspace | <http://localhost:4173> | Guest ordering, customer accounts, and staff sign-in SPA |
 | Spring health | <http://localhost:8080/actuator/health> | Backend and database readiness |
 | Supabase Auth health | <http://localhost:8000/auth/v1/health> | Local GoTrue readiness through Kong |
 | PostgreSQL | `localhost:54322` | Optional host access for database tools |
@@ -73,6 +73,31 @@ as a production deployment.
 Change `POSTGRES_PASSWORD`, `JWT_SECRET`, and `JWT_KEYS` before sharing an environment. Never
 commit real user data, production credentials, OAuth client secrets, tokens, or an edited `.env`.
 Email accounts are auto-confirmed because no SMTP service is part of this focused local stack.
+The local Auth service enforces the same eight-character password minimum shown by the customer
+registration form; browser validation is only usability feedback, not the security boundary.
+Self-service signup is for customers only: application roles still require a server-owned
+organization membership created by the owner bootstrap command below. Kong permits Auth browser
+requests only from the known local frontend origins on ports `4173` and `5173`.
+
+## Bootstrap the first owner
+
+Register the owner through the normal account screen first so Supabase Auth and Spring provision
+the application account. Obtain that identity's UUID (`sub` in its verified access token) and the
+target organization UUID, then run a one-shot backend container:
+
+```bash
+docker compose run --rm \
+  -e OWNER_BOOTSTRAP_ENABLED=true \
+  -e OWNER_BOOTSTRAP_AUTH_SUBJECT=<uuid> \
+  -e OWNER_BOOTSTRAP_ORGANIZATION_ID=<uuid> \
+  backend --spring.main.web-application-type=none
+```
+
+The command succeeds if it creates the active owner membership or if that exact active owner
+membership already exists. It fails closed for missing or disabled accounts, missing organizations,
+manager memberships, and inactive memberships. It never creates an Auth identity, promotes a role,
+or reactivates access. Remove the three bootstrap variables after the one-shot command; never place
+them in a committed environment file or enable bootstrap on the long-running backend service.
 
 The Supabase image tags are copied from a tested official Docker Compose release. Update the
 Postgres and GoTrue tags together only after reviewing Supabase release notes and running the full
