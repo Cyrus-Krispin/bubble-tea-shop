@@ -175,6 +175,20 @@ describe("App", () => {
     expect(screen.getByRole("link", { name: "Continue to menu" })).toHaveAttribute("href", "/");
   });
 
+  it("preserves a safe return path from the legacy customer sign-in route", async () => {
+    render(
+      <MemoryRouter initialEntries={["/account/sign-in?next=/cart"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("main")).toHaveAccessibleName("Customer access");
+    expect(screen.getByRole("link", { name: "Create account" })).toHaveAttribute(
+      "href",
+      "/account/access?mode=create&next=%2Fcart",
+    );
+  });
+
   it("shows the signed-in customer account without granting a staff role", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
       accessToken: "customer-token",

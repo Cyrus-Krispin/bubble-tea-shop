@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router";
+import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import { AccountAccessPage } from "../features/auth/AccountAccessPage";
 import { StaffSignInPage } from "../features/auth/StaffSignInPage";
@@ -33,6 +33,13 @@ function CatalogLoading({ label }: { label: string }) {
   );
 }
 
+function LegacyAccountAccessRedirect({ mode }: { mode: "create" | "sign-in" }) {
+  const { search } = useLocation();
+  const parameters = new URLSearchParams(search);
+  parameters.set("mode", mode);
+  return <Navigate replace to={`/account/access?${parameters.toString()}`} />;
+}
+
 export function App() {
   return (
     <AuthProvider>
@@ -44,8 +51,8 @@ export function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/account" element={<CustomerAccountPage />} />
           <Route path="/account/access" element={<AccountAccessPage />} />
-          <Route path="/account/create" element={<Navigate replace to="/account/access?mode=create" />} />
-          <Route path="/account/sign-in" element={<Navigate replace to="/account/access?mode=sign-in" />} />
+          <Route path="/account/create" element={<LegacyAccountAccessRedirect mode="create" />} />
+          <Route path="/account/sign-in" element={<LegacyAccountAccessRedirect mode="sign-in" />} />
           <Route path="/staff/sign-in" element={<StaffSignInPage />} />
           <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<StaffWorkspacePage />} />

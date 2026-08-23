@@ -1,8 +1,8 @@
 # Modern Tea Bar Product Experience
 
-This guide replaces the previous storybook direction. Bubble Tea Shop is a fast, contemporary
-consumer ordering product first and an illustrated brand experience second. Its interface should
-feel like a modern independent tea bar: product-led, direct, tactile, and calm.
+This guide replaces the previous visual direction rather than extending it. Bubble Tea Shop is a
+fast, contemporary consumer ordering product first. Its interface should feel like a modern
+independent tea bar: product-led, direct, energetic, and composed.
 
 ## Objective
 
@@ -30,25 +30,32 @@ choices, explicit guest checkout, visible totals, and compact checkout copy.
 
 ### Palette
 
-Milk white and tea ink carry nearly the entire interface. Tea red is the single action accent.
-Leaf green is reserved for availability and successful operational states. Product colors provide
-the remaining visual variety.
+Cool white and soft lavender carry nearly the entire interface. Ube violet is the functional brand
+color; calamansi lime is a scarce highlight. The drink artwork supplies warmth and ingredient
+color. This deliberately avoids the category's crowded cream/red, orange, heritage-green, and
+near-black systems, while remaining more specific to a modern drink shop than generic cafe beige.
 
 | Token | Value | Role |
 |---|---:|---|
-| `canvas` | `#f7f4ee` | App background |
-| `surface` | `#fffdf8` | Product and form surfaces |
-| `ink` | `#181815` | Primary type and strong borders |
-| `muted` | `#68655f` | Supporting type |
-| `line` | `#d9d4ca` | Dividers and neutral controls |
-| `accent` | `#d64b32` | Primary actions and current navigation |
-| `accent-strong` | `#b43824` | Hover and pressed action state |
-| `leaf` | `#315d46` | Available, success, and quiet brand detail |
-| `warning` | `#9a5b16` | Low stock and attention states |
-| `danger` | `#a33a31` | Destructive actions and errors |
+| `canvas` | `#f7f7fb` | App background |
+| `surface` | `#ffffff` | Product and form surfaces |
+| `surface-subtle` | `#f0edff` | Selected and compact supporting surfaces |
+| `ink` | `#17131f` | Primary type and strong structure |
+| `muted` | `#625b6b` | Supporting type |
+| `line` | `#ded9e5` | Decorative dividers |
+| `line-strong` | `#958b9f` | Interactive control boundaries |
+| `primary` | `#6b2bd9` | Primary actions and current navigation |
+| `primary-strong` | `#5420b5` | Hover and pressed action state |
+| `primary-soft` | `#eee8ff` | Selected and informational surfaces |
+| `highlight` | `#c8f169` | Small freshness and conversion highlights |
+| `flavor` | `#d91e63` | Rare product/promotion accent |
+| `success` | `#18794e` | Successful operational states |
+| `warning` | `#8a4b08` | Low stock and attention states |
+| `danger` | `#b42318` | Destructive actions and errors |
 
-Do not use gradients, glass effects, paper texture, fantasy scenery, decorative sparkles, or equal
-amounts of multiple accents.
+Keep neutral surfaces to roughly 85–90% of each screen. Violet is functional; lime and lychee are
+accents, never a three-color decoration. Do not use gradients, glass effects, paper texture,
+fantasy scenery, decorative sparkles, floating boba circles, or color-only state.
 
 ### Typography
 

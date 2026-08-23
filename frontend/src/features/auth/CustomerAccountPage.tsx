@@ -32,8 +32,8 @@ export function CustomerAccountPage() {
             <h2 id="signed-out-heading">Sign in to continue</h2>
             <p>Your menu and guest ordering remain available without an account.</p>
             <div className="account-actions">
-              <Link className="primary-link" to="/account/sign-in">Sign in</Link>
-              <Link to="/account/create">Create an account</Link>
+              <Link className="primary-link" to="/account/access?mode=sign-in">Sign in</Link>
+              <Link to="/account/access?mode=create">Create an account</Link>
             </div>
           </section>
         ) : null}
