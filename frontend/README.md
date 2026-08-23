@@ -43,14 +43,14 @@ owners can then grant, scope, deactivate, and reactivate registered manager acco
 
 ## Implemented routes
 
-- `/` — customer welcome with `Continue as guest` and secondary staff access.
-- `/shop` — responsive database-backed menu with category filters and sold-out treatment.
+- `/` — responsive database-backed menu with category filters and sold-out treatment.
+- `/shop` — compatibility alias for the customer menu.
 - `/shop/drinks/:drinkId` — accessible size, sweetness, ice, and topping customization.
 - `/cart` — in-memory current-order review with quantity and removal controls.
-- `/account/create` — optional customer email/password registration.
-- `/account/sign-in` — customer sign-in and application-account provisioning.
+- `/account/access` — unified optional customer sign-in and registration with safe return paths.
+- `/account/create` and `/account/sign-in` — compatibility redirects to unified account access.
 - `/account` — session-aware customer account summary and sign-out.
-- `/staff/sign-in` — existing staff authentication flow.
+- `/staff/sign-in` — dedicated staff authentication with deep-link restoration.
 - `/staff` — server-scoped operations overview.
 - `/staff/catalog/*` — ingredient, recipe, menu, variant, option-group, and choice management.
 - `/staff/inventory` — current balances and immutable manual movement history.

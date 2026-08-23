@@ -491,7 +491,7 @@ export default function RecipeDetailPage() {
 
   return (
     <main aria-label="Recipe detail" className="staff-main" id="staff-workspace">
-      <Link className="staff-back-link" to="/staff/catalog/recipes">← Back to recipes</Link>
+      <Link className="staff-back-link" to={`/staff/catalog/recipes?organizationId=${encodeURIComponent(organizationId)}`}>← Back to recipes</Link>
       {detailState.status === "loading" ? <p role="status">Loading recipe…</p> : null}
       {detailState.status === "error" ? (
         <ProblemState

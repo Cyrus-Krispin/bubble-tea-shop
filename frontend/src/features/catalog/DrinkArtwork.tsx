@@ -11,8 +11,8 @@ export function DrinkArtwork({ drink }: { drink: DrinkArtworkProduct }) {
       role="img"
       viewBox="0 0 240 280"
     >
-      <path className="art-backdrop" d="M30 122C43 52 184 28 212 111c27 82-48 139-113 137-68-2-83-65-69-126Z" />
-      <path className="art-leaf" d="M37 88c-16-14-14-33-12-41 18 2 31 13 35 29-7 1-15 5-23 12Zm170 34c4-22 18-32 29-35 2 17-5 31-22 39Z" />
+      <rect className="art-backdrop" height="216" rx="24" transform="rotate(-3 120 145)" width="212" x="14" y="37" />
+      <path className="art-signal" d="m190 28 28 5m-31 8 22 4" />
       <path className="cup-lid" d="M72 79h99l-6 17H78Z" />
       <path className="cup-body" d="m80 93 10 138c1 13 11 21 24 21h17c13 0 23-8 24-21l10-138Z" />
       <path className="cup-shine" d="M97 111c5 54 7 92 9 113" />
@@ -21,7 +21,6 @@ export function DrinkArtwork({ drink }: { drink: DrinkArtworkProduct }) {
         <circle cx="107" cy="218" r="8" /><circle cx="127" cy="231" r="8" />
         <circle cx="145" cy="213" r="8" /><circle cx="117" cy="204" r="7" />
       </g>
-      <path className="art-spark" d="m48 183 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z" />
     </svg>
   );
 }

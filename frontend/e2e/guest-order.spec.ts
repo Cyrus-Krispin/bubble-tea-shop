@@ -31,23 +31,20 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
   });
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Your next favorite brew starts here." })).toBeVisible();
-  await expectProductionQuality(page);
-
-  await page.getByRole("link", { name: "Continue as guest" }).click();
-  await expect(page.getByRole("heading", { name: "Choose your brew" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Drinks made your way" })).toBeVisible();
   await expectProductionQuality(page);
 
   await page.getByRole("link", { name: /Customize / }).first().click();
-  await expect(page.getByRole("heading", { name: "Make it yours" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Customize your drink" })).toBeVisible();
   await expectProductionQuality(page);
 
   await page.getByRole("button", { name: /Add to order/ }).click();
   await page.getByRole("link", { name: "View order" }).click();
   await expect(page.getByRole("heading", { name: "Your current order" })).toBeVisible();
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
   await expectProductionQuality(page);
 
-  await page.getByRole("button", { name: "Place cash order" }).click();
+  await page.getByRole("button", { name: /Place order ·/ }).click();
   await expect(page.getByRole("heading", { name: /Pickup BT\d+/ })).toBeVisible();
   await expectProductionQuality(page);
 
@@ -57,7 +54,7 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
 
 test("production entrypoint stays within its transfer and load budgets", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Your next favorite brew starts here." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Drinks made your way" })).toBeVisible();
 
   const budgets = await page.evaluate(() => {
     const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;

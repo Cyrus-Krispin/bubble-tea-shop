@@ -446,7 +446,7 @@ export default function OptionGroupDetailPage() {
       className="staff-main"
       id="staff-workspace"
     >
-      <Link className="staff-back-link" to="/staff/catalog/options">
+      <Link className="staff-back-link" to={`/staff/catalog/options?organizationId=${encodeURIComponent(organizationId)}`}>
         ← Back to options
       </Link>
       <div className="recipe-detail-heading">

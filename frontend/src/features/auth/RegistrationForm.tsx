@@ -12,6 +12,7 @@ export function RegistrationForm({ onRegister }: RegistrationFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
+  const [showPasswords, setShowPasswords] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<"idle" | "ready" | "verify" | "mismatch" | "error">("idle");
 
@@ -59,7 +60,7 @@ export function RegistrationForm({ onRegister }: RegistrationFormProps) {
           name="password"
           onChange={(event) => setPassword(event.target.value)}
           required
-          type="password"
+          type={showPasswords ? "text" : "password"}
           value={password}
         />
       </Field>
@@ -75,10 +76,14 @@ export function RegistrationForm({ onRegister }: RegistrationFormProps) {
           name="passwordConfirmation"
           onChange={(event) => setConfirmation(event.target.value)}
           required
-          type="password"
+          type={showPasswords ? "text" : "password"}
           value={confirmation}
         />
       </Field>
+
+      <button className="password-toggle" onClick={() => setShowPasswords((value) => !value)} type="button">
+        {showPasswords ? "Hide passwords" : "Show passwords"}
+      </button>
 
       {message === "error" ? (
         <p className="form-message form-message--error" role="alert">
