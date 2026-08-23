@@ -183,31 +183,18 @@ h2 {
 
 .auth-page {
   display: grid;
-  width: min(100% - 2rem, 64rem);
+  width: min(100% - 2rem, 32rem);
   min-height: calc(100vh - 4.75rem);
-  grid-template-columns: minmax(0, 0.9fr) minmax(22rem, 1fr);
-  gap: clamp(var(--space-8), 8vw, 7rem);
-  align-items: center;
+  place-items: center;
   margin: 0 auto;
-  padding: clamp(var(--space-8), 8vw, 6rem) 0;
+  padding: var(--space-8) 0;
 }
 
-.auth-introduction { max-width: 32rem; }
-.auth-introduction h1 { max-width: 10ch; }
-
-.lede,
 .card-copy,
 .access-help {
   color: var(--color-muted);
   line-height: 1.6;
 }
-
-.lede { max-width: 31rem; font-size: 1.05rem; }
-
-.access-notes { display: grid; gap: var(--space-4); margin: var(--space-6) 0 0; }
-.access-notes div { padding-top: var(--space-3); border-top: 1px solid var(--color-line); }
-.access-notes dt { font-weight: 800; }
-.access-notes dd { margin: var(--space-1) 0 0; color: var(--color-muted); line-height: 1.5; }
 
 .auth-card,
 .access-panel,
@@ -217,6 +204,10 @@ h2 {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
 }
+
+.staff-auth-page .auth-card { width: 100%; }
+.staff-auth-page .auth-card h1 { max-width: none; font-size: clamp(2rem, 8vw, 2.75rem); }
+.staff-auth-page .access-help { margin: var(--space-4) 0 0; }
 
 .access-main {
   display: grid;
@@ -289,12 +280,6 @@ h2 {
 .account-note,
 .not-found-page > p:not(.eyebrow) { color: var(--color-muted); line-height: 1.6; }
 .account-actions { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
-
-@media (max-width: 48rem) {
-  .auth-page { grid-template-columns: 1fr; gap: var(--space-6); align-content: center; }
-  .auth-introduction h1 { max-width: none; }
-  .access-notes { display: none; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

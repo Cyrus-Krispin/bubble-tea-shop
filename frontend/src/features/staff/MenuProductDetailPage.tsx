@@ -1205,7 +1205,7 @@ export default function MenuProductDetailPage() {
       className="staff-main"
       id="staff-workspace"
     >
-      <Link className="staff-back-link" to="/staff/catalog/menu">
+      <Link className="staff-back-link" to={`/staff/catalog/menu?organizationId=${encodeURIComponent(organizationId)}`}>
         ← Back to menu
       </Link>
       <div className="recipe-detail-heading">

@@ -3,7 +3,7 @@
 ## Active increment: Complete product UI redesign
 
 Replace the current customer and staff interface—not merely its styling—with the market-researched
-Modern Tea Bar experience documented in `frontend/docs/visual-style-guide.md`. Preserve existing API
+Ube and Calamansi experience documented in `frontend/docs/visual-style-guide.md`. Preserve existing API
 contracts and domain behavior while changing route hierarchy, customer navigation, authentication
 entry, storefront presentation, cart/confirmation, and the staff application shell.
 

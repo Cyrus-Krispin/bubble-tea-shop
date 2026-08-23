@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import { AccountAccessPage } from "../features/auth/AccountAccessPage";
@@ -40,10 +40,19 @@ function LegacyAccountAccessRedirect({ mode }: { mode: "create" | "sign-in" }) {
   return <Navigate replace to={`/account/access?${parameters.toString()}`} />;
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+  return null;
+}
+
 export function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<ShopPage />} />
           <Route path="/shop" element={<ShopPage />} />

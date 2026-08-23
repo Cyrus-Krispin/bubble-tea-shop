@@ -64,9 +64,10 @@ HS256 tokens and never receives `JWT_SECRET`, `JWT_KEYS`, `JWT_JWKS`, an API sec
 or a raw user token. The exact Compose services and generated local secrets belong to the separate
 local-stack infrastructure change, not this backend integration.
 
-The current slice protects the API boundary, includes separate customer registration/sign-in and
-staff sign-in routes, and provisions the application account after Supabase returns a customer
-session.
+The current slice protects the API boundary, provides a unified customer account-access surface and
+a distinct staff sign-in route, and provisions the application account after Supabase returns a
+customer session. Customer mode switching does not imply or grant a role. Validated same-origin
+return paths restore the requested customer or staff destination after authentication.
 Guest catalog reads and `POST /api/v1/guest/orders` are explicitly public. Order placement accepts
 an optional verified bearer token only to resolve an enabled customer account; it validates all
 catalog identifiers and recalculates prices, totals, currency, payment, and consumption on the

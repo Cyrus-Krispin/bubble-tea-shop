@@ -1,4 +1,4 @@
-# Modern Tea Bar Product Experience
+# Ube and Calamansi Product Experience
 
 This guide replaces the previous visual direction rather than extending it. Bubble Tea Shop is a
 fast, contemporary consumer ordering product first. Its interface should feel like a modern

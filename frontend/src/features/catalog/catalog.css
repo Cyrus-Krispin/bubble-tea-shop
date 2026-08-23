@@ -50,8 +50,11 @@
   border: 1px solid var(--color-line-strong);
   border-radius: 999px;
 }
+.category-filter { scrollbar-width: none; }
+.category-filter::-webkit-scrollbar { display: none; }
 .category-filter button:hover { color: var(--color-ink); border-color: var(--color-ink); }
 .category-filter button[aria-pressed="true"] { color: #fff; background: var(--color-ink); border-color: var(--color-ink); }
+.category-filter button[aria-pressed="true"]::before { margin-right: var(--space-1); content: "✓"; }
 
 .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
 .catalog-status,
@@ -72,20 +75,22 @@
   transition: border-color 160ms ease, transform 160ms ease;
 }
 .product-card:hover { border-color: var(--color-line-strong); transform: translateY(-2px); }
-.product-card--unavailable { opacity: 0.7; }
+.product-card--unavailable { background: var(--color-canvas); }
+.product-card--unavailable .drink-art { filter: grayscale(35%); opacity: 0.58; }
 .product-card--unavailable:hover { transform: none; }
 
 .drink-art { display: block; width: 100%; height: auto; max-height: 20rem; padding: var(--space-5) var(--space-5) 0; }
 .art-backdrop { fill: var(--art-backdrop); }
+.art-signal { fill: none; stroke: var(--color-highlight); stroke-linecap: square; stroke-width: 6; }
 .cup-lid { fill: #f6f3fb; stroke: var(--color-ink); stroke-width: 3; }
 .cup-body { fill: var(--art-drink); stroke: var(--color-ink); stroke-width: 3; }
 .cup-shine { fill: none; stroke: rgb(255 255 255 / 58%); stroke-linecap: round; stroke-width: 5; }
 .straw { fill: var(--color-highlight); stroke: var(--color-ink); stroke-width: 3; }
 .pearls { fill: #25231f; }
-.drink-art--moon { --art-backdrop: #e2ddd4; --art-drink: #bf8c59; }
-.drink-art--berry { --art-backdrop: #f2d9d1; --art-drink: #dd6b50; }
-.drink-art--matcha { --art-backdrop: #dce3d2; --art-drink: #7d9661; }
-.drink-art--taro { --art-backdrop: #e4dee7; --art-drink: #a58aad; }
+.drink-art--moon { --art-backdrop: #eee8ff; --art-drink: #a8662f; }
+.drink-art--berry { --art-backdrop: #ffe4ef; --art-drink: #d91e63; }
+.drink-art--matcha { --art-backdrop: #eaf7c7; --art-drink: #6e9134; }
+.drink-art--taro { --art-backdrop: #e8deff; --art-drink: #7a4bc2; }
 
 .product-copy { padding: var(--space-4) var(--space-5); }
 .product-category { margin-bottom: var(--space-2); color: var(--color-primary-strong); font-size: 0.7rem; font-weight: 850; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -141,6 +146,7 @@
 .option-row input,
 .topping-row input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .option-row label:has(input:checked) { color: var(--color-primary-strong); background: var(--color-primary-soft); border-color: var(--color-primary); }
+.option-row label:has(input:checked)::after { position: absolute; top: var(--space-1); right: var(--space-2); content: "✓"; font-size: 0.75rem; font-weight: 900; }
 .option-row label:has(input:disabled) { color: var(--color-muted); background: var(--color-canvas); border-style: dashed; cursor: not-allowed; }
 .option-row label:has(input:focus-visible),
 .topping-row label:has(input:focus-visible) { outline: 3px solid var(--color-primary); outline-offset: 2px; }
@@ -186,4 +192,13 @@
   .option-row--five,
   .option-row--5 { grid-template-columns: repeat(2, 1fr); }
   .customizer-action { position: sticky; bottom: 0; z-index: 5; margin-inline: calc(var(--space-4) * -1); padding: var(--space-4); background: var(--color-surface); box-shadow: 0 -0.5rem 1.5rem rgb(23 19 31 / 8%); }
+  .customizer-action .preview-disclaimer { display: none; }
+}
+
+@media (forced-colors: active) {
+  .category-filter button[aria-pressed="true"],
+  .option-row label:has(input:checked),
+  .topping-row label:has(input:checked) { border: 2px solid Highlight; }
+  .option-row label:has(input:checked)::after,
+  .topping-row label:has(input:checked)::before { color: HighlightText; background: Highlight; }
 }

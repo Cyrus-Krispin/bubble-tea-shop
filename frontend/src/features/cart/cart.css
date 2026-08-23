@@ -52,5 +52,4 @@
   .cart-main { padding-top: var(--space-6); }
   .cart-item { align-items: flex-start; flex-direction: column; }
   .cart-item-actions { width: 100%; grid-template-columns: 1fr auto; align-items: center; }
-  .order-summary { position: sticky; bottom: var(--space-3); z-index: 6; }
 }

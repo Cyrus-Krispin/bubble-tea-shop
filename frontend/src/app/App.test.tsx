@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { catalogMenu, catalogProduct } from "../test/catalogFixtures";
@@ -76,6 +76,13 @@ import {
   updateRecipe,
 } from "../features/staff/recipeClient";
 
+const scrollToMock = vi.fn();
+
+function LocationProbe() {
+  const location = useLocation();
+  return <output data-testid="location">{location.pathname}{location.search}</output>;
+}
+
 const managedIngredient = {
   id: "a20d5547-69bb-4cb1-b9cc-d699629c49dc",
   name: "Assam Tea",
@@ -117,6 +124,7 @@ const managedRecipe = {
 describe("App", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubGlobal("scrollTo", scrollToMock);
     vi.mocked(getCurrentAuthSession).mockResolvedValue(null);
     vi.mocked(getGuestMenu).mockResolvedValue(catalogMenu);
     vi.mocked(getGuestProduct).mockResolvedValue(catalogProduct);
@@ -243,8 +251,8 @@ describe("App", () => {
     );
 
     expect(screen.getByRole("main")).toHaveAccessibleName("Staff sign in");
-    expect(screen.getByRole("heading", { level: 1, name: "Staff access" })).toBeVisible();
-    expect(screen.getByText("Sign in to open shop operations.")).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1, name: "Staff sign in" })).toBeVisible();
+    expect(screen.getByText("Use the account assigned to your shop role.")).toBeVisible();
   });
 
   it("shows a useful recovery page for unknown routes", async () => {
@@ -302,6 +310,20 @@ describe("App", () => {
 
     expect(await screen.findByRole("main", { name: "Staff sign in" })).toBeVisible();
     expect(getStaffContext).not.toHaveBeenCalled();
+  });
+
+  it("preserves the exact staff deep link while requesting sign in", async () => {
+    render(
+      <MemoryRouter initialEntries={["/staff/orders?status=PENDING"]}>
+        <App />
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("main", { name: "Staff sign in" })).toBeVisible();
+    expect(screen.getByTestId("location")).toHaveTextContent(
+      "/staff/sign-in?next=%2Fstaff%2Forders%3Fstatus%3DPENDING",
+    );
   });
 
   it("shows a generic no-access state without inventing an organization", async () => {
@@ -650,9 +672,11 @@ describe("App", () => {
     await screen.findByRole("heading", { name: "Moonlit Milk Tea" });
     fireEvent.click(screen.getByRole("checkbox", { name: "Pearls +$0.60" }));
     fireEvent.click(screen.getByRole("button", { name: "Add to order · $7.20" }));
+    scrollToMock.mockClear();
     fireEvent.click(screen.getByRole("link", { name: "View order" }));
 
     expect(screen.getByRole("heading", { level: 1, name: "Your current order" })).toBeVisible();
+    expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
     expect(screen.getByText("Medium · 50% · Less ice · Pearls")).toBeVisible();
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$7.20");
   });

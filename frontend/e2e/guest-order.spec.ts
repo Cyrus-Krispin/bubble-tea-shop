@@ -41,6 +41,7 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
   await page.getByRole("button", { name: /Add to order/ }).click();
   await page.getByRole("link", { name: "View order" }).click();
   await expect(page.getByRole("heading", { name: "Your current order" })).toBeVisible();
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
   await expectProductionQuality(page);
 
   await page.getByRole("button", { name: /Place order ·/ }).click();

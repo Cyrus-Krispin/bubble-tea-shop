@@ -2,17 +2,17 @@
 
 ## Active increment — Complete product UI redesign
 
-- [ ] Make the API-backed menu the home page and add a useful not-found recovery surface.
-- [ ] Consolidate customer sign-in and registration into one compact access route with safe return
+- [x] Make the API-backed menu the home page and add a useful not-found recovery surface.
+- [x] Consolidate customer sign-in and registration into one compact access route with safe return
   navigation and compatibility redirects.
-- [ ] Replace customer navigation, menu, customization, cart, confirmation, and account layouts with
-  the Modern Tea Bar product system.
-- [ ] Replace the staff top header with a responsive operational rail and cohesive module navigation.
-- [ ] Retheme forms, tables, dialogs, loading, empty, error, denied, and status states across staff
+- [x] Replace customer navigation, menu, customization, cart, confirmation, and account layouts with
+  the Ube and Calamansi product system.
+- [x] Replace the staff top header with a responsive operational rail and cohesive module navigation.
+- [x] Retheme forms, tables, dialogs, loading, empty, error, denied, and status states across staff
   workflows without changing their behavior.
-- [ ] Add route, auth-mode, password-visibility, mobile-navigation, and accessibility tests.
-- [ ] Run frontend unit, type, lint, build, E2E, and real-browser desktop/mobile verification.
-- [ ] Complete adversarial design/code review, address findings, commit, and push.
+- [x] Add route, auth-mode, password-visibility, mobile-navigation, and accessibility tests.
+- [x] Run frontend unit, type, lint, build, E2E, and real-browser desktop/mobile verification.
+- [x] Complete adversarial design/code review, address findings, commit, and push.
 
 Each task is a small verified increment. Behavioral work follows RED-GREEN-REFACTOR, then the
 relevant full suite, focused commit, and push.

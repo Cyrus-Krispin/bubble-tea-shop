@@ -41,11 +41,12 @@
   font-size: 0.875rem;
   font-weight: 750;
   text-decoration: none;
+  border-bottom: 2px solid transparent;
   border-radius: var(--radius-control);
 }
 
 .customer-header nav > a:hover,
-.customer-header nav > a[aria-current="page"] { color: var(--color-primary-strong); background: var(--color-primary-soft); }
+.customer-header nav > a[aria-current="page"] { color: var(--color-primary-strong); background: var(--color-primary-soft); border-bottom-color: currentColor; }
 
 .customer-header .order-link {
   gap: var(--space-2);
