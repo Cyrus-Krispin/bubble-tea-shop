@@ -159,16 +159,20 @@ describe("App", () => {
     });
   });
 
-  it("offers optional customer account creation without blocking guest ordering", () => {
+  it("offers sign in and account creation on one customer access surface", async () => {
     render(
-      <MemoryRouter initialEntries={["/account/create"]}>
+      <MemoryRouter initialEntries={["/account/access?mode=create"]}>
         <App />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("main")).toHaveAccessibleName("Create customer account");
-    expect(screen.getByRole("heading", { level: 1, name: "Save your tea journey" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Continue as guest" })).toHaveAttribute("href", "/shop");
+    expect(await screen.findByRole("main")).toHaveAccessibleName("Customer access");
+    expect(screen.getByRole("heading", { level: 1, name: "Create your account" })).toBeVisible();
+    expect(screen.getByRole("navigation", { name: "Account access options" }).querySelector("a")).toHaveAttribute(
+      "href",
+      "/account/access?mode=sign-in",
+    );
+    expect(screen.getByRole("link", { name: "Continue to menu" })).toHaveAttribute("href", "/");
   });
 
   it("shows the signed-in customer account without granting a staff role", async () => {
@@ -196,7 +200,7 @@ describe("App", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/account/create"]}>
+      <MemoryRouter initialEntries={["/account/access?mode=create"]}>
         <App />
       </MemoryRouter>,
     );
@@ -205,17 +209,15 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "Create account" })).not.toBeInTheDocument();
   });
 
-  it("lets a customer continue to the guest shop", async () => {
+  it("opens directly on the API-backed menu", async () => {
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole("link", { name: "Continue as guest" }));
-
     expect(await screen.findByRole("main", { name: "Guest shop" })).toBeVisible();
-    expect(screen.getByRole("heading", { level: 1, name: "Choose your brew" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1, name: "Drinks made your way" })).toBeVisible();
     expect(screen.getByRole("heading", { level: 2, name: "Moonlit Milk Tea" })).toBeVisible();
   });
 
@@ -227,8 +229,19 @@ describe("App", () => {
     );
 
     expect(screen.getByRole("main")).toHaveAccessibleName("Staff sign in");
-    expect(screen.getByRole("heading", { level: 1, name: "Sign in to your workspace" })).toBeVisible();
-    expect(screen.getByText("Use your staff account to access shop operations.")).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1, name: "Staff access" })).toBeVisible();
+    expect(screen.getByText("Sign in to open shop operations.")).toBeVisible();
+  });
+
+  it("shows a useful recovery page for unknown routes", async () => {
+    render(
+      <MemoryRouter initialEntries={["/missing-page"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Return to menu" })).toHaveAttribute("href", "/");
   });
 
   it("guards the staff workspace and renders only server-returned scope", async () => {

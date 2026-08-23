@@ -33,9 +33,9 @@ export function ShopPage() {
       <main aria-label="Guest shop" className="shop-main">
         <div className="shop-heading">
           <div>
-            <p className="eyebrow">Made fresh for you</p>
-            <h1 id="menu-title">Choose your brew</h1>
-            <p>Small-batch tea, bright ingredients, and plenty of room to make it yours.</p>
+            <p className="eyebrow">Fresh tea · made to order</p>
+            <h1 id="menu-title">Drinks made your way</h1>
+            <p>Choose a tea, then set the size, sweetness, ice, and toppings.</p>
           </div>
           <p className="location-note"><strong>{state.data.location.name}</strong> · Order online and pay cash at pickup.</p>
         </div>

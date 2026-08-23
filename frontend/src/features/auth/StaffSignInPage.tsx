@@ -29,9 +29,9 @@ export function StaffSignInPage() {
       </header>
       <main aria-label="Staff sign in" className="auth-page">
         <section className="auth-introduction" aria-labelledby="auth-page-title">
-          <p className="eyebrow">Staff workspace</p>
-          <h1 id="auth-page-title">Sign in to your workspace</h1>
-          <p className="lede">Use your staff account to access shop operations.</p>
+          <p className="eyebrow">Bubble Tea Shop operations</p>
+          <h1 id="auth-page-title">Staff access</h1>
+          <p className="lede">Sign in to open shop operations.</p>
           <dl className="access-notes">
             <div><dt>Secure sign-in</dt><dd>Your password is handled by the local authentication service.</dd></div>
             <div><dt>Server-verified access</dt><dd>Roles and location permissions are checked before staff tools are available.</dd></div>

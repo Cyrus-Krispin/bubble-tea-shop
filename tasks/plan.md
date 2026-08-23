@@ -1,5 +1,23 @@
 # Implementation Plan: Production-Ready MVP
 
+## Active increment: Complete product UI redesign
+
+Replace the current customer and staff interface—not merely its styling—with the market-researched
+Modern Tea Bar experience documented in `frontend/docs/visual-style-guide.md`. Preserve existing API
+contracts and domain behavior while changing route hierarchy, customer navigation, authentication
+entry, storefront presentation, cart/confirmation, and the staff application shell.
+
+Implementation order:
+
+1. Lock the new route and authentication behavior with focused tests.
+2. Replace the global tokens and shared customer shell, then make the menu the home page.
+3. Replace menu, customization, cart, confirmation, account, and access layouts.
+4. Replace the staff header with a responsive operational rail and retheme all staff primitives.
+5. Add responsive/accessibility coverage and verify representative customer and staff flows in a
+   real browser.
+
+No backend, database, or generated OpenAPI contract changes are planned for this increment.
+
 ## Overview
 
 Deliver the complete MVP defined in `docs/product/mvp.md`: optional customer accounts, secure
@@ -127,4 +145,3 @@ Customer identity mapping
 - Forecasting, supplier ordering, expiry/FIFO lots, cash-flow dashboards, and detailed cost
   accounting.
 - Multiple active currencies/locales/locations and opt-in face authentication.
-
