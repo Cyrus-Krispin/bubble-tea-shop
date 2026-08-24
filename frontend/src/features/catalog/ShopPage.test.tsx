@@ -2,13 +2,14 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { catalogMenu } from "../../test/catalogFixtures";
+import { catalogLocations, catalogMenu } from "../../test/catalogFixtures";
 import { expectNoAccessibilityViolations } from "../../test/accessibility";
 import { CartProvider } from "../cart/CartProvider";
-import { getGuestMenu } from "./catalogClient";
+import { getGuestLocations, getGuestMenu } from "./catalogClient";
 import { ShopPage } from "./ShopPage";
 
 vi.mock("./catalogClient", () => ({
+  getGuestLocations: vi.fn(),
   getGuestMenu: vi.fn(),
   getGuestProduct: vi.fn(),
 }));
@@ -18,7 +19,10 @@ function renderShop() {
 }
 
 describe("ShopPage", () => {
-  beforeEach(() => vi.mocked(getGuestMenu).mockResolvedValue(catalogMenu));
+  beforeEach(() => {
+    vi.mocked(getGuestLocations).mockResolvedValue(catalogLocations);
+    vi.mocked(getGuestMenu).mockResolvedValue(catalogMenu);
+  });
 
   it("shows database-backed drinks with their starting prices", async () => {
     const { container } = renderShop();
@@ -27,10 +31,28 @@ describe("ShopPage", () => {
     await expectNoAccessibilityViolations(container);
     expect(screen.getByRole("link", { name: /Customize Moonlit Milk Tea/ })).toHaveAttribute(
       "href",
-      "/shop/drinks/moonlit-milk-tea",
+      "/shop/orchard-central/drinks/moonlit-milk-tea",
     );
+    expect(screen.getByRole("img", { name: "Moonlit Milk Tea in a clear cup" }))
+      .toHaveAttribute("src", "/assets/catalog/moonlit-milk-tea.webp");
+    fireEvent.click(screen.getByRole("button", { name: "Pickup at Orchard Central" }));
+    expect(screen.getByRole("link", { name: /Tiong Bahru/ }).querySelector("img"))
+      .toHaveAttribute("src", "/assets/catalog/tiong-bahru.webp");
     expect(screen.getAllByText("From $6.10").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Orchard Central").length).toBeGreaterThan(0);
+  });
+
+  it("opens a compact location disclosure and closes it with Escape", async () => {
+    renderShop();
+
+    const trigger = await screen.findByRole("button", { name: "Pickup at Orchard Central" });
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: /Tiong Bahru/ })).toHaveAttribute("href", "/shop/tiong-bahru");
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveFocus();
   });
 
   it("filters the menu by categories returned by the API", async () => {

@@ -1,18 +1,21 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
 import { ProblemState } from "../../components/ui";
 import { useCart } from "../cart/CartContext";
 import { DrinkArtwork } from "./DrinkArtwork";
+import { LocationPicker } from "./LocationPicker";
 import { formatMoney } from "./formatMoney";
-import { useGuestMenu } from "./useGuestCatalog";
+import { useGuestLocations, useGuestMenu } from "./useGuestCatalog";
 import "./catalog.css";
 
 export function ShopPage() {
   const { itemCount } = useCart();
+  const { locationSlug } = useParams();
   const [category, setCategory] = useState("All");
-  const { state, retry } = useGuestMenu();
+  const locations = useGuestLocations();
+  const { state, retry } = useGuestMenu(locationSlug);
 
   if (state.status === "loading") {
     return <CatalogStatus itemCount={itemCount} message="Loading today’s menu…" />;
@@ -37,8 +40,13 @@ export function ShopPage() {
             <h1 id="menu-title">Choose your brew</h1>
             <p>Small-batch tea, bright ingredients, and plenty of room to make it yours.</p>
           </div>
-          <p className="location-note"><strong>{state.data.location.name}</strong> · Order online and pay cash at pickup.</p>
+          {locations.status === "ready" ? (
+            <LocationPicker locations={locations.data} selected={state.data.location} />
+          ) : (
+            <p className="location-picker-static">Pickup at <strong>{state.data.location.name}</strong></p>
+          )}
         </div>
+        <p aria-atomic="true" className="visually-hidden" role="status">Menu for {state.data.location.name}</p>
         <div className="category-filter" aria-label="Filter drinks" role="group">
           {categories.map((option) => (
             <button
@@ -64,7 +72,7 @@ export function ShopPage() {
               <div className="product-footer">
                 <strong>{drink.available ? `From ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}` : "Unavailable today"}</strong>
                 {drink.available ? (
-                  <Link aria-label={`Customize ${drink.name}, from ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}`} to={`/shop/drinks/${drink.slug}`}>
+                  <Link aria-label={`Customize ${drink.name}, from ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}`} to={`/shop/${state.data.location.slug}/drinks/${drink.slug}`}>
                     Customize <span aria-hidden="true">→</span>
                   </Link>
                 ) : <span className="product-status">Sold out</span>}

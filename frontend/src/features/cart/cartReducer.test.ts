@@ -9,6 +9,7 @@ import {
 } from "./cartReducer";
 
 const moonlit: CartDraft = {
+  locationSlug: "orchard-central",
   drinkId: "moonlit-milk-tea",
   drinkName: "Moonlit Milk Tea",
   configuration: {
@@ -51,6 +52,16 @@ describe("cartReducer", () => {
     const state = cartReducer(added, { type: "decrement", itemId: added.items[0].id });
 
     expect(state.items).toEqual([]);
+  });
+
+  it("does not mix drinks from different pickup locations", () => {
+    const orchard = cartReducer(initialCartState, { type: "add", draft: moonlit });
+    const unchanged = cartReducer(orchard, {
+      type: "add",
+      draft: { ...moonlit, locationSlug: "tiong-bahru" },
+    });
+
+    expect(unchanged).toEqual(orchard);
   });
 
   it("caps line and order quantities at the checkout contract limits", () => {

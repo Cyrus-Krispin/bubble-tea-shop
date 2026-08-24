@@ -21,27 +21,28 @@ function priceDeltaLabel(priceDeltaMinor: number, currency: string) {
 }
 
 export function DrinkPage() {
-  const { drinkId } = useParams();
+  const { drinkId, locationSlug } = useParams();
   const { itemCount } = useCart();
-  const { state, retry } = useGuestProduct(drinkId);
+  const { state, retry } = useGuestProduct(drinkId, locationSlug);
 
   if (state.status === "loading") {
-    return <DrinkStatus itemCount={itemCount} message="Loading drink options…" />;
+    return <DrinkStatus itemCount={itemCount} locationSlug={locationSlug} message="Loading drink options…" />;
   }
   if (state.status === "error" || !state.data.variants.some((variant) => variant.available)) {
     return (
       <DrinkStatus
         itemCount={itemCount}
+        locationSlug={locationSlug}
         message="We couldn’t find that drink or load its current options."
         retry={retry}
       />
     );
   }
-  return <DrinkCustomizer key={state.data.id} product={state.data} />;
+  return <DrinkCustomizer key={`${locationSlug ?? "default"}-${state.data.id}`} locationSlug={locationSlug} product={state.data} />;
 }
 
-function DrinkCustomizer({ product }: { product: CatalogProduct }) {
-  const { addItem, itemCount } = useCart();
+function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; product: CatalogProduct }) {
+  const { addItem, itemCount, locationSlug: cartLocationSlug } = useCart();
   const [configuration, setConfiguration] = useState<DrinkConfiguration>(() => (
     createDefaultConfiguration(product)
   ));
@@ -53,7 +54,17 @@ function DrinkCustomizer({ product }: { product: CatalogProduct }) {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (locationSlug === undefined) {
+      setAddedMessage("Choose a shop before adding this drink to your order.");
+      return;
+    }
+    const pickupLocation = locationSlug;
+    if (cartLocationSlug !== undefined && cartLocationSlug !== pickupLocation) {
+      setAddedMessage("Your current order is for another shop. Complete or clear it before adding this drink.");
+      return;
+    }
     addItem({
+      locationSlug: pickupLocation,
       drinkId: product.slug,
       drinkName: product.name,
       configuration,
@@ -99,8 +110,8 @@ function DrinkCustomizer({ product }: { product: CatalogProduct }) {
       <CustomerHeader itemCount={itemCount} />
       <main className="customize-layout">
         <section className="drink-feature" aria-labelledby="drink-name">
-          <Link className="back-link" to="/shop">← Back to menu</Link>
-          <DrinkArtwork drink={product} />
+          <Link className="back-link" to={locationSlug === undefined ? "/shop" : `/shop/${locationSlug}`}>← Back to menu</Link>
+          <DrinkArtwork drink={product} priority />
           <p className="product-category">{product.category}</p>
           <h1 id="drink-name">{product.name}</h1>
           <p>{product.description}</p>
@@ -196,10 +207,12 @@ function OptionGroup({
 
 function DrinkStatus({
   itemCount,
+  locationSlug,
   message,
   retry,
 }: {
   itemCount: number;
+  locationSlug?: string;
   message: string;
   retry?: () => void;
 }) {
@@ -219,7 +232,7 @@ function DrinkStatus({
             title={message}
           />
         )}
-        <Link className="secondary-link" to="/shop">Return to menu</Link>
+        <Link className="secondary-link" to={locationSlug === undefined ? "/shop" : `/shop/${locationSlug}`}>Return to menu</Link>
       </main>
     </div>
   );

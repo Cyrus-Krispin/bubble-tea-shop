@@ -9,6 +9,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     items: state.items,
     itemCount: state.items.reduce((total, item) => total + item.quantity, 0),
     previewTotalMinor: state.items.reduce((total, item) => total + item.unitPriceMinor * item.quantity, 0),
+    locationSlug: state.items[0]?.locationSlug,
     addItem: (draft) => dispatch({ type: "add", draft }),
     incrementItem: (itemId: string) => dispatch({ type: "increment", itemId }),
     decrementItem: (itemId: string) => dispatch({ type: "decrement", itemId }),

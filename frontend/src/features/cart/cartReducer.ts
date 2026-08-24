@@ -1,6 +1,7 @@
 import type { DrinkConfiguration } from "../catalog/pricing";
 
 export type CartDraft = {
+  locationSlug: string;
   drinkId: string;
   drinkName: string;
   configuration: DrinkConfiguration;
@@ -30,7 +31,7 @@ function itemCount(state: CartState) {
 
 function cartItemId(draft: CartDraft) {
   const choiceIds = draft.configuration.selections.flatMap((selection) => selection.choiceIds).sort();
-  return [draft.drinkId, draft.configuration.variantId, ...choiceIds].join("|");
+  return [draft.locationSlug, draft.drinkId, draft.configuration.variantId, ...choiceIds].join("|");
 }
 
 export function cartReducer(state: CartState, action: CartAction): CartState {
@@ -38,6 +39,7 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
 
   if (action.type === "add") {
     if (itemCount(state) >= MAX_ORDER_QUANTITY) return state;
+    if (state.items.some((item) => item.locationSlug !== action.draft.locationSlug)) return state;
     const id = cartItemId(action.draft);
     const existingItem = state.items.find((item) => item.id === id);
     if (existingItem) {

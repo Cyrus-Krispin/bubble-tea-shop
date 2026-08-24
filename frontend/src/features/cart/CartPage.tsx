@@ -33,6 +33,7 @@ export function CartPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>();
   const [placedOrder, setPlacedOrder] = useState<GuestOrder>();
+  const [placedLocationSlug, setPlacedLocationSlug] = useState<string>();
   const retryKey = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -52,8 +53,9 @@ export function CartPage() {
           quantity: item.quantity,
           optionChoiceIds: item.configuration.selections.flatMap((selection) => selection.choiceIds),
         })),
-      }, key, session?.accessToken);
+      }, key, session?.accessToken, items[0].locationSlug);
       retryKey.current = undefined;
+      setPlacedLocationSlug(items[0].locationSlug);
       setPlacedOrder(order);
       clearCart();
     } catch (error) {
@@ -96,7 +98,7 @@ export function CartPage() {
               <div><dt>Items</dt><dd>{placedOrder.items.reduce((total, item) => total + item.quantity, 0)}</dd></div>
               <div><dt>Confirmed total</dt><dd>{formatMoney(placedOrder.totalMinor, placedOrder.currencyCode)}</dd></div>
             </dl>
-            <Link className="secondary-link" to="/shop">Start another order</Link>
+            <Link className="secondary-link" to={placedLocationSlug === undefined ? "/shop" : `/shop/${placedLocationSlug}`}>Start another order</Link>
           </section>
         ) : items.length === 0 ? (
           <section className="cart-empty" aria-labelledby="empty-title">
@@ -128,7 +130,7 @@ export function CartPage() {
                   </li>
                 ))}
               </ul>
-              <Link className="back-link" to="/shop">← Add another drink</Link>
+              <Link className="back-link" to={`/shop/${items[0].locationSlug}`}>← Add another drink</Link>
             </section>
             <aside className="order-summary" aria-labelledby="summary-title">
               <p className="eyebrow">Pickup summary</p>

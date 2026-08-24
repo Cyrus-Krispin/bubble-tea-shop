@@ -36,6 +36,32 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
 
   await page.getByRole("link", { name: "Continue as guest" }).click();
   await expect(page.getByRole("heading", { name: "Choose your brew" })).toBeVisible();
+  const locationTrigger = page.getByRole("button", { name: "Pickup at Orchard Central" });
+  await expect(locationTrigger).toBeVisible();
+  expect((await locationTrigger.boundingBox())?.height).toBeLessThanOrEqual(80);
+  await locationTrigger.click();
+  const locationPhotos = page.locator(".location-picker-panel .location-picker-photo");
+  for (let index = 0; index < await locationPhotos.count(); index += 1) {
+    await expect.poll(() => locationPhotos.nth(index).evaluate((image) => {
+      const photo = image as HTMLImageElement;
+      return photo.complete && photo.naturalWidth > 0 && getComputedStyle(photo).objectFit === "cover";
+    })).toBe(true);
+  }
+  await page.getByRole("link", { name: /Tiong Bahru/ }).click();
+  await expect(page).toHaveURL(/\/shop\/tiong-bahru$/);
+  await expect(page.getByRole("button", { name: "Pickup at Tiong Bahru" })).toBeVisible();
+  await expect(page.locator(".product-card")).toHaveCount(7);
+  const photos = page.locator(".drink-art");
+  for (let index = 0; index < await photos.count(); index += 1) {
+    const photo = photos.nth(index);
+    await photo.scrollIntoViewIfNeeded();
+    await expect.poll(() => photo.evaluate((image) => {
+      const loadedImage = image as HTMLImageElement;
+      return loadedImage.complete
+        && loadedImage.naturalWidth > 0
+        && getComputedStyle(loadedImage).objectFit === "cover";
+    })).toBe(true);
+  }
   await expectProductionQuality(page);
 
   await page.getByRole("link", { name: /Customize / }).first().click();

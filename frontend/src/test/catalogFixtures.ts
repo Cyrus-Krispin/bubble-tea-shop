@@ -6,7 +6,7 @@ export const catalogProduct: CatalogProduct = {
   name: "Moonlit Milk Tea",
   description: "Creamy black tea with brown sugar pearls and a smooth finish.",
   category: "Milk tea",
-  artworkKey: "moon",
+  artworkKey: "moonlit-milk-tea",
   variants: [
     {
       id: "small",
@@ -77,6 +77,7 @@ export const catalogMenu: CatalogMenu = {
     slug: "orchard-central",
     name: "Orchard Central",
     currency: "SGD",
+    imageKey: "orchard-central",
   },
   products: [
     {
@@ -95,7 +96,7 @@ export const catalogMenu: CatalogMenu = {
       name: "Sunberry Oolong",
       description: "Bright oolong layered with strawberry, citrus, and berry notes.",
       category: "Fruit tea",
-      artworkKey: "berry",
+      artworkKey: "sunberry-oolong",
       startingPrice: { amountMinor: 610, currency: "SGD" },
       available: true,
     },
@@ -105,9 +106,20 @@ export const catalogMenu: CatalogMenu = {
       name: "Cloudberry Taro",
       description: "Silky taro milk tea with a mellow vanilla aroma.",
       category: "Milk tea",
-      artworkKey: "taro",
+      artworkKey: "cloudberry-taro",
       startingPrice: { amountMinor: 640, currency: "SGD" },
       available: false,
     },
   ],
 };
+
+export const catalogLocations = [
+  catalogMenu.location,
+  {
+    id: "20000000-0000-0000-0000-000000000002",
+    slug: "tiong-bahru",
+    name: "Tiong Bahru",
+    currency: "SGD",
+    imageKey: "tiong-bahru",
+  },
+];
