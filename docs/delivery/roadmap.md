@@ -41,6 +41,8 @@ healthy database.
 - End-to-end tests from order placement through inventory deduction. (Implemented.)
 - Two-location guest selection, expanded photographic catalog, and location-scoped checkout.
   (Implemented.)
+- Private customer order history, immutable receipt detail, and signed-in last-order storefront
+  suggestion. (Implemented.)
 
 ## Phase 4 — Operational polish
 
@@ -54,8 +56,8 @@ healthy database.
 
 ## Later releases
 
-- Customer order history, extended profiles, card payments, forecasting/alerts, supplier
-  integration, dashboards, location lifecycle/expansion, localization, and multiple currencies.
+- Extended profiles, card payments, forecasting/alerts, supplier integration, dashboards, location
+  lifecycle/expansion, localization, and multiple currencies.
 - Opt-in customer face authentication, only after customer accounts and the standard Supabase
   authentication path; see
   [`../architecture/face-authentication.md`](../architecture/face-authentication.md).

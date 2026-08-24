@@ -123,3 +123,5 @@
   immutable staff-access change ledger used by owner management.
 - V13 adds location image keys and seeds Tiong Bahru, three published recipes and products, and
   location-specific offerings without changing earlier migrations.
+- V14 adds the partial account/time/order index used for deterministic, bounded customer-history
+  reads; it changes no domain relationship or lifecycle.

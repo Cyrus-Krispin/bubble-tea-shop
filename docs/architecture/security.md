@@ -82,6 +82,12 @@ explicit operator-only bootstrap. An authenticated owner may subsequently grant,
 deactivate, or reactivate manager access for existing verified application accounts through the
 Spring API. Spring never derives staff access from signup metadata.
 
+Customer order-history reads resolve `account.id` only from the verified token subject and include
+that account in every order query. The API accepts no customer account identifier. An order owned
+by another account is indistinguishable from an unknown order, and list sizes are bounded. The
+frontend validates history payloads before rendering immutable snapshot text and never blocks the
+public menu when personalization is unavailable.
+
 ## Authorization
 
 - Authentication establishes identity; it does not grant organization or location access by

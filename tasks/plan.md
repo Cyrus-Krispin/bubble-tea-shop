@@ -1,22 +1,19 @@
 # Implementation Plan: Production-Ready MVP
 
-## Active increment: Complete product UI redesign
+## Active increment: Customer order history and last-order suggestion
 
-Replace the current customer and staff interface—not merely its styling—with the market-researched
-Ube and Calamansi experience documented in `frontend/docs/visual-style-guide.md`. Preserve existing API
-contracts and domain behavior while changing route hierarchy, customer navigation, authentication
-entry, storefront presentation, cart/confirmation, and the staff application shell.
+Deliver the contract in `docs/product/customer-order-history.md` as two connected vertical slices:
 
-Implementation order:
+1. Add the indexed, ownership-scoped history list and receipt-detail API with integration tests,
+   OpenAPI generation, and database/API/security documentation.
+2. Add the validated frontend client, account history and receipt pages, and a non-blocking
+   `Last ordered` storefront section for authenticated customers.
+3. Verify the complete account-linked checkout-to-history flow in desktop and mobile browsers,
+   review the full diff across correctness, simplicity, architecture, security, and performance,
+   then commit and push the coherent feature.
 
-1. Lock the new route and authentication behavior with focused tests.
-2. Replace the global tokens and shared customer shell, then make the menu the home page.
-3. Replace menu, customization, cart, confirmation, account, and access layouts.
-4. Replace the staff header with a responsive operational rail and retheme all staff primitives.
-5. Add responsive/accessibility coverage and verify representative customer and staff flows in a
-   real browser.
-
-No backend, database, or generated OpenAPI contract changes are planned for this increment.
+The browser never supplies an account identifier. History uses immutable order snapshots, and
+reordering remains outside this increment.
 
 ## Overview
 

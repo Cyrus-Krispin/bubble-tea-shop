@@ -48,7 +48,7 @@ Movement types:
 
 | Table | Purpose | Lifecycle |
 |---|---|---|
-| `customer_order` | Idempotent guest or account-linked sale with money/status snapshots. | Pending, then completed or cancelled. |
+| `customer_order` | Idempotent guest or account-linked sale with money/status snapshots; account-linked rows support private newest-first customer history. | Pending, then completed or cancelled. |
 | `order_item` | Product, variant, quantity, and price snapshots. | Immutable after placement. |
 | `order_item_option` | Selected option name and price snapshots. | Immutable after placement. |
 | `order_item_consumption` | Final positive ingredient quantities for the complete line. | Immutable after placement. |

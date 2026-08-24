@@ -77,6 +77,20 @@ The endpoint never accepts or creates an organization, location, role, or member
 identity claims return `401` with `CUSTOMER_IDENTITY_INVALID`; a disabled application account
 returns `403` with `CUSTOMER_ACCOUNT_DISABLED`.
 
+## Customer order history
+
+`GET /api/v1/customer/orders` and `GET /api/v1/customer/orders/{orderId}` are authenticated,
+read-only customer resources. Spring derives the application account from the verified token
+subject; neither endpoint accepts an account ID. The list is ordered by `createdAt DESC, id DESC`
+and uses zero-based `page` plus bounded `size` (`1..20`). Summaries contain the shop and immutable
+line-name snapshots needed by account history and the signed-in `Last ordered` storefront section.
+Detail returns the complete immutable line, option, quantity, and price snapshots.
+
+An unmapped or disabled account returns `403` with `CUSTOMER_ACCOUNT_UNAVAILABLE`. Unknown and
+cross-account order IDs both return `404` with `CUSTOMER_ORDER_NOT_FOUND`, preventing resource
+existence disclosure. Invalid subjects return `401` with `CUSTOMER_IDENTITY_INVALID`; invalid page
+or path values return `400` with `CUSTOMER_ORDER_HISTORY_INVALID`.
+
 ## Staff context
 
 `GET /api/v1/staff/context` is authenticated and bodyless. It derives the caller from the verified

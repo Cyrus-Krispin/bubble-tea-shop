@@ -745,6 +745,40 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/customer/orders": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List the current customer's orders */
+        readonly get: operations["listCustomerOrders"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/customer/orders/{orderId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get an owned customer order receipt */
+        readonly get: operations["getCustomerOrder"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1536,6 +1570,92 @@ export interface components {
             readonly available: boolean;
             readonly price: components["schemas"]["Money"];
             readonly optionGroups: readonly components["schemas"]["OptionGroup"][];
+        };
+        readonly CustomerOrderItemSummary: {
+            readonly productName: string;
+            readonly variantName: string;
+            /** Format: int32 */
+            readonly quantity: number;
+        };
+        readonly CustomerOrderLocation: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly slug: string;
+            readonly name: string;
+        };
+        readonly CustomerOrderPage: {
+            readonly items: readonly components["schemas"]["CustomerOrderSummary"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int32 */
+            readonly totalPages: number;
+        };
+        readonly CustomerOrderSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly publicOrderNumber: string;
+            /** @enum {string} */
+            readonly status: "PENDING" | "COMPLETED" | "CANCELLED";
+            readonly paymentMethod: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly totalMinor: number;
+            /** Format: int32 */
+            readonly itemQuantity: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly completedAt: string | null;
+            /** Format: date-time */
+            readonly cancelledAt: string | null;
+            readonly location: components["schemas"]["CustomerOrderLocation"];
+            readonly items: readonly components["schemas"]["CustomerOrderItemSummary"][];
+        };
+        readonly CustomerOrderDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly publicOrderNumber: string;
+            /** @enum {string} */
+            readonly status: "PENDING" | "COMPLETED" | "CANCELLED";
+            readonly paymentMethod: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly subtotalMinor: number;
+            /** Format: int64 */
+            readonly totalMinor: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly completedAt: string | null;
+            /** Format: date-time */
+            readonly cancelledAt: string | null;
+            readonly location: components["schemas"]["CustomerOrderLocation"];
+            readonly items: readonly components["schemas"]["CustomerOrderLine"][];
+        };
+        readonly CustomerOrderLine: {
+            /** Format: int32 */
+            readonly lineNumber: number;
+            readonly productName: string;
+            readonly variantName: string;
+            /** Format: int32 */
+            readonly quantity: number;
+            /** Format: int64 */
+            readonly unitPriceMinor: number;
+            /** Format: int64 */
+            readonly lineTotalMinor: number;
+            readonly options: readonly components["schemas"]["CustomerOrderOption"][];
+        };
+        readonly CustomerOrderOption: {
+            /** Format: int32 */
+            readonly selectionNumber: number;
+            readonly groupName: string;
+            readonly choiceName: string;
+            /** Format: int64 */
+            readonly priceDeltaMinor: number;
         };
     };
     responses: {
@@ -3377,6 +3497,59 @@ export interface operations {
                     readonly "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
+        };
+    };
+    readonly listCustomerOrders: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Customer order page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CustomerOrderPage"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+        };
+    };
+    readonly getCustomerOrder: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly orderId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Customer order receipt */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CustomerOrderDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
         };
     };
 }

@@ -1,18 +1,22 @@
 # Production-Ready MVP Tasks
 
-## Active increment — Complete product UI redesign
+## Active increment — Customer order history and last-order suggestion
 
-- [x] Make the API-backed menu the home page and add a useful not-found recovery surface.
-- [x] Consolidate customer sign-in and registration into one compact access route with safe return
-  navigation and compatibility redirects.
-- [x] Replace customer navigation, menu, customization, cart, confirmation, and account layouts with
-  the Ube and Calamansi product system.
-- [x] Replace the staff top header with a responsive operational rail and cohesive module navigation.
-- [x] Retheme forms, tables, dialogs, loading, empty, error, denied, and status states across staff
-  workflows without changing their behavior.
-- [x] Add route, auth-mode, password-visibility, mobile-navigation, and accessibility tests.
-- [x] Run frontend unit, type, lint, build, E2E, and real-browser desktop/mobile verification.
-- [x] Complete adversarial design/code review, address findings, commit, and push.
+- [ ] Specify the customer-owned history, immutable receipt, pagination, storefront placement, and
+  explicit reorder boundary.
+- [ ] Add the customer-history index and ownership-scoped list/detail API using test-first backend
+  integration slices.
+- [ ] Generate and review OpenAPI plus immutable frontend types; update database, API, security,
+  product, and roadmap documentation.
+- [ ] Add a runtime-validating customer-order client with focused request, response, and error tests.
+- [ ] Add signed-in account history and receipt pages with loading, empty, error, pagination, and
+  accessibility coverage.
+- [ ] Add a non-blocking `Last ordered` storefront section that is hidden for guests and empty
+  histories, with focused tests.
+- [ ] Verify account-linked checkout through storefront suggestion, history, and receipt in desktop
+  and mobile browsers; confirm clean console/network output and accessibility.
+- [ ] Run all backend/frontend/contract/security checks, complete the five-axis review, update the
+  checklist, commit, and push.
 
 Each task is a small verified increment. Behavioral work follows RED-GREEN-REFACTOR, then the
 relevant full suite, focused commit, and push.
