@@ -1,15 +1,75 @@
-# Bubble Tea Shop
+<div align="center">
+  <img src="frontend/public/app-icon-512.png" alt="Bubble Tea Shop" width="128" />
 
-Schema-first monorepo for a bubble tea shop management and ordering platform.
+  # Bubble Tea Shop
 
-## Repository layout
+  **A complete ordering and shop-operations application for an independent bubble tea store.**
 
-- `backend/` — Spring Boot modular monolith and Flyway migrations.
-- `frontend/` — React/Vite customer ordering and staff operations SPA.
-- `docs/` — product, architecture, database, API, and delivery documentation.
-- `infra/` — local Auth/database assets and backup/restore tooling.
+  Browse and customize drinks, place cash pickup orders, manage the menu and inventory, and move
+  orders safely from checkout to completion—all in one local-first application.
 
-## Quick start
+  [![CI](https://github.com/Cyrus-Krispin/bubble-tea-shop/actions/workflows/ci.yml/badge.svg)](https://github.com/Cyrus-Krispin/bubble-tea-shop/actions/workflows/ci.yml)
+</div>
+
+## What it does
+
+Bubble Tea Shop brings the customer counter and the staff workspace together without compromising
+the business rules behind them. Guests get a fast, account-optional ordering flow. Staff get the
+tools to run the catalog, stock, and order queue. PostgreSQL and Spring keep pricing, permissions,
+inventory, and order completion authoritative on the server.
+
+### Customer experience
+
+- Browse a live, database-backed menu by category and availability.
+- Customize size, sweetness, ice, milk, and toppings with server-owned pricing.
+- Review a cart and place an idempotent cash pickup order as a guest.
+- Optionally create an account or sign in without crossing into staff access.
+- Use a responsive, WCAG-conscious interface designed for mobile ordering.
+
+### Staff operations
+
+- Manage ingredients, immutable recipe versions, products, variants, prices, and options.
+- Record stock receipts and adjustments against an auditable inventory ledger.
+- Process the live order queue, record cash collection, and complete orders safely.
+- Deduct recipe consumption atomically and reject completion when stock is insufficient.
+- Review operational audit history and manage location-scoped manager access.
+
+## Application architecture
+
+```mermaid
+flowchart LR
+    Customer[Customer ordering] --> SPA[React + TypeScript SPA]
+    Staff[Staff workspace] --> SPA
+    SPA -->|Generated OpenAPI client| API[Spring Boot modular monolith]
+    SPA -->|Sign-in and sessions| Auth[Local Supabase Auth]
+    API -->|Identity verification| Auth
+    API --> DB[(PostgreSQL)]
+```
+
+The backend is a Java 21 modular monolith organized around four domain boundaries:
+`identity`, `catalog`, `inventory`, and `ordering`. Spring owns workflows and authorization;
+PostgreSQL owns relational integrity; Flyway is the only schema-change mechanism. The React SPA
+uses a generated OpenAPI client and never ships fallback catalog or business data.
+
+| Layer | Technology | Responsibility |
+| --- | --- | --- |
+| Web application | React 19, TypeScript, Vite | Customer ordering, accounts, and staff operations |
+| Application API | Java 21, Spring Boot 4 | Domain workflows, authorization, validation, and OpenAPI |
+| Data | PostgreSQL, Flyway, JPA | Transactional state, constraints, migrations, and persistence |
+| Identity | Self-hosted Supabase Auth, Kong | Local sign-in, sessions, JWT issuing, and public JWKS |
+| Delivery | Docker Compose, Nginx, GitHub Actions | Reproducible local stack, production build, and quality gates |
+
+Read the [architecture overview](docs/architecture/overview.md) for module boundaries and the
+[MVP product scope](docs/product/mvp.md) for the supported workflows.
+
+## Run it locally
+
+### Prerequisites
+
+- Docker Desktop, Colima, or another Docker-compatible runtime
+- Node.js 24 (used once to generate local Auth keys)
+
+### Start the complete stack
 
 ```bash
 cp .env.example .env
@@ -17,13 +77,61 @@ node infra/supabase/generate-local-auth-keys.mjs >> .env
 docker compose up --build
 ```
 
-This starts the official Supabase Postgres and Auth images, the Spring Boot backend, and the React
-frontend in one local-only Compose network. Open the frontend at
-<http://localhost:4173>; backend health is at <http://localhost:8080/actuator/health> and Auth
-health is at <http://localhost:9999/health>.
+The first run pulls the pinned images and downloads build dependencies. After the services become
+healthy, open [localhost:4173](http://localhost:4173) to browse the shop.
 
-The first run needs internet access to pull images and download build dependencies. Once those
-artifacts are cached, `docker compose up` runs without a hosted Supabase project or other online
-runtime dependency. See [`docs/development/local-docker.md`](docs/development/local-docker.md) for
-configuration, health checks, and lifecycle commands, and [`docs/README.md`](docs/README.md) for
-the documentation index.
+| Local service | URL |
+| --- | --- |
+| Customer and staff application | <http://localhost:4173> |
+| Spring Boot health | <http://localhost:8080/actuator/health> |
+| Supabase Auth health | <http://localhost:8000/auth/v1/health> |
+| PostgreSQL | `localhost:54322` |
+
+Stop the stack without deleting its database volume:
+
+```bash
+docker compose down
+```
+
+See the [local development guide](docs/development/local-docker.md) for health checks, owner
+bootstrap, configuration, and lifecycle details.
+
+## Quality gates
+
+The CI pipeline verifies the same boundaries the application depends on:
+
+- Backend integration tests run against PostgreSQL with Testcontainers.
+- Frontend tests, accessibility checks, OpenAPI drift checks, types, lint, and builds must pass.
+- Local Auth infrastructure scripts are tested independently.
+- The production containers are built and exercised through desktop and mobile browser flows.
+
+Run the main suites directly when working outside Compose:
+
+```bash
+# Backend (Docker is required for Testcontainers)
+cd backend && ./mvnw verify
+
+# Frontend
+cd frontend
+pnpm install --frozen-lockfile
+pnpm test && pnpm typecheck && pnpm lint && pnpm build
+```
+
+## Repository guide
+
+| Path | Contents |
+| --- | --- |
+| [`backend/`](backend/) | Spring modules, Flyway migrations, and integration tests |
+| [`frontend/`](frontend/) | React SPA, reusable UI primitives, Storybook, and browser tests |
+| [`docs/`](docs/) | Product, architecture, API, database, delivery, and operations documentation |
+| [`infra/`](infra/) | Local Supabase configuration plus backup and restore tooling |
+| [`compose.yaml`](compose.yaml) | The complete local application stack |
+
+Start with the [documentation index](docs/README.md) for deeper technical and product context.
+
+## Current scope
+
+The implemented MVP supports one active shop location, guest and signed-in customer cash orders,
+customer accounts, owner and manager access, catalog and recipe management, inventory movements,
+order operations, and operational audit views. Card payments, customer order history, forecasting,
+multiple active locations, and opt-in face authentication remain later-release work.
