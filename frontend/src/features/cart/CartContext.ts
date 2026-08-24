@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 
-import type { CartDraft, CartItem } from "./cartReducer";
+import type { CartDraft, CartItem, CartOrderLine } from "./cartReducer";
 
 export type CartContextValue = {
   items: CartItem[];
@@ -8,6 +8,7 @@ export type CartContextValue = {
   previewTotalMinor: number;
   locationSlug?: string;
   addItem: (draft: CartDraft) => void;
+  addOrder: (lines: readonly CartOrderLine[]) => void;
   incrementItem: (itemId: string) => void;
   decrementItem: (itemId: string) => void;
   removeItem: (itemId: string) => void;

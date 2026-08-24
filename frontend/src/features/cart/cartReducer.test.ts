@@ -79,4 +79,42 @@ describe("cartReducer", () => {
     expect(cartReducer(fullOrder, { type: "increment", itemId: "three" })).toEqual(fullOrder);
     expect(cartReducer(fullOrder, { type: "add", draft: moonlit })).toEqual(fullOrder);
   });
+
+  it("restores every line of a previous order atomically", () => {
+    const restored = cartReducer(initialCartState, {
+      type: "add-order",
+      lines: [
+        { draft: moonlit, quantity: 2 },
+        {
+          draft: {
+            ...moonlit,
+            drinkId: "mossy-matcha",
+            drinkName: "Mossy Matcha",
+            configuration: {
+              ...moonlit.configuration,
+              variantId: "large",
+              variantName: "Large",
+            },
+          },
+          quantity: 1,
+        },
+      ],
+    });
+
+    expect(restored.items).toHaveLength(2);
+    expect(restored.items.map((item) => item.quantity)).toEqual([2, 1]);
+  });
+
+  it("leaves the cart unchanged when any restored line violates checkout limits", () => {
+    const orchard = cartReducer(initialCartState, { type: "add", draft: moonlit });
+
+    expect(cartReducer(orchard, {
+      type: "add-order",
+      lines: [{ draft: { ...moonlit, locationSlug: "tiong-bahru" }, quantity: 2 }],
+    })).toEqual(orchard);
+    expect(cartReducer(orchard, {
+      type: "add-order",
+      lines: [{ draft: moonlit, quantity: MAX_LINE_QUANTITY }],
+    })).toEqual(orchard);
+  });
 });

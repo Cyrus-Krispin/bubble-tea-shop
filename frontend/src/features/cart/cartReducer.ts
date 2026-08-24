@@ -14,10 +14,16 @@ export type CartItem = CartDraft & {
   quantity: number;
 };
 
+export type CartOrderLine = {
+  draft: CartDraft;
+  quantity: number;
+};
+
 export type CartState = { items: CartItem[] };
 
 type CartAction =
   | { type: "add"; draft: CartDraft }
+  | { type: "add-order"; lines: readonly CartOrderLine[] }
   | { type: "increment" | "decrement" | "remove"; itemId: string }
   | { type: "clear" };
 
@@ -34,22 +40,44 @@ function cartItemId(draft: CartDraft) {
   return [draft.locationSlug, draft.drinkId, draft.configuration.variantId, ...choiceIds].join("|");
 }
 
+function addOrder(state: CartState, lines: readonly CartOrderLine[]): CartState {
+  if (lines.length === 0) return state;
+  const locationSlug = state.items[0]?.locationSlug ?? lines[0].draft.locationSlug;
+  if (
+    lines.some((line) => (
+      line.quantity < 1 ||
+      line.quantity > MAX_LINE_QUANTITY ||
+      line.draft.locationSlug !== locationSlug
+    )) ||
+    itemCount(state) + lines.reduce((total, line) => total + line.quantity, 0) > MAX_ORDER_QUANTITY
+  ) return state;
+
+  const quantities = new Map(state.items.map((item) => [item.id, item.quantity]));
+  const newItems = new Map<string, CartDraft>();
+  for (const line of lines) {
+    const id = cartItemId(line.draft);
+    const quantity = (quantities.get(id) ?? 0) + line.quantity;
+    if (quantity > MAX_LINE_QUANTITY) return state;
+    quantities.set(id, quantity);
+    if (!state.items.some((item) => item.id === id)) newItems.set(id, line.draft);
+  }
+
+  return {
+    items: [
+      ...state.items.map((item) => ({ ...item, quantity: quantities.get(item.id) ?? item.quantity })),
+      ...Array.from(newItems, ([id, draft]) => ({ ...draft, id, quantity: quantities.get(id) ?? 1 })),
+    ],
+  };
+}
+
 export function cartReducer(state: CartState, action: CartAction): CartState {
   if (action.type === "clear") return initialCartState;
 
   if (action.type === "add") {
-    if (itemCount(state) >= MAX_ORDER_QUANTITY) return state;
-    if (state.items.some((item) => item.locationSlug !== action.draft.locationSlug)) return state;
-    const id = cartItemId(action.draft);
-    const existingItem = state.items.find((item) => item.id === id);
-    if (existingItem) {
-      if (existingItem.quantity >= MAX_LINE_QUANTITY) return state;
-      return {
-        items: state.items.map((item) => item.id === id ? { ...item, quantity: item.quantity + 1 } : item),
-      };
-    }
-    return { items: [...state.items, { ...action.draft, id, quantity: 1 }] };
+    return addOrder(state, [{ draft: action.draft, quantity: 1 }]);
   }
+
+  if (action.type === "add-order") return addOrder(state, action.lines);
 
   if (action.type === "remove") {
     return { items: state.items.filter((item) => item.id !== action.itemId) };
