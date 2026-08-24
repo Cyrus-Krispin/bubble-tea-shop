@@ -6,6 +6,7 @@ export type CartContextValue = {
   items: CartItem[];
   itemCount: number;
   previewTotalMinor: number;
+  locationSlug?: string;
   addItem: (draft: CartDraft) => void;
   incrementItem: (itemId: string) => void;
   decrementItem: (itemId: string) => void;

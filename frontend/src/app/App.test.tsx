@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { catalogMenu, catalogProduct } from "../test/catalogFixtures";
+import { catalogLocations, catalogMenu, catalogProduct } from "../test/catalogFixtures";
 
 vi.mock("../features/auth/authClient", () => ({
   getCurrentAuthSession: vi.fn().mockResolvedValue(null),
@@ -13,6 +13,7 @@ vi.mock("../features/auth/authClient", () => ({
   subscribeToAuthState: vi.fn().mockReturnValue(() => undefined),
 }));
 vi.mock("../features/catalog/catalogClient", () => ({
+  getGuestLocations: vi.fn(),
   getGuestMenu: vi.fn(),
   getGuestProduct: vi.fn(),
 }));
@@ -54,7 +55,7 @@ vi.mock("../features/staff/recipeClient", () => ({
 
 import { App } from "./App";
 import { getCurrentAuthSession } from "../features/auth/authClient";
-import { getGuestMenu, getGuestProduct } from "../features/catalog/catalogClient";
+import { getGuestLocations, getGuestMenu, getGuestProduct } from "../features/catalog/catalogClient";
 import { getStaffContext, StaffContextError } from "../features/staff/staffClient";
 import {
   archiveIngredient,
@@ -126,6 +127,7 @@ describe("App", () => {
     vi.clearAllMocks();
     vi.stubGlobal("scrollTo", scrollToMock);
     vi.mocked(getCurrentAuthSession).mockResolvedValue(null);
+    vi.mocked(getGuestLocations).mockResolvedValue(catalogLocations);
     vi.mocked(getGuestMenu).mockResolvedValue(catalogMenu);
     vi.mocked(getGuestProduct).mockResolvedValue(catalogProduct);
     vi.mocked(getStaffContext).mockResolvedValue({
@@ -241,6 +243,7 @@ describe("App", () => {
     expect(await screen.findByRole("main", { name: "Guest shop" })).toBeVisible();
     expect(document.querySelector("img.brand-icon")).toHaveAttribute("src", "/app-icon-192.png");
     expect(screen.getByRole("heading", { level: 1, name: "Drinks made your way" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Pickup at Orchard Central" })).toBeVisible();
     expect(screen.getByRole("heading", { level: 2, name: "Moonlit Milk Tea" })).toBeVisible();
   });
 
@@ -665,7 +668,7 @@ describe("App", () => {
 
   it("keeps a configured guest drink through to the current order", async () => {
     render(
-      <MemoryRouter initialEntries={["/shop/drinks/moonlit-milk-tea"]}>
+      <MemoryRouter initialEntries={["/shop/orchard-central/drinks/moonlit-milk-tea"]}>
         <App />
       </MemoryRouter>,
     );

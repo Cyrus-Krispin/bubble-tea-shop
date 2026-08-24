@@ -130,16 +130,23 @@ export async function placeGuestOrder(
   input: CreateGuestOrderInput,
   idempotencyKey: string,
   accessToken?: string,
+  locationSlug?: string,
 ): Promise<GuestOrder> {
   const client = createClient<paths>({ baseUrl: window.location.origin });
-  const { data, error, response } = await client.POST("/api/v1/guest/orders", {
+  const request = {
     params: { header: { "Idempotency-Key": idempotencyKey } },
     headers:
       accessToken === undefined
         ? undefined
         : { Authorization: `Bearer ${accessToken}` },
     body: input,
-  });
+  } as const;
+  const { data, error, response } = locationSlug === undefined
+    ? await client.POST("/api/v1/guest/orders", request)
+    : await client.POST("/api/v1/guest/locations/{locationSlug}/orders", {
+      ...request,
+      params: { header: request.params.header, path: { locationSlug } },
+    });
   if (data === undefined) throw apiError(error, response.status);
   return order(data);
 }

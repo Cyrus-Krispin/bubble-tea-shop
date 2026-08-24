@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/guest")
@@ -33,6 +34,17 @@ public class GuestCatalogController {
     ) {
         this.catalog = catalog;
         this.properties = properties;
+    }
+
+    @GetMapping("/locations")
+    @Operation(operationId = "listGuestLocations", summary = "List active guest ordering locations")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Active guest ordering locations",
+        content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = GuestCatalogDto.Location.class)))
+    List<GuestCatalogDto.Location> locations() {
+        return catalog.listLocations(properties.guestLocationSlug());
     }
 
     @GetMapping("/menu")

@@ -73,6 +73,18 @@ describe("orderClient", () => {
     );
   });
 
+  it("submits an order through the selected location route", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(response), { status: 201 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await placeGuestOrder({ items: [] }, "key", undefined, "tiong-bahru");
+
+    expect((fetchMock.mock.calls[0]?.[0] as Request).url)
+      .toBe("http://localhost:3000/api/v1/guest/locations/tiong-bahru/orders");
+  });
+
   it("preserves stable order problem codes and status", async () => {
     vi.stubGlobal(
       "fetch",

@@ -55,6 +55,7 @@ function location(value: unknown): CatalogLocation {
     slug: string(input.slug),
     name: string(input.name),
     currency: string(input.currency),
+    imageKey: string(input.imageKey),
   };
 }
 
@@ -113,6 +114,13 @@ function menu(value: unknown): CatalogMenu {
   return { location: location(input.location), products: array(input.products, productSummary) };
 }
 
+export async function getGuestLocations(signal?: AbortSignal): Promise<CatalogLocation[]> {
+  const client = createClient<paths>({ baseUrl: window.location.origin });
+  const { data } = await client.GET("/api/v1/guest/locations", { signal });
+  if (data === undefined) throw new Error("locations could not be loaded");
+  return array(data, location);
+}
+
 function product(value: unknown): CatalogProduct {
   const input = object(value);
   return {
@@ -126,22 +134,33 @@ function product(value: unknown): CatalogProduct {
   };
 }
 
-export async function getGuestMenu(signal?: AbortSignal): Promise<CatalogMenu> {
+export async function getGuestMenu(
+  locationSlug?: string,
+  signal?: AbortSignal,
+): Promise<CatalogMenu> {
   const client = createClient<paths>({ baseUrl: window.location.origin });
-  const { data } = await client.GET("/api/v1/guest/menu", { signal });
+  const { data } = locationSlug === undefined
+    ? await client.GET("/api/v1/guest/menu", { signal })
+    : await client.GET("/api/v1/guest/locations/{locationSlug}/menu", {
+      params: { path: { locationSlug } }, signal,
+    });
   if (data === undefined) throw new Error("catalog could not be loaded");
   return menu(data);
 }
 
 export async function getGuestProduct(
   productSlug: string,
+  locationSlug?: string,
   signal?: AbortSignal,
 ): Promise<CatalogProduct> {
   const client = createClient<paths>({ baseUrl: window.location.origin });
-  const { data } = await client.GET("/api/v1/guest/menu/products/{productSlug}", {
-    params: { path: { productSlug } },
-    signal,
-  });
+  const { data } = locationSlug === undefined
+    ? await client.GET("/api/v1/guest/menu/products/{productSlug}", {
+      params: { path: { productSlug } }, signal,
+    })
+    : await client.GET("/api/v1/guest/locations/{locationSlug}/menu/products/{productSlug}", {
+      params: { path: { locationSlug, productSlug } }, signal,
+    });
   if (data === undefined) throw new Error("catalog could not be loaded");
   return product(data);
 }

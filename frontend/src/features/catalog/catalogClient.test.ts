@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { catalogMenu, catalogProduct } from "../../test/catalogFixtures";
-import { getGuestMenu, getGuestProduct } from "./catalogClient";
+import { catalogLocations, catalogMenu, catalogProduct } from "../../test/catalogFixtures";
+import { getGuestLocations, getGuestMenu, getGuestProduct } from "./catalogClient";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -14,6 +14,18 @@ describe("catalogClient", () => {
     const request = fetchMock.mock.calls[0]?.[0];
     expect(request).toBeInstanceOf(Request);
     expect((request as Request).url).toBe("http://localhost:3000/api/v1/guest/menu");
+  });
+
+  it("loads public locations and a selected location menu from Spring", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(catalogLocations), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(catalogMenu), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getGuestLocations()).resolves.toEqual(catalogLocations);
+    await expect(getGuestMenu("tiong-bahru")).resolves.toEqual(catalogMenu);
+    expect((fetchMock.mock.calls[1]?.[0] as Request).url)
+      .toBe("http://localhost:3000/api/v1/guest/locations/tiong-bahru/menu");
   });
 
   it("encodes product slugs and validates the response", async () => {

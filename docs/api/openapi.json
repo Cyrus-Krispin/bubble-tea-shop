@@ -2785,6 +2785,70 @@
         }
       }
     },
+    "/api/v1/guest/locations/{locationSlug}/orders" : {
+      "post" : {
+        "tags" : [ "Guest ordering" ],
+        "summary" : "Place an order at a public location",
+        "operationId" : "placeGuestLocationOrder",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGuestOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Existing order replayed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GuestOrder"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Order placed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GuestOrder"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "503" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        }
+      }
+    },
     "/api/v1/customer/account" : {
       "post" : {
         "tags" : [ "Customer account" ],
@@ -3235,6 +3299,35 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/locations" : {
+      "get" : {
+        "tags" : [ "Guest catalog" ],
+        "summary" : "List active guest ordering locations",
+        "operationId" : "listGuestLocations",
+        "responses" : {
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Active guest ordering locations",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Location"
                 }
               }
             }
@@ -5219,6 +5312,9 @@
             "type" : "string"
           },
           "currency" : {
+            "type" : "string"
+          },
+          "imageKey" : {
             "type" : "string"
           }
         }

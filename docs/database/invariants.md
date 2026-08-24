@@ -27,7 +27,7 @@
   same transaction. Retrying an already-completed archive is an idempotent no-op.
 - A non-null location public slug resolves globally to one location; product public slugs are
   unique inside their organization.
-- Public slugs and artwork keys use lowercase kebab case. Each product has at most one active
+- Public slugs, product artwork keys, and location image keys use lowercase kebab case. Each product has at most one active
   default variant, and each option group has at most one active default choice.
 - Component quantities are strictly positive and use the ingredient's base unit.
 - Components of a published or retired recipe version cannot be inserted, changed, or deleted.
@@ -78,7 +78,8 @@
   and idempotent replays.
 - Placement keys are unique per location; matching retries return the existing order, while a
   different normalized request or customer identity cannot reuse the key.
-- The configured active location, catalog availability, published recipe, price, currency, cash
+- The requested active location (or configured default on the compatibility route), catalog
+  availability, published recipe, price, currency, cash
   payment, totals, and optional verified customer account are resolved by Spring, never trusted
   from checkout input.
 - A pending order does not reserve stock.
@@ -120,3 +121,5 @@
   timelines for catalog and order status events.
 - V12 stores verified account emails, adds manager membership optimistic versions, and adds the
   immutable staff-access change ledger used by owner management.
+- V13 adds location image keys and seeds Tiong Bahru, three published recipes and products, and
+  location-specific offerings without changing earlier migrations.

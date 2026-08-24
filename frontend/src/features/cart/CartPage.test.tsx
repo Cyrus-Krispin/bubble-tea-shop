@@ -41,6 +41,7 @@ function SeedControl() {
   const { addItem } = useCart();
   return (
     <button onClick={() => addItem({
+      locationSlug: "orchard-central",
       drinkId: "moonlit-milk-tea",
       drinkName: "Moonlit Milk Tea",
       configuration: {
@@ -108,7 +109,7 @@ describe("CartPage", () => {
         quantity: 1,
         optionChoiceIds: ["sweet-50", "less-ice", "pearls"],
       }],
-    }, expect.any(String), undefined));
+    }, expect.any(String), undefined, "orchard-central"));
     expect(await screen.findByRole("heading", { name: "Pickup BT0000000001" })).toBeVisible();
     expect(screen.getByText("Confirmed total").nextSibling).toHaveTextContent("$7.20");
     expect(screen.queryByRole("heading", { name: "Moonlit Milk Tea" })).not.toBeInTheDocument();

@@ -541,6 +541,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/guest/locations/{locationSlug}/orders": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Place an order at a public location */
+        readonly post: operations["placeGuestLocationOrder"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/customer/account": {
         readonly parameters: {
             readonly query?: never;
@@ -669,6 +686,23 @@ export interface paths {
         };
         /** Load a product from the configured guest menu */
         readonly get: operations["getCurrentGuestProduct"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/guest/locations": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List active guest ordering locations */
+        readonly get: operations["listGuestLocations"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -1439,6 +1473,7 @@ export interface components {
             readonly slug: string;
             readonly name: string;
             readonly currency: string;
+            readonly imageKey: string;
         };
         readonly Menu: {
             readonly location: components["schemas"]["Location"];
@@ -2947,6 +2982,46 @@ export interface operations {
             readonly 503: components["responses"]["Problem"];
         };
     };
+    readonly placeGuestLocationOrder: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly "Idempotency-Key": string;
+            };
+            readonly path: {
+                readonly locationSlug: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateGuestOrderRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Existing order replayed */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["GuestOrder"];
+                };
+            };
+            /** @description Order placed */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["GuestOrder"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+            readonly 503: components["responses"]["Problem"];
+        };
+    };
     readonly provisionCustomerAccount: {
         readonly parameters: {
             readonly query?: never;
@@ -3202,6 +3277,35 @@ export interface operations {
                 };
             };
             /** @description Catalog product unavailable */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    readonly listGuestLocations: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Active guest ordering locations */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["Location"];
+                };
+            };
+            /** @description Not Found */
             readonly 404: {
                 headers: {
                     readonly [name: string]: unknown;

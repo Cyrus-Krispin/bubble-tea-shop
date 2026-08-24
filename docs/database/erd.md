@@ -23,6 +23,8 @@ V11 makes catalog change rows database-enforced immutable and adds deterministic
 timeline indexes for catalog and order-status audit reads; it introduces no new relationships.
 V12 persists verified account emails, versions manager memberships, and adds the immutable
 staff-access change ledger.
+V13 adds location presentation metadata and seeds a second shop plus three published drinks and
+their location-specific offerings; it introduces no new entity relationships.
 
 ## Identity
 

@@ -42,8 +42,9 @@ The frontend is one React/TypeScript/Vite SPA:
 - `app` owns routing and providers.
 - `features` groups screens and behavior by backend domain.
 - `components/ui` owns tokens and accessible Radix-based components.
-- Guest catalog pages load server-owned values from Spring; TanStack Query remains planned for
-  broader server-state caching.
+- Guest catalog pages discover active locations, location-specific offerings, and prices from
+  Spring. The cart remains bound to one location; TanStack Query remains planned for broader
+  server-state caching.
 - The API client is generated from Spring's OpenAPI document.
 
 ## Runtime configuration

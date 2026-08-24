@@ -144,6 +144,7 @@ Checks: `name` must not be blank.
 | `id` | `uuid` | NN | `gen_random_uuid()` | PK; UQ with `organization_id` |
 | `organization_id` | `uuid` | NN | — | FK → `organization.id`; UQ with `id` |
 | `public_slug` | `varchar(120)` | Nullable | — | Global partial UQ when present |
+| `image_key` | `varchar(40)` | Nullable | — | — |
 | `name` | `varchar(160)` | NN | — | UQ with `organization_id` |
 | `timezone` | `varchar(64)` | NN | — | — |
 | `default_locale` | `varchar(16)` | NN | `'en-SG'` | — |
@@ -153,7 +154,8 @@ Checks: `name` must not be blank.
 | `updated_at` | `timestamptz` | NN | `now()` | — |
 
 Unique: `(id, organization_id)`, `(organization_id, name)`, and non-null `public_slug`. Checks:
-non-blank name, lowercase kebab-case public slug, and three-letter uppercase currency code.
+non-blank name, lowercase kebab-case public slug and image key, and three-letter uppercase currency
+code.
 
 ### `account`
 

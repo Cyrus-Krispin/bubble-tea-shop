@@ -95,15 +95,20 @@ is rejected by the security filter. A missing or non-UUID token subject returns 
 
 These read-only endpoints are public so a guest can browse without a Supabase session:
 
+- `GET /api/v1/guest/locations` returns the ordered active shop choices and their photographic
+  image keys.
 - `GET /api/v1/guest/menu` and `GET /api/v1/guest/menu/products/{productSlug}` resolve the
-  deployment-configured MVP guest location and are the frontend's current endpoints.
+  deployment-configured default guest location for backward compatibility.
 - `GET /api/v1/guest/locations/{locationSlug}/menu` returns the active location and ordered product
   summaries with database-owned availability and starting prices.
 - `GET /api/v1/guest/locations/{locationSlug}/menu/products/{productSlug}` returns available size
   variants, exact variant prices, and enabled option groups and choices.
+- `POST /api/v1/guest/locations/{locationSlug}/orders` places an order against that active shop's
+  offerings. `POST /api/v1/guest/orders` retains the default-location behavior.
 
-`GUEST_LOCATION_SLUG` configures the current MVP location on the server; the frontend does not own
-or duplicate that domain value. The menu is a bounded singleton resource for one location, so it is not paginated. Unknown or
+`GUEST_LOCATION_SLUG` configures the default location on the server; the frontend discovers all
+choices through the location endpoint instead of owning or duplicating domain values. Each
+location menu is a bounded resource and is not paginated. Unknown or
 inactive locations and products return `404` problem details with `CATALOG_NOT_FOUND` or
 `CATALOG_PRODUCT_NOT_FOUND`. All other `/api/**` routes keep their configured authentication or
 deny-by-default rule.

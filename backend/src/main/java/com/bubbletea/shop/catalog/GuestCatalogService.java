@@ -19,6 +19,18 @@ public class GuestCatalogService {
     }
 
     @Transactional(readOnly = true)
+    public List<GuestCatalogDto.Location> listLocations(String defaultLocationSlug) {
+        return jdbc.query("""
+                SELECT id, organization_id, public_slug, name, currency_code, image_key
+                  FROM location
+                 WHERE active
+                   AND public_slug IS NOT NULL
+                   AND image_key IS NOT NULL
+                 ORDER BY CASE WHEN public_slug = ? THEN 0 ELSE 1 END, name
+                """, (rs, rowNum) -> mapLocation(rs).toDto(), defaultLocationSlug);
+    }
+
+    @Transactional(readOnly = true)
     public GuestCatalogDto.Menu loadMenu(String locationSlug) {
         LocationRecord location = findLocation(locationSlug);
         List<GuestCatalogDto.ProductSummary> products = jdbc.query("""
@@ -161,23 +173,28 @@ public class GuestCatalogService {
 
     private LocationRecord findLocation(String locationSlug) {
         return jdbc.query("""
-                SELECT id, organization_id, public_slug, name, currency_code
+                SELECT id, organization_id, public_slug, name, currency_code, image_key
                   FROM location
                  WHERE public_slug = ?
                    AND active
                 """,
-                (rs, rowNum) -> new LocationRecord(
-                    rs.getObject("id", UUID.class),
-                    rs.getObject("organization_id", UUID.class),
-                    rs.getString("public_slug"),
-                    rs.getString("name"),
-                    rs.getString("currency_code")),
+                (rs, rowNum) -> mapLocation(rs),
                 locationSlug)
             .stream()
             .findFirst()
             .orElseThrow(() -> new GuestCatalogNotFoundException(
                 "CATALOG_NOT_FOUND",
                 "The requested shop menu was not found."));
+    }
+
+    private LocationRecord mapLocation(java.sql.ResultSet rs) throws java.sql.SQLException {
+        return new LocationRecord(
+            rs.getObject("id", UUID.class),
+            rs.getObject("organization_id", UUID.class),
+            rs.getString("public_slug"),
+            rs.getString("name"),
+            rs.getString("currency_code"),
+            rs.getString("image_key"));
     }
 
     private Map<UUID, LinkedHashMap<UUID, OptionGroupBuilder>> loadOptionGroups(
@@ -249,10 +266,11 @@ public class GuestCatalogService {
         UUID organizationId,
         String slug,
         String name,
-        String currency
+        String currency,
+        String imageKey
     ) {
         GuestCatalogDto.Location toDto() {
-            return new GuestCatalogDto.Location(id, slug, name, currency);
+            return new GuestCatalogDto.Location(id, slug, name, currency, imageKey);
         }
     }
 

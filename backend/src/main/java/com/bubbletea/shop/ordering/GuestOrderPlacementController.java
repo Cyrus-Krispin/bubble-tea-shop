@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +37,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/guest/orders")
+@RequestMapping("/api/v1/guest")
 @Tag(name = "Guest ordering")
 public class GuestOrderPlacementController {
     private final GuestOrderPlacementService placement;
@@ -45,7 +46,7 @@ public class GuestOrderPlacementController {
         this.placement = placement;
     }
 
-    @PostMapping
+    @PostMapping("/orders")
     @Operation(operationId = "placeGuestOrder", summary = "Place an idempotent pending cash order")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Existing order replayed",
@@ -65,20 +66,56 @@ public class GuestOrderPlacementController {
         @AuthenticationPrincipal Jwt jwt,
         @Valid @RequestBody CreateOrderRequest request
     ) {
-        UUID authSubject = null;
-        if (jwt != null) {
-            try {
-                authSubject = UUID.fromString(jwt.getSubject());
-            } catch (IllegalArgumentException | NullPointerException exception) {
-                throw new InvalidGuestOrderException();
-            }
-        }
-        GuestOrderPlacementService.PlacedOrder result = placement.place(
+        return response(placement.place(
             idempotencyKey,
-            authSubject,
-            request.items().stream().map(item -> new GuestOrderPlacementService.CreateLine(
-                item.variantId(), item.quantity(), item.optionChoiceIds())).toList());
+            authSubject(jwt),
+            createLines(request)));
+    }
+
+    @PostMapping("/locations/{locationSlug}/orders")
+    @Operation(operationId = "placeGuestLocationOrder", summary = "Place an order at a public location")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Existing order replayed",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = GuestOrderPlacementService.PlacedOrder.class))),
+        @ApiResponse(responseCode = "201", description = "Order placed",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = GuestOrderPlacementService.PlacedOrder.class))),
+        @ApiResponse(responseCode = "400", ref = "#/components/responses/Problem"),
+        @ApiResponse(responseCode = "409", ref = "#/components/responses/Problem"),
+        @ApiResponse(responseCode = "503", ref = "#/components/responses/Problem")
+    })
+    ResponseEntity<GuestOrderPlacementService.PlacedOrder> placeAtLocation(
+        @PathVariable String locationSlug,
+        @RequestHeader("Idempotency-Key") UUID idempotencyKey,
+        @AuthenticationPrincipal Jwt jwt,
+        @Valid @RequestBody CreateOrderRequest request
+    ) {
+        return response(placement.place(
+            locationSlug,
+            idempotencyKey,
+            authSubject(jwt),
+            createLines(request)));
+    }
+
+    private ResponseEntity<GuestOrderPlacementService.PlacedOrder> response(
+        GuestOrderPlacementService.PlacedOrder result
+    ) {
         return ResponseEntity.status(result.replayed() ? HttpStatus.OK : HttpStatus.CREATED).body(result);
+    }
+
+    private UUID authSubject(Jwt jwt) {
+        if (jwt == null) return null;
+        try {
+            return UUID.fromString(jwt.getSubject());
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw new InvalidGuestOrderException();
+        }
+    }
+
+    private List<GuestOrderPlacementService.CreateLine> createLines(CreateOrderRequest request) {
+        return request.items().stream().map(item -> new GuestOrderPlacementService.CreateLine(
+            item.variantId(), item.quantity(), item.optionChoiceIds())).toList();
     }
 
     @Schema(name = "CreateGuestOrderRequest")
