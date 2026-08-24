@@ -34,6 +34,21 @@ services:
       retries: 12
       start_period: 60s
 
+  meta:
+    image: supabase/postgres-meta:v0.96.6
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD:-local-supabase-postgres}
+      CRYPTO_KEY: ${PG_META_CRYPTO_KEY:?Run the local Auth key generator before starting Compose.}
+
   auth:
     image: supabase/gotrue:v2.189.0
     restart: unless-stopped
@@ -88,6 +103,47 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  studio:
+    image: supabase/studio:2026.08.03-sha-022b374
+    restart: unless-stopped
+    depends_on:
+      meta:
+        condition: service_started
+      kong:
+        condition: service_healthy
+    environment:
+      HOSTNAME: 0.0.0.0
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-supabase-postgres}
+      POSTGRES_USER_READ_WRITE: postgres
+      PG_META_CRYPTO_KEY: ${PG_META_CRYPTO_KEY:?Run the local Auth key generator before starting Compose.}
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_MAX_ROWS: 1000
+      PGRST_DB_EXTRA_SEARCH_PATH: public
+      DEFAULT_ORGANIZATION_NAME: Bubble Tea Shop
+      DEFAULT_PROJECT_NAME: Local Development
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: http://localhost:${KONG_PORT:-8000}
+      SUPABASE_ANON_KEY: ${ANON_KEY:?Run the local Auth key generator before starting Compose.}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY:?Run the local Auth key generator before starting Compose.}
+      AUTH_JWT_SECRET: ${JWT_SECRET:?Run the local Auth key generator before starting Compose.}
+      ENABLED_FEATURES_LOGS_ALL: "false"
+    ports:
+      - "127.0.0.1:${STUDIO_PORT:-54323}:3000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://localhost:3000/api/platform/profile').then((response) => { if (!response.ok) throw new Error(response.status) })\"",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 6
+      start_period: 20s
 
   backend:
     build:
