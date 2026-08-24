@@ -639,6 +639,7 @@ Primary keys and unique constraints create their own indexes. The migration also
 | `idx_inventory_movement_history` | `inventory_movement` | `(location_id, ingredient_id, created_at DESC)` | Movement history. |
 | `idx_inventory_movement_location_type_time` | `inventory_movement` | `(location_id, movement_type, created_at DESC, id DESC)` | Deterministic location/type history pagination. |
 | `idx_customer_order_status_time` | `customer_order` | `(location_id, status, created_at DESC)` | Order queue and history. |
+| `idx_customer_order_customer_time` | `customer_order` | `(customer_account_id, created_at DESC, id DESC) WHERE customer_account_id IS NOT NULL` | Deterministic account-owned order history. |
 | `idx_order_item_order` | `order_item` | `(customer_order_id)` | Load order lines. |
 | `idx_order_history_order_time` | `order_status_history` | `(customer_order_id, changed_at)` | Load order transitions. |
 | `idx_order_status_history_timeline` | `order_status_history` | `(organization_id, changed_at DESC, id DESC)` | Deterministic organization audit pagination. |

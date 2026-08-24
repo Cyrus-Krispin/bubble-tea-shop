@@ -146,8 +146,17 @@ describe("OrderOperationsPage", () => {
       { page: 0, size: 25, status: "PENDING" },
       expect.any(AbortSignal),
     );
-    fireEvent.click(screen.getByRole("button", { name: "View BT0000000001" }));
+    const viewButton = screen.getByRole("button", { name: "View BT0000000001" });
+    expect(viewButton).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(viewButton);
     expect(await screen.findByText(/Moonlit Milk Tea/)).toBeInTheDocument();
+    expect(viewButton).toHaveAttribute("aria-expanded", "true");
+    const detailRegion = screen.getByRole("region", {
+      name: "Order BT0000000001 details",
+    });
+    expect(detailRegion.closest("tr")?.previousElementSibling).toContainElement(
+      viewButton,
+    );
     await expectNoAccessibilityViolations(container);
     expect(screen.getByText("2.500000 g needed")).toBeInTheDocument();
     expect(getStaffOrder).toHaveBeenCalledWith(
@@ -157,6 +166,11 @@ describe("OrderOperationsPage", () => {
       orderId,
       expect.any(AbortSignal),
     );
+
+    fireEvent.click(screen.getByRole("button", { name: "Hide BT0000000001" }));
+    expect(
+      screen.queryByRole("region", { name: "Order BT0000000001 details" }),
+    ).not.toBeInTheDocument();
   });
 
   it("confirms cash completion once and renders the paid server response", async () => {

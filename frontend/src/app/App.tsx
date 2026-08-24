@@ -9,6 +9,7 @@ import { CartPage } from "../features/cart/CartPage";
 import { CartProvider } from "../features/cart/CartProvider";
 import { DrinkPage } from "../features/catalog/DrinkPage";
 import { ShopPage } from "../features/catalog/ShopPage";
+import { CustomerOrderDetailPage } from "../features/orders/CustomerOrderDetailPage";
 import { StaffWorkspacePage } from "../features/staff/StaffWorkspacePage";
 import { StaffLayout } from "../features/staff/StaffLayout";
 import { NotFoundPage } from "./NotFoundPage";
@@ -61,6 +62,7 @@ export function App() {
           <Route path="/shop/:locationSlug/drinks/:drinkId" element={<DrinkPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/account" element={<CustomerAccountPage />} />
+          <Route path="/account/orders/:orderId" element={<CustomerOrderDetailPage />} />
           <Route path="/account/access" element={<AccountAccessPage />} />
           <Route path="/account/create" element={<LegacyAccountAccessRedirect mode="create" />} />
           <Route path="/account/sign-in" element={<LegacyAccountAccessRedirect mode="sign-in" />} />

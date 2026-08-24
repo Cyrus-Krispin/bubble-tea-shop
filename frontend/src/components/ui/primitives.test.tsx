@@ -53,6 +53,31 @@ describe("interface primitives", () => {
     expect(screen.getByText("No ingredients yet.")).toHaveAttribute("colspan", "2");
   });
 
+  it("renders an expanded row directly after its parent row", () => {
+    render(
+      <DataTable
+        caption="Orders"
+        columns={[{ key: "name", header: "Name" }, { key: "total", header: "Total" }]}
+        emptyMessage="No orders yet."
+        expandedRowKey="tea"
+        getRowKey={(row) => row.id}
+        renderExpandedRow={(row) => (
+          <section aria-label={`${row.name} details`}>Order details</section>
+        )}
+        rows={[
+          { id: "tea", name: "Milk tea", total: "$6.60" },
+          { id: "coffee", name: "Coffee", total: "$5.00" },
+        ]}
+      />,
+    );
+
+    const details = screen.getByRole("region", { name: "Milk tea details" });
+    const expandedRow = details.closest("tr");
+    expect(expandedRow?.previousElementSibling).toHaveTextContent("Milk tea");
+    expect(details.closest("td")).toHaveAttribute("colspan", "2");
+    expect(screen.queryByRole("region", { name: "Coffee details" })).not.toBeInTheDocument();
+  });
+
   it("opens a labelled modal dialog and returns control to its trigger", async () => {
     const { container } = render(
       <Dialog

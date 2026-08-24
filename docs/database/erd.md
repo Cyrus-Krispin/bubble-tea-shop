@@ -25,6 +25,8 @@ V12 persists verified account emails, versions manager memberships, and adds the
 staff-access change ledger.
 V13 adds location presentation metadata and seeds a second shop plus three published drinks and
 their location-specific offerings; it introduces no new entity relationships.
+V14 indexes the existing optional account-to-order relationship for deterministic customer-history
+reads; it introduces no new entity relationship.
 
 ## Identity
 

@@ -1,22 +1,29 @@
 # Implementation Plan: Production-Ready MVP
 
-## Active increment: Complete product UI redesign
+## Completed increment: Selectable order-again rail
 
-Replace the current customer and staff interface—not merely its styling—with the market-researched
-Ube and Calamansi experience documented in `frontend/docs/visual-style-guide.md`. Preserve existing API
-contracts and domain behavior while changing route hierarchy, customer navigation, authentication
-entry, storefront presentation, cart/confirmation, and the staff application shell.
+Refine the latest-order highlight into a compact quick-add surface:
 
-Implementation order:
+1. Present saved drinks as an artwork-backed horizontal row with native selection controls and no
+   repeated receipt totals, shop metadata, or welcome copy.
+2. Select every eligible line by default, let the customer choose a subset, and add that subset to
+   the cart atomically with a quantity-and-price CTA.
+3. Verify selected configuration fidelity, cart conflicts, accessibility, desktop alignment,
+   mobile horizontal scrolling, and the production Compose flow before updating PR #26.
 
-1. Lock the new route and authentication behavior with focused tests.
-2. Replace the global tokens and shared customer shell, then make the menu the home page.
-3. Replace menu, customization, cart, confirmation, account, and access layouts.
-4. Replace the staff header with a responsive operational rail and retheme all staff primitives.
-5. Add responsive/accessibility coverage and verify representative customer and staff flows in a
-   real browser.
+## Completed increment: Actionable order-again suggestion
 
-No backend, database, or generated OpenAPI contract changes are planned for this increment.
+Extend the contract in `docs/product/customer-order-history.md` as three connected vertical slices:
+
+1. Resolve the newest order into an exact same-shop configuration using current catalog, pricing,
+   recipe, and inventory data; return no suggestion unless every line is fulfillable.
+2. Restore the suggestion lines to the cart atomically and present their actual variants,
+   selections, quantities, and current prices in the storefront highlight.
+3. Differentiate the two seeded location menus, verify database/API/frontend behavior, and update
+   the existing customer-order-history pull request.
+
+The browser never supplies an account identifier, price, or availability decision. Receipts keep
+immutable snapshots while reorder eligibility is derived from current server-owned state.
 
 ## Overview
 
@@ -141,7 +148,7 @@ Customer identity mapping
 ## Explicitly Deferred
 
 - Card providers, refunds, tax, promotions, discounts, favorites, extended profiles, and customer
-  cancellation/history UI.
+  cancellation.
 - Forecasting, supplier ordering, expiry/FIFO lots, cash-flow dashboards, and detailed cost
   accounting.
 - Multiple active currencies/locales/locations and opt-in face authentication.

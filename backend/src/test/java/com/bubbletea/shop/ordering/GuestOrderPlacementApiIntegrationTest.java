@@ -143,6 +143,10 @@ class GuestOrderPlacementApiIntegrationTest {
         jdbc.update("""
             INSERT INTO inventory_balance (organization_id, location_id, ingredient_id, quantity)
             VALUES (?, ?, ?, 100), (?, ?, ?, 1000), (?, ?, ?, 500)
+            ON CONFLICT (location_id, ingredient_id) DO UPDATE
+                SET quantity = EXCLUDED.quantity,
+                    organization_id = EXCLUDED.organization_id,
+                    updated_at = now()
             """, ORGANIZATION, LOCATION, blackTea,
             ORGANIZATION, LOCATION, freshMilk,
             ORGANIZATION, LOCATION, pearls);

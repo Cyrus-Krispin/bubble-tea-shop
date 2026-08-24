@@ -46,7 +46,7 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
   await page.getByRole("link", { name: /Tiong Bahru/ }).click();
   await expect(page).toHaveURL(/\/shop\/tiong-bahru$/);
   await expect(page.getByRole("button", { name: "Pickup at Tiong Bahru" })).toBeVisible();
-  await expect(page.locator(".product-card")).toHaveCount(7);
+  await expect(page.locator(".product-card")).toHaveCount(5);
   const photos = page.locator(".drink-art");
   for (let index = 0; index < await photos.count(); index += 1) {
     const photo = photos.nth(index);
@@ -74,6 +74,87 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
   await expect(page.getByRole("heading", { name: /Pickup BT\d+/ })).toBeVisible();
   await expectProductionQuality(page);
 
+  expect(apiFailures).toEqual([]);
+  expect(consoleProblems).toEqual([]);
+});
+
+test("customer sees an account-linked order across the personalized storefront and history", async ({
+  page,
+}, testInfo) => {
+  const consoleProblems: string[] = [];
+  const apiFailures: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error" || message.type() === "warning") {
+      consoleProblems.push(`${message.type()}: ${message.text()}`);
+    }
+  });
+  page.on("response", (response) => {
+    if (response.url().includes("/api/") && response.status() >= 400) {
+      apiFailures.push(`${response.status()} ${response.request().method()} ${response.url()}`);
+    }
+  });
+
+  const email = `history-${testInfo.project.name}-${Date.now()}@example.test`;
+  const password = "local-history-test-password";
+  await page.goto("/account/access?mode=create");
+  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByLabel("Confirm password").fill(password);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByRole("heading", { name: "Your account" })).toBeVisible();
+  await expect(page.getByText(email)).toBeVisible();
+  await expect(page.getByText("No orders yet")).toBeVisible();
+  await expectProductionQuality(page);
+
+  await page.getByRole("link", { name: "Menu", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Drinks made your way" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Order again" })).toHaveCount(0);
+  await page.getByRole("link", { name: /Customize / }).first().click();
+  await page.getByRole("button", { name: /Add to order/ }).click();
+  await page.getByRole("link", { name: "Menu", exact: true }).click();
+  await page.getByRole("link", { name: /Customize / }).nth(1).click();
+  await page.getByRole("button", { name: /Add to order/ }).click();
+  await page.getByRole("link", { name: "View order" }).click();
+  await page.getByRole("button", { name: /Place order ·/ }).click();
+  const confirmation = page.getByRole("heading", { name: /Pickup BT\d+/ });
+  await expect(confirmation).toBeVisible();
+  const publicOrderNumber = (await confirmation.textContent())?.replace("Pickup ", "") ?? "";
+
+  await page.getByRole("link", { name: "Start another order" }).click();
+  await expect(page.getByRole("heading", { name: "Order again" })).toBeVisible();
+  const reorderCards = page.locator(".last-order-item");
+  await expect(reorderCards).toHaveCount(2);
+  const firstCard = await reorderCards.nth(0).boundingBox();
+  const secondCard = await reorderCards.nth(1).boundingBox();
+  expect(Math.abs((firstCard?.y ?? 0) - (secondCard?.y ?? 0))).toBeLessThan(2);
+  const reorderArtwork = await reorderCards.nth(0).locator(".drink-art").boundingBox();
+  const reorderRatio = (reorderArtwork?.width ?? 0) / (reorderArtwork?.height ?? 1);
+  expect(Math.abs(reorderRatio - (4 / 3))).toBeLessThan(0.02);
+  if (testInfo.project.name === "mobile-chromium") {
+    await expect.poll(() => page.locator(".last-order__items").evaluate(
+      (rail) => rail.scrollWidth > rail.clientWidth,
+    )).toBe(true);
+  }
+  await page.getByRole("checkbox", { name: /Select 1 Moonlit Milk Tea/ }).uncheck();
+  await page.getByRole("button", { name: /Add 1 drink ·/ }).click();
+  await expect(page.getByText("Added 1 drink to your order.")).toBeVisible();
+  await expectProductionQuality(page);
+
+  await page.getByRole("link", { name: "Order 1 item" }).click();
+  await expect(page.getByRole("heading", { name: "Your current order" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sunberry Oolong" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Moonlit Milk Tea" })).toHaveCount(0);
+  await page.getByRole("link", { name: "Account" }).click();
+  await expect(page.getByRole("heading", { name: "Order history" })).toBeVisible();
+  const receiptLink = page.getByRole("link", { name: `View order ${publicOrderNumber}` });
+  await expect(receiptLink).toBeVisible();
+  await receiptLink.click();
+  await expect(page.getByRole("heading", { name: `Order ${publicOrderNumber}` })).toBeVisible();
+  await expect(page.getByText("This receipt preserves the names and prices from when you ordered.")).toBeVisible();
+  await expectProductionQuality(page);
+
+  await page.getByRole("link", { name: "Back to order history" }).click();
+  await expect(page.getByRole("heading", { name: "Order history" })).toBeVisible();
   expect(apiFailures).toEqual([]);
   expect(consoleProblems).toEqual([]);
 });

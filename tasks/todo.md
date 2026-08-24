@@ -1,18 +1,43 @@
 # Production-Ready MVP Tasks
 
-## Active increment — Complete product UI redesign
+## Completed increment — Selectable order-again rail
 
-- [x] Make the API-backed menu the home page and add a useful not-found recovery surface.
-- [x] Consolidate customer sign-in and registration into one compact access route with safe return
-  navigation and compatibility redirects.
-- [x] Replace customer navigation, menu, customization, cart, confirmation, and account layouts with
-  the Ube and Calamansi product system.
-- [x] Replace the staff top header with a responsive operational rail and cohesive module navigation.
-- [x] Retheme forms, tables, dialogs, loading, empty, error, denied, and status states across staff
-  workflows without changing their behavior.
-- [x] Add route, auth-mode, password-visibility, mobile-navigation, and accessibility tests.
-- [x] Run frontend unit, type, lint, build, E2E, and real-browser desktop/mobile verification.
-- [x] Complete adversarial design/code review, address findings, commit, and push.
+- [x] Replace the receipt-style summary with a responsive horizontal row of artwork-backed saved
+  drink cards.
+- [x] Select saved lines by default and support accessible subset selection with a dynamic
+  quantity-and-price action.
+- [x] Prove selected configuration fidelity, disabled empty selection, and atomic conflict behavior
+  through component tests.
+- [x] Cover two-item selective quick-add and desktop/mobile row behavior in the Compose browser flow.
+- [x] Complete final review, commit, push, refresh the local UI, and update PR #26.
+
+## Completed increment — Actionable order-again suggestion
+
+- [x] Add current catalog, configuration, price, and inventory eligibility tests for the newest
+  owned order at the selected shop.
+- [x] Publish and validate the latest-reorder API contract, including no-content ineligible cases.
+- [x] Add atomic multi-line cart restoration and storefront item/selection presentation tests.
+- [x] Differentiate the seeded Orchard Central and Tiong Bahru menus with an additive migration and
+  verify both catalog responses.
+- [x] Run full backend/frontend/browser verification, review, commit, push, and update PR #26.
+
+## Completed foundation — Customer order history and last-order suggestion
+
+- [x] Specify the customer-owned history, immutable receipt, pagination, storefront placement, and
+  explicit reorder boundary.
+- [x] Add the customer-history index and ownership-scoped list/detail API using test-first backend
+  integration slices.
+- [x] Generate and review OpenAPI plus immutable frontend types; update database, API, security,
+  product, and roadmap documentation.
+- [x] Add a runtime-validating customer-order client with focused request, response, and error tests.
+- [x] Add signed-in account history and receipt pages with loading, empty, error, pagination, and
+  accessibility coverage.
+- [x] Add a non-blocking `Order again` storefront section that is hidden for guests and empty
+  histories, with focused tests.
+- [x] Verify account-linked checkout through storefront suggestion, history, and receipt in desktop
+  and mobile browsers; confirm clean console/network output and accessibility.
+- [x] Run all backend/frontend/contract/security checks, complete the five-axis review, update the
+  checklist, commit, and push.
 
 Each task is a small verified increment. Behavioral work follows RED-GREEN-REFACTOR, then the
 relevant full suite, focused commit, and push.

@@ -44,10 +44,11 @@ Guests choose an active shop before browsing its database-owned menu and pricing
    snapshots at the selected active location.
 7. Move a pending order to completed. Completion deducts its consumption snapshot atomically.
 8. View current inventory balances and historical movements.
+9. View private account-linked order history and immutable receipts after signing in.
 
 ## Deferred
 
-- Extended customer profiles, favorites, discounts, order history UI, and customer cancellation.
+- Extended customer profiles, favorites, discounts, and customer cancellation.
 - Card payment providers, refunds, taxation, and promotions.
 - Consumption forecasting, projected low-stock alerts, and supplier ordering.
 - Cash-flow dashboards, purchase orders, and detailed cost-of-goods accounting.

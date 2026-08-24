@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 export type DataTableColumn<Row> = {
   align?: "end" | "start";
@@ -11,7 +11,9 @@ type DataTableProps<Row> = {
   caption: string;
   columns: readonly DataTableColumn<Row>[];
   emptyMessage: string;
+  expandedRowKey?: string;
   getRowKey: (row: Row) => string;
+  renderExpandedRow?: (row: Row) => ReactNode;
   rows: readonly Row[];
 };
 
@@ -24,7 +26,9 @@ export function DataTable<Row>({
   caption,
   columns,
   emptyMessage,
+  expandedRowKey,
   getRowKey,
+  renderExpandedRow,
   rows,
 }: DataTableProps<Row>) {
   return (
@@ -43,15 +47,26 @@ export function DataTable<Row>({
         <tbody>
           {rows.length === 0 ? (
             <tr><td className="ui-table__empty" colSpan={columns.length}>{emptyMessage}</td></tr>
-          ) : rows.map((row) => (
-            <tr key={getRowKey(row)}>
-              {columns.map((column) => (
-                <td className={column.align === "end" ? "ui-table__end" : undefined} key={column.key}>
-                  {column.cell === undefined ? defaultCell(row, column.key) : column.cell(row)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          ) : rows.map((row) => {
+            const rowKey = getRowKey(row);
+            const isExpanded = rowKey === expandedRowKey && renderExpandedRow !== undefined;
+            return (
+              <Fragment key={rowKey}>
+                <tr>
+                  {columns.map((column) => (
+                    <td className={column.align === "end" ? "ui-table__end" : undefined} key={column.key}>
+                      {column.cell === undefined ? defaultCell(row, column.key) : column.cell(row)}
+                    </td>
+                  ))}
+                </tr>
+                {isExpanded ? (
+                  <tr className="ui-table__expanded-row">
+                    <td colSpan={columns.length}>{renderExpandedRow(row)}</td>
+                  </tr>
+                ) : null}
+              </Fragment>
+            );
+          })}
         </tbody>
       </table>
     </div>

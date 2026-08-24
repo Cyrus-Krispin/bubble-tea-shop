@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
-import { Button } from "../../components/ui";
+import { Button } from "../../components/ui/Button";
+import { CustomerOrderHistory } from "../orders/CustomerOrderHistory";
 import { signOut } from "./authClient";
 import { useAuth } from "./useAuth";
 
@@ -41,9 +42,9 @@ export function CustomerAccountPage() {
           <section className="account-panel" aria-labelledby="details-heading">
             <h2 id="details-heading">Account details</h2>
             <dl><div><dt>Email</dt><dd>{session.email}</dd></div></dl>
-            <p className="account-note">Account-linked order history is planned for a later release.</p>
             {signOutFailed ? <p className="form-message form-message--error" role="alert">We couldn&apos;t sign you out. Please try again.</p> : null}
             <Button onClick={handleSignOut} variant="secondary">Sign out</Button>
+            <CustomerOrderHistory accessToken={session.accessToken} />
           </section>
         ) : null}
       </main>

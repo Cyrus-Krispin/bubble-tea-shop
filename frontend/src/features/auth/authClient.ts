@@ -8,6 +8,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? "http://localhost:8000"
 const publicAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? "local-public-anon-key";
 
 const authClient = createClient(supabaseUrl, publicAnonKey);
+let customerAccessGate: Promise<boolean> | null = null;
 
 export type RegistrationResult = {
   verificationRequired: boolean;
@@ -22,28 +23,53 @@ export async function signInWithEmailAndPassword(credentials: Credentials): Prom
 }
 
 export async function signInCustomer(credentials: Credentials): Promise<void> {
-  const { data, error } = await authClient.auth.signInWithPassword(credentials);
+  return withCustomerProvisioning(async () => {
+    const { data, error } = await authClient.auth.signInWithPassword(credentials);
 
-  if (error || data.session === null) {
-    throw error ?? new Error("Customer sign-in did not return a session.");
-  }
+    if (error || data.session === null) {
+      throw error ?? new Error("Customer sign-in did not return a session.");
+    }
 
-  await provisionAuthenticatedCustomer(data.session.access_token);
+    await provisionAuthenticatedCustomer(data.session.access_token);
+  });
 }
 
 export async function signUpCustomer(credentials: Credentials): Promise<RegistrationResult> {
-  const { data, error } = await authClient.auth.signUp(credentials);
+  return withCustomerProvisioning(async () => {
+    const { data, error } = await authClient.auth.signUp(credentials);
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw error;
+    }
+
+    if (data.session === null) {
+      return { verificationRequired: true };
+    }
+
+    await provisionAuthenticatedCustomer(data.session.access_token);
+    return { verificationRequired: false };
+  });
+}
+
+async function withCustomerProvisioning<T>(operation: () => Promise<T>): Promise<T> {
+  if (customerAccessGate !== null) {
+    throw new Error("Customer authentication is already in progress.");
   }
 
-  if (data.session === null) {
-    return { verificationRequired: true };
+  let finishGate: (provisioned: boolean) => void = () => undefined;
+  const gate = new Promise<boolean>((resolve) => {
+    finishGate = resolve;
+  });
+  customerAccessGate = gate;
+  let provisioned = false;
+  try {
+    const result = await operation();
+    provisioned = true;
+    return result;
+  } finally {
+    finishGate(provisioned);
+    if (customerAccessGate === gate) customerAccessGate = null;
   }
-
-  await provisionAuthenticatedCustomer(data.session.access_token);
-  return { verificationRequired: false };
 }
 
 async function provisionAuthenticatedCustomer(accessToken: string): Promise<void> {
@@ -78,7 +104,12 @@ export async function getCurrentAuthSession(): Promise<AuthSession | null> {
 
 export function subscribeToAuthState(listener: (session: AuthSession | null) => void): () => void {
   const { data } = authClient.auth.onAuthStateChange((_event, session) => {
-    listener(summarizeSession(session));
+    const gate = customerAccessGate;
+    if (gate === null) {
+      listener(summarizeSession(session));
+      return;
+    }
+    void gate.then((provisioned) => listener(provisioned ? summarizeSession(session) : null));
   });
   return () => data.subscription.unsubscribe();
 }

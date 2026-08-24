@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
-import { ProblemState } from "../../components/ui";
+import { ProblemState } from "../../components/ui/ProblemState";
 import { useCart } from "../cart/CartContext";
+import { LastOrderSuggestion } from "../orders/LastOrderSuggestion";
 import { DrinkArtwork } from "./DrinkArtwork";
 import { LocationPicker } from "./LocationPicker";
 import { formatMoney } from "./formatMoney";
@@ -47,6 +48,7 @@ export function ShopPage() {
           )}
         </div>
         <p aria-atomic="true" className="visually-hidden" role="status">Menu for {state.data.location.name}</p>
+        <LastOrderSuggestion locationSlug={state.data.location.slug} products={state.data.products} />
         <div className="category-filter" aria-label="Filter drinks" role="group">
           {categories.map((option) => (
             <button
