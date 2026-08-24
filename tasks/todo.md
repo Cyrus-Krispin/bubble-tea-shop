@@ -1,14 +1,14 @@
 # Production-Ready MVP Tasks
 
-## Active increment — Actionable order-again suggestion
+## Completed increment — Actionable order-again suggestion
 
-- [ ] Add current catalog, configuration, price, and inventory eligibility tests for the newest
+- [x] Add current catalog, configuration, price, and inventory eligibility tests for the newest
   owned order at the selected shop.
-- [ ] Publish and validate the latest-reorder API contract, including no-content ineligible cases.
-- [ ] Add atomic multi-line cart restoration and storefront item/selection presentation tests.
-- [ ] Differentiate the seeded Orchard Central and Tiong Bahru menus with an additive migration and
+- [x] Publish and validate the latest-reorder API contract, including no-content ineligible cases.
+- [x] Add atomic multi-line cart restoration and storefront item/selection presentation tests.
+- [x] Differentiate the seeded Orchard Central and Tiong Bahru menus with an additive migration and
   verify both catalog responses.
-- [ ] Run full backend/frontend/browser verification, review, commit, push, and update PR #26.
+- [x] Run full backend/frontend/browser verification, review, commit, push, and update PR #26.
 
 ## Completed foundation — Customer order history and last-order suggestion
 
@@ -21,7 +21,7 @@
 - [x] Add a runtime-validating customer-order client with focused request, response, and error tests.
 - [x] Add signed-in account history and receipt pages with loading, empty, error, pagination, and
   accessibility coverage.
-- [x] Add a non-blocking `Last ordered` storefront section that is hidden for guests and empty
+- [x] Add a non-blocking `Order again` storefront section that is hidden for guests and empty
   histories, with focused tests.
 - [x] Verify account-linked checkout through storefront suggestion, history, and receipt in desktop
   and mobile browsers; confirm clean console/network output and accessibility.

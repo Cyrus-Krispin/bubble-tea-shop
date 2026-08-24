@@ -72,8 +72,8 @@ public class CustomerReorderSuggestionService {
         Map<UUID, LinkedHashMap<UUID, SelectionBuilder>> selectionsByLine =
             currentGroups(order.id());
         for (CurrentLine line : lines) {
-            LinkedHashMap<UUID, SelectionBuilder> groups = selectionsByLine.get(line.itemId());
-            if (groups == null) return Optional.empty();
+            LinkedHashMap<UUID, SelectionBuilder> groups = selectionsByLine.computeIfAbsent(
+                line.itemId(), ignored -> new LinkedHashMap<>());
             for (CurrentChoice choice : choicesByLine.getOrDefault(line.itemId(), List.of())) {
                 SelectionBuilder group = groups.get(choice.groupId());
                 if (group == null) return Optional.empty();

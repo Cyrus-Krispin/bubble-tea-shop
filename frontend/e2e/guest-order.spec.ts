@@ -123,7 +123,7 @@ test("customer sees an account-linked order across the personalized storefront a
   await expect(page.getByRole("link", { name: "View last order" })).toBeVisible();
   await page.getByRole("button", { name: "Add order to cart" }).click();
   await expect(page.getByText("Added your last order to the cart.")).toBeVisible();
-  await expect(page.getByRole("link", { name: "View order" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "View last order" })).toBeVisible();
   await expectProductionQuality(page);
 
   await page.getByRole("link", { name: "Account" }).click();

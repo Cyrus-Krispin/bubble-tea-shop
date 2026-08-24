@@ -83,7 +83,7 @@ returns `403` with `CUSTOMER_ACCOUNT_DISABLED`.
 read-only customer resources. Spring derives the application account from the verified token
 subject; neither endpoint accepts an account ID. The list is ordered by `createdAt DESC, id DESC`
 and uses zero-based `page` plus bounded `size` (`1..20`). Summaries contain the shop and immutable
-line-name snapshots needed by account history and the signed-in `Last ordered` storefront section.
+line-name snapshots needed by account history and the signed-in `Order again` storefront section.
 Detail returns the complete immutable line, option, quantity, and price snapshots.
 
 `GET /api/v1/customer/orders/latest-reorder?locationSlug={slug}` returns the newest order as a

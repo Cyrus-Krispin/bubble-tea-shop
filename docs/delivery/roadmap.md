@@ -41,8 +41,8 @@ healthy database.
 - End-to-end tests from order placement through inventory deduction. (Implemented.)
 - Two-location guest selection, expanded photographic catalog, and location-scoped checkout.
   (Implemented.)
-- Private customer order history, immutable receipt detail, and signed-in last-order storefront
-  suggestion. (Implemented.)
+- Private customer order history, immutable receipt detail, and an actionable signed-in `Order
+  again` storefront highlight. (Implemented.)
 
 ## Phase 4 — Operational polish
 

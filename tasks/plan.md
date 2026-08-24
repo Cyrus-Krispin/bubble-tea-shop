@@ -1,6 +1,6 @@
 # Implementation Plan: Production-Ready MVP
 
-## Active increment: Actionable order-again suggestion
+## Completed increment: Actionable order-again suggestion
 
 Extend the contract in `docs/product/customer-order-history.md` as three connected vertical slices:
 

@@ -17,7 +17,7 @@ The Flyway migration remains the executable source of truth for the database.
 - [`product/guest-order-placement.md`](product/guest-order-placement.md) — server-priced guest
   checkout, immutable snapshots, and idempotent placement contract.
 - [`product/customer-order-history.md`](product/customer-order-history.md) — private account-linked
-  history, immutable receipts, and the signed-in storefront suggestion contract.
+  history, immutable receipts, and the actionable signed-in `Order again` contract.
 - [`product/staff-order-operations.md`](product/staff-order-operations.md) — authorized order queue,
   atomic cash collection, and inventory-safe completion contract.
 - [`product/audit-views.md`](product/audit-views.md) — role-scoped, read-only operational audit
