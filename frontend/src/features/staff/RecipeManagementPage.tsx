@@ -153,8 +153,16 @@ export default function RecipeManagementPage() {
     { key: "name", header: "Recipe" },
     { key: "description", header: "Description" },
     { key: "latestVersionNumber", header: "Latest version", cell: (row) => `v${row.latestVersionNumber}` },
-    { key: "latestStatus", header: "Formula status" },
-    { key: "archived", header: "Recipe status", cell: (row) => row.archived ? "Archived" : "Active" },
+    {
+      key: "latestStatus",
+      header: "Formula status",
+      cell: (row) => <span className={`recipe-status recipe-status--${row.latestStatus.toLowerCase()}`}>{row.latestStatus.charAt(0) + row.latestStatus.slice(1).toLowerCase()}</span>,
+    },
+    {
+      key: "archived",
+      header: "Recipe status",
+      cell: (row) => <span className={`staff-record-status staff-record-status--${row.archived ? "archived" : "active"}`}>{row.archived ? "Archived" : "Active"}</span>,
+    },
     {
       key: "actions",
       header: "Actions",
@@ -164,7 +172,7 @@ export default function RecipeManagementPage() {
           className="ui-button ui-button--secondary ui-button--compact"
           to={`/staff/catalog/recipes/${row.id}?organizationId=${encodeURIComponent(organizationId)}`}
         >
-          Manage
+          Open recipe
         </Link>
       ),
     },

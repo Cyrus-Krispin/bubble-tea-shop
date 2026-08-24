@@ -1,8 +1,11 @@
 import { Link, NavLink } from "react-router";
 import { useAuth } from "../features/auth/useAuth";
+import { useOptionalCartItemCount } from "../features/cart/CartContext";
 import "./CustomerHeader.css";
 
-export function CustomerHeader({ itemCount = 0 }: { itemCount?: number }) {
+export function CustomerHeader({ itemCount: providedItemCount }: { itemCount?: number } = {}) {
+  const contextItemCount = useOptionalCartItemCount();
+  const itemCount = providedItemCount ?? contextItemCount;
   const itemLabel = `${itemCount} ${itemCount === 1 ? "item" : "items"}`;
   const { isLoading, session } = useAuth();
 

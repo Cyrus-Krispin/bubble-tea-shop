@@ -222,7 +222,7 @@ export default function MenuManagementPage() {
     {
       key: "archived",
       header: "Status",
-      cell: (row) => (row.archived ? "Archived" : "Active"),
+      cell: (row) => <span className={`staff-record-status staff-record-status--${row.archived ? "archived" : "active"}`}>{row.archived ? "Archived" : "Active"}</span>,
     },
     {
       key: "actions",
@@ -233,7 +233,7 @@ export default function MenuManagementPage() {
           className="ui-button ui-button--secondary ui-button--compact"
           to={`/staff/catalog/menu/${row.id}?organizationId=${encodeURIComponent(organizationId)}`}
         >
-          Manage
+          Open product
         </Link>
       ),
     },

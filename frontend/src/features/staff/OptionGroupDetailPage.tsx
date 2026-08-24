@@ -13,6 +13,7 @@ import {
 } from "react-router";
 
 import { Button, Dialog, Field, ProblemState } from "../../components/ui";
+import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import {
   archiveOptionChoice,
@@ -446,6 +447,7 @@ export default function OptionGroupDetailPage() {
       className="staff-main"
       id="staff-workspace"
     >
+      <CatalogSectionNav />
       <Link className="staff-back-link" to={`/staff/catalog/options?organizationId=${encodeURIComponent(organizationId)}`}>
         ← Back to options
       </Link>
@@ -485,6 +487,11 @@ export default function OptionGroupDetailPage() {
           </div>
         )}
       </div>
+      <dl className="staff-summary-strip" aria-label="Option group summary">
+        <div><dt>Group status</dt><dd>{group.archived ? "Archived" : "Active"}</dd></div>
+        <div><dt>Selection rule</dt><dd>{group.minimumSelections === 0 ? `Choose up to ${group.maximumSelections}` : group.minimumSelections === group.maximumSelections ? `Choose ${group.maximumSelections}` : `Choose ${group.minimumSelections}–${group.maximumSelections}`}</dd></div>
+        <div><dt>Choices</dt><dd>{group.choices.filter((choice) => !choice.archived).length} active</dd></div>
+      </dl>
       <section aria-labelledby="choices-title">
         <div className="recipe-history-heading">
           <div>

@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-3) var(--space-4);
-  font-weight: 800;
+  font-weight: 750;
   border: 1px solid transparent;
   border-radius: var(--radius-control);
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
@@ -40,7 +40,7 @@
 }
 
 .ui-field { display: grid; gap: var(--space-2); }
-.ui-field label { font-size: 0.875rem; font-weight: 800; }
+.ui-field label { font-size: 0.875rem; font-weight: 750; }
 
 .ui-field input,
 .ui-field select,
@@ -73,10 +73,11 @@
 }
 
 .ui-table { width: 100%; min-width: 36rem; border-spacing: 0; border-collapse: collapse; background: var(--color-surface); }
-.ui-table caption { padding: var(--space-4); font-family: var(--font-display); font-size: 1rem; font-weight: 800; text-align: left; }
+.ui-table caption { padding: var(--space-4); font-family: var(--font-display); font-size: 1rem; font-weight: 750; text-align: left; }
 .ui-table th,
 .ui-table td { padding: var(--space-3) var(--space-4); text-align: left; border-top: 1px solid var(--color-line); }
-.ui-table th { color: var(--color-muted); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.ui-table th { color: var(--color-muted); font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.ui-table td { font-variant-numeric: tabular-nums; }
 .ui-table tbody tr:hover { background: var(--color-surface-subtle); }
 .ui-table tbody .ui-table__expanded-row,
 .ui-table tbody .ui-table__expanded-row:hover { background: var(--color-surface-subtle); }
@@ -114,6 +115,52 @@
 .ui-problem { padding: var(--space-5); background: var(--color-danger-soft); border: 1px solid var(--color-danger); border-radius: var(--radius-card); }
 .ui-problem h2 { margin-bottom: var(--space-2); font-size: 1.4rem; }
 .ui-problem p { color: var(--color-danger); line-height: 1.5; }
+
+@media (max-width: 48rem) {
+  .ui-table-scroll { overflow: visible; background: transparent; border: 0; }
+  .ui-table { display: block; min-width: 0; background: transparent; }
+  .ui-table caption { display: block; margin-bottom: var(--space-2); padding: 0; }
+  .ui-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .ui-table tbody { display: grid; gap: var(--space-3); }
+  .ui-table tbody > tr {
+    display: grid;
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-control);
+  }
+  .ui-table tbody > tr > td {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: minmax(6.5rem, 0.7fr) minmax(0, 1.3fr);
+    gap: var(--space-3);
+    align-items: start;
+    padding: var(--space-3) var(--space-4);
+    overflow-wrap: anywhere;
+    text-align: left;
+    border-top: 1px solid var(--color-line);
+  }
+  .ui-table tbody > tr > td:first-child { border-top: 0; }
+  .ui-table tbody > tr > td[data-label]::before {
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    font-weight: 750;
+    content: attr(data-label);
+  }
+  .ui-table__value { min-width: 0; }
+  .ui-table tbody > .ui-table__expanded-row { margin-top: calc(var(--space-3) * -1); border-top: 0; border-radius: 0 0 var(--radius-control) var(--radius-control); }
+  .ui-table tbody > .ui-table__expanded-row > td { display: block; border-top: 0; }
+  .ui-table tbody > tr > .ui-table__empty { display: block; padding: var(--space-6); text-align: center; }
+}
 
 @media (forced-colors: active) {
   .ui-button,

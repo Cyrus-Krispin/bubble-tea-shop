@@ -21,6 +21,14 @@ import {
 } from "./menuClient";
 
 const PAGE_SIZE = 25;
+
+function selectionRule(minimum: number, maximum: number) {
+  if (minimum === 0 && maximum === 1) return "Optional · choose one";
+  if (minimum === 1 && maximum === 1) return "Choose one";
+  if (minimum === 0) return `Choose up to ${maximum}`;
+  if (minimum === maximum) return `Choose ${minimum}`;
+  return `Choose ${minimum}–${maximum}`;
+}
 type ListState =
   | { status: "loading" }
   | { status: "ready"; page: OptionGroupPage }
@@ -201,13 +209,13 @@ export default function OptionManagementPage() {
     {
       key: "bounds",
       header: "Selections",
-      cell: (row) => `${row.minimumSelections}–${row.maximumSelections}`,
+      cell: (row) => selectionRule(row.minimumSelections, row.maximumSelections),
     },
     { key: "activeChoiceCount", header: "Active choices" },
     {
       key: "archived",
       header: "Status",
-      cell: (row) => (row.archived ? "Archived" : "Active"),
+      cell: (row) => <span className={`staff-record-status staff-record-status--${row.archived ? "archived" : "active"}`}>{row.archived ? "Archived" : "Active"}</span>,
     },
     {
       key: "actions",
@@ -218,7 +226,7 @@ export default function OptionManagementPage() {
           className="ui-button ui-button--secondary ui-button--compact"
           to={`/staff/catalog/options/${row.id}?organizationId=${encodeURIComponent(organizationId)}`}
         >
-          Manage
+          Open group
         </Link>
       ),
     },

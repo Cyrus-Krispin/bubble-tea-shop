@@ -4,11 +4,17 @@ import { Link } from "react-router";
 import { CustomerHeader } from "../../app/CustomerHeader";
 import { formatMoney } from "../catalog/formatMoney";
 import type { DrinkConfiguration } from "../catalog/pricing";
+import { useGuestLocations } from "../catalog/useGuestCatalog";
 import { useAuth } from "../auth/useAuth";
 import { useCart } from "./CartContext";
 import { MAX_LINE_QUANTITY, MAX_ORDER_QUANTITY } from "./cartReducer";
 import { OrderError, placeGuestOrder, type GuestOrder } from "./orderClient";
 import "./cart.css";
+
+function locationNameFromSlug(slug: string | undefined) {
+  if (slug === undefined) return "Pickup shop";
+  return slug.split("-").map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`).join(" ");
+}
 
 function configurationSummary(configuration: DrinkConfiguration) {
   const choices = configuration.selections.map((selection) => (
@@ -35,6 +41,10 @@ export function CartPage() {
   const [placedOrder, setPlacedOrder] = useState<GuestOrder>();
   const [placedLocationSlug, setPlacedLocationSlug] = useState<string>();
   const retryKey = useRef<string | undefined>(undefined);
+  const locations = useGuestLocations();
+  const pickupLocation = locations.status === "ready"
+    ? locations.data.find((location) => location.slug === items[0]?.locationSlug)
+    : undefined;
 
   useEffect(() => {
     retryKey.current = undefined;
@@ -136,7 +146,11 @@ export function CartPage() {
               <p className="eyebrow">Cash pickup</p>
               <h2 id="summary-title">Pay at the shop</h2>
               <p>Review the total, place the order, then pay cash when you pick it up.</p>
-              <dl><div><dt>Items</dt><dd>{itemCount}</dd></div><div className="summary-total"><dt>Preview total</dt><dd>{formatMoney(previewTotalMinor, items[0].currency)}</dd></div></dl>
+              <dl>
+                <div><dt>Pickup at</dt><dd>{pickupLocation?.name ?? locationNameFromSlug(items[0]?.locationSlug)}</dd></div>
+                <div><dt>Items</dt><dd>{itemCount}</dd></div>
+                <div className="summary-total"><dt>Preview total</dt><dd>{formatMoney(previewTotalMinor, items[0].currency)}</dd></div>
+              </dl>
               <button aria-describedby="checkout-note" disabled={submitting} onClick={checkout} type="button">{submitting ? "Placing order…" : `Place order · ${formatMoney(previewTotalMinor, items[0].currency)}`}</button>
               <small id="checkout-note">This sends a pending order to the shop. Pay cash at pickup.</small>
               {submitError === undefined ? null : <p className="checkout-error" role="alert">{submitError}</p>}

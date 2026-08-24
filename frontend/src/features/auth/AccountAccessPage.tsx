@@ -46,8 +46,8 @@ export function AccountAccessPage() {
             <p className="eyebrow">Customer account</p>
             <h1 id="access-title">{mode === "create" ? "Create your account" : "Welcome back"}</h1>
             <p>{mode === "create"
-              ? "Create an optional account. Guest ordering is always available."
-              : "Sign in to your Bubble Tea Shop account."}</p>
+              ? "Create an optional account to keep receipts and order again. Guest checkout stays available."
+              : "Sign in to see receipts and order again. Guest checkout stays available."}</p>
           </div>
           <nav aria-label="Account access options" className="access-modes">
             <Link aria-current={mode === "sign-in" ? "page" : undefined} to={accessHref("sign-in", next)}>Sign in</Link>

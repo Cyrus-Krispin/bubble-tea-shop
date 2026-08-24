@@ -63,9 +63,9 @@ export function ShopPage() {
         </div>
         <section aria-label={`${category} drinks`} className="product-grid">
           {drinks.length === 0 ? <p className="catalog-empty" role="status">No drinks are available in this category.</p> : null}
-          {drinks.map((drink) => (
+          {drinks.map((drink, index) => (
             <article className={`product-card${drink.available ? "" : " product-card--unavailable"}`} key={drink.id}>
-              <DrinkArtwork drink={drink} />
+              <DrinkArtwork drink={drink} priority={index < 3} />
               <div className="product-copy">
                 <p className="product-category">{drink.category}</p>
                 <h2>{drink.name}</h2>

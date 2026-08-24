@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router";
+import { Link, Navigate, Route, Routes, useLocation } from "react-router";
 
 import { AccountAccessPage } from "../features/auth/AccountAccessPage";
 import { StaffSignInPage } from "../features/auth/StaffSignInPage";
@@ -47,6 +47,17 @@ function ScrollToTop() {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname]);
   return null;
+}
+
+function StaffNotFoundPage() {
+  return (
+    <main aria-label="Staff page not found" className="staff-main" id="staff-workspace">
+      <p className="eyebrow">Staff workspace</p>
+      <h1>Staff page not found</h1>
+      <p className="staff-muted">That operations page does not exist or may have moved.</p>
+      <Link className="secondary-link" to="/staff">Back to operations overview</Link>
+    </main>
+  );
 }
 
 export function App() {
@@ -125,6 +136,7 @@ export function App() {
                 <ManagerManagementPage />
               </Suspense>
             )} />
+            <Route path="*" element={<StaffNotFoundPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

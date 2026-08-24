@@ -54,8 +54,14 @@ export function DataTable<Row>({
               <Fragment key={rowKey}>
                 <tr>
                   {columns.map((column) => (
-                    <td className={column.align === "end" ? "ui-table__end" : undefined} key={column.key}>
-                      {column.cell === undefined ? defaultCell(row, column.key) : column.cell(row)}
+                    <td
+                      className={column.align === "end" ? "ui-table__end" : undefined}
+                      data-label={typeof column.header === "string" ? column.header : undefined}
+                      key={column.key}
+                    >
+                      <div className="ui-table__value">
+                        {column.cell === undefined ? defaultCell(row, column.key) : column.cell(row)}
+                      </div>
                     </td>
                   ))}
                 </tr>

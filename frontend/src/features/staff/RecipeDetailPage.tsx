@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type FormEvent, type ReactNode } from "reac
 import { Link, useOutletContext, useParams, useSearchParams } from "react-router";
 
 import { Button, Dialog, Field, ProblemState } from "../../components/ui";
+import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import { getIngredients, type Ingredient } from "./ingredientClient";
 import {
@@ -480,6 +481,9 @@ export default function RecipeDetailPage() {
   const ingredients = ingredientState.status === "ready" ? ingredientState.ingredients : [];
   const recipe = detailState.status === "ready" ? detailState.recipe : undefined;
   const hasDraft = recipe?.versions.some((version) => version.status === "DRAFT") ?? false;
+  const currentVersion = recipe?.versions.reduce((latest, version) => (
+    version.versionNumber > latest.versionNumber ? version : latest
+  ));
 
   if (organizationId === "" || recipeId === "") {
     return (
@@ -491,6 +495,7 @@ export default function RecipeDetailPage() {
 
   return (
     <main aria-label="Recipe detail" className="staff-main" id="staff-workspace">
+      <CatalogSectionNav />
       <Link className="staff-back-link" to={`/staff/catalog/recipes?organizationId=${encodeURIComponent(organizationId)}`}>← Back to recipes</Link>
       {detailState.status === "loading" ? <p role="status">Loading recipe…</p> : null}
       {detailState.status === "error" ? (
@@ -529,6 +534,12 @@ export default function RecipeDetailPage() {
               </div>
             ) : <span className="recipe-status recipe-status--retired">ARCHIVED</span>}
           </div>
+
+          <dl className="staff-summary-strip" aria-label="Recipe summary">
+            <div><dt>Recipe status</dt><dd>{recipe.archived ? "Archived" : "Active"}</dd></div>
+            <div><dt>Versions</dt><dd>{recipe.versions.length}</dd></div>
+            <div><dt>Current formula</dt><dd>{currentVersion === undefined ? "None" : `${currentVersion.status.charAt(0)}${currentVersion.status.slice(1).toLowerCase()}`}</dd></div>
+          </dl>
 
           <div className="recipe-history-heading">
             <div>

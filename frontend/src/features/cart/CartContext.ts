@@ -22,3 +22,7 @@ export function useCart() {
   if (!value) throw new Error("useCart must be used inside CartProvider");
   return value;
 }
+
+export function useOptionalCartItemCount() {
+  return useContext(CartContext)?.itemCount ?? 0;
+}

@@ -39,13 +39,17 @@ export function CustomerAccountPage() {
           </section>
         ) : null}
         {!isLoading && session !== null ? (
-          <section className="account-panel" aria-labelledby="details-heading">
-            <h2 id="details-heading">Account details</h2>
-            <dl><div><dt>Email</dt><dd>{session.email}</dd></div></dl>
-            {signOutFailed ? <p className="form-message form-message--error" role="alert">We couldn&apos;t sign you out. Please try again.</p> : null}
-            <Button onClick={handleSignOut} variant="secondary">Sign out</Button>
+          <>
+            <section className="account-panel account-summary" aria-labelledby="details-heading">
+              <div>
+                <p className="card-kicker">Signed in as</p>
+                <h2 id="details-heading">{session.email}</h2>
+              </div>
+              <Button onClick={handleSignOut} variant="secondary">Sign out</Button>
+              {signOutFailed ? <p className="form-message form-message--error" role="alert">We couldn&apos;t sign you out. Please try again.</p> : null}
+            </section>
             <CustomerOrderHistory accessToken={session.accessToken} />
-          </section>
+          </>
         ) : null}
       </main>
     </div>

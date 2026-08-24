@@ -273,7 +273,11 @@ export default function IngredientManagementPage() {
     { key: "sku", header: "SKU" },
     { key: "baseUnit", header: "Base unit", cell: (row) => unitLabel(row.baseUnit) },
     { key: "reorderThreshold", header: "Reorder at" },
-    { key: "archived", header: "Status", cell: (row) => row.archived ? "Archived" : "Active" },
+    {
+      key: "archived",
+      header: "Status",
+      cell: (row) => <span className={`staff-record-status staff-record-status--${row.archived ? "archived" : "active"}`}>{row.archived ? "Archived" : "Active"}</span>,
+    },
     {
       key: "actions",
       header: "Actions",

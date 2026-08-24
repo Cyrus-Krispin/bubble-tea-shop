@@ -88,6 +88,11 @@ export function CustomerOrderDetailPage() {
 }
 
 function Receipt({ order }: { order: CustomerOrderDetail }) {
+  const nextStep = order.status === "PENDING"
+    ? "Your order is pending. Pay cash at the shop when you pick it up."
+    : order.status === "COMPLETED"
+      ? "This order is complete. Your receipt remains available here."
+      : "This order was cancelled. No pickup is required.";
   return (
     <article aria-labelledby="receipt-title" className="receipt">
       <Link aria-label="Back to order history" className="receipt__back" to="/account#order-history">
@@ -99,10 +104,12 @@ function Receipt({ order }: { order: CustomerOrderDetail }) {
           <h1 id="receipt-title">Order {order.publicOrderNumber}</h1>
           <p>{formatOrderDate(order.createdAt)} · {order.location.name}</p>
         </div>
-        <span className={`order-status order-status--${order.status.toLowerCase()}`}>
+        <span aria-label={`Order status: ${orderStatusLabel(order.status)}`} className={`order-status order-status--${order.status.toLowerCase()}`}>
           {orderStatusLabel(order.status)}
         </span>
       </header>
+
+      <p className={`receipt__next-step receipt__next-step--${order.status.toLowerCase()}`}>{nextStep}</p>
 
       <ol className="receipt__lines">
         {order.items.map((line) => <ReceiptLine currency={order.currencyCode} key={line.lineNumber} line={line} />)}

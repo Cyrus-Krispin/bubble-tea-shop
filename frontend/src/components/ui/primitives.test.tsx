@@ -53,6 +53,21 @@ describe("interface primitives", () => {
     expect(screen.getByText("No ingredients yet.")).toHaveAttribute("colspan", "2");
   });
 
+  it("labels cells for the responsive stacked presentation", () => {
+    render(
+      <DataTable
+        caption="Ingredients"
+        columns={[{ key: "name", header: "Ingredient" }, { key: "stock", header: "Stock" }]}
+        emptyMessage="No ingredients yet."
+        getRowKey={(row) => row.name}
+        rows={[{ name: "Assam tea", stock: "4,000 g" }]}
+      />,
+    );
+
+    expect(screen.getByRole("cell", { name: "Assam tea" })).toHaveAttribute("data-label", "Ingredient");
+    expect(screen.getByRole("cell", { name: "4,000 g" })).toHaveAttribute("data-label", "Stock");
+  });
+
   it("renders an expanded row directly after its parent row", () => {
     render(
       <DataTable

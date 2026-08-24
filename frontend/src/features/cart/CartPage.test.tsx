@@ -11,11 +11,15 @@ vi.mock("./orderClient", () => ({
     }
   },
 }));
+vi.mock("../catalog/catalogClient", () => ({
+  getGuestLocations: vi.fn(),
+}));
 
 import { CartProvider } from "./CartProvider";
 import { useCart } from "./CartContext";
 import { CartPage } from "./CartPage";
 import { placeGuestOrder } from "./orderClient";
+import { getGuestLocations } from "../catalog/catalogClient";
 
 const placedOrder = {
   id: "order-id",
@@ -71,6 +75,13 @@ describe("CartPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(placeGuestOrder).mockResolvedValue(placedOrder);
+    vi.mocked(getGuestLocations).mockResolvedValue([{
+      id: "location-id",
+      slug: "orchard-central",
+      name: "Orchard Central",
+      currency: "SGD",
+      imageKey: "orchard-central",
+    }]);
   });
 
   it("offers a route back to the menu when the order is empty", () => {
@@ -88,6 +99,7 @@ describe("CartPage", () => {
     expect(screen.getByRole("heading", { name: "Moonlit Milk Tea" })).toBeVisible();
     await expectNoAccessibilityViolations(container);
     expect(screen.getByText("Medium · 50% · Less ice · Pearls")).toBeVisible();
+    expect(await screen.findByText("Orchard Central")).toBeVisible();
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$7.20");
 
     fireEvent.click(screen.getByRole("button", { name: "Increase Moonlit Milk Tea quantity" }));
@@ -96,6 +108,14 @@ describe("CartPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Remove Moonlit Milk Tea" }));
     expect(screen.getByText("Your order is empty")).toBeVisible();
+  });
+
+  it("keeps the pickup identity visible when the location lookup fails", async () => {
+    vi.mocked(getGuestLocations).mockRejectedValueOnce(new Error("offline"));
+    renderCart();
+    fireEvent.click(screen.getByRole("button", { name: "Seed item" }));
+
+    expect(await screen.findByText("Orchard Central")).toBeVisible();
   });
 
   it("submits catalog identifiers only and clears the cart after server confirmation", async () => {
