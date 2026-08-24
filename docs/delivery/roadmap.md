@@ -39,6 +39,8 @@ healthy database.
 - Staff order queue and completion UI. (Implemented.)
 - Cash payment recording and shortage conflict UX. (Implemented.)
 - End-to-end tests from order placement through inventory deduction. (Implemented.)
+- Two-location guest selection, expanded photographic catalog, and location-scoped checkout.
+  (Implemented.)
 
 ## Phase 4 — Operational polish
 
@@ -53,7 +55,7 @@ healthy database.
 ## Later releases
 
 - Customer order history, extended profiles, card payments, forecasting/alerts, supplier
-  integration, dashboards, active multi-location operation, localization, and multiple currencies.
+  integration, dashboards, location lifecycle/expansion, localization, and multiple currencies.
 - Opt-in customer face authentication, only after customer accounts and the standard Supabase
   authentication path; see
   [`../architecture/face-authentication.md`](../architecture/face-authentication.md).

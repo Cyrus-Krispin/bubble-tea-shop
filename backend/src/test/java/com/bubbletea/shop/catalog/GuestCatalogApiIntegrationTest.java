@@ -34,19 +34,45 @@ class GuestCatalogApiIntegrationTest {
     MockMvc mvc;
 
     @Test
+    void locationsArePublicAndReturnExactlyTheTwoSeededPhotographicShops() throws Exception {
+        mvc.perform(get("/api/v1/guest/locations"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].slug").value("orchard-central"))
+            .andExpect(jsonPath("$[0].imageKey").value("orchard-central"))
+            .andExpect(jsonPath("$[1].slug").value("tiong-bahru"))
+            .andExpect(jsonPath("$[1].name").value("Tiong Bahru"))
+            .andExpect(jsonPath("$[1].imageKey").value("tiong-bahru"));
+    }
+
+    @Test
     void menuIsPublicAndReturnsDatabaseBackedProductSummaries() throws Exception {
         mvc.perform(get("/api/v1/guest/menu"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.location.slug").value("orchard-central"))
             .andExpect(jsonPath("$.location.name").value("Orchard Central"))
             .andExpect(jsonPath("$.location.currency").value("SGD"))
-            .andExpect(jsonPath("$.products.length()").value(4))
+            .andExpect(jsonPath("$.location.imageKey").value("orchard-central"))
+            .andExpect(jsonPath("$.products.length()").value(7))
             .andExpect(jsonPath("$.products[0].slug").value("moonlit-milk-tea"))
+            .andExpect(jsonPath("$.products[0].artworkKey").value("moonlit-milk-tea"))
             .andExpect(jsonPath("$.products[0].startingPrice.amountMinor").value(610))
             .andExpect(jsonPath("$.products[0].startingPrice.currency").value("SGD"))
             .andExpect(jsonPath("$.products[0].available").value(true))
             .andExpect(jsonPath("$.products[3].slug").value("cloudberry-taro"))
-            .andExpect(jsonPath("$.products[3].available").value(false));
+            .andExpect(jsonPath("$.products[3].available").value(false))
+            .andExpect(jsonPath("$.products[4].slug").value("honey-peach-green-tea"))
+            .andExpect(jsonPath("$.products[5].slug").value("roasted-hojicha-latte"))
+            .andExpect(jsonPath("$.products[6].slug").value("mango-passionfruit-tea"));
+    }
+
+    @Test
+    void additionalLocationReturnsItsDatabaseBackedMenu() throws Exception {
+        mvc.perform(get("/api/v1/guest/locations/tiong-bahru/menu"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.location.name").value("Tiong Bahru"))
+            .andExpect(jsonPath("$.products.length()").value(7))
+            .andExpect(jsonPath("$.products[0].startingPrice.amountMinor").value(590));
     }
 
     @Test

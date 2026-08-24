@@ -112,6 +112,21 @@ class GuestOrderPlacementApiIntegrationTest {
     }
 
     @Test
+    void placesOrderAgainstTheSelectedPublicLocation() throws Exception {
+        UUID key = UUID.randomUUID();
+        mvc.perform(post("/api/v1/guest/locations/tiong-bahru/orders")
+                .header("Idempotency-Key", key)
+                .contentType("application/json")
+                .content(orderBody(1)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.totalMinor").value(700));
+
+        assertThat(jdbc.queryForObject(
+            "SELECT location_id FROM customer_order WHERE placement_key = ?", UUID.class, key))
+            .isEqualTo(UUID.fromString("20000000-0000-0000-0000-000000000002"));
+    }
+
+    @Test
     void placesThenCompletesOrderAcrossGuestAndStaffApisWithExactInventoryDeduction() throws Exception {
         UUID subject = UUID.randomUUID();
         UUID account = UUID.randomUUID();

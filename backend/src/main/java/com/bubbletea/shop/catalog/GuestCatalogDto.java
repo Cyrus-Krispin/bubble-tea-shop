@@ -10,7 +10,7 @@ public final class GuestCatalogDto {
     public record Money(long amountMinor, String currency) {
     }
 
-    public record Location(UUID id, String slug, String name, String currency) {
+    public record Location(UUID id, String slug, String name, String currency, String imageKey) {
     }
 
     public record Menu(Location location, List<ProductSummary> products) {

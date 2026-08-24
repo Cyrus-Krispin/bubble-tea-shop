@@ -26,6 +26,7 @@ public class UnconfiguredApiSecurityConfiguration {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.GET, "/api/v1/guest/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/guest/orders").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/guest/locations/*/orders").permitAll()
                 .requestMatchers("/api/**").denyAll()
                 .anyRequest().permitAll())
             .build();

@@ -3,8 +3,8 @@
 ## Purpose
 
 Guest checkout turns a client-side cart into immutable order, option, price, payment, and ingredient
-consumption snapshots. The client supplies catalog identifiers and quantities only. Spring resolves
-the configured active guest location and treats the current PostgreSQL catalog as the sole source
+consumption snapshots. The client supplies a public location slug, catalog identifiers, and
+quantities only. Spring resolves the active guest location and treats the current PostgreSQL catalog as the sole source
 of names, availability, recipes, prices, currency, and ownership.
 
 The MVP creates pending cash orders. Placement does not reserve or deduct inventory; authorized
@@ -13,7 +13,8 @@ invariants.
 
 ## Request and identity boundary
 
-- `POST /api/v1/guest/orders` is available without authentication.
+- `POST /api/v1/guest/locations/{locationSlug}/orders` is available without authentication. The
+  legacy `POST /api/v1/guest/orders` route resolves the configured default shop.
 - A valid optional bearer token links the order to its enabled application customer account. A
   missing token creates a guest order. Invalid bearer tokens are rejected by the resource server.
 - The request contains one to 25 lines. Each line contains an available variant ID, a quantity from
@@ -26,7 +27,7 @@ invariants.
 
 Within one transaction, Spring:
 
-1. Resolves the configured guest-location slug to one active location and organization.
+1. Resolves the requested public location slug to one active location and organization.
 2. Loads every requested variant through an active product, active variant, available
    location offering, and published assigned recipe version.
 3. Verifies every selected choice is active and enabled for that variant, rejects duplicates, and
@@ -70,7 +71,8 @@ details.
 
 ## Frontend workflow
 
-- Checkout sends the cart's variant IDs, choice IDs, and quantities and never sends preview prices.
+- Checkout targets the cart's selected location and sends variant IDs, choice IDs, and quantities;
+  it never sends location IDs or preview prices. One cart cannot mix offerings from different shops.
 - One idempotency key is retained for an in-flight checkout and reused when the customer explicitly
   retries an ambiguous network failure. It is replaced when the cart changes or a terminal
   response is received.
@@ -92,5 +94,5 @@ details.
 - The OpenAPI snapshot and generated frontend types remain drift-free.
 - Frontend tests prove contract-only request bodies, retained carts on failure, stable retry keys,
   single-submit behavior, confirmed server totals, and cart clearing only after success.
-- A live browser test completes guest checkout at desktop and mobile widths against the Compose
-  stack.
+- A live browser test selects a shop and completes guest checkout at desktop and mobile widths
+  against the Compose stack.

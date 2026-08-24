@@ -35,6 +35,16 @@ public class GuestOrderPlacementService {
 
     @Transactional
     public PlacedOrder place(UUID placementKey, UUID authSubject, List<CreateLine> requestedLines) {
+        return place(properties.guestLocationSlug(), placementKey, authSubject, requestedLines);
+    }
+
+    @Transactional
+    public PlacedOrder place(
+        String locationSlug,
+        UUID placementKey,
+        UUID authSubject,
+        List<CreateLine> requestedLines
+    ) {
         if (placementKey == null || requestedLines == null || requestedLines.isEmpty()
             || requestedLines.size() > 25) throw new InvalidGuestOrderException();
         long totalQuantity = requestedLines.stream().mapToLong(CreateLine::quantity).sum();
@@ -43,7 +53,7 @@ public class GuestOrderPlacementService {
             throw new InvalidGuestOrderException();
         }
 
-        Location location = findLocation();
+        Location location = findLocation(locationSlug);
         UUID customerAccountId = resolveCustomerAccount(authSubject);
         String fingerprint = fingerprint(customerAccountId, requestedLines);
         PlacedOrder replay = findByPlacementKey(location.id(), placementKey, fingerprint, true);
@@ -105,13 +115,13 @@ public class GuestOrderPlacementService {
         return loadOrder(orderId, false);
     }
 
-    private Location findLocation() {
+    private Location findLocation(String locationSlug) {
         return jdbc.sql("""
                 SELECT id, organization_id, currency_code
                   FROM location
                  WHERE public_slug = :slug AND active
                 """)
-            .param("slug", properties.guestLocationSlug())
+            .param("slug", locationSlug)
             .query((rs, row) -> new Location(
                 rs.getObject("id", UUID.class),
                 rs.getObject("organization_id", UUID.class),

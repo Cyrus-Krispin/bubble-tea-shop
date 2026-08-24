@@ -67,7 +67,8 @@ local-stack infrastructure change, not this backend integration.
 The current slice protects the API boundary, includes separate customer registration/sign-in and
 staff sign-in routes, and provisions the application account after Supabase returns a customer
 session.
-Guest catalog reads and `POST /api/v1/guest/orders` are explicitly public. Order placement accepts
+Guest catalog reads, `POST /api/v1/guest/orders`, and
+`POST /api/v1/guest/locations/{locationSlug}/orders` are explicitly public. Order placement accepts
 an optional verified bearer token only to resolve an enabled customer account; it validates all
 catalog identifiers and recalculates prices, totals, currency, payment, and consumption on the
 server.

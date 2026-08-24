@@ -2,11 +2,9 @@
 
 ## Goal
 
-Enable one bubble tea location to maintain recipes and stock, accept guest or signed-in customer
+Enable two bubble tea locations to maintain recipes and stock, accept guest or signed-in customer
 cash orders, complete orders without overselling inventory, and delegate management access safely.
-
-The schema is location-aware so a later multi-location release does not require re-owning catalog,
-stock, staff, or order data.
+Guests choose an active shop before browsing its database-owned menu and pricing.
 
 ## Roles
 
@@ -43,7 +41,7 @@ stock, staff, or order data.
    enable sugar, ice, milk, or topping choices.
 5. Create or sign in to an optional customer account without creating an organization membership.
 6. Place a guest or account-linked order with immutable product, option, price, and consumption
-   snapshots.
+   snapshots at the selected active location.
 7. Move a pending order to completed. Completion deducts its consumption snapshot atomically.
 8. View current inventory balances and historical movements.
 
@@ -53,5 +51,5 @@ stock, staff, or order data.
 - Card payment providers, refunds, taxation, and promotions.
 - Consumption forecasting, projected low-stock alerts, and supplier ordering.
 - Cash-flow dashboards, purchase orders, and detailed cost-of-goods accounting.
-- Multiple active currencies, translations, and multiple active locations.
+- Multiple active currencies, translations, and self-service location lifecycle management.
 - Inventory reservations, delivery lots, expiry dates, and FIFO consumption.

@@ -5,7 +5,7 @@
 | Table | Purpose | Lifecycle |
 |---|---|---|
 | `organization` | Top-level business owner. | Retained permanently in MVP. |
-| `location` | Physical stock/order boundary, public menu slug, timezone, and currency. | Deactivated with `active=false`. |
+| `location` | Physical stock/order boundary with a public menu slug, photographic image key, timezone, and currency. | Deactivated with `active=false`. |
 | `account` | Application identity mapped optionally and uniquely to a Supabase Auth subject and verified email; it grants no organization access by itself. | Disabled rather than deleted. |
 | `organization_membership` | Optimistically versioned owner/manager role inside an organization. | Deactivated to remove access; inactive manager memberships can be reactivated. |
 | `location_assignment` | Manager-to-location access. | Replaced atomically while history is retained in the access ledger. |
