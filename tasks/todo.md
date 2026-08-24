@@ -2,20 +2,20 @@
 
 ## Active increment — Customer order history and last-order suggestion
 
-- [ ] Specify the customer-owned history, immutable receipt, pagination, storefront placement, and
+- [x] Specify the customer-owned history, immutable receipt, pagination, storefront placement, and
   explicit reorder boundary.
-- [ ] Add the customer-history index and ownership-scoped list/detail API using test-first backend
+- [x] Add the customer-history index and ownership-scoped list/detail API using test-first backend
   integration slices.
-- [ ] Generate and review OpenAPI plus immutable frontend types; update database, API, security,
+- [x] Generate and review OpenAPI plus immutable frontend types; update database, API, security,
   product, and roadmap documentation.
-- [ ] Add a runtime-validating customer-order client with focused request, response, and error tests.
-- [ ] Add signed-in account history and receipt pages with loading, empty, error, pagination, and
+- [x] Add a runtime-validating customer-order client with focused request, response, and error tests.
+- [x] Add signed-in account history and receipt pages with loading, empty, error, pagination, and
   accessibility coverage.
-- [ ] Add a non-blocking `Last ordered` storefront section that is hidden for guests and empty
+- [x] Add a non-blocking `Last ordered` storefront section that is hidden for guests and empty
   histories, with focused tests.
-- [ ] Verify account-linked checkout through storefront suggestion, history, and receipt in desktop
+- [x] Verify account-linked checkout through storefront suggestion, history, and receipt in desktop
   and mobile browsers; confirm clean console/network output and accessibility.
-- [ ] Run all backend/frontend/contract/security checks, complete the five-axis review, update the
+- [x] Run all backend/frontend/contract/security checks, complete the five-axis review, update the
   checklist, commit, and push.
 
 Each task is a small verified increment. Behavioral work follows RED-GREEN-REFACTOR, then the

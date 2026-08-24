@@ -137,8 +137,8 @@ Customer identity mapping
 
 ## Explicitly Deferred
 
-- Card providers, refunds, tax, promotions, discounts, favorites, extended profiles, and customer
-  cancellation/history UI.
+- Card providers, refunds, tax, promotions, discounts, favorites, extended profiles, customer
+  cancellation, and one-tap reordering.
 - Forecasting, supplier ordering, expiry/FIFO lots, cash-flow dashboards, and detailed cost
   accounting.
 - Multiple active currencies/locales/locations and opt-in face authentication.
