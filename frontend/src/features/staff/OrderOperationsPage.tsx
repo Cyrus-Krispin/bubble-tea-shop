@@ -221,20 +221,33 @@ export default function OrderOperationsPage() {
         align: "end",
         cell: (order) => (
           <Button
+            aria-controls={`order-detail-${order.id}`}
+            aria-expanded={selectedOrderId === order.id}
             onClick={() => {
+              if (selectedOrderId === order.id) {
+                setSelectedOrderId(undefined);
+                setDetailState({ status: "idle" });
+                setCompletionOpen(false);
+                setCompletionError(undefined);
+                setShortages([]);
+                return;
+              }
               setSelectedOrderId(order.id);
               setDetailState({ status: "loading" });
+              setCompletionOpen(false);
+              setCompletionError(undefined);
+              setShortages([]);
               setDetailVersion((value) => value + 1);
             }}
             size="compact"
             variant="secondary"
           >
-            View {order.publicOrderNumber}
+            {selectedOrderId === order.id ? "Hide" : "View"} {order.publicOrderNumber}
           </Button>
         ),
       },
     ],
-    [],
+    [selectedOrderId],
   );
 
   if (organizationId === "") {
@@ -385,7 +398,47 @@ export default function OrderOperationsPage() {
                   caption={`${pageState.page.totalItems} order${pageState.page.totalItems === 1 ? "" : "s"}`}
                   columns={columns}
                   emptyMessage="No orders match this status."
+                  expandedRowKey={selectedOrderId}
                   getRowKey={(order) => order.id}
+                  renderExpandedRow={(order) => (
+                    <div
+                      aria-label={`Order ${order.publicOrderNumber} details`}
+                      className="order-inline-detail"
+                      id={`order-detail-${order.id}`}
+                      role="region"
+                    >
+                      {detailState.status === "loading" ? (
+                        <p role="status">Loading order details…</p>
+                      ) : null}
+                      {detailState.status === "error" ? (
+                        <ProblemState
+                          message="We couldn’t load this order. Select it again or refresh the queue."
+                          onRetry={() => {
+                            setDetailState({ status: "loading" });
+                            setDetailVersion((value) => value + 1);
+                          }}
+                          title="Order unavailable"
+                        />
+                      ) : null}
+                      {detailState.status === "ready" ? (
+                        <OrderDetail
+                          completionError={completionError}
+                          completionOpen={completionOpen}
+                          completing={completing}
+                          onComplete={complete}
+                          onOpenChange={(open) => {
+                            setCompletionOpen(open);
+                            if (open) {
+                              setCompletionError(undefined);
+                              setShortages([]);
+                            }
+                          }}
+                          order={detailState.order}
+                          shortages={shortages}
+                        />
+                      ) : null}
+                    </div>
+                  )}
                   rows={pageState.page.items}
                 />
                 <Pagination
@@ -401,36 +454,6 @@ export default function OrderOperationsPage() {
             ) : null}
           </section>
 
-          {detailState.status === "loading" ? (
-            <p role="status">Loading order details…</p>
-          ) : null}
-          {detailState.status === "error" ? (
-            <ProblemState
-              message="We couldn’t load this order. Select it again or refresh the queue."
-              onRetry={() => {
-                setDetailState({ status: "loading" });
-                setDetailVersion((value) => value + 1);
-              }}
-              title="Order unavailable"
-            />
-          ) : null}
-          {detailState.status === "ready" ? (
-            <OrderDetail
-              completionError={completionError}
-              completionOpen={completionOpen}
-              completing={completing}
-              onComplete={complete}
-              onOpenChange={(open) => {
-                setCompletionOpen(open);
-                if (open) {
-                  setCompletionError(undefined);
-                  setShortages([]);
-                }
-              }}
-              order={detailState.order}
-              shortages={shortages}
-            />
-          ) : null}
         </div>
       )}
     </main>

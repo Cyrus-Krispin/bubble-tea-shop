@@ -313,6 +313,12 @@
   border-radius: var(--radius-card);
 }
 
+.order-inline-detail .order-detail {
+  padding: var(--space-4);
+  border-color: var(--color-line-strong);
+  box-shadow: 0 0.5rem 1.5rem rgb(24 24 21 / 8%);
+}
+
 .order-detail-heading,
 .order-total-row,
 .order-line-list li,
