@@ -84,9 +84,9 @@ export function CartPage() {
       <CustomerHeader itemCount={itemCount} />
       <main className="cart-main" aria-labelledby="cart-title">
         <div className="cart-heading">
-          <p className="eyebrow">Almost tea time</p>
+          <p className="eyebrow">Order review</p>
           <h1 id="cart-title">Your current order</h1>
-          <p>Review each cup before heading to the counter.</p>
+          <p>Check each drink, then place the order for cash pickup.</p>
         </div>
         {placedOrder !== undefined ? (
           <section className="cart-confirmation" aria-labelledby="confirmation-title">
@@ -102,9 +102,9 @@ export function CartPage() {
           </section>
         ) : items.length === 0 ? (
           <section className="cart-empty" aria-labelledby="empty-title">
-            <span aria-hidden="true">○</span>
-            <h2 id="empty-title">Your cup is waiting</h2>
-            <p>Choose a drink and make it exactly the way you like it.</p>
+            <span aria-hidden="true">0</span>
+            <h2 id="empty-title">Your order is empty</h2>
+            <p>Choose a drink and customize it to get started.</p>
             <Link className="secondary-link" to="/shop">Browse the menu</Link>
           </section>
         ) : (
@@ -133,12 +133,12 @@ export function CartPage() {
               <Link className="back-link" to={`/shop/${items[0].locationSlug}`}>← Add another drink</Link>
             </section>
             <aside className="order-summary" aria-labelledby="summary-title">
-              <p className="eyebrow">Pickup summary</p>
+              <p className="eyebrow">Cash pickup</p>
               <h2 id="summary-title">Pay at the shop</h2>
-              <p>Your final price is recalculated from the live menu before the order is accepted.</p>
+              <p>Review the total, place the order, then pay cash when you pick it up.</p>
               <dl><div><dt>Items</dt><dd>{itemCount}</dd></div><div className="summary-total"><dt>Preview total</dt><dd>{formatMoney(previewTotalMinor, items[0].currency)}</dd></div></dl>
-              <button aria-describedby="checkout-note" disabled={submitting} onClick={checkout} type="button">{submitting ? "Placing order…" : "Place cash order"}</button>
-              <small id="checkout-note">Placement creates a pending order. Stock is checked when staff complete it.</small>
+              <button aria-describedby="checkout-note" disabled={submitting} onClick={checkout} type="button">{submitting ? "Placing order…" : `Place order · ${formatMoney(previewTotalMinor, items[0].currency)}`}</button>
+              <small id="checkout-note">This sends a pending order to the shop. Pay cash at pickup.</small>
               {submitError === undefined ? null : <p className="checkout-error" role="alert">{submitError}</p>}
             </aside>
           </div>

@@ -118,7 +118,7 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
         </section>
         <form className="customizer" onSubmit={submit}>
           <div className="customizer-heading">
-            <div><p className="eyebrow">One cup at a time</p><h2 id="customize-title">Make it yours</h2></div>
+            <div><p className="eyebrow">Your drink</p><h2 id="customize-title">Customize your drink</h2></div>
             <strong aria-live="polite">{formatMoney(previewTotalMinor, currency)}</strong>
           </div>
           <fieldset>
@@ -153,7 +153,7 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
             />
           ))}
           <div className="customizer-action">
-            <p className="preview-disclaimer">Current menu total · Final price is confirmed when the order is submitted.</p>
+            <p className="preview-disclaimer">Menu total. The shop confirms the final price when you place the order.</p>
             <button type="submit">Add to order · {formatMoney(previewTotalMinor, currency)}</button>
           </div>
           {addedMessage ? <p className="added-message" role="status">✓ {addedMessage} <Link to="/cart">View order</Link></p> : null}
@@ -194,7 +194,6 @@ function OptionGroup({
                 onChange={() => onSelect(group, choice)}
                 type={multiple ? "checkbox" : "radio"}
               />
-              {multiple ? <span aria-hidden="true" className="topping-icon">●</span> : null}
               {multiple ? <strong>{choice.name}</strong> : <span>{choice.name}</span>}
               <small>{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small>
             </label>

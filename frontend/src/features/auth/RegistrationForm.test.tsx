@@ -72,4 +72,17 @@ describe("RegistrationForm", () => {
     expect(alert).toHaveTextContent("We couldn't create your account. Please try again or sign in.");
     expect(alert).not.toHaveTextContent("User already registered");
   });
+
+  it("lets the user reveal both new-password fields", () => {
+    render(<RegistrationForm onRegister={vi.fn()} />);
+
+    const password = screen.getByLabelText("Password");
+    const confirmation = screen.getByLabelText("Confirm password");
+    fireEvent.click(screen.getByRole("button", { name: "Show passwords" }));
+    expect(password).toHaveAttribute("type", "text");
+    expect(confirmation).toHaveAttribute("type", "text");
+    fireEvent.click(screen.getByRole("button", { name: "Hide passwords" }));
+    expect(password).toHaveAttribute("type", "password");
+    expect(confirmation).toHaveAttribute("type", "password");
+  });
 });

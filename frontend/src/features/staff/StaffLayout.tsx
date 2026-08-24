@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, NavLink, Outlet } from "react-router";
+import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
 
 import { Button, ProblemState } from "../../components/ui";
 import { signOut } from "../auth/authClient";
@@ -22,6 +22,7 @@ export type StaffOutletContext = {
 };
 
 export function StaffLayout() {
+  const location = useLocation();
   const { isLoading: isSessionLoading, session } = useAuth();
   const [contextState, setContextState] = useState<ContextState>({ status: "idle" });
   const [requestVersion, setRequestVersion] = useState(0);
@@ -46,7 +47,10 @@ export function StaffLayout() {
   if (isSessionLoading) {
     return <main aria-label="Staff workspace" className="staff-status"><p role="status">Checking your session…</p></main>;
   }
-  if (session === null) return <Navigate replace to="/staff/sign-in" />;
+  if (session === null) {
+    const next = `${location.pathname}${location.search}`;
+    return <Navigate replace to={`/staff/sign-in?next=${encodeURIComponent(next)}`} />;
+  }
 
   const visibleState = (
     (contextState.status === "ready" || contextState.status === "error")
@@ -69,11 +73,12 @@ export function StaffLayout() {
   return (
     <div className="staff-shell">
       <a className="skip-link" href="#staff-workspace">Skip to workspace</a>
-      <header className="staff-header">
+      <aside className="staff-header" aria-label="Staff workspace navigation">
         <Link className="staff-brand" to="/staff" aria-label="Bubble Tea Shop staff home">
-          <span className="brand-mark" aria-hidden="true">BT</span>
+          <img alt="" aria-hidden="true" className="brand-icon" height="40" src="/app-icon-192.png" width="40" />
           <span><strong>Bubble Tea Shop</strong><small>Operations</small></span>
         </Link>
+        <p className="staff-nav-label">Workspace</p>
         <nav aria-label="Staff navigation">
           <NavLink end to="/staff">Overview</NavLink>
           <NavLink to="/staff/catalog">Catalog</NavLink>
@@ -89,7 +94,7 @@ export function StaffLayout() {
           <span>{session.email}</span>
           <Button onClick={handleSignOut} size="compact" variant="secondary">Sign out</Button>
         </div>
-      </header>
+      </aside>
 
       {signOutFailed ? <p className="staff-global-message form-message form-message--error" role="alert">We couldn&apos;t sign you out. Please try again.</p> : null}
       {visibleState.status === "idle" || visibleState.status === "loading" ? (

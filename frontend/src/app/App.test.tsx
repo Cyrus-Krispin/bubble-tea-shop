@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { catalogLocations, catalogMenu, catalogProduct } from "../test/catalogFixtures";
@@ -77,6 +77,13 @@ import {
   updateRecipe,
 } from "../features/staff/recipeClient";
 
+const scrollToMock = vi.fn();
+
+function LocationProbe() {
+  const location = useLocation();
+  return <output data-testid="location">{location.pathname}{location.search}</output>;
+}
+
 const managedIngredient = {
   id: "a20d5547-69bb-4cb1-b9cc-d699629c49dc",
   name: "Assam Tea",
@@ -118,6 +125,7 @@ const managedRecipe = {
 describe("App", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubGlobal("scrollTo", scrollToMock);
     vi.mocked(getCurrentAuthSession).mockResolvedValue(null);
     vi.mocked(getGuestLocations).mockResolvedValue(catalogLocations);
     vi.mocked(getGuestMenu).mockResolvedValue(catalogMenu);
@@ -161,16 +169,34 @@ describe("App", () => {
     });
   });
 
-  it("offers optional customer account creation without blocking guest ordering", () => {
+  it("offers sign in and account creation on one customer access surface", async () => {
     render(
-      <MemoryRouter initialEntries={["/account/create"]}>
+      <MemoryRouter initialEntries={["/account/access?mode=create"]}>
         <App />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("main")).toHaveAccessibleName("Create customer account");
-    expect(screen.getByRole("heading", { level: 1, name: "Save your tea journey" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Continue as guest" })).toHaveAttribute("href", "/shop");
+    expect(await screen.findByRole("main")).toHaveAccessibleName("Customer access");
+    expect(screen.getByRole("heading", { level: 1, name: "Create your account" })).toBeVisible();
+    expect(screen.getByRole("navigation", { name: "Account access options" }).querySelector("a")).toHaveAttribute(
+      "href",
+      "/account/access?mode=sign-in",
+    );
+    expect(screen.getByRole("link", { name: "Continue to menu" })).toHaveAttribute("href", "/");
+  });
+
+  it("preserves a safe return path from the legacy customer sign-in route", async () => {
+    render(
+      <MemoryRouter initialEntries={["/account/sign-in?next=/cart"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("main")).toHaveAccessibleName("Customer access");
+    expect(screen.getByRole("link", { name: "Create account" })).toHaveAttribute(
+      "href",
+      "/account/access?mode=create&next=%2Fcart",
+    );
   });
 
   it("shows the signed-in customer account without granting a staff role", async () => {
@@ -198,7 +224,7 @@ describe("App", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/account/create"]}>
+      <MemoryRouter initialEntries={["/account/access?mode=create"]}>
         <App />
       </MemoryRouter>,
     );
@@ -207,17 +233,16 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "Create account" })).not.toBeInTheDocument();
   });
 
-  it("lets a customer continue to the guest shop", async () => {
+  it("opens directly on the API-backed menu", async () => {
     render(
       <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole("link", { name: "Continue as guest" }));
-
     expect(await screen.findByRole("main", { name: "Guest shop" })).toBeVisible();
-    expect(screen.getByRole("heading", { level: 1, name: "Choose your brew" })).toBeVisible();
+    expect(document.querySelector("img.brand-icon")).toHaveAttribute("src", "/app-icon-192.png");
+    expect(screen.getByRole("heading", { level: 1, name: "Drinks made your way" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Pickup at Orchard Central" })).toBeVisible();
     expect(screen.getByRole("heading", { level: 2, name: "Moonlit Milk Tea" })).toBeVisible();
   });
@@ -230,8 +255,19 @@ describe("App", () => {
     );
 
     expect(screen.getByRole("main")).toHaveAccessibleName("Staff sign in");
-    expect(screen.getByRole("heading", { level: 1, name: "Sign in to your workspace" })).toBeVisible();
-    expect(screen.getByText("Use your staff account to access shop operations.")).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1, name: "Staff sign in" })).toBeVisible();
+    expect(screen.getByText("Use the account assigned to your shop role.")).toBeVisible();
+  });
+
+  it("shows a useful recovery page for unknown routes", async () => {
+    render(
+      <MemoryRouter initialEntries={["/missing-page"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Return to menu" })).toHaveAttribute("href", "/");
   });
 
   it("guards the staff workspace and renders only server-returned scope", async () => {
@@ -278,6 +314,20 @@ describe("App", () => {
 
     expect(await screen.findByRole("main", { name: "Staff sign in" })).toBeVisible();
     expect(getStaffContext).not.toHaveBeenCalled();
+  });
+
+  it("preserves the exact staff deep link while requesting sign in", async () => {
+    render(
+      <MemoryRouter initialEntries={["/staff/orders?status=PENDING"]}>
+        <App />
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("main", { name: "Staff sign in" })).toBeVisible();
+    expect(screen.getByTestId("location")).toHaveTextContent(
+      "/staff/sign-in?next=%2Fstaff%2Forders%3Fstatus%3DPENDING",
+    );
   });
 
   it("shows a generic no-access state without inventing an organization", async () => {
@@ -626,9 +676,11 @@ describe("App", () => {
     await screen.findByRole("heading", { name: "Moonlit Milk Tea" });
     fireEvent.click(screen.getByRole("checkbox", { name: "Pearls +$0.60" }));
     fireEvent.click(screen.getByRole("button", { name: "Add to order · $7.20" }));
+    scrollToMock.mockClear();
     fireEvent.click(screen.getByRole("link", { name: "View order" }));
 
     expect(screen.getByRole("heading", { level: 1, name: "Your current order" })).toBeVisible();
+    expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
     expect(screen.getByText("Medium · 50% · Less ice · Pearls")).toBeVisible();
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$7.20");
   });

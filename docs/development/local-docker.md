@@ -4,6 +4,7 @@ The development runtime is intentionally local-only. One Compose project starts:
 
 - Supabase Postgres from the official `supabase/postgres` image;
 - Supabase Auth (GoTrue) from the official `supabase/gotrue` image;
+- Supabase Studio and Postgres Meta for local database and Auth administration;
 - the Spring Boot modular monolith; and
 - a React/Vite SPA served by Nginx with guest ordering and separate customer/staff authentication.
 
@@ -29,6 +30,16 @@ build layers are present:
 docker compose up
 ```
 
+For an existing checkout created before Studio was added, rerun the generator once and append its
+fresh signing material and Studio keys to the ignored `.env` file before starting Compose:
+
+```bash
+node infra/supabase/generate-local-auth-keys.mjs >> .env
+```
+
+The new values supersede the earlier generated entries. This rotates local signing keys, so sign
+in again if an existing browser session stops working.
+
 Do not use `--build` offline after changing a Dockerfile or dependency manifest unless the required
 artifacts are already cached.
 
@@ -37,6 +48,7 @@ artifacts are already cached.
 | Service | URL | Purpose |
 | --- | --- | --- |
 | Frontend workspace | <http://localhost:4173> | Guest ordering, customer accounts, and staff sign-in SPA |
+| Supabase Studio | <http://localhost:54323> | Local table editor, SQL editor, and Auth administration |
 | Spring health | <http://localhost:8080/actuator/health> | Backend and database readiness |
 | Supabase Auth health | <http://localhost:8000/auth/v1/health> | Local GoTrue readiness through Kong |
 | PostgreSQL | `localhost:54322` | Optional host access for database tools |
@@ -52,6 +64,7 @@ Check the stack without changing data:
 ```bash
 docker compose ps
 curl --fail http://localhost:4173/health
+curl --fail http://localhost:54323/api/platform/profile
 curl --fail http://localhost:8080/actuator/health
 curl --fail http://localhost:8000/auth/v1/health
 ```
@@ -70,8 +83,9 @@ output so they can be redirected into the ignored `.env`; it never writes or com
 Every port mapping binds only to `127.0.0.1`; do not expose this stack to another machine or use it
 as a production deployment.
 
-Change `POSTGRES_PASSWORD`, `JWT_SECRET`, and `JWT_KEYS` before sharing an environment. Never
-commit real user data, production credentials, OAuth client secrets, tokens, or an edited `.env`.
+Change `POSTGRES_PASSWORD`, `JWT_SECRET`, `JWT_KEYS`, `ANON_KEY`, `SERVICE_ROLE_KEY`, and
+`PG_META_CRYPTO_KEY` before sharing an environment. Never commit real user data, production
+credentials, OAuth client secrets, tokens, or an edited `.env`.
 Email accounts are auto-confirmed because no SMTP service is part of this focused local stack.
 The local Auth service enforces the same eight-character password minimum shown by the customer
 registration form; browser validation is only usability feedback, not the security boundary.
@@ -100,5 +114,5 @@ or reactivates access. Remove the three bootstrap variables after the one-shot c
 them in a committed environment file or enable bootstrap on the long-running backend service.
 
 The Supabase image tags are copied from a tested official Docker Compose release. Update the
-Postgres and GoTrue tags together only after reviewing Supabase release notes and running the full
-backend verification suite.
+Postgres, GoTrue, Studio, and Postgres Meta tags together only after reviewing Supabase release
+notes and running the full backend verification suite.

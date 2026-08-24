@@ -77,7 +77,7 @@ describe("CartPage", () => {
     renderCart();
 
     expect(screen.getByRole("heading", { name: "Your current order" })).toBeVisible();
-    expect(screen.getByText("Your cup is waiting")).toBeVisible();
+    expect(screen.getByText("Your order is empty")).toBeVisible();
     expect(screen.getByRole("link", { name: "Browse the menu" })).toHaveAttribute("href", "/shop");
   });
 
@@ -95,13 +95,13 @@ describe("CartPage", () => {
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$14.40");
 
     fireEvent.click(screen.getByRole("button", { name: "Remove Moonlit Milk Tea" }));
-    expect(screen.getByText("Your cup is waiting")).toBeVisible();
+    expect(screen.getByText("Your order is empty")).toBeVisible();
   });
 
   it("submits catalog identifiers only and clears the cart after server confirmation", async () => {
     renderCart();
     fireEvent.click(screen.getByRole("button", { name: "Seed item" }));
-    fireEvent.click(screen.getByRole("button", { name: "Place cash order" }));
+    fireEvent.click(screen.getByRole("button", { name: "Place order · $7.20" }));
 
     await waitFor(() => expect(placeGuestOrder).toHaveBeenCalledWith({
       items: [{
@@ -122,7 +122,7 @@ describe("CartPage", () => {
       .mockRejectedValueOnce(new TypeError("network unavailable"));
     renderCart();
     fireEvent.click(screen.getByRole("button", { name: "Seed item" }));
-    const checkout = screen.getByRole("button", { name: "Place cash order" });
+    const checkout = screen.getByRole("button", { name: "Place order · $7.20" });
     fireEvent.click(checkout);
     expect(screen.getByRole("button", { name: "Placing order…" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Placing order…" }));
@@ -131,7 +131,7 @@ describe("CartPage", () => {
     rejectRequest?.(new TypeError("network unavailable"));
     expect(await screen.findByRole("alert")).toHaveTextContent("couldn’t confirm");
     const firstKey = vi.mocked(placeGuestOrder).mock.calls[0]?.[1];
-    fireEvent.click(screen.getByRole("button", { name: "Place cash order" }));
+    fireEvent.click(screen.getByRole("button", { name: "Place order · $7.20" }));
     await waitFor(() => expect(placeGuestOrder).toHaveBeenCalledTimes(2));
     expect(vi.mocked(placeGuestOrder).mock.calls[1]?.[1]).toBe(firstKey);
     expect(screen.getByRole("heading", { name: "Moonlit Milk Tea" })).toBeVisible();

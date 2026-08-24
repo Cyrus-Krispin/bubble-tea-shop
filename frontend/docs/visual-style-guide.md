@@ -1,146 +1,149 @@
-# Customer Ordering Visual Style Guide
+# Ube, Calamansi, and Photographic Product Experience
 
-This guide defines the photographic visual direction for Bubble Tea Shop's customer ordering
-experience. Implementation must preserve usability, accessibility, responsive behavior, and the
-schema-first product boundary as the interface evolves.
+This guide defines Bubble Tea Shop as a fast, contemporary ordering product with a realistic,
+product-led visual system. The interface should feel like a modern independent tea bar: direct,
+energetic, composed, and grounded in honest drink and shop photography.
 
-## Visual identity
+## Objective
 
-The customer experience should feel like a contemporary neighborhood tea bar photographed in
-warm natural light. Real drinks and welcoming storefronts lead the interface; restrained ivory,
-forest, and apricot surfaces keep ordering calm and legible.
+Help a guest discover a drink, choose a pickup shop, understand customization, and place a cash
+pickup order with as little friction as possible. Help staff complete repeated operational work
+quickly and accurately. The guest and staff products share one brand system but use different
+information density.
 
-- Show the selected shop, drink, essential choices, price, and next action before decoration.
-- Use realistic photography to distinguish products and places without introducing fictional
-  labels, packaging brands, people, or text inside images.
-- Keep generous whitespace and one dominant action per step.
-- Prefer honest ingredients, natural texture, and plausible café lighting over exaggerated color,
-  animation, illustration, or synthetic glossy effects.
+Success means:
 
-## Color and typography
+- the menu is the home page and guest ordering never passes through an account gate;
+- every customer and staff workflow remains API-backed;
+- customer sign-in and registration share one compact access surface;
+- the experience works at 320, 768, 1024, and 1440 CSS pixels and at 200% zoom;
+- interactive controls meet WCAG 2.2 AA and use at least a 44-pixel target;
+- no business data, availability, price, location, badge, rating, or promotion is invented in the
+  client.
 
-Use the existing customer tokens as the base palette and confirm every foreground/background pair
-with automated contrast checks.
+## Brand system
 
-| Token | Value | Use |
+Cool white and soft lavender carry most of the interface. Ube violet is the functional brand
+color; calamansi lime is a scarce highlight. Realistic drink photography supplies warmth and
+ingredient color.
+
+| Token | Value | Role |
 |---|---:|---|
-| `canvas` | `#FFFDF7` | Page background and breathing room |
-| `surface` | `#FFF9EE` | Cards and customization panels |
-| `ink` | `#23332B` | Primary text |
-| `forest` | `#496B35` | Selected states and secondary actions |
-| `forest-strong` | `#315126` | Accessible emphasis on light surfaces |
-| `apricot` | `#F47A32` | Primary ordering action |
-| `apricot-strong` | `#C84F16` | Hover, pressed, and strong emphasis |
-| `line` | `#E8D9C4` | Dividers and inactive boundaries |
-| `muted-ink` | `#667269` | Supporting copy |
+| `canvas` | `#f7f7fb` | App background |
+| `surface` | `#ffffff` | Product and form surfaces |
+| `surface-subtle` | `#f0edff` | Selected and supporting surfaces |
+| `ink` | `#17131f` | Primary type and strong structure |
+| `muted` | `#625b6b` | Supporting type |
+| `line` | `#ded9e5` | Decorative dividers |
+| `line-strong` | `#958b9f` | Interactive boundaries |
+| `primary` | `#6b2bd9` | Primary actions and current navigation |
+| `primary-strong` | `#5420b5` | Hover and pressed actions |
+| `primary-soft` | `#eee8ff` | Selected and informational surfaces |
+| `highlight` | `#c8f169` | Small freshness highlights |
+| `flavor` | `#d91e63` | Rare product accent |
+| `success` | `#18794e` | Successful states |
+| `warning` | `#8a4b08` | Attention states |
+| `danger` | `#b42318` | Errors and destructive actions |
 
-Ivory should dominate, forest should organize, and apricot should identify the primary action.
-Never rely on color alone for selection, status, errors, or availability.
+Keep neutral surfaces to roughly 85–90% of each screen. Violet is functional; lime and lychee are
+accents. Do not use gradients, glass effects, fantasy scenery, decorative sparkles, floating boba
+circles, or color-only state.
 
-Use a warm, readable display serif for the brand, page titles, and drink names, paired with a
-highly legible humanist sans serif for prices, descriptions, controls, and operational copy. Keep
-interface text at least `1rem`, limit all-caps text, and avoid novelty lettering in controls.
+Use a contemporary system sans stack. Display hierarchy comes from weight, scale, and spacing,
+not novelty type. Body text never falls below `1rem`; supporting metadata never falls below
+`0.8125rem`. Use literal task labels such as “Customize your drink” and “Pay cash at pickup.”
+
+Use an eight-point spacing rhythm. Controls use 8px radii and product surfaces use 10–12px radii.
+Pills are limited to category filters, status labels, and count badges. Prefer one-pixel boundaries
+and reserve shadows for overlays and sticky mobile actions.
 
 ## Photography system
 
 Every public drink and location record exposes a lowercase kebab-case image key through Spring's
-PostgreSQL-backed APIs. The frontend maps that presentation key to a reviewed, optimized local
-WebP asset; it must not invent a product, shop, price, availability value, or runtime fallback
+PostgreSQL-backed APIs. The frontend maps that presentation key to a reviewed, optimized local WebP
+asset; it must not invent a product, shop, price, availability, location, or runtime fallback
 catalog.
 
-Drink photographs should:
+Drink photographs should use a consistent crop with one clear cup, realistic liquid and toppings,
+a neutral café setting, soft daylight, and enough edge space for responsive `object-fit: cover`.
+They must match the recipe without text, logos, branded packaging, hands, or implausible ingredients.
 
-- use a consistent portrait crop with one clear cup, realistic liquid and toppings, a neutral
-  warm café setting, soft daylight, and enough edge space for responsive `object-fit: cover`;
-- match the named recipe visually without text, logos, branded packaging, hands, or implausible
-  ingredients;
-- retain enough tonal contrast against the card and avoid important details at crop boundaries.
+Location photographs should use a landscape storefront or interior crop with a believable
+Singapore neighborhood context and warm daylight. Avoid readable branding, promotional text,
+identifiable faces, and decorative drink lineups that could be mistaken for catalog offerings.
 
-Location photographs should:
+Runtime assets belong under `public/assets/catalog`, use explicit intrinsic dimensions, and are
+compressed to WebP after visual review. Menu images load lazily; the primary product and selected
+location images may load eagerly. Meaningful drink photographs use concise alternative text. Shop
+thumbnails use empty alternative text because the adjacent shop name supplies the accessible name.
 
-- use a consistent landscape storefront or interior crop with a believable Singapore neighborhood
-  context and warm daylight;
-- avoid readable branding, promotional text, identifiable faces, and decorative drink lineups that
-  could be mistaken for catalog offerings;
-- keep the main architectural subject centered enough for desktop and phone card crops.
+## Customer information architecture
 
-Generated source files are not runtime dependencies. Production assets belong under
-`public/assets/catalog`, use explicit intrinsic dimensions, and should be compressed to WebP after
-visual review. Menu images load lazily; the primary product detail image may load eagerly. Keep
-layout dimensions reserved to prevent content shift.
+`/` is the API-backed menu and `/shop` is a compatibility alias. The header contains the brand,
+menu link, account access, and cart count. Staff access remains a quiet secondary concern.
 
-Meaningful standalone drink photographs need concise alternative text such as “Mossy Matcha in a
-clear cup.” Shop thumbnails in the location picker use empty alternative text because the adjacent
-shop name already supplies the accessible name.
+The menu begins with a compact title and a “Pickup at” disclosure beside it. The closed control
+shows one small selected-shop photograph and name. Its anchored panel lists the API-returned shop
+routes with restrained thumbnails and a visible current marker; it never becomes a hero gallery,
+modal, or full-screen picker. Phones use the same control at full container width, approximately
+64–72px tall when closed.
 
-## Layout, cards, and controls
+The category rail stays visible while browsing. Product cards show a realistic photograph,
+category, name, description, database-owned starting price, availability, and one customization
+action. Do not add fake ratings, popularity, dietary attributes, or marketing badges.
 
-Build pages on an eight-point spacing rhythm. Desktop pages use a centered container with generous
-outer margins; phones use a single column without reducing text or touch targets. Location choices
-appear before the menu so pricing and checkout context remain clear.
+Customization uses a dedicated route. Desktop shows the drink at left and a decision panel at
+right. Mobile uses one document with a persistent total/action bar. Size, sweetness, ice, milk,
+and topping choices remain visible as native radios or checkboxes with literal names and price
+deltas. Unavailable choices remain readable and disabled.
 
-Product cards feature one large photograph, the product name, a short flavor note, and a clearly
-formatted database-owned starting price. Shop selection stays compact: a “Pickup at” disclosure
-beside the menu heading shows only a small selected-shop thumbnail and name until opened. Its
-anchored panel lists the two shop routes with restrained thumbnails and a visible current marker;
-it never becomes a hero gallery or full-screen picker. Use a quiet boundary, moderate radius, and
-restrained shadow. Selected or current states need a visible non-color cue such as text or a check.
+The cart is a one-page review. Each line shows quantity, configuration, remove control, and line
+total. The summary shows the selected pickup shop, pickup method, preview total, and explicit order
+action. Confirmation prioritizes the public order number, pending status, cash due, and next action.
+Mixed-location carts remain blocked.
 
-Use standard accessible controls:
+## Authentication and staff workspace
 
-- segmented controls for mutually exclusive choices such as size, sweetness, and ice;
-- checkbox-style tiles for optional toppings, with selection communicated beyond color;
-- literal labels, visible price deltas, and a current total near the primary action;
-- one dominant apricot action per step and forest treatments for secondary actions.
+Customer sign-in and registration live on one compact `/account/access` route with an in-place mode
+switch. Old routes redirect to the corresponding mode. Successful sign-in returns only to a
+validated same-origin application path. Staff sign-in remains separate because Spring resolves
+staff membership; the interface never offers a role picker.
 
-All interactive targets should be at least `44px` square. Keyboard focus must be visible and not
-clipped by rounded containers.
+Desktop staff navigation uses the redesigned left rail. The workspace is a neutral high-density
+canvas with compact headings, scope controls, actions, and semantic tables. Mobile uses the labeled
+horizontal module bar. Status always combines words with color.
 
-## Responsive image behavior
+## State and accessibility contract
 
-- Wide screens align the compact location disclosure beside the menu heading.
-- Tablets retain two columns only while cards and controls remain comfortable.
-- Phones keep the same disclosure pattern at full container width, around `64–72px` tall when
-  collapsed; the anchored option panel stays within the viewport.
-- Keep text in document flow; never bake shop names, prices, labels, or availability into photos.
-- Verify focal points at representative phone, tablet, and desktop widths before release.
-- Prefer CSS cropping with stable aspect ratios over separate domain-specific mobile assets.
+Every route handles loading, empty, error, denied, unavailable, and success states without layout
+collapse. Focus is visible and follows document order. Selection and availability never depend on
+color alone. Live regions announce price, cart, and mutation updates without moving focus. Content
+reflows at 200% zoom and forced-colors mode retains boundaries and selection.
 
-## Accessibility and interaction
-
-Target WCAG 2.2 AA. Preserve heading order, landmarks, labels, descriptions, and error associations;
-support keyboard-only ordering, screen readers, 200% zoom, and text reflow. Announce price and
-selection changes without moving focus unexpectedly. Pair error color with actionable text and
-retain customer choices after validation.
-
-Respect reduced-motion preferences. Photography must not require parallax, autoplay, or animation
-to understand the page. Loading and error states reserve space and use plain progress or recovery
-copy. Cart and checkout must state the selected shop, prevent mixed-location carts, and explain
-cash pickup before submission.
-
-## Customer and staff separation
-
-The photographic treatment belongs primarily to public shop selection, menu browsing,
-customization, cart, checkout, and guest order status. Staff and owner operations remain denser and
-more utilitarian, sharing tokens and accessible controls but prioritizing stable alignment, status
-clarity, data density, and keyboard workflows.
+The location disclosure uses a native button with `aria-expanded` and `aria-controls`, then an
+ordinary list of route links. Enter or Space toggles it; Escape closes it and restores trigger
+focus; outside click closes it. It does not impersonate a menu, listbox, or editable combobox.
 
 ## Image generation brief
-
-Use this reusable structure when extending the catalog:
 
 ```text
 Use case: product-mockup
 Asset type: photorealistic bubble tea product or Singapore tea-shop location photograph
-Primary request: create one realistic, original subject matching the database-owned product or
-location name and description.
-Composition: clean centered subject, generous crop-safe edges, no collage; portrait 4:5 for drinks
-or landscape 3:2 for shops.
-Lighting/mood: soft warm natural daylight, welcoming contemporary café, realistic materials.
-Palette: warm ivory, natural tea colors, restrained forest green and apricot accents.
-Constraints: no text, logo, watermark, brand, identifiable face, illustration, animation, fake UI,
-or unrelated products; plausible ingredients and scale; consistent with the existing photo set.
+Composition: one centered subject, crop-safe edges; portrait 4:5 for drinks or landscape 3:2 for shops
+Lighting: soft warm natural daylight in a plausible contemporary café
+Constraints: no text, logo, watermark, identifiable face, illustration, fake UI, or unrelated products
 ```
 
-Review every result at full size. Reject malformed cups, inconsistent shadows, illegible generated
-signage, unintended brands, misleading extra products, or focal points that fail responsive crops.
+Reject malformed cups, inconsistent shadows, generated signage, unintended brands, misleading
+extra products, or focal points that fail responsive crops.
+
+## Verification and boundaries
+
+Run `pnpm test`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, and `pnpm e2e` from `frontend/`.
+Verify desktop and phone layouts, keyboard behavior, axe results, console/network output, image
+loading and cropping, location-scoped checkout, and screenshot review in a real browser.
+
+Always preserve API-backed catalog, pricing, inventory, organization, location, and role data;
+idempotent order retry; optimistic concurrency; archival history; and server-side authorization.
+Never add a runtime fixture catalog, fake merchandising data, client-owned authorization, secrets,
+biometric behavior, or unimplemented navigation.

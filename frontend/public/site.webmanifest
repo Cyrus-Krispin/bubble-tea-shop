@@ -1,0 +1,21 @@
+{
+  "name": "Bubble Tea Shop",
+  "short_name": "Bubble Tea",
+  "description": "Order fresh, customizable bubble tea for cash pickup.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f7fb",
+  "theme_color": "#6b2bd9",
+  "icons": [
+    {
+      "src": "/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

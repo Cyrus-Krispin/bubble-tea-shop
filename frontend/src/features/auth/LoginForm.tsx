@@ -12,6 +12,7 @@ type LoginFormProps = {
 export function LoginForm({ onSignIn }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
@@ -49,10 +50,13 @@ export function LoginForm({ onSignIn }: LoginFormProps) {
           name="password"
           onChange={(event) => setPassword(event.target.value)}
           required
-          type="password"
+          type={showPassword ? "text" : "password"}
           value={password}
         />
       </Field>
+      <button className="password-toggle" onClick={() => setShowPassword((value) => !value)} type="button">
+        {showPassword ? "Hide password" : "Show password"}
+      </button>
 
       {status === "error" ? (
         <p className="form-message form-message--error" role="alert">

@@ -49,4 +49,15 @@ describe("LoginForm", () => {
 
     expect(screen.getByLabelText("Password")).not.toHaveAttribute("minlength");
   });
+
+  it("lets the user reveal and hide the password", () => {
+    render(<LoginForm onSignIn={vi.fn()} />);
+
+    const password = screen.getByLabelText("Password");
+    expect(password).toHaveAttribute("type", "password");
+    fireEvent.click(screen.getByRole("button", { name: "Show password" }));
+    expect(password).toHaveAttribute("type", "text");
+    fireEvent.click(screen.getByRole("button", { name: "Hide password" }));
+    expect(password).toHaveAttribute("type", "password");
+  });
 });
