@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createHmac } from "node:crypto";
+import { createPublicKey, verify } from "node:crypto";
 
 import { generateLocalAuthKeys } from "./generate-local-auth-keys.mjs";
 
@@ -17,11 +17,12 @@ test("generates one ES256 private signing key accepted by GoTrue", () => {
   assert.ok(signingKey.kid);
 });
 
-test("generates signed legacy API keys for local Studio", () => {
-  const { anonKey, jwtSecret, serviceRoleKey } = generateLocalAuthKeys();
+test("generates ES256 API keys accepted by asymmetric GoTrue", () => {
+  const { anonKey, jwtKeys, serviceRoleKey } = generateLocalAuthKeys();
+  const [signingKey] = JSON.parse(jwtKeys);
 
-  assertLegacyApiKey(anonKey, jwtSecret, "anon");
-  assertLegacyApiKey(serviceRoleKey, jwtSecret, "service_role");
+  assertApiKey(anonKey, signingKey, "anon");
+  assertApiKey(serviceRoleKey, signingKey, "service_role");
 });
 
 test("generates a separate encryption key for postgres-meta", () => {
@@ -31,20 +32,27 @@ test("generates a separate encryption key for postgres-meta", () => {
   assert.notEqual(pgMetaCryptoKey, jwtSecret);
 });
 
-function assertLegacyApiKey(token, secret, expectedRole) {
+function assertApiKey(token, signingKey, expectedRole) {
   assert.equal(typeof token, "string");
 
   const [encodedHeader, encodedPayload, signature] = token.split(".");
   const header = JSON.parse(Buffer.from(encodedHeader, "base64url").toString("utf8"));
   const payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8"));
-  const expectedSignature = createHmac("sha256", secret)
-    .update(`${encodedHeader}.${encodedPayload}`)
-    .digest("base64url");
+  const publicKey = createPublicKey({
+    key: { ...signingKey, d: undefined, key_ops: ["verify"] },
+    format: "jwk",
+  });
 
-  assert.deepEqual(header, { alg: "HS256", typ: "JWT" });
+  assert.deepEqual(header, { alg: "ES256", typ: "JWT", kid: signingKey.kid });
   assert.equal(payload.iss, "supabase-local");
+  assert.equal(payload.aud, "authenticated");
   assert.equal(payload.role, expectedRole);
   assert.ok(payload.iat <= Math.floor(Date.now() / 1000));
   assert.ok(payload.exp > payload.iat);
-  assert.equal(signature, expectedSignature);
+  assert.equal(verify(
+    "sha256",
+    Buffer.from(`${encodedHeader}.${encodedPayload}`),
+    { key: publicKey, dsaEncoding: "ieee-p1363" },
+    Buffer.from(signature, "base64url"),
+  ), true);
 }

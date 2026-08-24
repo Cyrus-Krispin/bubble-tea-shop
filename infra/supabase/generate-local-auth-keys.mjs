@@ -1,7 +1,7 @@
-import { createHmac, generateKeyPairSync, randomBytes, randomUUID } from "node:crypto";
+import { createPrivateKey, generateKeyPairSync, randomBytes, randomUUID, sign } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
-const LEGACY_API_KEY_LIFETIME_SECONDS = 10 * 365 * 24 * 60 * 60;
+const API_KEY_LIFETIME_SECONDS = 10 * 365 * 24 * 60 * 60;
 
 export function generateLocalAuthKeys() {
   const { privateKey } = generateKeyPairSync("ec", {
@@ -18,28 +18,38 @@ export function generateLocalAuthKeys() {
   const issuedAt = Math.floor(Date.now() / 1000);
 
   return {
-    anonKey: createLegacyApiKey(jwtSecret, "anon", issuedAt),
+    anonKey: createApiKey(signingKey, "anon", issuedAt),
     jwtSecret,
     jwtKeys: JSON.stringify([signingKey]),
     pgMetaCryptoKey: randomBytes(32).toString("hex"),
-    serviceRoleKey: createLegacyApiKey(jwtSecret, "service_role", issuedAt),
+    serviceRoleKey: createApiKey(signingKey, "service_role", issuedAt),
   };
 }
 
-function createLegacyApiKey(secret, role, issuedAt) {
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+function createApiKey(signingKey, role, issuedAt) {
+  const header = Buffer.from(JSON.stringify({
+    alg: "ES256",
+    typ: "JWT",
+    kid: signingKey.kid,
+  })).toString("base64url");
   const payload = Buffer.from(
     JSON.stringify({
       iss: "supabase-local",
       ref: "supabase-local",
       role,
+      aud: "authenticated",
       iat: issuedAt,
-      exp: issuedAt + LEGACY_API_KEY_LIFETIME_SECONDS,
+      exp: issuedAt + API_KEY_LIFETIME_SECONDS,
     }),
   ).toString("base64url");
-  const signature = createHmac("sha256", secret)
-    .update(`${header}.${payload}`)
-    .digest("base64url");
+  const signature = sign(
+    "sha256",
+    Buffer.from(`${header}.${payload}`),
+    {
+      key: createPrivateKey({ key: signingKey, format: "jwk" }),
+      dsaEncoding: "ieee-p1363",
+    },
+  ).toString("base64url");
 
   return `${header}.${payload}.${signature}`;
 }
