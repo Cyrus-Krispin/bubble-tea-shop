@@ -3,19 +3,30 @@ import { Link } from "react-router";
 
 import { Button } from "../../components/ui/Button";
 import { useAuth } from "../auth/useAuth";
+import { useCart } from "../cart/CartContext";
 import { formatMoney } from "../catalog/formatMoney";
-import { listCustomerOrders, type CustomerOrderSummary } from "./customerOrderClient";
-import { formatOrderDate, orderStatusLabel } from "./orderPresentation";
+import {
+  getLatestCustomerReorder,
+  type CustomerReorderSuggestion,
+} from "./customerOrderClient";
+import { formatOrderDate } from "./orderPresentation";
 import "./customerOrders.css";
 
 type SuggestionState =
   | { status: "hidden" }
-  | { status: "error"; accessToken: string }
-  | { status: "ready"; accessToken: string; order: CustomerOrderSummary };
+  | { status: "error"; accessToken: string; locationSlug: string }
+  | {
+      status: "ready";
+      accessToken: string;
+      locationSlug: string;
+      suggestion: CustomerReorderSuggestion;
+    };
 
-export function LastOrderSuggestion() {
+export function LastOrderSuggestion({ locationSlug }: { locationSlug: string }) {
   const { isLoading, session } = useAuth();
+  const { addOrder } = useCart();
   const [retryKey, setRetryKey] = useState(0);
+  const [cartMessage, setCartMessage] = useState<{ orderId: string; text: string }>();
   const [state, setState] = useState<SuggestionState>({ status: "hidden" });
   const accessToken = session?.accessToken ?? "";
 
@@ -23,23 +34,24 @@ export function LastOrderSuggestion() {
     if (isLoading || accessToken.length === 0) return;
 
     const controller = new AbortController();
-    listCustomerOrders(accessToken, { page: 0, size: 1 }, controller.signal)
-      .then((result) => setState(result.items[0] === undefined
+    getLatestCustomerReorder(accessToken, locationSlug, controller.signal)
+      .then((suggestion) => setState(suggestion === undefined
         ? { status: "hidden" }
-        : { status: "ready", accessToken, order: result.items[0] }))
+        : { status: "ready", accessToken, locationSlug, suggestion }))
       .catch((error: unknown) => {
         if (!(error instanceof DOMException && error.name === "AbortError")) {
-          setState({ status: "error", accessToken });
+          setState({ status: "error", accessToken, locationSlug });
         }
       });
     return () => controller.abort();
-  }, [accessToken, isLoading, retryKey]);
+  }, [accessToken, isLoading, locationSlug, retryKey]);
 
   if (
     isLoading ||
     accessToken.length === 0 ||
     state.status === "hidden" ||
-    state.accessToken !== accessToken
+    state.accessToken !== accessToken ||
+    state.locationSlug !== locationSlug
   ) return null;
 
   if (state.status === "error") {
@@ -53,24 +65,70 @@ export function LastOrderSuggestion() {
     );
   }
 
-  const { order } = state;
-  const itemPreview = order.items
-    .map((item) => `${item.productName} · ${item.variantName}${item.quantity > 1 ? ` × ${item.quantity}` : ""}`)
-    .join(", ");
+  const { suggestion } = state;
+
+  function addLastOrder() {
+    const added = addOrder(suggestion.items.map((item) => ({
+      quantity: item.quantity,
+      draft: {
+        locationSlug: suggestion.location.slug,
+        drinkId: item.productSlug,
+        drinkName: item.productName,
+        configuration: {
+          variantId: item.variantId,
+          variantName: item.variantName,
+          selections: item.selections.map((selection) => ({
+            groupId: selection.groupId,
+            groupName: selection.groupName,
+            choiceIds: [...selection.choiceIds],
+            choiceNames: [...selection.choiceNames],
+          })),
+        },
+        unitPriceMinor: item.unitPriceMinor,
+        currency: suggestion.currencyCode,
+      },
+    })));
+    setCartMessage({
+      orderId: suggestion.orderId,
+      text: added
+        ? "Added your last order to the cart."
+        : "Your cart can’t fit this order. Clear it before adding your last order.",
+    });
+  }
 
   return (
     <section aria-labelledby="last-order-title" className="last-order">
-      <div>
+      <div className="last-order__content">
         <p className="eyebrow">Welcome back</p>
-        <h2 id="last-order-title">Last ordered</h2>
-        <p className="last-order__items">{itemPreview}</p>
+        <h2 id="last-order-title">Order again</h2>
+        <ul className="last-order__items">
+          {suggestion.items.map((item) => (
+            <li key={`${item.variantId}-${item.selections.flatMap((selection) => selection.choiceIds).join("-")}`}>
+              <div>
+                <h3>{item.quantity} × {item.productName}</h3>
+                <p>
+                  {[item.variantName, ...item.selections.flatMap((selection) => selection.choiceNames)]
+                    .join(" · ")}
+                </p>
+              </div>
+              <strong>
+                {formatMoney(item.unitPriceMinor * item.quantity, suggestion.currencyCode)}
+              </strong>
+            </li>
+          ))}
+        </ul>
         <p className="last-order__meta">
-          <span>{formatOrderDate(order.createdAt)}</span> · <span>{order.location.name}</span> · {orderStatusLabel(order.status)}
+          <span>{formatOrderDate(suggestion.createdAt)}</span> · <span>{suggestion.location.name}</span>
+        </p>
+        <p aria-live="polite" className="last-order__message" role="status">
+          {cartMessage?.orderId === suggestion.orderId ? cartMessage.text : ""}
         </p>
       </div>
       <div className="last-order__action">
-        <strong>{formatMoney(order.totalMinor, order.currencyCode)}</strong>
-        <Link to={`/account/orders/${order.id}`}>View last order</Link>
+        <span>Current total</span>
+        <strong>{formatMoney(suggestion.totalMinor, suggestion.currencyCode)}</strong>
+        <Button onClick={addLastOrder}>Add order to cart</Button>
+        <Link to={`/account/orders/${suggestion.orderId}`}>View last order</Link>
       </div>
     </section>
   );

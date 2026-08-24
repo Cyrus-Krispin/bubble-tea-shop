@@ -11,7 +11,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     previewTotalMinor: state.items.reduce((total, item) => total + item.unitPriceMinor * item.quantity, 0),
     locationSlug: state.items[0]?.locationSlug,
     addItem: (draft) => dispatch({ type: "add", draft }),
-    addOrder: (lines) => dispatch({ type: "add-order", lines }),
+    addOrder: (lines) => {
+      const current = { items: state.items };
+      if (cartReducer(current, { type: "add-order", lines }) === current) return false;
+      dispatch({ type: "add-order", lines });
+      return true;
+    },
     incrementItem: (itemId: string) => dispatch({ type: "increment", itemId }),
     decrementItem: (itemId: string) => dispatch({ type: "decrement", itemId }),
     removeItem: (itemId: string) => dispatch({ type: "remove", itemId }),

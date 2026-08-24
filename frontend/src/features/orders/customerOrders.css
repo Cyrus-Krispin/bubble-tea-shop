@@ -74,9 +74,28 @@
 
 .last-order h2 { margin-bottom: var(--space-2); }
 .last-order p { margin-bottom: 0; }
-.last-order__items { font-weight: 800; line-height: 1.45; }
+.last-order__content { min-width: 0; flex: 1; }
+.last-order__items {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.last-order__items li {
+  display: flex;
+  gap: var(--space-4);
+  align-items: start;
+  justify-content: space-between;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-line);
+}
+.last-order__items h3 { margin: 0 0 var(--space-1); font-size: 1rem; }
+.last-order__items p { color: var(--color-muted); line-height: 1.45; }
 .last-order__meta { margin-top: var(--space-2); color: var(--color-muted); font-size: 0.9rem; }
-.last-order__action { display: grid; flex: 0 0 auto; gap: var(--space-3); text-align: right; }
+.last-order__message { min-height: 1.5em; margin-top: var(--space-3); font-weight: 800; }
+.last-order__action { display: grid; flex: 0 0 auto; gap: var(--space-2); text-align: right; }
+.last-order__action > span { color: var(--color-muted); font-size: 0.8rem; }
 .last-order__action a { font-weight: 800; }
 .last-order--error { justify-content: flex-start; background: var(--color-surface); border-color: var(--color-line); }
 

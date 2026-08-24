@@ -8,7 +8,7 @@ export type CartContextValue = {
   previewTotalMinor: number;
   locationSlug?: string;
   addItem: (draft: CartDraft) => void;
-  addOrder: (lines: readonly CartOrderLine[]) => void;
+  addOrder: (lines: readonly CartOrderLine[]) => boolean;
   incrementItem: (itemId: string) => void;
   decrementItem: (itemId: string) => void;
   removeItem: (itemId: string) => void;

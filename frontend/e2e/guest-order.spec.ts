@@ -46,7 +46,7 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
   await page.getByRole("link", { name: /Tiong Bahru/ }).click();
   await expect(page).toHaveURL(/\/shop\/tiong-bahru$/);
   await expect(page.getByRole("button", { name: "Pickup at Tiong Bahru" })).toBeVisible();
-  await expect(page.locator(".product-card")).toHaveCount(7);
+  await expect(page.locator(".product-card")).toHaveCount(5);
   const photos = page.locator(".drink-art");
   for (let index = 0; index < await photos.count(); index += 1) {
     const photo = photos.nth(index);
@@ -108,7 +108,7 @@ test("customer sees an account-linked order across the personalized storefront a
 
   await page.getByRole("link", { name: "Menu", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Drinks made your way" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Last ordered" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Order again" })).toHaveCount(0);
   await page.getByRole("link", { name: /Customize / }).first().click();
   await page.getByRole("button", { name: /Add to order/ }).click();
   await page.getByRole("link", { name: "View order" }).click();
@@ -118,8 +118,12 @@ test("customer sees an account-linked order across the personalized storefront a
   const publicOrderNumber = (await confirmation.textContent())?.replace("Pickup ", "") ?? "";
 
   await page.getByRole("link", { name: "Start another order" }).click();
-  await expect(page.getByRole("heading", { name: "Last ordered" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Order again" })).toBeVisible();
+  await expect(page.locator(".last-order__items").getByRole("heading")).toBeVisible();
   await expect(page.getByRole("link", { name: "View last order" })).toBeVisible();
+  await page.getByRole("button", { name: "Add order to cart" }).click();
+  await expect(page.getByText("Added your last order to the cart.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "View order" })).toBeVisible();
   await expectProductionQuality(page);
 
   await page.getByRole("link", { name: "Account" }).click();
