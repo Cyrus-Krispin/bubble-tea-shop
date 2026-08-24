@@ -23,7 +23,7 @@
 | `recipe_component` | Positive base-unit quantity of an ingredient. | Editable only while version is draft. |
 | `menu_product` | Optimistically versioned customer-facing drink identity, public slug, category, artwork key, and display order. | Archived only when no available offering uses a variant. |
 | `menu_variant` | Optimistically versioned size/form of a menu product, including its optional default marker. | Archived only when it has no available offering. |
-| `menu_variant_offering` | Optimistically versioned location price, availability, currency, and recipe assignment. | Updated when price, recipe, or availability changes. |
+| `menu_variant_offering` | Optimistically versioned location price, availability, currency, and recipe assignment. Its presence defines whether a variant belongs to that location's menu. | Updated when price, recipe, or availability changes; removed only when a location stops carrying the variant. Historical orders retain variant identifiers and immutable snapshots. |
 | `option_group` | Optimistically versioned selection limits and display order for a choice family. | Archived only when not enabled by an available offering. |
 | `option_choice` | Optimistically versioned value within an option group, including its optional default marker. | Archived only when not enabled by an available offering. |
 | `menu_variant_option_choice` | Optimistically versioned variant-specific enablement and price delta. | Disabled rather than deleted after use. |

@@ -53,7 +53,7 @@ class GuestCatalogApiIntegrationTest {
             .andExpect(jsonPath("$.location.name").value("Orchard Central"))
             .andExpect(jsonPath("$.location.currency").value("SGD"))
             .andExpect(jsonPath("$.location.imageKey").value("orchard-central"))
-            .andExpect(jsonPath("$.products.length()").value(7))
+            .andExpect(jsonPath("$.products.length()").value(6))
             .andExpect(jsonPath("$.products[0].slug").value("moonlit-milk-tea"))
             .andExpect(jsonPath("$.products[0].artworkKey").value("moonlit-milk-tea"))
             .andExpect(jsonPath("$.products[0].startingPrice.amountMinor").value(610))
@@ -62,8 +62,7 @@ class GuestCatalogApiIntegrationTest {
             .andExpect(jsonPath("$.products[3].slug").value("cloudberry-taro"))
             .andExpect(jsonPath("$.products[3].available").value(false))
             .andExpect(jsonPath("$.products[4].slug").value("honey-peach-green-tea"))
-            .andExpect(jsonPath("$.products[5].slug").value("roasted-hojicha-latte"))
-            .andExpect(jsonPath("$.products[6].slug").value("mango-passionfruit-tea"));
+            .andExpect(jsonPath("$.products[5].slug").value("roasted-hojicha-latte"));
     }
 
     @Test
@@ -71,8 +70,10 @@ class GuestCatalogApiIntegrationTest {
         mvc.perform(get("/api/v1/guest/locations/tiong-bahru/menu"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.location.name").value("Tiong Bahru"))
-            .andExpect(jsonPath("$.products.length()").value(7))
-            .andExpect(jsonPath("$.products[0].startingPrice.amountMinor").value(590));
+            .andExpect(jsonPath("$.products.length()").value(5))
+            .andExpect(jsonPath("$.products[0].slug").value("moonlit-milk-tea"))
+            .andExpect(jsonPath("$.products[0].startingPrice.amountMinor").value(590))
+            .andExpect(jsonPath("$.products[4].slug").value("mango-passionfruit-tea"));
     }
 
     @Test

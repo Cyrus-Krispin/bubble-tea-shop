@@ -125,3 +125,5 @@
   location-specific offerings without changing earlier migrations.
 - V14 adds the partial account/time/order index used for deterministic, bounded customer-history
   reads; it changes no domain relationship or lifecycle.
+- V15 gives Orchard Central and Tiong Bahru distinct product assortments and adds auditable opening
+  balances for the local catalog ingredients at both seeded locations.
