@@ -9,6 +9,9 @@ export type CustomerOrderSummary = Schemas["CustomerOrderSummary"];
 export type CustomerOrderDetail = Schemas["CustomerOrderDetail"];
 export type CustomerOrderLine = Schemas["CustomerOrderLine"];
 export type CustomerOrderOption = Schemas["CustomerOrderOption"];
+export type CustomerReorderSuggestion = Schemas["CustomerReorderSuggestion"];
+export type CustomerReorderLine = Schemas["CustomerReorderLine"];
+export type CustomerReorderSelection = Schemas["CustomerReorderSelection"];
 export type CustomerOrderStatus = CustomerOrderSummary["status"];
 
 export type CustomerOrderErrorCode =
@@ -150,6 +153,47 @@ function detail(value: unknown): CustomerOrderDetail {
   };
 }
 
+function reorderSelection(value: unknown): CustomerReorderSelection {
+  const input = object(value);
+  const choiceIds = array(input.choiceIds, string);
+  const choiceNames = array(input.choiceNames, string);
+  if (choiceIds.length !== choiceNames.length) invalid();
+  return {
+    groupId: string(input.groupId),
+    groupName: string(input.groupName),
+    choiceIds,
+    choiceNames,
+  };
+}
+
+function reorderLine(value: unknown): CustomerReorderLine {
+  const input = object(value);
+  return {
+    productSlug: string(input.productSlug),
+    productName: string(input.productName),
+    variantId: string(input.variantId),
+    variantName: string(input.variantName),
+    quantity: positiveInteger(input.quantity),
+    unitPriceMinor: integer(input.unitPriceMinor),
+    selections: array(input.selections, reorderSelection),
+  };
+}
+
+function reorderSuggestion(value: unknown): CustomerReorderSuggestion {
+  const input = object(value);
+  const items = array(input.items, reorderLine);
+  if (items.length === 0) invalid();
+  return {
+    orderId: string(input.orderId),
+    publicOrderNumber: string(input.publicOrderNumber),
+    createdAt: instant(input.createdAt),
+    location: location(input.location),
+    currencyCode: string(input.currencyCode),
+    totalMinor: integer(input.totalMinor),
+    items,
+  };
+}
+
 function page(value: unknown): CustomerOrderPage {
   const input = object(value);
   return {
@@ -214,4 +258,18 @@ export async function getCustomerOrder(
   );
   if (data === undefined) throw apiError(error, response.status);
   return detail(data);
+}
+
+export async function getLatestCustomerReorder(
+  accessToken: string,
+  locationSlug: string,
+  signal?: AbortSignal,
+): Promise<CustomerReorderSuggestion | undefined> {
+  const { data, error, response } = await client(accessToken).GET(
+    "/api/v1/customer/orders/latest-reorder",
+    { params: { query: { locationSlug } }, signal },
+  );
+  if (response.status === 204) return undefined;
+  if (data === undefined) throw apiError(error, response.status);
+  return reorderSuggestion(data);
 }

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   CustomerOrderError,
   getCustomerOrder,
+  getLatestCustomerReorder,
   listCustomerOrders,
 } from "./customerOrderClient";
 
@@ -53,6 +54,29 @@ const detail = {
   }],
 };
 
+const reorderSuggestion = {
+  orderId: summary.id,
+  publicOrderNumber: summary.publicOrderNumber,
+  createdAt: summary.createdAt,
+  location: summary.location,
+  currencyCode: "SGD",
+  totalMinor: 1440,
+  items: [{
+    productSlug: "moonlit-milk-tea",
+    productName: "Moonlit Milk Tea",
+    variantId: "50000000-0000-0000-0000-000000000002",
+    variantName: "Medium",
+    quantity: 2,
+    unitPriceMinor: 720,
+    selections: [{
+      groupId: "70000000-0000-0000-0000-000000000001",
+      groupName: "Sweetness",
+      choiceIds: ["71000000-0000-0000-0000-000000000003"],
+      choiceNames: ["50%"],
+    }],
+  }],
+};
+
 afterEach(() => {
   vi.clearAllMocks();
   vi.unstubAllGlobals();
@@ -87,6 +111,24 @@ describe("customerOrderClient", () => {
 
     const request = fetchMock.mock.calls[0]?.[0] as Request;
     expect(new URL(request.url).pathname).toBe(`/api/v1/customer/orders/${summary.id}`);
+  });
+
+  it("loads a current cart-ready reorder and maps no-content to no suggestion", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(reorderSuggestion), { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getLatestCustomerReorder("customer-token", "orchard-central"))
+      .resolves.toEqual(reorderSuggestion);
+    await expect(getLatestCustomerReorder("customer-token", "orchard-central"))
+      .resolves.toBeUndefined();
+
+    const request = fetchMock.mock.calls[0]?.[0] as Request;
+    const url = new URL(request.url);
+    expect(url.pathname).toBe("/api/v1/customer/orders/latest-reorder");
+    expect(url.searchParams.get("locationSlug")).toBe("orchard-central");
+    expect(request.headers.get("authorization")).toBe("Bearer customer-token");
   });
 
   it("preserves safe problem codes and rejects malformed successful payloads", async () => {
