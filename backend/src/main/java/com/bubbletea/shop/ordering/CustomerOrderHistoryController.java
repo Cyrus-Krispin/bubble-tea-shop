@@ -27,6 +27,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -41,9 +42,14 @@ import java.util.UUID;
 })
 public class CustomerOrderHistoryController {
     private final CustomerOrderHistoryService history;
+    private final CustomerReorderSuggestionService reorderSuggestions;
 
-    public CustomerOrderHistoryController(CustomerOrderHistoryService history) {
+    public CustomerOrderHistoryController(
+        CustomerOrderHistoryService history,
+        CustomerReorderSuggestionService reorderSuggestions
+    ) {
         this.history = history;
+        this.reorderSuggestions = reorderSuggestions;
     }
 
     @GetMapping
@@ -58,6 +64,26 @@ public class CustomerOrderHistoryController {
         @RequestParam(defaultValue = "10") @Min(1) @Max(20) int size
     ) {
         return history.list(authSubject(jwt), page, size);
+    }
+
+    @GetMapping("/latest-reorder")
+    @Operation(operationId = "getLatestCustomerReorder",
+        summary = "Get the newest currently fulfillable order configuration",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Current reorder configuration",
+            content = @Content(mediaType = "application/json", schema = @Schema(
+                implementation = CustomerReorderSuggestionService.CustomerReorderSuggestion.class))),
+        @ApiResponse(responseCode = "204", description = "No fully fulfillable latest order")
+    })
+    ResponseEntity<CustomerReorderSuggestionService.CustomerReorderSuggestion> latestReorder(
+        @AuthenticationPrincipal Jwt jwt,
+        @RequestParam String locationSlug
+    ) {
+        Optional<CustomerReorderSuggestionService.CustomerReorderSuggestion> suggestion =
+            reorderSuggestions.latest(authSubject(jwt), locationSlug);
+        return suggestion.map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/{orderId}")

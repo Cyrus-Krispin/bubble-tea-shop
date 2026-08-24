@@ -10,6 +10,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -180,6 +181,65 @@ class CustomerOrderHistoryApiIntegrationTest {
             .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    @Transactional
+    void returnsTheExactLatestOrderAtCurrentPricesOnlyWhileFullyInStock() throws Exception {
+        Customer customer = customer(true);
+        Order order = reorderableOrder(customer.accountId(), "BT-REORDER-LATEST",
+            Instant.parse("2026-08-23T09:30:00Z"));
+        stockOrchardIngredients("10000.000000");
+
+        mvc.perform(get("/api/v1/customer/orders/latest-reorder")
+                .param("locationSlug", "orchard-central")
+                .with(jwt().jwt(token -> token.subject(customer.subject().toString()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.orderId").value(order.id().toString()))
+            .andExpect(jsonPath("$.publicOrderNumber").value("BT-REORDER-LATEST"))
+            .andExpect(jsonPath("$.location.slug").value("orchard-central"))
+            .andExpect(jsonPath("$.currencyCode").value("SGD"))
+            .andExpect(jsonPath("$.totalMinor").value(1440))
+            .andExpect(jsonPath("$.items[0].productSlug").value("moonlit-milk-tea"))
+            .andExpect(jsonPath("$.items[0].variantId")
+                .value("50000000-0000-0000-0000-000000000002"))
+            .andExpect(jsonPath("$.items[0].variantName").value("Medium"))
+            .andExpect(jsonPath("$.items[0].quantity").value(2))
+            .andExpect(jsonPath("$.items[0].unitPriceMinor").value(720))
+            .andExpect(jsonPath("$.items[0].selections.length()").value(3))
+            .andExpect(jsonPath("$.items[0].selections[0].groupName").value("Sweetness"))
+            .andExpect(jsonPath("$.items[0].selections[0].choiceNames[0]").value("50%"))
+            .andExpect(jsonPath("$.items[0].selections[2].choiceNames[0]").value("Pearls"));
+
+        jdbc.update("UPDATE inventory_balance SET quantity = 0 WHERE location_id = ? AND ingredient_id = ?",
+            LOCATION, UUID.fromString("90000000-0000-0000-0000-000000000005"));
+
+        mvc.perform(get("/api/v1/customer/orders/latest-reorder")
+                .param("locationSlug", "orchard-central")
+                .with(jwt().jwt(token -> token.subject(customer.subject().toString()))))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Transactional
+    void hidesTheLatestOrderAtAnotherShopOrWhenItsConfigurationIsNoLongerAvailable() throws Exception {
+        Customer customer = customer(true);
+        reorderableOrder(customer.accountId(), "BT-REORDER-HIDDEN",
+            Instant.parse("2026-08-23T10:30:00Z"));
+        stockOrchardIngredients("10000.000000");
+
+        mvc.perform(get("/api/v1/customer/orders/latest-reorder")
+                .param("locationSlug", "tiong-bahru")
+                .with(jwt().jwt(token -> token.subject(customer.subject().toString()))))
+            .andExpect(status().isNoContent());
+
+        jdbc.update("UPDATE menu_variant_offering SET available = false WHERE location_id = ? AND menu_variant_id = ?",
+            LOCATION, UUID.fromString("50000000-0000-0000-0000-000000000002"));
+
+        mvc.perform(get("/api/v1/customer/orders/latest-reorder")
+                .param("locationSlug", "orchard-central")
+                .with(jwt().jwt(token -> token.subject(customer.subject().toString()))))
+            .andExpect(status().isNoContent());
+    }
+
     private Customer customer(boolean enabled) {
         UUID subject = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
@@ -215,6 +275,54 @@ class CustomerOrderHistoryApiIntegrationTest {
             """, itemId, ORGANIZATION, orderId, productName, variantName, quantity,
             totalMinor / quantity, totalMinor, Timestamp.from(createdAt));
         return new Order(orderId, itemId);
+    }
+
+    private Order reorderableOrder(UUID accountId, String publicNumber, Instant createdAt) {
+        UUID orderId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
+        UUID variantId = UUID.fromString("50000000-0000-0000-0000-000000000002");
+        jdbc.update("""
+            INSERT INTO customer_order (
+                id, organization_id, location_id, customer_account_id, public_order_number,
+                status, payment_method, currency_code, subtotal_minor, total_minor,
+                created_at, completed_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, 'COMPLETED', 'CASH', 'SGD', 1440, 1440, ?, ?, ?)
+            """, orderId, ORGANIZATION, LOCATION, accountId, publicNumber,
+            Timestamp.from(createdAt), Timestamp.from(createdAt.plusSeconds(300)),
+            Timestamp.from(createdAt));
+        jdbc.update("""
+            INSERT INTO order_item (
+                id, organization_id, customer_order_id, menu_variant_id, line_number,
+                product_name_snapshot, variant_name_snapshot, quantity,
+                unit_price_minor, line_total_minor, created_at
+            ) VALUES (?, ?, ?, ?, 1, 'Moonlit Milk Tea', 'Medium', 2, 720, 1440, ?)
+            """, itemId, ORGANIZATION, orderId, variantId, Timestamp.from(createdAt));
+        UUID[] choices = {
+            UUID.fromString("71000000-0000-0000-0000-000000000003"),
+            UUID.fromString("71000000-0000-0000-0000-000000000007"),
+            UUID.fromString("71000000-0000-0000-0000-000000000010")
+        };
+        String[] groups = { "Sweetness", "Ice", "Toppings" };
+        String[] names = { "50%", "Less ice", "Pearls" };
+        long[] deltas = { 0, 0, 60 };
+        for (int index = 0; index < choices.length; index++) {
+            jdbc.update("""
+                INSERT INTO order_item_option (
+                    id, organization_id, order_item_id, option_choice_id, selection_number,
+                    group_name_snapshot, choice_name_snapshot, price_delta_minor
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, UUID.randomUUID(), ORGANIZATION, itemId, choices[index], index + 1,
+                groups[index], names[index], deltas[index]);
+        }
+        return new Order(orderId, itemId);
+    }
+
+    private void stockOrchardIngredients(String quantity) {
+        jdbc.update("""
+            INSERT INTO inventory_balance (organization_id, location_id, ingredient_id, quantity)
+            SELECT ?, ?, id, ?::numeric FROM ingredient WHERE organization_id = ?
+            ON CONFLICT (location_id, ingredient_id) DO UPDATE SET quantity = EXCLUDED.quantity
+            """, ORGANIZATION, LOCATION, quantity, ORGANIZATION);
     }
 
     private record Customer(UUID subject, UUID accountId) { }

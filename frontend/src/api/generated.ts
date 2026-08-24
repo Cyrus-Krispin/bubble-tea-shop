@@ -779,6 +779,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/customer/orders/latest-reorder": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Get the newest currently fulfillable order configuration */
+        readonly get: operations["getLatestCustomerReorder"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1656,6 +1673,37 @@ export interface components {
             readonly choiceName: string;
             /** Format: int64 */
             readonly priceDeltaMinor: number;
+        };
+        readonly CustomerReorderLine: {
+            readonly productSlug: string;
+            readonly productName: string;
+            /** Format: uuid */
+            readonly variantId: string;
+            readonly variantName: string;
+            /** Format: int32 */
+            readonly quantity: number;
+            /** Format: int64 */
+            readonly unitPriceMinor: number;
+            readonly selections: readonly components["schemas"]["CustomerReorderSelection"][];
+        };
+        readonly CustomerReorderSelection: {
+            /** Format: uuid */
+            readonly groupId: string;
+            readonly groupName: string;
+            readonly choiceIds: readonly string[];
+            readonly choiceNames: readonly string[];
+        };
+        readonly CustomerReorderSuggestion: {
+            /** Format: uuid */
+            readonly orderId: string;
+            readonly publicOrderNumber: string;
+            /** Format: date-time */
+            readonly createdAt: string;
+            readonly location: components["schemas"]["CustomerOrderLocation"];
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly totalMinor: number;
+            readonly items: readonly components["schemas"]["CustomerReorderLine"][];
         };
     };
     responses: {
@@ -3544,6 +3592,41 @@ export interface operations {
                 };
                 content: {
                     readonly "application/json": components["schemas"]["CustomerOrderDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+        };
+    };
+    readonly getLatestCustomerReorder: {
+        readonly parameters: {
+            readonly query: {
+                readonly locationSlug: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Current reorder configuration */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CustomerReorderSuggestion"];
+                };
+            };
+            /** @description No fully fulfillable latest order */
+            readonly 204: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["CustomerReorderSuggestion"];
                 };
             };
             readonly 400: components["responses"]["Problem"];

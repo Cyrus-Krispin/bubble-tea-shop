@@ -3514,6 +3514,58 @@
           "bearerAuth" : [ ]
         } ]
       }
+    },
+    "/api/v1/customer/orders/latest-reorder" : {
+      "get" : {
+        "tags" : [ "Customer order history" ],
+        "summary" : "Get the newest currently fulfillable order configuration",
+        "operationId" : "getLatestCustomerReorder",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Current reorder configuration",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerReorderSuggestion"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "No fully fulfillable latest order",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerReorderSuggestion"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
     }
   },
   "components" : {
@@ -5795,6 +5847,95 @@
           "priceDeltaMinor" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "CustomerReorderLine" : {
+        "type" : "object",
+        "properties" : {
+          "productSlug" : {
+            "type" : "string"
+          },
+          "productName" : {
+            "type" : "string"
+          },
+          "variantId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "variantName" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "unitPriceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "selections" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomerReorderSelection"
+            }
+          }
+        }
+      },
+      "CustomerReorderSelection" : {
+        "type" : "object",
+        "properties" : {
+          "groupId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "groupName" : {
+            "type" : "string"
+          },
+          "choiceIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string",
+              "format" : "uuid"
+            }
+          },
+          "choiceNames" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "CustomerReorderSuggestion" : {
+        "type" : "object",
+        "properties" : {
+          "orderId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "publicOrderNumber" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "location" : {
+            "$ref" : "#/components/schemas/CustomerOrderLocation"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "totalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomerReorderLine"
+            }
           }
         }
       }

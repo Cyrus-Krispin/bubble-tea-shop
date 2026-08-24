@@ -86,6 +86,12 @@ and uses zero-based `page` plus bounded `size` (`1..20`). Summaries contain the 
 line-name snapshots needed by account history and the signed-in `Last ordered` storefront section.
 Detail returns the complete immutable line, option, quantity, and price snapshots.
 
+`GET /api/v1/customer/orders/latest-reorder?locationSlug={slug}` returns the newest order as a
+cart-ready configuration only when it belongs to that active shop and every saved variant and
+option is still enabled, currently priced, and fulfillable from current inventory. It returns
+`204` when there is no history or the complete configuration is ineligible. The response uses
+current prices while the receipt endpoints continue to expose immutable historical snapshots.
+
 An unmapped or disabled account returns `403` with `CUSTOMER_ACCOUNT_UNAVAILABLE`. Unknown and
 cross-account order IDs both return `404` with `CUSTOMER_ORDER_NOT_FOUND`, preventing resource
 existence disclosure. Invalid subjects return `401` with `CUSTOMER_IDENTITY_INVALID`; invalid page
