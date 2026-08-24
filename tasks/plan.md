@@ -1,19 +1,18 @@
 # Implementation Plan: Production-Ready MVP
 
-## Active increment: Customer order history and last-order suggestion
+## Active increment: Actionable order-again suggestion
 
-Deliver the contract in `docs/product/customer-order-history.md` as two connected vertical slices:
+Extend the contract in `docs/product/customer-order-history.md` as three connected vertical slices:
 
-1. Add the indexed, ownership-scoped history list and receipt-detail API with integration tests,
-   OpenAPI generation, and database/API/security documentation.
-2. Add the validated frontend client, account history and receipt pages, and a non-blocking
-   `Last ordered` storefront section for authenticated customers.
-3. Verify the complete account-linked checkout-to-history flow in desktop and mobile browsers,
-   review the full diff across correctness, simplicity, architecture, security, and performance,
-   then commit and push the coherent feature.
+1. Resolve the newest order into an exact same-shop configuration using current catalog, pricing,
+   recipe, and inventory data; return no suggestion unless every line is fulfillable.
+2. Restore all suggestion lines to the cart atomically and present their actual variants,
+   selections, quantities, and current total in the storefront highlight.
+3. Differentiate the two seeded location menus, verify database/API/frontend behavior, and update
+   the existing customer-order-history pull request.
 
-The browser never supplies an account identifier. History uses immutable order snapshots, and
-reordering remains outside this increment.
+The browser never supplies an account identifier, price, or availability decision. Receipts keep
+immutable snapshots while reorder eligibility is derived from current server-owned state.
 
 ## Overview
 
@@ -137,8 +136,8 @@ Customer identity mapping
 
 ## Explicitly Deferred
 
-- Card providers, refunds, tax, promotions, discounts, favorites, extended profiles, customer
-  cancellation, and one-tap reordering.
+- Card providers, refunds, tax, promotions, discounts, favorites, extended profiles, and customer
+  cancellation.
 - Forecasting, supplier ordering, expiry/FIFO lots, cash-flow dashboards, and detailed cost
   accounting.
 - Multiple active currencies/locales/locations and opt-in face authentication.

@@ -1,6 +1,16 @@
 # Production-Ready MVP Tasks
 
-## Active increment — Customer order history and last-order suggestion
+## Active increment — Actionable order-again suggestion
+
+- [ ] Add current catalog, configuration, price, and inventory eligibility tests for the newest
+  owned order at the selected shop.
+- [ ] Publish and validate the latest-reorder API contract, including no-content ineligible cases.
+- [ ] Add atomic multi-line cart restoration and storefront item/selection presentation tests.
+- [ ] Differentiate the seeded Orchard Central and Tiong Bahru menus with an additive migration and
+  verify both catalog responses.
+- [ ] Run full backend/frontend/browser verification, review, commit, push, and update PR #26.
+
+## Completed foundation — Customer order history and last-order suggestion
 
 - [x] Specify the customer-owned history, immutable receipt, pagination, storefront placement, and
   explicit reorder boundary.
