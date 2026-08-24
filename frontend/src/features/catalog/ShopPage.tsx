@@ -48,7 +48,7 @@ export function ShopPage() {
           )}
         </div>
         <p aria-atomic="true" className="visually-hidden" role="status">Menu for {state.data.location.name}</p>
-        <LastOrderSuggestion locationSlug={state.data.location.slug} />
+        <LastOrderSuggestion locationSlug={state.data.location.slug} products={state.data.products} />
         <div className="category-filter" aria-label="Filter drinks" role="group">
           {categories.map((option) => (
             <button

@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
 
 import { Button } from "../../components/ui/Button";
 import { useAuth } from "../auth/useAuth";
+import { type CartOrderLine } from "../cart/cartReducer";
 import { useCart } from "../cart/CartContext";
+import { DrinkArtwork } from "../catalog/DrinkArtwork";
 import { formatMoney } from "../catalog/formatMoney";
+import type { CatalogProductSummary } from "../catalog/types";
 import {
   getLatestCustomerReorder,
+  type CustomerReorderLine,
   type CustomerReorderSuggestion,
 } from "./customerOrderClient";
-import { formatOrderDate } from "./orderPresentation";
 import "./customerOrders.css";
 
 type SuggestionState =
@@ -22,11 +24,15 @@ type SuggestionState =
       suggestion: CustomerReorderSuggestion;
     };
 
-export function LastOrderSuggestion({ locationSlug }: { locationSlug: string }) {
+export function LastOrderSuggestion({
+  locationSlug,
+  products,
+}: {
+  locationSlug: string;
+  products: readonly CatalogProductSummary[];
+}) {
   const { isLoading, session } = useAuth();
-  const { addOrder } = useCart();
   const [retryKey, setRetryKey] = useState(0);
-  const [cartMessage, setCartMessage] = useState<{ orderId: string; text: string }>();
   const [state, setState] = useState<SuggestionState>({ status: "hidden" });
   const accessToken = session?.accessToken ?? "";
 
@@ -65,71 +71,115 @@ export function LastOrderSuggestion({ locationSlug }: { locationSlug: string }) 
     );
   }
 
-  const { suggestion } = state;
+  return <ReorderPicker key={state.suggestion.orderId} products={products} suggestion={state.suggestion} />;
+}
 
-  function addLastOrder() {
-    const added = addOrder(suggestion.items.map((item) => ({
-      quantity: item.quantity,
-      draft: {
-        locationSlug: suggestion.location.slug,
-        drinkId: item.productSlug,
-        drinkName: item.productName,
-        configuration: {
-          variantId: item.variantId,
-          variantName: item.variantName,
-          selections: item.selections.map((selection) => ({
-            groupId: selection.groupId,
-            groupName: selection.groupName,
-            choiceIds: [...selection.choiceIds],
-            choiceNames: [...selection.choiceNames],
-          })),
-        },
-        unitPriceMinor: item.unitPriceMinor,
-        currency: suggestion.currencyCode,
-      },
-    })));
-    setCartMessage({
-      orderId: suggestion.orderId,
-      text: added
-        ? "Added your last order to the cart."
-        : "Your cart can’t fit this order. Clear it before adding your last order.",
+function ReorderPicker({
+  products,
+  suggestion,
+}: {
+  products: readonly CatalogProductSummary[];
+  suggestion: CustomerReorderSuggestion;
+}) {
+  const { addOrder } = useCart();
+  const [selectedIndexes, setSelectedIndexes] = useState(
+    () => new Set(suggestion.items.map((_, index) => index)),
+  );
+  const [cartMessage, setCartMessage] = useState("");
+  const selectedItems = suggestion.items.filter((_, index) => selectedIndexes.has(index));
+  const selectedQuantity = selectedItems.reduce((total, item) => total + item.quantity, 0);
+  const selectedTotal = selectedItems.reduce(
+    (total, item) => total + item.unitPriceMinor * item.quantity,
+    0,
+  );
+
+  function toggleItem(index: number) {
+    setSelectedIndexes((current) => {
+      const next = new Set(current);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
     });
+    setCartMessage("");
+  }
+
+  function addSelectedItems() {
+    const added = addOrder(selectedItems.map((item) => toCartOrderLine(item, suggestion)));
+    setCartMessage(added
+      ? `Added ${selectedQuantity} ${selectedQuantity === 1 ? "drink" : "drinks"} to your order.`
+      : "Your cart can’t fit these drinks. Clear it before trying again.");
   }
 
   return (
     <section aria-labelledby="last-order-title" className="last-order">
-      <div className="last-order__content">
-        <p className="eyebrow">Welcome back</p>
+      <div className="last-order__heading">
         <h2 id="last-order-title">Order again</h2>
-        <ul className="last-order__items">
-          {suggestion.items.map((item) => (
-            <li key={`${item.variantId}-${item.selections.flatMap((selection) => selection.choiceIds).join("-")}`}>
-              <div>
-                <h3>{item.quantity} × {item.productName}</h3>
-                <p>
-                  {[item.variantName, ...item.selections.flatMap((selection) => selection.choiceNames)]
-                    .join(" · ")}
-                </p>
-              </div>
-              <strong>
-                {formatMoney(item.unitPriceMinor * item.quantity, suggestion.currencyCode)}
-              </strong>
-            </li>
-          ))}
-        </ul>
-        <p className="last-order__meta">
-          <span>{formatOrderDate(suggestion.createdAt)}</span> · <span>{suggestion.location.name}</span>
-        </p>
-        <p aria-live="polite" className="last-order__message" role="status">
-          {cartMessage?.orderId === suggestion.orderId ? cartMessage.text : ""}
-        </p>
+        <p>Choose favourites from your last order.</p>
       </div>
-      <div className="last-order__action">
-        <span>Current total</span>
-        <strong>{formatMoney(suggestion.totalMinor, suggestion.currencyCode)}</strong>
-        <Button onClick={addLastOrder}>Add order to cart</Button>
-        <Link to={`/account/orders/${suggestion.orderId}`}>View last order</Link>
+      <ul aria-label="Drinks from your last order" className="last-order__items">
+        {suggestion.items.map((item, index) => {
+          const configuration = [
+            item.variantName,
+            ...item.selections.flatMap((selection) => selection.choiceNames),
+          ];
+          const product = products.find((candidate) => candidate.slug === item.productSlug);
+          return (
+            <li key={index}>
+              <label className="last-order-item">
+                <input
+                  aria-label={`Select ${item.quantity} ${item.productName}, ${configuration.join(", ")}`}
+                  checked={selectedIndexes.has(index)}
+                  onChange={() => toggleItem(index)}
+                  type="checkbox"
+                />
+                {product === undefined ? null : <DrinkArtwork drink={product} />}
+                <div className="last-order-item__copy">
+                  <span className="last-order-item__quantity">
+                    {item.quantity} {item.quantity === 1 ? "drink" : "drinks"}
+                  </span>
+                  <h3>{item.productName}</h3>
+                  <span>{configuration.join(" · ")}</span>
+                  <strong>{formatMoney(item.unitPriceMinor * item.quantity, suggestion.currencyCode)}</strong>
+                </div>
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="last-order__footer">
+        <p aria-live="polite" className="last-order__message" role="status">{cartMessage}</p>
+        <Button disabled={selectedQuantity === 0} onClick={addSelectedItems}>
+          {selectedQuantity === 0
+            ? "Select drinks to add"
+            : `Add ${selectedQuantity} ${selectedQuantity === 1 ? "drink" : "drinks"} · ${formatMoney(selectedTotal, suggestion.currencyCode)}`}
+        </Button>
       </div>
     </section>
   );
+}
+
+function toCartOrderLine(
+  item: CustomerReorderLine,
+  suggestion: CustomerReorderSuggestion,
+): CartOrderLine {
+  return {
+    quantity: item.quantity,
+    draft: {
+      locationSlug: suggestion.location.slug,
+      drinkId: item.productSlug,
+      drinkName: item.productName,
+      configuration: {
+        variantId: item.variantId,
+        variantName: item.variantName,
+        selections: item.selections.map((selection) => ({
+          groupId: selection.groupId,
+          groupName: selection.groupName,
+          choiceIds: [...selection.choiceIds],
+          choiceNames: [...selection.choiceNames],
+        })),
+      },
+      unitPriceMinor: item.unitPriceMinor,
+      currency: suggestion.currencyCode,
+    },
+  };
 }

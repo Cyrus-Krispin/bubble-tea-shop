@@ -15,11 +15,12 @@ validates the Supabase access token and resolves its subject to an enabled appli
 - `/account` shows a paginated, newest-first list of the signed-in customer's orders.
 - `/account/orders/{orderId}` shows the order number, shop, status, placement time, payment method,
   total, line snapshots, option snapshots, and line prices for one owned order.
-- The storefront shows the newest order's individual products, variants, selections, quantities,
-  and current total before menu filters when the whole configuration can be fulfilled at the shop
-  currently being viewed.
-- `Add order to cart` restores the whole configuration atomically using current server-owned
-  prices. It never silently substitutes a variant or option and never partially adds an order.
+- The storefront shows the newest order's individual products as a horizontal quick-add row with
+  current artwork, variants, selections, quantities, and line prices before the menu filters when
+  the whole configuration can be fulfilled at the shop currently being viewed.
+- Every saved line is selected by default. The customer can deselect lines and add the remaining
+  selection atomically using current server-owned prices. The UI never silently substitutes a
+  variant or option and never partially adds the selected set.
 - The suggestion is hidden when the newest order belongs to another shop, a product/variant/option
   is retired or disabled, an offering is unavailable, required selections have changed, or current
   ingredient stock cannot fulfill the full saved quantity.
@@ -28,7 +29,7 @@ validates the Supabase access token and resolves its subject to an enabled appli
 - History and the storefront suggestion have explicit loading and recoverable error states. A
   history failure never blocks the public menu.
 
-If the cart already belongs to another shop or adding the complete order would exceed checkout
+If the cart already belongs to another shop or adding the selected lines would exceed checkout
 quantity limits, the cart remains unchanged and the storefront explains what the customer must do.
 
 ## API contract
@@ -100,10 +101,11 @@ links, headings, status text, and live regions.
   pagination, empty history, detail snapshots, invalid input, and disabled accounts.
 - Frontend client tests cover bearer-token requests, runtime response validation, problem mapping,
   and abort behavior.
-- Component tests cover signed-in history, empty/error states, receipt rendering, eligible reorder,
-  atomic cart restoration, ineligible suppression, signed-out suppression, and axe accessibility.
-- Playwright covers sign-in, account-linked checkout, storefront suggestion, history, and receipt
-  at desktop and mobile widths.
+- Component tests cover signed-in history, empty/error states, receipt rendering, selected-line
+  cart restoration, cart conflicts, ineligible suppression, signed-out suppression, and axe
+  accessibility.
+- Playwright covers sign-in, a multi-line account-linked checkout, selective storefront quick-add,
+  the horizontal desktop/mobile item row, history, and receipt.
 
 ```bash
 cd backend && ./mvnw verify
@@ -118,7 +120,7 @@ git diff --check
 - Receipt details retain the exact names, selections, quantities, and prices captured at placement.
 - The newest eligible same-shop order appears as the first personalized storefront section for
   signed-in customers and exposes its actual saved items and selections.
-- One action adds the complete order configuration to the cart at current prices; unavailable or
+- One action adds the selected saved lines to the cart at current prices; unavailable or
   out-of-stock orders produce no storefront highlight.
 - Guests and customers without history receive no personalized storefront suggestion.
 - A history request failure does not hide or delay an otherwise available guest menu.

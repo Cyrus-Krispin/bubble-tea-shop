@@ -1,13 +1,24 @@
 # Implementation Plan: Production-Ready MVP
 
+## Completed increment: Selectable order-again rail
+
+Refine the latest-order highlight into a compact quick-add surface:
+
+1. Present saved drinks as an artwork-backed horizontal row with native selection controls and no
+   repeated receipt totals, shop metadata, or welcome copy.
+2. Select every eligible line by default, let the customer choose a subset, and add that subset to
+   the cart atomically with a quantity-and-price CTA.
+3. Verify selected configuration fidelity, cart conflicts, accessibility, desktop alignment,
+   mobile horizontal scrolling, and the production Compose flow before updating PR #26.
+
 ## Completed increment: Actionable order-again suggestion
 
 Extend the contract in `docs/product/customer-order-history.md` as three connected vertical slices:
 
 1. Resolve the newest order into an exact same-shop configuration using current catalog, pricing,
    recipe, and inventory data; return no suggestion unless every line is fulfillable.
-2. Restore all suggestion lines to the cart atomically and present their actual variants,
-   selections, quantities, and current total in the storefront highlight.
+2. Restore the suggestion lines to the cart atomically and present their actual variants,
+   selections, quantities, and current prices in the storefront highlight.
 3. Differentiate the two seeded location menus, verify database/API/frontend behavior, and update
    the existing customer-order-history pull request.
 

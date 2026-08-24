@@ -1,5 +1,16 @@
 # Production-Ready MVP Tasks
 
+## Completed increment — Selectable order-again rail
+
+- [x] Replace the receipt-style summary with a responsive horizontal row of artwork-backed saved
+  drink cards.
+- [x] Select saved lines by default and support accessible subset selection with a dynamic
+  quantity-and-price action.
+- [x] Prove selected configuration fidelity, disabled empty selection, and atomic conflict behavior
+  through component tests.
+- [x] Cover two-item selective quick-add and desktop/mobile row behavior in the Compose browser flow.
+- [x] Complete final review, commit, push, refresh the local UI, and update PR #26.
+
 ## Completed increment — Actionable order-again suggestion
 
 - [x] Add current catalog, configuration, price, and inventory eligibility tests for the newest
