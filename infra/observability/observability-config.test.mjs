@@ -7,12 +7,14 @@ const dashboardPath = new URL(
   import.meta.url,
 );
 const prometheusPath = new URL("./prometheus/prometheus.yml", import.meta.url);
+const composePath = new URL("../../compose.yaml", import.meta.url);
 const datasourcePath = new URL(
   "./grafana/provisioning/datasources/prometheus.yml",
   import.meta.url,
 );
 
 const dashboard = JSON.parse(await readFile(dashboardPath, "utf8"));
+const compose = await readFile(composePath, "utf8");
 const prometheus = await readFile(prometheusPath, "utf8");
 const datasource = await readFile(datasourcePath, "utf8");
 
@@ -78,4 +80,13 @@ test("scrapes the private Spring Actuator Prometheus endpoint", () => {
   assert.match(prometheus, /metrics_path: \/actuator\/prometheus/);
   assert.match(prometheus, /- backend:8080/);
   assert.match(prometheus, /scrape_interval: 15s/);
+});
+
+test("keeps the local monitoring services read-only and loopback-bound", () => {
+  assert.match(compose, /127\.0\.0\.1:\$\{PROMETHEUS_PORT:-9090}:9090/);
+  assert.match(compose, /127\.0\.0\.1:\$\{GRAFANA_PORT:-3000}:3000/);
+  assert.match(compose, /GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer/);
+  assert.match(compose, /GF_SECURITY_DISABLE_INITIAL_ADMIN_CREATION: "true"/);
+  assert.match(compose, /GF_PLUGINS_PREINSTALL_DISABLED: "true"/);
+  assert.doesNotMatch(compose, /--web\.enable-lifecycle/);
 });
