@@ -46,7 +46,7 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
   await page.getByRole("link", { name: /Tiong Bahru/ }).click();
   await expect(page).toHaveURL(/\/shop\/tiong-bahru$/);
   await expect(page.getByRole("button", { name: "Pickup at Tiong Bahru" })).toBeVisible();
-  await expect(page.locator(".product-card")).toHaveCount(5);
+  await expect.poll(() => page.getByRole("region", { name: "All drinks" }).locator('[data-slot="card"]').count()).toBeGreaterThanOrEqual(5);
   const photos = page.locator(".drink-art");
   for (let index = 0; index < await photos.count(); index += 1) {
     const photo = photos.nth(index);
@@ -76,6 +76,44 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
 
   expect(apiFailures).toEqual([]);
   expect(consoleProblems).toEqual([]);
+});
+
+test("guest menu keeps a compact responsive product grid", async ({ page }) => {
+  const viewports = [
+    { width: 320, height: 800, columns: 1 },
+    { width: 768, height: 900, columns: 2 },
+    { width: 1024, height: 900, columns: 3 },
+    { width: 1280, height: 800, columns: 4 },
+    { width: 1440, height: 900, columns: 4 },
+  ];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    const grid = page.getByRole("region", { name: "All drinks" });
+    const cards = grid.locator('[data-slot="card"]');
+    await expect.poll(() => cards.count()).toBeGreaterThanOrEqual(5);
+
+    const firstRow = await Promise.all(
+      Array.from({ length: viewport.columns }, (_, index) => cards.nth(index).boundingBox()),
+    );
+    const firstY = firstRow[0]?.y ?? 0;
+    for (const card of firstRow) {
+      expect(Math.abs((card?.y ?? 0) - firstY)).toBeLessThan(2);
+    }
+
+    if (viewport.columns === 4) {
+      const firstCard = firstRow[0];
+      expect((firstCard?.y ?? 0) + (firstCard?.height ?? 0)).toBeLessThanOrEqual(viewport.height);
+    }
+  }
+
+  const images = page.getByRole("region", { name: "All drinks" }).locator(".drink-art");
+  await expect(images.nth(3)).toHaveAttribute("loading", "eager");
+  await expect(images.nth(3)).toHaveAttribute("fetchpriority", "high");
+  await expect(images.nth(4)).toHaveAttribute("loading", "lazy");
+  await expect(images.nth(4)).toHaveAttribute("fetchpriority", "auto");
+  await expectProductionQuality(page);
 });
 
 test("customer sees an account-linked order across the personalized storefront and history", async ({

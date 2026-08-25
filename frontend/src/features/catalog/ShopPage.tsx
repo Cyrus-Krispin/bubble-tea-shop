@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardFooter } from "../../components/ui/card";
 import { ProblemState } from "../../components/ui/ProblemState";
 import { useCart } from "../cart/CartContext";
 import { LastOrderSuggestion } from "../orders/LastOrderSuggestion";
@@ -51,34 +55,49 @@ export function ShopPage() {
         <LastOrderSuggestion locationSlug={state.data.location.slug} products={state.data.products} />
         <div className="category-filter" aria-label="Filter drinks" role="group">
           {categories.map((option) => (
-            <button
+            <Button
               aria-pressed={category === option}
+              className="rounded-full"
               key={option}
               onClick={() => setCategory(option)}
-              type="button"
+              size="regular"
+              variant={category === option ? "default" : "outline"}
             >
               {option}
-            </button>
+            </Button>
           ))}
         </div>
-        <section aria-label={`${category} drinks`} className="product-grid">
+        <section
+          aria-label={`${category} drinks`}
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
           {drinks.length === 0 ? <p className="catalog-empty" role="status">No drinks are available in this category.</p> : null}
           {drinks.map((drink, index) => (
-            <article className={`product-card${drink.available ? "" : " product-card--unavailable"}`} key={drink.id}>
-              <DrinkArtwork drink={drink} priority={index < 3} />
-              <div className="product-copy">
-                <p className="product-category">{drink.category}</p>
-                <h2>{drink.name}</h2>
-                <p>{drink.description}</p>
-              </div>
-              <div className="product-footer">
-                <strong>{drink.available ? `From ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}` : "Unavailable today"}</strong>
-                {drink.available ? (
-                  <Link aria-label={`Customize ${drink.name}, from ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}`} to={`/shop/${state.data.location.slug}/drinks/${drink.slug}`}>
-                    Customize <span aria-hidden="true">→</span>
-                  </Link>
-                ) : <span className="product-status">Sold out</span>}
-              </div>
+            <article className="min-w-0" key={drink.id}>
+              <Card className={`group h-full gap-0 overflow-hidden py-0 transition-shadow duration-150 hover:ring-foreground/20${drink.available ? "" : " bg-muted/35"}`}>
+                <DrinkArtwork
+                  className={`aspect-[4/3] w-full object-cover object-[center_47%]${drink.available ? "" : " grayscale"}`}
+                  drink={drink}
+                  priority={index < 4}
+                />
+                <CardContent className="flex min-h-28 flex-col px-4 pt-4 pb-3">
+                  <Badge className="mb-2 w-fit" variant="secondary">{drink.category}</Badge>
+                  <h2 className="mb-1.5 text-lg leading-tight font-semibold tracking-tight">{drink.name}</h2>
+                  <p className="line-clamp-2 text-sm leading-5 text-muted-foreground">{drink.description}</p>
+                </CardContent>
+                <CardFooter className="mt-auto min-h-16 justify-between gap-2 border-t px-4 py-2.5">
+                  <strong className="text-sm leading-tight">
+                    {drink.available ? `From ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}` : "Unavailable today"}
+                  </strong>
+                  {drink.available ? (
+                    <Button asChild className="shrink-0" size="regular" variant="secondary">
+                      <Link aria-label={`Customize ${drink.name}, from ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}`} to={`/shop/${state.data.location.slug}/drinks/${drink.slug}`}>
+                        Customize <ArrowRight aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  ) : <span className="product-status text-sm font-semibold text-destructive">Sold out</span>}
+                </CardFooter>
+              </Card>
             </article>
           ))}
         </section>

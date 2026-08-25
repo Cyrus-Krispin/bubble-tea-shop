@@ -23,31 +23,33 @@ Success means:
 
 ## Brand system
 
-Cool white and soft lavender carry most of the interface. Ube violet is the functional brand
-color; calamansi lime is a scarce highlight. Realistic drink photography supplies warmth and
-ingredient color.
+The application uses an Obsidian-inspired dark foundation: stepped neutral-charcoal surfaces,
+quiet one-pixel boundaries, and restrained chrome. Ube violet is the functional interaction color;
+calamansi lime is a scarce product highlight. Realistic drink photography supplies warmth and
+ingredient color without filters, dimming, or color overlays.
 
 | Token | Value | Role |
 |---|---:|---|
-| `canvas` | `#f7f7fb` | App background |
-| `surface` | `#ffffff` | Product and form surfaces |
-| `surface-subtle` | `#f0edff` | Selected and supporting surfaces |
-| `ink` | `#17131f` | Primary type and strong structure |
-| `muted` | `#625b6b` | Supporting type |
-| `line` | `#ded9e5` | Decorative dividers |
-| `line-strong` | `#958b9f` | Interactive boundaries |
-| `primary` | `#6b2bd9` | Primary actions and current navigation |
-| `primary-strong` | `#5420b5` | Hover and pressed actions |
-| `primary-soft` | `#eee8ff` | Selected and informational surfaces |
+| `canvas` | `#1c1c1c` | App background |
+| `surface` | `#232323` | Product and form surfaces |
+| `surface-raised` | `#282828` | Popovers, dialogs, and raised surfaces |
+| `surface-subtle` | `#302a3d` | Selected and supporting surfaces |
+| `ink` | `#e8e4ec` | Primary type and strong structure |
+| `muted` | `#b3adb8` | Supporting type |
+| `line` | `#3f3f3f` | Decorative dividers |
+| `line-strong` | `#666166` | Interactive boundaries |
+| `primary` | `#a882ff` | Primary actions, focus, and current navigation |
+| `primary-strong` | `#c2a7ff` | Hover and pressed emphasis |
+| `primary-soft` | `#342b45` | Selected and informational surfaces |
 | `highlight` | `#c8f169` | Small freshness highlights |
-| `flavor` | `#d91e63` | Rare product accent |
-| `success` | `#18794e` | Successful states |
-| `warning` | `#8a4b08` | Attention states |
-| `danger` | `#b42318` | Errors and destructive actions |
+| `flavor` | `#fa99cd` | Rare product accent |
+| `success` | `#66dc88` | Successful states |
+| `warning` | `#f0b469` | Attention states |
+| `danger` | `#ff6b70` | Errors and destructive actions |
 
 Keep neutral surfaces to roughly 85–90% of each screen. Violet is functional; lime and lychee are
-accents. Do not use gradients, glass effects, fantasy scenery, decorative sparkles, floating boba
-circles, or color-only state.
+accents. Do not tint the canvas purple. Do not use gradients, glass effects, fantasy scenery,
+decorative sparkles, floating boba circles, luminous shadows, or color-only state.
 
 Use a contemporary system sans stack. Display hierarchy comes from weight, scale, and spacing,
 not novelty type. Body text never falls below `1rem`; supporting metadata never falls below

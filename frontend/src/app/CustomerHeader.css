@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) clamp(var(--space-4), 5vw, var(--space-10));
-  background: rgb(255 255 255 / 97%);
+  background: rgb(28 28 28 / 97%);
   border-bottom: 1px solid var(--color-line);
 }
 
@@ -24,7 +24,7 @@
 .customer-brand strong,
 .customer-brand small { display: block; }
 .customer-brand strong { font-family: var(--font-display); font-size: 0.95rem; font-weight: 750; letter-spacing: -0.015em; }
-.customer-brand small { margin-top: 0.1rem; color: var(--color-muted); font-size: 0.8125rem; }
+.customer-brand small { margin-top: 0.1rem; color: var(--legacy-color-muted); font-size: 0.8125rem; }
 
 .customer-header nav {
   display: flex;
@@ -37,7 +37,7 @@
   min-height: 2.75rem;
   align-items: center;
   padding: 0 var(--space-3);
-  color: var(--color-muted);
+  color: var(--legacy-color-muted);
   font-size: 0.875rem;
   font-weight: 700;
   text-decoration: none;
@@ -50,11 +50,11 @@
 
 .customer-header .order-link {
   gap: var(--space-2);
-  color: #fff;
-  background: var(--color-primary);
+  color: var(--primary-foreground);
+  background: var(--primary);
 }
 
-.customer-header .order-link:hover { color: #fff; background: var(--color-primary-strong); }
+.customer-header .order-link:hover { color: var(--primary-foreground); background: var(--primary-hover); }
 
 .order-link span {
   display: grid;

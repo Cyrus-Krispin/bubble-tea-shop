@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
-import { Button } from "../../components/ui/Button";
+import { Button } from "../../components/ui/button";
 import { CustomerOrderHistory } from "../orders/CustomerOrderHistory";
 import { signOut } from "./authClient";
 import { useAuth } from "./useAuth";

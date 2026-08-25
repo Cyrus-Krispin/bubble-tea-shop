@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { expectNoAccessibilityViolations } from "../../test/accessibility";
-import { Button } from "./Button";
+import { Button } from "./button";
 import { DataTable } from "./DataTable";
 import { Dialog } from "./Dialog";
 import { Field } from "./Field";
@@ -35,6 +35,15 @@ describe("interface primitives", () => {
     const button = screen.getByRole("button", { name: "Saving product" });
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "true");
+  });
+
+  it("composes a link as the button control without nesting interactive content", () => {
+    render(<Button asChild><a href="/menu">Browse menu</a></Button>);
+
+    const link = screen.getByRole("link", { name: "Browse menu" });
+    expect(link).toHaveAttribute("href", "/menu");
+    expect(link).toHaveAttribute("data-slot", "button");
+    expect(link.querySelector("a")).not.toBeInTheDocument();
   });
 
   it("renders semantic table structure and an empty state", () => {

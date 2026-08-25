@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Button } from "../../components/ui/Button";
+import { Button } from "../../components/ui/button";
 import { useAuth } from "../auth/useAuth";
 import { type CartOrderLine } from "../cart/cartReducer";
 import { useCart } from "../cart/CartContext";
