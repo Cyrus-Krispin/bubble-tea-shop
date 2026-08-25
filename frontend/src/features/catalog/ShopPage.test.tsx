@@ -35,6 +35,10 @@ describe("ShopPage", () => {
     );
     expect(screen.getByRole("img", { name: "Moonlit Milk Tea in a clear cup" }))
       .toHaveAttribute("src", "/assets/catalog/moonlit-milk-tea.webp");
+    for (const image of screen.getAllByRole("img", { name: /in a clear cup/ })) {
+      expect(image).toHaveAttribute("loading", "eager");
+      expect(image).toHaveAttribute("fetchpriority", "high");
+    }
     fireEvent.click(screen.getByRole("button", { name: "Pickup at Orchard Central" }));
     expect(screen.getByRole("link", { name: /Tiong Bahru/ }).querySelector("img"))
       .toHaveAttribute("src", "/assets/catalog/tiong-bahru.webp");

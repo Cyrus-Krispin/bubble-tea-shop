@@ -302,6 +302,10 @@ describe("App", () => {
     expect(await screen.findByText("Bubble Tea Operations")).toBeVisible();
     expect(screen.getByText("Owner")).toBeVisible();
     expect(screen.getByText("Orchard Central")).toBeVisible();
+    expect(screen.getByRole("link", { name: /Review orders/ })).toHaveAttribute("href", "/staff/orders");
+    expect(screen.getByRole("link", { name: /Check inventory/ })).toHaveAttribute("href", "/staff/inventory");
+    expect(screen.getByRole("link", { name: /Manage menu/ })).toHaveAttribute("href", "/staff/catalog/menu");
+    expect(screen.getByRole("link", { name: /Review audit/ })).toHaveAttribute("href", "/staff/audit");
     expect(getStaffContext).toHaveBeenCalledWith("staff-token", expect.any(AbortSignal));
   });
 
@@ -473,7 +477,7 @@ describe("App", () => {
 
     expect(await screen.findByRole("heading", { level: 1, name: "Recipes" })).toBeVisible();
     expect(await screen.findByRole("cell", { name: "Classic Milk Tea" })).toBeVisible();
-    expect(screen.getByRole("link", { name: "Manage" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Open recipe" })).toHaveAttribute(
       "href",
       `/staff/catalog/recipes/${managedRecipe.id}?organizationId=88b23060-cbc4-4218-9938-63d75f6f324c`,
     );
@@ -517,6 +521,10 @@ describe("App", () => {
 
     expect(await screen.findByRole("heading", { level: 1, name: "Classic Milk Tea" })).toBeVisible();
     expect(screen.getByText("Assam Tea")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Menu" })).toHaveAttribute(
+      "href",
+      "/staff/catalog/menu?organizationId=88b23060-cbc4-4218-9938-63d75f6f324c",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Edit formula" }));
     fireEvent.change(screen.getByLabelText("Quantity 1"), { target: { value: "15.000000" } });
     fireEvent.click(screen.getByRole("button", { name: "Save formula" }));
@@ -632,11 +640,16 @@ describe("App", () => {
     });
     const publishedVersion = {
       ...managedRecipeVersion,
+      versionNumber: 2,
       status: "PUBLISHED" as const,
       version: 2,
       publishedAt: "2026-08-22T01:00:00Z",
     };
-    vi.mocked(getRecipe).mockResolvedValue({ ...managedRecipe, versions: [publishedVersion] });
+    const retiredVersion = {
+      ...managedRecipeVersion,
+      status: "RETIRED" as const,
+    };
+    vi.mocked(getRecipe).mockResolvedValue({ ...managedRecipe, versions: [publishedVersion, retiredVersion] });
     render(
       <MemoryRouter initialEntries={[
         `/staff/catalog/recipes/${managedRecipe.id}?organizationId=88b23060-cbc4-4218-9938-63d75f6f324c`,
@@ -646,6 +659,7 @@ describe("App", () => {
     );
 
     await screen.findByRole("heading", { level: 1, name: "Classic Milk Tea" });
+    expect(screen.getByText("Current formula").nextElementSibling).toHaveTextContent("Published");
     fireEvent.click(screen.getByRole("button", { name: "New draft" }));
     fireEvent.click(screen.getByRole("button", { name: "Create next draft" }));
     await waitFor(() => expect(createRecipeVersion).toHaveBeenCalledWith(
@@ -683,5 +697,27 @@ describe("App", () => {
     expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
     expect(screen.getByText("Medium · 50% · Less ice · Pearls")).toBeVisible();
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$7.20");
+  });
+
+  it("keeps unknown staff routes inside the operations workspace", async () => {
+    vi.mocked(getCurrentAuthSession).mockResolvedValue({
+      accessToken: "staff-token",
+      email: "owner@example.test",
+    });
+    vi.mocked(getStaffContext).mockResolvedValue({
+      accountId: "35f942a3-0591-4973-83ef-8889f608184e",
+      memberships: [{
+        organizationId: "88b23060-cbc4-4218-9938-63d75f6f324c",
+        organizationName: "Bubble Tea Operations",
+        role: "OWNER",
+        locations: [],
+      }],
+    });
+
+    render(<MemoryRouter initialEntries={["/staff/unknown"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "Staff page not found" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Back to operations overview" })).toHaveAttribute("href", "/staff");
+    expect(screen.queryByRole("link", { name: "Bubble Tea Shop menu" })).not.toBeInTheDocument();
   });
 });

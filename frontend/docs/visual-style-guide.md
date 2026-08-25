@@ -147,3 +147,34 @@ Always preserve API-backed catalog, pricing, inventory, organization, location, 
 idempotent order retry; optimistic concurrency; archival history; and server-side authorization.
 Never add a runtime fixture catalog, fake merchandising data, client-owned authorization, secrets,
 biometric behavior, or unimplemented navigation.
+
+## Product-maturity benchmarks
+
+The refinement bar is informed by current, public patterns rather than visual imitation:
+
+- [Baymard food delivery and takeout UX research](https://baymard.com/audits/food-delivery-and-takeout)
+  treats menu discovery, food customization, cart behavior, guest checkout, and pickup context as
+  one continuous conversion flow.
+- [Gong cha product discovery](https://www.gong-cha.com/our-products/) keeps drink photography and
+  customization central to the menu experience.
+- [Toast order-screen guidance](https://support.toasttab.com/en/article/New-POS-Experience-Ordering-Screens)
+  prioritizes frequent actions, search, and rapid order scanning in restaurant operations.
+- [Square inventory guidance](https://squareup.com/help/us/en/article/6110-manage-inventory-with-the-retail-pos-app)
+  uses visible scope, filters, stock state, and actions close to the affected record.
+- [Shopify's index-table pattern](https://shopify.dev/docs/api/app-home/patterns/compositions/index-table)
+  emphasizes scannable resource lists, search/filter context, row actions, and responsive behavior.
+
+Applied principles:
+
+- reserve expressive display type for customer merchandising; staff headings and controls use a
+  calmer, denser hierarchy;
+- keep API-resolved pickup context adjacent to menu discovery and checkout actions;
+- preserve image geometry and prioritize the first visible product row so catalog cards do not
+  appear unfinished while scrolling;
+- make customer primary actions at least 44 pixels and keep mobile purchase actions visible without
+  obscuring validation or the final control;
+- turn staff tables into labeled stacked rows on narrow screens rather than requiring horizontal
+  scrolling for routine work;
+- lead operational pages with scope, status, next actions, and derived summaries before historical
+  or configuration detail;
+- use one restrained surface/border system and reduce nested cards before adding decoration.

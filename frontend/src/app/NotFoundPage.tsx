@@ -12,7 +12,10 @@ export function NotFoundPage() {
         <p className="eyebrow">404</p>
         <h1 id="not-found-title">Page not found</h1>
         <p>The page may have moved, or the address may be incorrect.</p>
-        <Link className="primary-link" to="/">Return to menu</Link>
+        <div className="account-actions">
+          <Link className="primary-link" to="/">Return to menu</Link>
+          {itemCount > 0 ? <Link className="secondary-link" to="/cart">View current order</Link> : null}
+        </div>
       </main>
     </div>
   );

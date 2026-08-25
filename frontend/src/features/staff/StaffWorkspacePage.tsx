@@ -1,4 +1,4 @@
-import { useOutletContext } from "react-router";
+import { Link, useOutletContext } from "react-router";
 
 import type { StaffOutletContext } from "./StaffLayout";
 import type { StaffRole } from "./staffClient";
@@ -14,6 +14,18 @@ export function StaffWorkspacePage() {
     <main aria-label="Staff workspace" className="staff-main" id="staff-workspace">
       <p className="eyebrow">Staff workspace</p>
       <h1>Operations overview</h1>
+      <section aria-labelledby="start-work-title" className="staff-quick-start">
+        <div className="staff-quick-start__heading">
+          <h2 id="start-work-title">Start work</h2>
+          <p>Go straight to the task that needs your attention.</p>
+        </div>
+        <nav aria-label="Common staff tasks" className="staff-quick-links">
+          <Link to="/staff/orders"><strong>Review orders</strong><span>Collect cash and complete pickups</span><b aria-hidden="true">→</b></Link>
+          <Link to="/staff/inventory"><strong>Check inventory</strong><span>Review balances and movements</span><b aria-hidden="true">→</b></Link>
+          <Link to="/staff/catalog/menu"><strong>Manage menu</strong><span>Update products, prices, and availability</span><b aria-hidden="true">→</b></Link>
+          <Link to="/staff/audit"><strong>Review audit</strong><span>Trace recent operational changes</span><b aria-hidden="true">→</b></Link>
+        </nav>
+      </section>
       <div className="staff-memberships">
         {staffContext.memberships.map((membership) => (
               <section className="staff-organization" key={membership.organizationId}>

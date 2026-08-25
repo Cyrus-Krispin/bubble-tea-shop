@@ -14,6 +14,7 @@ import {
 } from "react-router";
 
 import { Button, Dialog, Field, ProblemState } from "../../components/ui";
+import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import type { StaffLocation } from "./staffClient";
 import { getIngredients, type Ingredient } from "./ingredientClient";
@@ -1199,12 +1200,15 @@ export default function MenuProductDetailPage() {
       </main>
     );
   const { product } = state;
+  const activeVariantCount = product.variants.filter((variant) => !variant.archived).length;
+  const availableOfferingCount = product.offerings.filter((offering) => offering.available).length;
   return (
     <main
       aria-label="Menu product detail"
       className="staff-main"
       id="staff-workspace"
     >
+      <CatalogSectionNav />
       <Link className="staff-back-link" to={`/staff/catalog/menu?organizationId=${encodeURIComponent(organizationId)}`}>
         ← Back to menu
       </Link>
@@ -1244,6 +1248,11 @@ export default function MenuProductDetailPage() {
           </div>
         )}
       </div>
+      <dl className="staff-summary-strip" aria-label="Product summary">
+        <div><dt>Product status</dt><dd>{product.archived ? "Archived" : "Active"}</dd></div>
+        <div><dt>Active variants</dt><dd>{activeVariantCount} of {product.variants.length}</dd></div>
+        <div><dt>Available offerings</dt><dd>{availableOfferingCount} of {product.offerings.length}</dd></div>
+      </dl>
       <section aria-labelledby="variants-title">
         <div className="recipe-history-heading">
           <div>
