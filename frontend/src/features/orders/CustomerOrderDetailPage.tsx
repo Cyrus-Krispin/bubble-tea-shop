@@ -16,7 +16,6 @@ import {
   type CustomerOrderLine,
 } from "./customerOrderClient";
 import { formatOrderDate, orderStatusLabel } from "./orderPresentation";
-import "./customerOrders.css";
 
 type DetailState =
   | { status: "loading" }

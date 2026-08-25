@@ -13,7 +13,6 @@ import {
   type CustomerOrderSummary,
 } from "./customerOrderClient";
 import { formatOrderDate, orderStatusLabel } from "./orderPresentation";
-import "./customerOrders.css";
 
 const PAGE_SIZE = 5;
 

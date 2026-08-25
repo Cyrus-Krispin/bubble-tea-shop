@@ -1,7 +1,9 @@
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useOutletContext, useParams, useSearchParams } from "react-router";
 
-import { Button, Dialog, Field, ProblemState } from "../../components/ui";
+import { Dialog, Field, ProblemState } from "../../components/shared";
+import { Button } from "../../components/ui/button";
+import { ConfirmDialog } from "../../components/shared/ConfirmDialog";
 import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import { getIngredients, type Ingredient } from "./ingredientClient";
@@ -330,6 +332,25 @@ function ActionDialog({
     }
   }
 
+  if (variant === "danger") {
+    return (
+      <ConfirmDialog
+        confirmLabel={actionLabel}
+        description={description}
+        error={error}
+        isLoading={saving}
+        onConfirm={act}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (nextOpen) setError(undefined);
+        }}
+        open={open}
+        title={title}
+        trigger={<Button disabled={disabled} size="compact" variant="danger">{children}</Button>}
+      />
+    );
+  }
+
   return (
     <Dialog
       description={description}
@@ -412,7 +433,7 @@ function VersionCard({
             )}
             onChanged={onChanged}
             title={`Retire version ${version.versionNumber}?`}
-            variant="secondary"
+            variant="danger"
           >
             Retire
           </ActionDialog>

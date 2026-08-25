@@ -12,7 +12,10 @@ import {
   useSearchParams,
 } from "react-router";
 
-import { Button, Dialog, Field, ProblemState } from "../../components/ui";
+import { Dialog, Field, ProblemState } from "../../components/shared";
+import { Button } from "../../components/ui/button";
+import { ConfirmDialog as DestructiveConfirmDialog } from "../../components/shared/ConfirmDialog";
+import { Checkbox } from "../../components/ui/checkbox";
 import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import {
@@ -278,10 +281,9 @@ function ChoiceDialog({
           />
         </Field>
         <label className="ingredient-archive-filter">
-          <input
+          <Checkbox
             checked={defaultChoice}
-            onChange={(event) => setDefaultChoice(event.target.checked)}
-            type="checkbox"
+            onCheckedChange={(checked) => setDefaultChoice(checked === true)}
           />
           Default choice
         </label>
@@ -331,8 +333,12 @@ function ConfirmDialog({
     }
   }
   return (
-    <Dialog
+    <DestructiveConfirmDialog
+      confirmLabel="Archive"
       description={description}
+      error={error}
+      isLoading={saving}
+      onConfirm={act}
       onOpenChange={(next) => {
         setOpen(next);
         if (next) setError(undefined);
@@ -344,23 +350,7 @@ function ConfirmDialog({
           {children}
         </Button>
       }
-    >
-      {error === undefined ? null : (
-        <p className="form-message form-message--error" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="recipe-form-actions">
-        <Button
-          isLoading={saving}
-          loadingLabel="Archiving"
-          onClick={act}
-          variant="danger"
-        >
-          Archive
-        </Button>
-      </div>
-    </Dialog>
+    />
   );
 }
 
@@ -497,12 +487,11 @@ export default function OptionGroupDetailPage() {
           <div>
             <h2 id="choices-title">Choices</h2>
             <label className="ingredient-archive-filter">
-              <input
+              <Checkbox
                 checked={includeArchivedChoices}
-                onChange={(event) =>
-                  setIncludeArchivedChoices(event.target.checked)
+                onCheckedChange={(checked) =>
+                  setIncludeArchivedChoices(checked === true)
                 }
-                type="checkbox"
               />
               Include archived
             </label>

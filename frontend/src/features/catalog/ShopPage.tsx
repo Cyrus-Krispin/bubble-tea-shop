@@ -7,6 +7,7 @@ import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardFooter } from "../../components/ui/card";
 import { ProblemState } from "../../components/shared";
+import { cn } from "../../lib/utils";
 import { useCart } from "../cart/CartContext";
 import { LastOrderSuggestion } from "../orders/LastOrderSuggestion";
 import { DrinkArtwork } from "./DrinkArtwork";
@@ -51,7 +52,7 @@ export function ShopPage() {
             <p className="location-picker-static">Pickup at <strong>{state.data.location.name}</strong></p>
           )}
         </div>
-        <p aria-atomic="true" className="visually-hidden" role="status">Menu for {state.data.location.name}</p>
+        <p aria-atomic="true" className="sr-only" role="status">Menu for {state.data.location.name}</p>
         <LastOrderSuggestion locationSlug={state.data.location.slug} products={state.data.products} />
         <div className="category-filter" aria-label="Filter drinks" role="group">
           {categories.map((option) => (
@@ -76,7 +77,7 @@ export function ShopPage() {
             <article className="min-w-0" key={drink.id}>
               <Card className={`group h-full gap-0 overflow-hidden py-0 transition-shadow duration-150 hover:ring-foreground/20${drink.available ? "" : " bg-muted/35"}`}>
                 <DrinkArtwork
-                  className={`aspect-[4/3] w-full object-cover object-[center_47%]${drink.available ? "" : " grayscale"}`}
+                  className={cn("aspect-[4/3] w-full object-cover object-[center_47%] xl:aspect-[16/9]", !drink.available && "grayscale")}
                   drink={drink}
                   priority={index < 4}
                 />

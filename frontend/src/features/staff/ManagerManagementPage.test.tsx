@@ -102,7 +102,7 @@ describe("ManagerManagementPage", () => {
     ));
 
     fireEvent.click(await screen.findByRole("button", { name: "Deactivate" }));
-    dialog = screen.getByRole("dialog", { name: "Deactivate manager?" });
+    dialog = screen.getByRole("alertdialog", { name: "Deactivate manager?" });
     fireEvent.click(within(dialog).getByRole("button", { name: "Confirm deactivation" }));
     await waitFor(() => expect(deactivateManager).toHaveBeenCalledWith(
       "owner-token", organizationId, manager.id, 0,

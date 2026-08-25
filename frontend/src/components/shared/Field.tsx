@@ -1,7 +1,10 @@
-import { cloneElement, type ReactElement, type ReactNode } from "react";
+import { cloneElement, type ComponentProps, type ReactElement, type ReactNode } from "react";
 
 import { cn } from "../../lib/utils";
+import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { NativeSelect } from "../ui/native-select";
+import { Textarea } from "../ui/textarea";
 
 type FieldControlProps = {
   "aria-describedby"?: string;
@@ -25,20 +28,29 @@ export function Field({ children, description, error, id, label }: FieldProps) {
     .filter(Boolean)
     .join(" ") || undefined;
   const isTextarea = children.type === "textarea";
+  const controlProps = {
+    ...children.props,
+    "aria-describedby": describedBy,
+    "aria-invalid": error === undefined ? children.props["aria-invalid"] : true,
+    className: cn(
+      isTextarea ? "min-h-24" : "h-11",
+      children.props.className,
+    ),
+    id,
+  };
+
+  const control = children.type === "input"
+    ? <Input {...controlProps as ComponentProps<"input">} />
+    : children.type === "textarea"
+      ? <Textarea {...controlProps as ComponentProps<"textarea">} />
+      : children.type === "select"
+        ? <NativeSelect {...controlProps as Omit<ComponentProps<"select">, "size">} className="w-full" />
+        : cloneElement(children, controlProps);
 
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{label}</Label>
-      {cloneElement(children, {
-        "aria-describedby": describedBy,
-        "aria-invalid": error === undefined ? children.props["aria-invalid"] : true,
-        className: cn(
-          "w-full rounded-lg border border-input bg-input/30 px-3 text-base text-foreground outline-none transition-shadow placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-          isTextarea ? "min-h-24 py-2" : "h-11",
-          children.props.className,
-        ),
-        id,
-      })}
+      {control}
       {description === undefined ? null : <small className="text-sm leading-5 text-muted-foreground" id={descriptionId}>{description}</small>}
       {error === undefined ? null : (
         <p className="text-sm font-medium text-destructive" id={errorId} role="alert">{error}</p>

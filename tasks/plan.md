@@ -34,7 +34,7 @@ repository. The target boundary is:
 
 ## Architecture Decisions
 
-1. **Use shadcn's `new-york` style with Radix primitives and Tailwind CSS v4.** Use the current
+1. **Use shadcn's `radix-nova` style with Radix primitives and Tailwind CSS v4.** Use the current
    unified `radix-ui` package rather than retaining individual Radix packages.
 2. **Make an Obsidian-inspired dark theme the application-wide default.** Derive an accessible
    neutral-charcoal surface ladder from Obsidian's documented default dark colors, then retain ube
@@ -156,7 +156,7 @@ changing a route.
 
 **Acceptance criteria:**
 
-- [ ] `components.json` selects `new-york`, TypeScript, CSS variables, Radix, and repository aliases.
+- [x] `components.json` selects `radix-nova`, TypeScript, CSS variables, Radix, and repository aliases.
 - [ ] Vite and TypeScript resolve `@/*`, and the application builds with the configuration.
 - [ ] The individual dialog dependency is removed once unified Radix is active.
 

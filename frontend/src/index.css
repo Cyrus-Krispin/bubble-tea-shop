@@ -40,7 +40,6 @@
   --space-10: 4rem;
   --radius-control: 0.5rem;
   --radius-card: 0.75rem;
-  --shadow-float: 0 1rem 2.5rem rgb(0 0 0 / 35%);
   color: var(--color-ink);
   background: var(--color-canvas);
   font-family: var(--font-interface);
@@ -173,135 +172,12 @@ h2 {
   text-transform: uppercase;
 }
 
-.primary-link {
-  display: inline-flex;
-  min-height: 3rem;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-3) var(--space-5);
-  color: var(--primary-foreground);
-  font-weight: 750;
-  text-decoration: none;
-  background: var(--primary);
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-control);
-  transition: background 160ms ease, border-color 160ms ease;
-}
-
-.primary-link:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  min-height: 4.75rem;
-  padding: var(--space-4) clamp(var(--space-4), 5vw, var(--space-10));
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-line);
-}
-
-.brand {
-  display: inline-flex;
-  gap: var(--space-3);
-  align-items: center;
-  color: var(--color-ink);
-  text-decoration: none;
-}
-
 .brand-icon {
   display: block;
   width: 2.5rem;
   height: 2.5rem;
   flex: 0 0 auto;
   object-fit: contain;
-}
-
-.brand strong,
-.brand span:last-child span { display: block; }
-.brand strong { font-size: 1rem; }
-.brand span:last-child span { margin-top: 0.1rem; color: var(--legacy-color-muted); font-size: 0.8125rem; }
-
-.auth-page {
-  display: grid;
-  width: min(100% - 2rem, 32rem);
-  min-height: calc(100vh - 4.75rem);
-  place-items: center;
-  margin: 0 auto;
-  padding: var(--space-8) 0;
-}
-
-.card-copy,
-.access-help {
-  color: var(--legacy-color-muted);
-  line-height: 1.6;
-}
-
-.auth-card,
-.access-panel,
-.account-panel {
-  padding: clamp(var(--space-5), 4vw, var(--space-8));
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-}
-
-.auth-card,
-.access-panel { border-top: 3px solid var(--legacy-color-primary); }
-
-.staff-auth-page .auth-card { width: 100%; }
-.staff-auth-page .auth-card h1 { max-width: none; font-size: clamp(2rem, 6vw, 2.5rem); }
-.staff-auth-page .access-help { margin: var(--space-4) 0 0; }
-
-.access-main {
-  display: grid;
-  width: min(100% - 2rem, 32rem);
-  min-height: calc(100vh - 4.75rem);
-  place-items: center;
-  margin: 0 auto;
-  padding: var(--space-8) 0;
-}
-
-.access-panel { width: 100%; }
-.access-heading > p:last-child { color: var(--legacy-color-muted); line-height: 1.55; }
-.access-heading h1 { font-size: clamp(2rem, 6vw, 2.5rem); }
-
-.access-modes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin: var(--space-5) 0;
-  padding: var(--space-1);
-  background: var(--color-canvas);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
-}
-
-.access-modes a {
-  min-height: 3rem;
-  padding: var(--space-3);
-  color: var(--legacy-color-muted);
-  font-weight: 750;
-  text-align: center;
-  text-decoration: none;
-  border: 1px solid transparent;
-  border-radius: calc(var(--radius-control) - 0.125rem);
-}
-
-.access-modes a[aria-current="page"] { color: var(--color-ink); background: var(--color-surface); border-color: var(--color-line); box-shadow: 0 1px 2px rgb(23 19 31 / 8%); }
-.access-continue { display: flex; min-height: 3rem; align-items: center; justify-content: center; margin-top: var(--space-4); font-weight: 750; text-align: center; border: 1px solid var(--color-line-strong); border-radius: var(--radius-control); }
-
-.login-form { display: grid; gap: var(--space-4); }
-
-.password-toggle {
-  width: max-content;
-  min-height: 2.75rem;
-  margin-top: calc(var(--space-3) * -1);
-  padding: 0;
-  color: var(--color-primary-strong);
-  font-weight: 700;
-  background: transparent;
-  border: 0;
 }
 
 .form-message {
@@ -314,42 +190,6 @@ h2 {
 .form-message--error { color: var(--color-danger); background: var(--color-danger-soft); border: 1px solid var(--color-danger); }
 .form-message--success { color: var(--legacy-color-success); background: var(--color-success-soft); border: 1px solid var(--legacy-color-success); }
 
-.account-page,
-.not-found-page {
-  width: min(100% - 2rem, 48rem);
-  margin: 0 auto;
-  padding: clamp(var(--space-6), 6vw, 4rem) 0;
-}
-
-.account-page > h1,
-.not-found-page > h1 { max-width: none; }
-.account-panel { margin-top: var(--space-5); }
-.account-panel dl div { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) 0; border-block: 1px solid var(--color-line); }
-.account-panel dd { margin: 0; font-weight: 750; }
-.account-note,
-.not-found-page > p:not(.eyebrow) { color: var(--legacy-color-muted); line-height: 1.6; }
-.account-actions { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
-
-.account-summary { display: flex; flex-wrap: wrap; gap: var(--space-5); align-items: center; justify-content: space-between; }
-.account-summary h2 { margin: 0; overflow-wrap: anywhere; font-size: 1.15rem; letter-spacing: -0.01em; }
-.account-summary .card-kicker { margin-bottom: var(--space-1); }
-.account-summary .form-message { width: 100%; flex-basis: 100%; }
-
-.not-found-page {
-  position: relative;
-  overflow: hidden;
-  margin-top: var(--space-8);
-  padding: clamp(var(--space-6), 6vw, var(--space-8));
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-top: 3px solid var(--legacy-color-primary);
-  border-radius: var(--radius-card);
-}
-
-@media (max-width: 36rem) {
-  .account-summary { align-items: stretch; flex-direction: column; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
@@ -361,7 +201,7 @@ h2 {
 
 @media (forced-colors: active) {
   :focus-visible { outline-color: Highlight; }
-  .primary-link { color: HighlightText; background: Highlight; border-color: Highlight; }
+  [data-slot]:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
 }
 
 @theme inline {

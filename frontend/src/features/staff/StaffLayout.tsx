@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
+import { ClipboardList, LayoutDashboard, LogOut, Menu, PackageSearch, ScrollText, ShoppingBag, Users } from "lucide-react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
 
-import { Button, ProblemState } from "../../components/ui";
+import { ProblemState } from "../../components/shared/ProblemState";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Button } from "../../components/ui/button";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "../../components/ui/sheet";
+import { cn } from "../../lib/utils";
 import { signOut } from "../auth/authClient";
 import { useAuth } from "../auth/useAuth";
 import {
@@ -20,6 +25,14 @@ export type StaffOutletContext = {
   accessToken: string;
   staffContext: StaffContext;
 };
+
+const navigation = [
+  { end: true, icon: LayoutDashboard, label: "Overview", to: "/staff" },
+  { end: false, icon: ShoppingBag, label: "Catalog", to: "/staff/catalog" },
+  { end: false, icon: PackageSearch, label: "Inventory", to: "/staff/inventory" },
+  { end: false, icon: ClipboardList, label: "Orders", to: "/staff/orders" },
+  { end: false, icon: ScrollText, label: "Audit", to: "/staff/audit" },
+] as const;
 
 export function StaffLayout() {
   const location = useLocation();
@@ -71,32 +84,54 @@ export function StaffLayout() {
     && visibleState.error.status === 403;
 
   return (
-    <div className="staff-shell">
+    <div className="staff-shell bg-background text-foreground">
       <a className="skip-link" href="#staff-workspace">Skip to workspace</a>
-      <aside className="staff-header" aria-label="Staff workspace navigation">
+      <aside className="staff-header bg-sidebar text-sidebar-foreground" aria-label="Staff workspace navigation">
         <Link className="staff-brand" to="/staff" aria-label="Bubble Tea Shop staff home">
           <img alt="" aria-hidden="true" className="brand-icon" height="40" src="/app-icon-192.png" width="40" />
           <span><strong>Bubble Tea Shop</strong><small>Operations</small></span>
         </Link>
         <p className="staff-nav-label">Workspace</p>
         <nav aria-label="Staff navigation">
-          <NavLink end to="/staff">Overview</NavLink>
-          <NavLink to="/staff/catalog">Catalog</NavLink>
-          <NavLink to="/staff/inventory">Inventory</NavLink>
-          <NavLink to="/staff/orders">Orders</NavLink>
-          <NavLink to="/staff/audit">Audit</NavLink>
+          {navigation.map(({ end, icon: Icon, label, to }) => (
+            <NavLink end={end} key={to} to={to}><Icon aria-hidden="true" className="size-4" />{label}</NavLink>
+          ))}
           {visibleState.status === "ready"
             && visibleState.context.memberships.some((membership) => membership.role === "OWNER")
-            ? <NavLink to="/staff/managers">Team</NavLink>
+            ? <NavLink to="/staff/managers"><Users aria-hidden="true" className="size-4" />Team</NavLink>
             : null}
         </nav>
+        <Sheet>
+          <SheetTrigger asChild><Button className="staff-mobile-menu" size="icon" variant="outline"><Menu aria-hidden="true" /><span className="sr-only">Open staff navigation</span></Button></SheetTrigger>
+          <SheetContent className="w-[min(22rem,88vw)]" side="right">
+            <SheetHeader>
+              <SheetTitle>Staff navigation</SheetTitle>
+              <SheetDescription>{session.email}</SheetDescription>
+            </SheetHeader>
+            <nav aria-label="Mobile staff navigation" className="grid gap-1 px-4">
+              {navigation.map(({ end, icon: Icon, label, to }) => (
+                <SheetClose asChild key={to}><NavLink className={({ isActive }) => cn("flex min-h-11 items-center gap-3 rounded-lg px-3 text-foreground no-underline hover:bg-muted", isActive && "bg-accent text-accent-foreground ring-1 ring-border")} end={end} to={to}><Icon aria-hidden="true" className="size-4" />{label}</NavLink></SheetClose>
+              ))}
+              {visibleState.status === "ready" && visibleState.context.memberships.some((membership) => membership.role === "OWNER") ? (
+                <SheetClose asChild><NavLink className={({ isActive }) => cn("flex min-h-11 items-center gap-3 rounded-lg px-3 text-foreground no-underline hover:bg-muted", isActive && "bg-accent text-accent-foreground ring-1 ring-border")} to="/staff/managers"><Users aria-hidden="true" className="size-4" />Team</NavLink></SheetClose>
+              ) : null}
+            </nav>
+            <SheetFooter>
+              <SheetClose asChild><Button onClick={handleSignOut} variant="outline"><LogOut aria-hidden="true" />Sign out</Button></SheetClose>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
         <div className="staff-account">
           <span>{session.email}</span>
-          <Button onClick={handleSignOut} size="compact" variant="secondary">Sign out</Button>
+          <Button onClick={handleSignOut} size="compact" variant="outline"><LogOut aria-hidden="true" />Sign out</Button>
         </div>
       </aside>
 
-      {signOutFailed ? <p className="staff-global-message form-message form-message--error" role="alert">We couldn&apos;t sign you out. Please try again.</p> : null}
+      {signOutFailed ? (
+        <Alert className="staff-global-message" variant="destructive">
+          <AlertDescription>We couldn&apos;t sign you out. Please try again.</AlertDescription>
+        </Alert>
+      ) : null}
       {visibleState.status === "idle" || visibleState.status === "loading" ? (
         <main aria-label="Staff workspace" className="staff-status" id="staff-workspace">
           <p role="status">Loading your access…</p>

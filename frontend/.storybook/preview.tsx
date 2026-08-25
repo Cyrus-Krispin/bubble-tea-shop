@@ -1,6 +1,5 @@
 import type { Preview } from "@storybook/react-vite";
 
-import "../src/components/ui/ui.css";
 import "../src/index.css";
 
 document.documentElement.classList.add("dark");

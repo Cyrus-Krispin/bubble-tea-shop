@@ -84,6 +84,7 @@ test("guest menu keeps a compact responsive product grid", async ({ page }) => {
     { width: 768, height: 900, columns: 2 },
     { width: 1024, height: 900, columns: 3 },
     { width: 1280, height: 800, columns: 4 },
+    { width: 1366, height: 768, columns: 4 },
     { width: 1440, height: 900, columns: 4 },
   ];
 

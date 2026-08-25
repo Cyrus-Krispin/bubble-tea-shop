@@ -2,14 +2,15 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { Link, useOutletContext } from "react-router";
 
 import {
-  Button,
   DataTable,
   Dialog,
   Field,
   Pagination,
   ProblemState,
   type DataTableColumn,
-} from "../../components/ui";
+} from "../../components/shared";
+import { Button } from "../../components/ui/button";
+import { Checkbox } from "../../components/ui/checkbox";
 import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import {
@@ -168,12 +169,7 @@ export default function RecipeManagementPage() {
       header: "Actions",
       align: "end",
       cell: (row) => (
-        <Link
-          className="ui-button ui-button--secondary ui-button--compact"
-          to={`/staff/catalog/recipes/${row.id}?organizationId=${encodeURIComponent(organizationId)}`}
-        >
-          Open recipe
-        </Link>
+        <Button asChild size="compact" variant="outline"><Link to={`/staff/catalog/recipes/${row.id}?organizationId=${encodeURIComponent(organizationId)}`}>Open recipe</Link></Button>
       ),
     },
   ];
@@ -223,10 +219,10 @@ export default function RecipeManagementPage() {
           <Button size="compact" type="submit" variant="secondary">Search</Button>
         </form>
         <label className="ingredient-archive-filter">
-          <input checked={includeArchived} onChange={(event) => {
-            setIncludeArchived(event.target.checked);
+          <Checkbox checked={includeArchived} onCheckedChange={(checked) => {
+            setIncludeArchived(checked === true);
             setPage(0);
-          }} type="checkbox" />
+          }} />
           Include archived
         </label>
       </section>
