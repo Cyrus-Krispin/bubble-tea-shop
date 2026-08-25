@@ -30,6 +30,15 @@ test("runs infrastructure verification and the release gate for Compose changes"
   });
 });
 
+test("runs the release gate when the Docker build context changes", () => {
+  assert.deepEqual(classifyChangedPaths([".dockerignore"]), {
+    backend: false,
+    frontend: false,
+    infrastructure: false,
+    release: true,
+  });
+});
+
 test("runs backend and frontend verification for the shared OpenAPI contract", () => {
   assert.deepEqual(classifyChangedPaths(["docs/api/openapi.json"]), {
     backend: true,
