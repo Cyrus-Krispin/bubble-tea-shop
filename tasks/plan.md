@@ -34,9 +34,11 @@ repository. The target boundary is:
 
 1. **Use shadcn's `new-york` style with Radix primitives and Tailwind CSS v4.** Use the current
    unified `radix-ui` package rather than retaining individual Radix packages.
-2. **Keep the existing light, photographic commerce direction.** Map the documented ube,
-   calamansi, status, spacing, and radius system to shadcn semantic CSS variables. Do not adopt a
-   generic dark dashboard, gradients, or glass effects. Dark mode is outside this migration.
+2. **Make dark theme the application-wide default.** Derive an accessible dark ube/calamansi
+   palette from the documented brand system and map it to shadcn semantic CSS variables. Customer,
+   authentication, account, and staff routes all use the same dark foundation; no route may retain
+   a light canvas. Preserve the photographic commerce direction without adopting a generic zinc
+   dashboard, gradients, glass effects, or low-contrast translucent surfaces.
 3. **Install only used components.** Do not run `shadcn add --all`; add explicit primitives so the
    repository owns no unused generated code.
 4. **Keep generated primitives generic.** Feature-specific loading buttons, responsive data
@@ -108,15 +110,19 @@ changing a route.
 
 ### Task 2: Establish the brand theme and first primitives
 
-Replace duplicated root tokens with Tailwind v4 and shadcn semantic variables. Map the documented
-light ube/calamansi palette to shadcn surface and state tokens, then validate focus, contrast,
-typography, motion, and forced-colors behavior.
+Replace duplicated root tokens with Tailwind v4 and shadcn semantic variables. Create a dark-first
+ube/calamansi palette for canvas, elevated surfaces, overlays, controls, imagery boundaries, and
+semantic states, then validate focus, contrast, typography, motion, and forced-colors behavior.
 
 **Acceptance criteria:**
 
-- [ ] The theme matches `frontend/docs/visual-style-guide.md` and uses semantic utilities.
+- [ ] The root applies the shadcn `dark` theme to the entire application and Storybook; every route
+  inherits dark canvas, foreground, surface, border, input, popover, and overlay tokens.
+- [ ] The dark palette preserves the ube/calamansi brand and uses semantic utilities with WCAG 2.2
+  AA contrast for text, controls, focus indicators, and status states.
 - [ ] Controls retain visible focus, 44px customer targets, reduced motion, and forced-color boundaries.
-- [ ] Storybook and the application load the same global theme without circular font variables.
+- [ ] Photography retains natural color and readable edge treatment on dark surfaces without
+  filters, dimming overlays, or misleading product appearance.
 
 **Verification:** `cd frontend && pnpm test && pnpm typecheck && pnpm lint && pnpm build-storybook`,
 plus manual contrast and focus review.
@@ -206,7 +212,8 @@ location disclosure. Preserve the documented ordinary-link semantics within the 
 - [ ] Location and catalog data come only from Spring APIs; location routes remain canonical.
 - [ ] The disclosure supports Enter/Space, Escape with focus restoration, outside click, and a
   visible current location.
-- [ ] Images, availability, prices, loading, empty, and error states work at all required widths.
+- [ ] Images, dark-surface boundaries, availability, prices, loading, empty, and error states work
+  at all required widths.
 
 **Verification:** focused `ShopPage` tests, typecheck, lint, and visual review at all four widths.
 
@@ -370,7 +377,10 @@ consumers. Update design-system, Storybook, and accessibility documentation.
 
 - [ ] No import references old primitives or feature CSS; no legacy selector remains in use.
 - [ ] `components/ui` contains only intentionally installed shadcn source; dependencies are used.
-- [ ] Customer/staff UI meets brand, responsive, WCAG, and API ownership boundaries without errors.
+- [ ] No customer, account, authentication, or staff route flashes or retains a light canvas during
+  initial load, navigation, suspense, dialogs, sheets, popovers, or error states.
+- [ ] Customer/staff UI meets the dark brand, responsive, WCAG, and API ownership boundaries
+  without errors.
 
 **Verification:**
 
@@ -424,7 +434,8 @@ and Storybook docs
 
 - Backend, database, OpenAPI, authentication, cart, pricing, inventory, or authorization redesign.
 - New workflows, fabricated application data, or unimplemented navigation.
-- Dark mode, localization, new branding, animation-heavy effects, or a custom component registry.
+- A user-selectable light/dark toggle, localization, new branding, animation-heavy effects, or a
+  custom component registry. This migration intentionally ships dark theme only.
 - Replacing React Router, Vitest, Storybook, Playwright, axe, or the generated API client.
 
 ## Approval Gate

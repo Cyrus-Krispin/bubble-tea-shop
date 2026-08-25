@@ -6,7 +6,7 @@ criteria, focused verification, diff review, commit, and push are complete.
 ## Phase 1 — Foundation
 
 - [ ] Task 1: Configure Tailwind v4, shadcn, Radix, Lucide, aliases, and `components.json`.
-- [ ] Task 2: Map the approved brand system to shadcn semantic tokens and add first primitives.
+- [ ] Task 2: Create the application-wide dark ube/calamansi shadcn theme and add first primitives.
 - [ ] Task 3: Replace shared primitives with tested shadcn-based application compositions.
 - [ ] Checkpoint A: Approve application/Storybook theme and shared component behavior.
 
@@ -18,7 +18,7 @@ criteria, focused verification, diff review, commit, and push are complete.
 - [ ] Task 7: Migrate drink customization and its responsive purchase action.
 - [ ] Task 8a: Migrate cart review, checkout, retry, and confirmation.
 - [ ] Task 8b: Migrate last-order quick add, history, and receipt detail.
-- [ ] Checkpoint B: Pass desktop/mobile customer browser and accessibility review.
+- [ ] Checkpoint B: Pass dark-theme desktop/mobile customer browser and accessibility review.
 
 ## Phase 3 — Staff workspace
 
@@ -31,7 +31,7 @@ criteria, focused verification, diff review, commit, and push are complete.
 - [ ] Task 12b: Migrate staff order queue, detail, cash completion, and shortages.
 - [ ] Task 13a: Migrate owner-only manager lifecycle and location assignments.
 - [ ] Task 13b: Migrate the operational audit timeline.
-- [ ] Checkpoint C: Pass owner/manager desktop/mobile browser and accessibility review.
+- [ ] Checkpoint C: Pass dark-theme owner/manager desktop/mobile browser and accessibility review.
 
 ## Phase 4 — Removal and release gate
 
@@ -39,6 +39,7 @@ criteria, focused verification, diff review, commit, and push are complete.
 - [ ] Update visual-style, Storybook, accessibility, and maintenance documentation.
 - [ ] Run `pnpm test`, `pnpm typecheck`, `pnpm lint`, `pnpm build`, and `pnpm build-storybook`.
 - [ ] Run `pnpm e2e` against healthy Compose.
-- [ ] Verify keyboard, focus return, VoiceOver, 200% zoom, reduced motion, forced colors, and all widths.
+- [ ] Verify dark-theme contrast/no-light-flash, keyboard, focus return, VoiceOver, 200% zoom,
+  reduced motion, forced colors, and all widths.
 - [ ] Run `git diff --check` and repository-wide legacy import/selector searches.
 - [ ] Review, commit, push, and obtain human approval before merge.
