@@ -14,7 +14,15 @@ application schema. GoTrue owns only its Supabase Auth schema.
 
 ## Prerequisites and first start
 
-Install and start Docker Desktop, Colima, or another Docker-compatible runtime. Then run:
+Install and start Docker Desktop. Wait until its engine is running, then verify that the Docker CLI
+targets Docker Desktop:
+
+```bash
+docker context use desktop-linux
+docker info --format '{{.OperatingSystem}}'
+```
+
+The second command must print `Docker Desktop`. Then run:
 
 ```bash
 cp .env.example .env
@@ -42,6 +50,39 @@ in again if an existing browser session stops working.
 
 Do not use `--build` offline after changing a Dockerfile or dependency manifest unless the required
 artifacts are already cached.
+
+## Migrating from Colima
+
+Docker Desktop and Colima use separate Linux virtual machines. Their containers, images, networks,
+and named volumes are not shared even though both runtimes use the same Docker CLI. Check the old
+runtime before cutting over:
+
+```bash
+docker --context colima compose ps
+```
+
+If the project is running there, stop it without deleting its named volumes:
+
+```bash
+docker --context colima compose down
+```
+
+Start Docker Desktop, select its context, and verify the engine before starting the project again:
+
+```bash
+docker context use desktop-linux
+docker info --format '{{.OperatingSystem}}'
+docker compose up --build
+```
+
+This uses Docker Desktop's own database volume and never reuses the Colima volume. If the Colima
+database contains local data that must be retained, do not run `docker compose down --volumes`,
+delete the Colima profile, or uninstall Colima. Create and verify a logical backup and restore
+before decommissioning the old runtime; the
+[backup and restore guide](../operations/backup-restore.md) describes the application schema
+workflow. Supabase Auth data is outside that logical backup, so preserving local accounts requires
+a separate Auth-aware migration or creating fresh local accounts after cutover. Keeping the stopped
+Colima profile provides a rollback path until the Docker Desktop stack is validated.
 
 ## Local endpoints
 

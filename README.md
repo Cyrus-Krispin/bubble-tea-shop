@@ -66,7 +66,7 @@ Read the [architecture overview](docs/architecture/overview.md) for module bound
 
 ### Prerequisites
 
-- Docker Desktop, Colima, or another Docker-compatible runtime
+- Docker Desktop, installed and running
 - Node.js 24 (used once to generate local Auth keys)
 
 ### Start the complete stack
@@ -79,6 +79,8 @@ docker compose up --build
 
 The first run pulls the pinned images and downloads build dependencies. After the services become
 healthy, open [localhost:4173](http://localhost:4173) to browse the shop.
+If another Docker runtime was previously installed, confirm that `docker context show` reports
+`desktop-linux` before starting the stack.
 
 | Local service | URL |
 | --- | --- |
