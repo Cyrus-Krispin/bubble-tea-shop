@@ -175,6 +175,79 @@ services:
       retries: 12
       start_period: 30s
 
+  local-auth-bootstrap:
+    image: node:24.16.0-alpine
+    restart: "no"
+    depends_on:
+      auth:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    environment:
+      APPLICATION_API_URL: http://backend:8080
+      SUPABASE_AUTH_URL: http://auth:9999
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY:?Run the local Auth key generator before starting Compose.}
+      LOCAL_USER_BOOTSTRAP_PHASE: accounts
+      LOCAL_OWNER_SUBJECT_FILE: /bootstrap-state/owner-subject
+      LOCAL_BOOTSTRAP_ORGANIZATION_ID: 10000000-0000-0000-0000-000000000001
+      LOCAL_CUSTOMER_EMAIL: user@user.com
+      LOCAL_CUSTOMER_PASSWORD: User@1234
+      LOCAL_MANAGER_EMAIL: manager@manager.com
+      LOCAL_MANAGER_PASSWORD: Manager@1234
+      LOCAL_OWNER_EMAIL: owner@owner.com
+      LOCAL_OWNER_PASSWORD: Owner@1234
+    command: ["node", "/bootstrap/bootstrap-local-users.mjs"]
+    volumes:
+      - ./infra/supabase/bootstrap-local-users.mjs:/bootstrap/bootstrap-local-users.mjs:ro
+      - local-user-bootstrap-state:/bootstrap-state
+
+  local-owner-bootstrap:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+      local-auth-bootstrap:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/postgres
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-local-supabase-postgres}
+      OWNER_BOOTSTRAP_ENABLED: "true"
+      OWNER_BOOTSTRAP_ORGANIZATION_ID: 10000000-0000-0000-0000-000000000001
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        export OWNER_BOOTSTRAP_AUTH_SUBJECT="$$(tr -d '\r\n' < /bootstrap-state/owner-subject)"
+        test -n "$$OWNER_BOOTSTRAP_AUTH_SUBJECT"
+        exec java -jar /app/app.jar --spring.main.web-application-type=none
+    volumes:
+      - local-user-bootstrap-state:/bootstrap-state:ro
+
+  local-access-bootstrap:
+    image: node:24.16.0-alpine
+    restart: "no"
+    depends_on:
+      local-owner-bootstrap:
+        condition: service_completed_successfully
+    environment:
+      APPLICATION_API_URL: http://backend:8080
+      SUPABASE_AUTH_URL: http://auth:9999
+      LOCAL_USER_BOOTSTRAP_PHASE: access
+      LOCAL_BOOTSTRAP_ORGANIZATION_ID: 10000000-0000-0000-0000-000000000001
+      LOCAL_CUSTOMER_EMAIL: user@user.com
+      LOCAL_CUSTOMER_PASSWORD: User@1234
+      LOCAL_MANAGER_EMAIL: manager@manager.com
+      LOCAL_MANAGER_PASSWORD: Manager@1234
+      LOCAL_OWNER_EMAIL: owner@owner.com
+      LOCAL_OWNER_PASSWORD: Owner@1234
+    command: ["node", "/bootstrap/bootstrap-local-users.mjs"]
+    volumes:
+      - ./infra/supabase/bootstrap-local-users.mjs:/bootstrap/bootstrap-local-users.mjs:ro
+
   frontend:
     build:
       context: ./frontend
@@ -188,6 +261,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      local-access-bootstrap:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:4173/health"]
       interval: 10s
@@ -198,3 +273,4 @@ services:
 volumes:
   supabase-postgres:
   supabase-db-config:
+  local-user-bootstrap-state:

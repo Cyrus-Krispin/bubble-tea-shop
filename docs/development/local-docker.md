@@ -51,6 +51,29 @@ in again if an existing browser session stops working.
 Do not use `--build` offline after changing a Dockerfile or dependency manifest unless the required
 artifacts are already cached.
 
+## Automatic local users
+
+Compose finishes three one-shot bootstrap services before it starts the frontend. They create or
+reconcile these public development-only credentials:
+
+| Access | Email | Password |
+| --- | --- | --- |
+| Customer | `user@user.com` | `User@1234` |
+| Manager | `manager@manager.com` | `Manager@1234` |
+| Owner | `owner@owner.com` | `Owner@1234` |
+
+The customer receives no organization membership. The owner receives organization-wide access to
+the seeded Bubble Tea Shop organization. The manager receives active assignments for every active
+seeded location. The bootstrap is idempotent: it reconciles the three local Auth passwords,
+provisions application accounts through Spring, treats an existing owner as success, and repairs
+the manager's location assignments through the owner API when necessary.
+
+These credentials are intentionally public fixtures for the loopback-only local stack. Never use
+them in a shared, staging, or production environment. The Auth service-role key is provided only to
+the short-lived account bootstrap container; neither the long-running Spring service nor the
+frontend receives it. Bootstrap logs and the shared bootstrap-state volume contain no passwords,
+service keys, access tokens, or refresh tokens.
+
 ## Migrating from Colima
 
 Docker Desktop and Colima use separate Linux virtual machines. Their containers, images, networks,
@@ -134,15 +157,17 @@ credentials, OAuth client secrets, tokens, or an edited `.env`.
 Email accounts are auto-confirmed because no SMTP service is part of this focused local stack.
 The local Auth service enforces the same eight-character password minimum shown by the customer
 registration form; browser validation is only usability feedback, not the security boundary.
-Self-service signup is for customers only: application roles still require a server-owned
-organization membership created by the owner bootstrap command below. Kong permits Auth browser
-requests only from the known local frontend origins on ports `4173` and `5173`.
+Self-service signup is for customers only: outside the documented local fixtures, application roles
+still require a server-owned organization membership created by the owner bootstrap command below.
+Kong permits Auth browser requests only from the known local frontend origins on ports `4173` and
+`5173`.
 
 ## Bootstrap the first owner
 
-Register the owner through the normal account screen first so Supabase Auth and Spring provision
-the application account. Obtain that identity's UUID (`sub` in its verified access token) and the
-target organization UUID, then run a one-shot backend container:
+Compose automatically performs this workflow for the documented local owner. To bootstrap a
+different owner, register it through the normal account screen first so Supabase Auth and Spring
+provision the application account. Obtain that identity's UUID (`sub` in its verified access token)
+and the target organization UUID, then run a one-shot backend container:
 
 ```bash
 docker compose run --rm \

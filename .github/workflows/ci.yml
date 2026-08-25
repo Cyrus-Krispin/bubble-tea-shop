@@ -83,6 +83,7 @@ jobs:
       - name: Test local Auth infrastructure
         run: >-
           node --test
+          infra/supabase/bootstrap-local-users.test.mjs
           infra/supabase/generate-local-auth-keys.test.mjs
           infra/supabase/kong/kong.test.mjs
 
