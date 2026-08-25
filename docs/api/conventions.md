@@ -15,8 +15,12 @@ conventions as controllers are introduced.
 - Update a deliberate contract change with
   `./mvnw -Dtest=OpenApiContractIntegrationTest -Dopenapi.update=true test` in `backend/`, then run
   `pnpm api:generate` in `frontend/`. Review both generated diffs before committing them.
-- OpenAPI publication is disabled in the running application by default. Set
-  `OPENAPI_DOCS_ENABLED=true` only in a controlled environment that needs `/v3/api-docs`.
+- OpenAPI and Swagger UI publication are disabled in the running application by default. Set
+  `OPENAPI_DOCS_ENABLED=true` and `SWAGGER_UI_ENABLED=true` only in a controlled environment that
+  needs `/v3/api-docs` and `/swagger-ui.html`. Local Compose enables both on its loopback-only
+  backend port. The paths and flags follow the
+  [springdoc WebMVC UI documentation](https://springdoc.org/getting-started.html) and
+  [configuration properties](https://springdoc.org/properties.html).
 - JPA entities never cross the HTTP boundary.
 - Breaking changes require a versioning decision and migration note.
 
