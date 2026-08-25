@@ -36,6 +36,9 @@ export function classifyChangedPaths(paths) {
       gates.infrastructure = true;
       gates.release = true;
     }
+    if (path === ".dockerignore") {
+      gates.release = true;
+    }
   }
 
   return gates;
