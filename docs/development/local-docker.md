@@ -49,6 +49,8 @@ artifacts are already cached.
 | --- | --- | --- |
 | Frontend workspace | <http://localhost:4173> | Guest ordering, customer accounts, and staff sign-in SPA |
 | Supabase Studio | <http://localhost:54323> | Local table editor, SQL editor, and Auth administration |
+| Swagger UI | <http://localhost:8080/swagger-ui.html> | Interactive documentation for the Spring application API |
+| OpenAPI JSON | <http://localhost:8080/v3/api-docs> | Runtime-generated OpenAPI 3.1 contract |
 | Spring health | <http://localhost:8080/actuator/health> | Backend and database readiness |
 | Supabase Auth health | <http://localhost:8000/auth/v1/health> | Local GoTrue readiness through Kong |
 | PostgreSQL | `localhost:54322` | Optional host access for database tools |
@@ -65,6 +67,8 @@ Check the stack without changing data:
 docker compose ps
 curl --fail http://localhost:4173/health
 curl --fail http://localhost:54323/api/platform/profile
+curl --fail http://localhost:8080/swagger-ui.html
+curl --fail http://localhost:8080/v3/api-docs
 curl --fail http://localhost:8080/actuator/health
 curl --fail http://localhost:8000/auth/v1/health
 ```

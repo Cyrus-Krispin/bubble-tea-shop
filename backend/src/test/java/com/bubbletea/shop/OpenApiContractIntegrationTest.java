@@ -20,11 +20,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Testcontainers
-@SpringBootTest(properties = "springdoc.api-docs.enabled=true")
+@SpringBootTest(properties = {
+    "springdoc.api-docs.enabled=true",
+    "springdoc.swagger-ui.enabled=true"
+})
 @AutoConfigureMockMvc
 class OpenApiContractIntegrationTest {
     @Container
@@ -40,6 +44,13 @@ class OpenApiContractIntegrationTest {
 
     @Autowired
     MockMvc mvc;
+
+    @Test
+    void servesSwaggerUiWhenApiDocumentationIsEnabled() throws Exception {
+        mvc.perform(get("/swagger-ui.html"))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/swagger-ui/index.html"));
+    }
 
     @Test
     void generatesTheImplementedSpringApiContract() throws Exception {

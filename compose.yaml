@@ -157,6 +157,8 @@ services:
       LOCAL_SUPABASE_AUTH_ISSUER_URI: http://localhost:${KONG_PORT:-8000}/auth/v1
       LOCAL_SUPABASE_AUTH_JWK_SET_URI: http://kong:8000/auth/v1/.well-known/jwks.json
       LOCAL_SUPABASE_AUTH_AUDIENCE: authenticated
+      OPENAPI_DOCS_ENABLED: ${OPENAPI_DOCS_ENABLED:-true}
+      SWAGGER_UI_ENABLED: ${SWAGGER_UI_ENABLED:-true}
     ports:
       - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
     depends_on:
