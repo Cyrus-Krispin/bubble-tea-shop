@@ -66,7 +66,7 @@ Read the [architecture overview](docs/architecture/overview.md) for module bound
 
 ### Prerequisites
 
-- Docker Desktop, Colima, or another Docker-compatible runtime
+- Docker Desktop, installed and running
 - Node.js 24 (used once to generate local Auth keys)
 
 ### Start the complete stack
@@ -79,13 +79,42 @@ docker compose up --build
 
 The first run pulls the pinned images and downloads build dependencies. After the services become
 healthy, open [localhost:4173](http://localhost:4173) to browse the shop.
+If another Docker runtime was previously installed, confirm that `docker context show` reports
+`desktop-linux` before starting the stack.
 
-| Local service | URL |
-| --- | --- |
-| Customer and staff application | <http://localhost:4173> |
-| Spring Boot health | <http://localhost:8080/actuator/health> |
-| Supabase Auth health | <http://localhost:8000/auth/v1/health> |
-| PostgreSQL | `localhost:54322` |
+### Local URLs
+
+These URLs use the default ports from `.env.example`. Every published service binds to
+`127.0.0.1`, so the development stack is available only from the local machine.
+
+| Local service | URL | Use |
+| --- | --- | --- |
+| Customer and staff application | <http://localhost:4173> | Guest ordering, customer accounts, and staff operations |
+| Frontend health | <http://localhost:4173/health> | Nginx/frontend container readiness |
+| Supabase Studio | <http://localhost:54323> | Local database, SQL, and Auth administration UI |
+| Swagger UI | <http://localhost:8080/swagger-ui.html> | Interactive Spring API documentation |
+| OpenAPI JSON | <http://localhost:8080/v3/api-docs> | Machine-readable runtime API contract |
+| Spring Actuator | <http://localhost:8080/actuator> | Available operational endpoints |
+| Spring Boot health | <http://localhost:8080/actuator/health> | Backend and database readiness |
+| Prometheus metrics | <http://localhost:8080/actuator/prometheus> | Spring application metrics |
+| Supabase Auth health | <http://localhost:8000/auth/v1/health> | Local Auth readiness |
+| Supabase Auth JWKS | <http://localhost:8000/auth/v1/.well-known/jwks.json> | Public JWT verification keys |
+| PostgreSQL | `localhost:54322` | Host and port for database clients |
+
+### Automatic local users
+
+Compose creates or reconciles these public, development-only accounts before starting the
+frontend:
+
+| Access | Email | Password | Scope |
+| --- | --- | --- | --- |
+| Customer | `user@user.com` | `User@1234` | Customer account with no staff access |
+| Manager | `manager@manager.com` | `Manager@1234` | Manager access to every active seeded location |
+| Owner | `owner@owner.com` | `Owner@1234` | Organization-wide owner access |
+
+The credentials are fixed local fixtures and must never be reused in shared, staging, or
+production environments. Re-running Compose is safe: the bootstrap reconciles the passwords and
+repairs the owner and manager access without creating duplicate accounts.
 
 Stop the stack without deleting its database volume:
 

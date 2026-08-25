@@ -38,6 +38,14 @@ and browser-session owner; the unused `refresh_session` lifecycle remains a late
   issuance by the authentication issuer; the matching component never issues JWTs. See
   [`face-authentication.md`](face-authentication.md).
 
+The loopback-only Compose stack has a development bootstrap for three documented fixture
+identities. A short-lived Node container alone receives the local service-role key and uses the Auth
+Admin API; it then provisions application accounts through the authenticated Spring endpoint. A
+separate Spring command grants the initial owner without receiving the service-role key, and a
+final short-lived container uses that owner's normal access token to grant manager scope through
+the audited owner API. No role is stored in Auth metadata, no container writes the `auth` schema,
+and the long-running backend and frontend never receive the service-role key or fixture passwords.
+
 ### Backend configuration
 
 JWT validation is deliberately opt-in. When `LOCAL_SUPABASE_AUTH_ENABLED` is absent or `false`, Spring

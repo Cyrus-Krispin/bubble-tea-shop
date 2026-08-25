@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -12,8 +14,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect relevant changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.classify.outputs.backend }}
+      frontend: ${{ steps.classify.outputs.frontend }}
+      infrastructure: ${{ steps.classify.outputs.infrastructure }}
+      release: ${{ steps.classify.outputs.release }}
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.16.0
+      - name: Test change classification
+        run: node --test .github/ci/detect-changes.test.mjs
+      - name: Classify changed paths
+        id: classify
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: git diff --name-only -z "$BASE_SHA" "$HEAD_SHA" | node .github/ci/detect-changes.mjs
+
   backend:
     name: Backend verification
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -32,6 +62,8 @@ jobs:
 
   frontend:
     name: Frontend verification
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -71,6 +103,8 @@ jobs:
 
   infrastructure:
     name: Infrastructure verification
+    needs: changes
+    if: needs.changes.outputs.infrastructure == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -83,12 +117,19 @@ jobs:
       - name: Test local Auth infrastructure
         run: >-
           node --test
+          infra/supabase/bootstrap-local-users.test.mjs
           infra/supabase/generate-local-auth-keys.test.mjs
           infra/supabase/kong/kong.test.mjs
 
   release-candidate:
     name: Container and browser release gate
-    needs: [backend, frontend, infrastructure]
+    needs: [changes, backend, frontend, infrastructure]
+    if: >-
+      ${{ !cancelled()
+          && needs.changes.outputs.release == 'true'
+          && (needs.backend.result == 'success' || needs.backend.result == 'skipped')
+          && (needs.frontend.result == 'success' || needs.frontend.result == 'skipped')
+          && (needs.infrastructure.result == 'success' || needs.infrastructure.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
