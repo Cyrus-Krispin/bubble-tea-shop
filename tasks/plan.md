@@ -34,11 +34,12 @@ repository. The target boundary is:
 
 1. **Use shadcn's `new-york` style with Radix primitives and Tailwind CSS v4.** Use the current
    unified `radix-ui` package rather than retaining individual Radix packages.
-2. **Make dark theme the application-wide default.** Derive an accessible dark ube/calamansi
-   palette from the documented brand system and map it to shadcn semantic CSS variables. Customer,
-   authentication, account, and staff routes all use the same dark foundation; no route may retain
-   a light canvas. Preserve the photographic commerce direction without adopting a generic zinc
-   dashboard, gradients, glass effects, or low-contrast translucent surfaces.
+2. **Make an Obsidian-inspired dark theme the application-wide default.** Derive an accessible
+   neutral-charcoal surface ladder from Obsidian's documented default dark colors, then retain ube
+   purple as the restrained interactive accent and calamansi as a scarce product highlight.
+   Customer, authentication, account, and staff routes all use this foundation; no route may retain
+   a light or purple-washed canvas. Preserve the photographic commerce direction without copying
+   Obsidian's desktop application literally or adopting gradients, glass effects, and glowing chrome.
 3. **Install only used components.** Do not run `shadcn add --all`; add explicit primitives so the
    repository owns no unused generated code.
 4. **Keep generated primitives generic.** Feature-specific loading buttons, responsive data
@@ -71,6 +72,64 @@ Add primitives when their first consumer migrates:
 
 Verify the current CLI registry before adding each component and omit any item that no migrated
 screen needs.
+
+## Research-Informed Visual Target
+
+The target is **Obsidian-inspired, not a pixel-identical replica**. Official Obsidian documentation
+publishes its foundation tokens but not every computed semantic value or proprietary application
+style. The design should borrow its quiet hierarchy while following web-commerce conventions and
+Bubble Tea Shop's product needs.
+
+Official references:
+
+- [Obsidian color variables](https://docs.obsidian.md/Reference/CSS%20variables/Foundations/Colors)
+  document the dark neutral ramp, semantic surface/text/interaction roles, a default accent at
+  hue 258, saturation 88%, lightness 66%, and dark purple `#a882ff`.
+- [Obsidian typography variables](https://github.com/obsidianmd/obsidian-developer-docs/blob/main/en/Reference/CSS%20variables/Foundations/Typography.md)
+  define separate interface, content, and monospace roles, with 16px content and tighter compact UI scales.
+- [Obsidian border variables](https://github.com/obsidianmd/obsidian-developer-docs/blob/main/en/Reference/CSS%20variables/Foundations/Borders.md),
+  [radius variables](https://github.com/obsidianmd/obsidian-developer-docs/blob/main/en/Reference/CSS%20variables/Foundations/Radiuses.md),
+  and [navigation variables](https://github.com/obsidianmd/obsidian-developer-docs/blob/main/en/Reference/CSS%20variables/Components/Navigation.md)
+  establish 1px boundaries, moderate 4/8/12/16px radii, and distinct hover/active/selected states.
+
+Starting token direction for Task 2, subject to measured WCAG contrast:
+
+| shadcn role | Obsidian reference | Bubble Tea Shop direction |
+| --- | --- | --- |
+| `background` | `#1c1c1c` | Near-neutral charcoal application canvas |
+| `sidebar` / secondary shell | `#212121` | Quiet navigation and staff rail |
+| `card` | `#232323` | Main content and product surfaces |
+| `popover` / elevated surface | `#282828` | Overlays and anchored disclosures |
+| `muted` / control surface | `#2e2e2e` | Inputs, subdued rows, hover foundations |
+| `border` | `#3f3f3f` | Hairline separation; stronger only on focus/hover |
+| `foreground` | `#dadada` | Primary text, with brighter text only when contrast requires it |
+| `muted-foreground` | `#b3b3b3` / `#999999` | Secondary and tertiary hierarchy after contrast measurement |
+| `primary` / `ring` | HSL `258 88% 66%`, purple `#a882ff` | Ube interaction, selection, links, CTA, and focus family |
+| status tokens | Obsidian extended colors | Accessible success/warning/danger text plus dark mixed surfaces |
+
+Application adaptations:
+
+- Keep the canvas and surfaces neutral charcoal rather than applying a purple tint everywhere.
+- Reserve ube for primary actions, links, current navigation, selection, focus, and small emphasis;
+  reserve calamansi for freshness/product highlights rather than general interface chrome.
+- Prefer 1px low-contrast boundaries and surface steps over shadows. Use 4-12px radii by hierarchy;
+  pills remain limited to filters, statuses, and counts.
+- Keep customer body text at least 16px/1.5 and touch targets at least 44px. Compact 13-15px UI
+  typography is appropriate only for dense staff metadata and controls.
+- Preserve normal web cursors and interaction conventions rather than copying Obsidian's desktop
+  cursor behavior.
+- Use accent-tinted `focus-visible` rings and selection surfaces, with state also expressed through
+  text, icons, weight, or borders.
+- Render photographs without color filters or dark overlays. Separate them from charcoal surfaces
+  with crop, spacing, and subtle borders so drinks remain appetizing and truthful.
+- Avoid colored headings, purple ambient backgrounds, nested cards, luminous shadows, oversized
+  rounding, and dense note-editor patterns that would reduce commerce clarity.
+
+| Relationship | Direction |
+| --- | --- |
+| Borrow | Stepped neutral surfaces, restrained violet interaction accent, hairline boundaries, quiet chrome |
+| Adapt | Stronger commerce CTA hierarchy, photographic framing, 44px targets, readable price/pickup/status copy |
+| Reject | Editor-pane imitation, faint operational metadata, monochrome imagery, purple on every surface |
 
 ## Dependency Graph
 
@@ -111,8 +170,9 @@ changing a route.
 ### Task 2: Establish the brand theme and first primitives
 
 Replace duplicated root tokens with Tailwind v4 and shadcn semantic variables. Create a dark-first
-ube/calamansi palette for canvas, elevated surfaces, overlays, controls, imagery boundaries, and
-semantic states, then validate focus, contrast, typography, motion, and forced-colors behavior.
+ube/calamansi palette for canvas, surface, raised, overlay, control, hover, selected, imagery, and
+semantic states. Document the researched direction now rather than deferring it to cleanup, then
+validate focus, contrast, typography, motion, and forced-colors behavior.
 
 **Acceptance criteria:**
 
@@ -120,9 +180,16 @@ semantic states, then validate focus, contrast, typography, motion, and forced-c
   inherits dark canvas, foreground, surface, border, input, popover, and overlay tokens.
 - [ ] The dark palette preserves the ube/calamansi brand and uses semantic utilities with WCAG 2.2
   AA contrast for text, controls, focus indicators, and status states.
+- [ ] `primary`, `primary-hover`, `primary-foreground`, `ring`, and accent-text roles are separate;
+  bright ube uses measured foreground contrast rather than assuming white text is accessible.
+- [ ] Success, warning, danger, and information use legible dark surfaces rather than faint
+  translucent washes, and every status includes non-color identification.
 - [ ] Controls retain visible focus, 44px customer targets, reduced motion, and forced-color boundaries.
 - [ ] Photography retains natural color and readable edge treatment on dark surfaces without
   filters, dimming overlays, or misleading product appearance.
+- [ ] Storybook includes a dark theme specimen covering controls, states, tables, overlays, and
+  representative reviewed drink/location photographs.
+- [ ] `frontend/docs/visual-style-guide.md` records the Obsidian-inspired token and adaptation rules.
 
 **Verification:** `cd frontend && pnpm test && pnpm typecheck && pnpm lint && pnpm build-storybook`,
 plus manual contrast and focus review.
@@ -130,7 +197,8 @@ plus manual contrast and focus review.
 **Dependencies:** Task 1
 
 **Files likely touched:** `frontend/src/index.css`, `frontend/src/lib/utils.ts`,
-`frontend/src/components/ui/*`, `frontend/.storybook/preview.tsx`
+`frontend/src/components/ui/*`, `frontend/.storybook/preview.tsx`,
+`frontend/docs/visual-style-guide.md`
 
 **Estimated scope:** Medium
 
@@ -160,6 +228,11 @@ component stories and tests
 - [ ] Application, Storybook, and shared-component tests pass.
 - [ ] Browser review confirms typography, tokens, keyboard focus, overlays, and responsive behavior
   at 320/768/1024/1440 before route migration.
+- [ ] Spawn two fresh-context senior review agents after Tasks 1-3: one reviews Obsidian-source
+  fidelity, tokens, contrast, focus, and forced colors; the other reviews photographic commerce,
+  conversion hierarchy, and dense staff usability.
+- [ ] Record their findings and resolve them, or document explicit human acceptance, before any
+  route migration begins.
 - [ ] Commit and push the foundation as one focused increment.
 
 ### Task 4: Migrate the customer shell and route-level states
@@ -214,6 +287,8 @@ location disclosure. Preserve the documented ordinary-link semantics within the 
   visible current location.
 - [ ] Images, dark-surface boundaries, availability, prices, loading, empty, and error states work
   at all required widths.
+- [ ] Photo QA covers pale and dark drinks, location imagery, unavailable products, crop consistency,
+  matte/edge separation, and the absence of filters or tinting at 200% zoom.
 
 **Verification:** focused `ShopPage` tests, typecheck, lint, and visual review at all four widths.
 
@@ -266,6 +341,9 @@ detail without altering order payloads or cart conflict behavior.
 - [ ] Unit, axe, type, lint, build, and Storybook checks pass.
 - [ ] Compose-backed Playwright passes location selection through checkout, history, and order-again
   on desktop and mobile.
+- [ ] Pickup context, price, availability, and the primary action are identifiable at a glance;
+  each major surface has only one strongest filled action.
+- [ ] Actual catalog photographs are reviewed at 320/768/1024/1440 and 200% zoom against the dark surfaces.
 - [ ] Customer feature CSS is removed only when its final consumers are migrated.
 
 ### Task 9: Migrate the staff shell and workspace overview
@@ -278,6 +356,8 @@ scope/status surfaces, quick links, and denied/loading states with shadcn primit
 - [ ] Owner and manager navigation derives solely from the Spring staff context.
 - [ ] Desktop/mobile navigation retains route labeling and keyboard access.
 - [ ] Loading, denied, no-membership, no-location, and sign-out states are accessible.
+- [ ] The operational hierarchy stays flat: scope and actions precede data, row boundaries remain
+  visible without shadows, and nested cards are avoided.
 
 **Verification:** focused staff layout/workspace tests, typecheck, lint, and manual narrow/desktop check.
 
@@ -367,6 +447,8 @@ Convert manager lifecycle/assignment dialogs and audit filters, event detail, st
 - [ ] Staff tests and representative axe scans pass.
 - [ ] Owner/manager browser checks cover allowed, denied, empty, conflict, and success states.
 - [ ] Desktop density, mobile navigation, tables, forms, dialogs, and keyboard flow are reviewed.
+- [ ] Repeat the two fresh-context senior reviews across the completed customer and staff routes;
+  record and resolve findings before legacy cleanup and final approval.
 
 ### Task 14: Remove the legacy design system and complete release verification
 
@@ -425,6 +507,10 @@ and Storybook docs
 | Generated source becomes opaque | Medium | Isolate it in `components/ui`, review CLI diffs, document local changes. |
 | “Everything shadcn” forces bad semantics | High | Use shadcn primitives plus semantic HTML for document structure. |
 | Brand becomes generic | High | Map approved tokens first and review screenshots at checkpoints. |
+| Bright ube with white text fails contrast | High | Maintain separate foreground/deeper-primary tokens and measure every state. |
+| Product images feel harsh or misleading on dark surfaces | High | Use neutral matte boundaries and review real pale/dark catalog images without filters. |
+| Near-black surfaces crush together on OLED displays | Medium | Avoid pure black and verify the surface ladder on multiple displays. |
+| Staff pages become nested-card dashboards | Medium | Prefer flat sections, borders, and semantic tables; review hierarchy at Checkpoint C. |
 | Radix changes form behavior | High | Preserve names/values and test keyboard, submission, focus, disabled states. |
 | Responsive staff tables regress | High | Retain labeled stacked rows; test narrow widths and 200% zoom. |
 | Accessibility is assumed | High | Keep axe gates and manually verify composition-level behavior. |

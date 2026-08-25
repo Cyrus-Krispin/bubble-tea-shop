@@ -7,7 +7,10 @@ criteria, focused verification, diff review, commit, and push are complete.
 
 - [ ] Task 1: Configure Tailwind v4, shadcn, Radix, Lucide, aliases, and `components.json`.
 - [ ] Task 2: Create the application-wide dark ube/calamansi shadcn theme and add first primitives.
+- [ ] Add the Obsidian-inspired dark theme specimen and update the visual style guide.
 - [ ] Task 3: Replace shared primitives with tested shadcn-based application compositions.
+- [ ] Spawn two fresh-context senior agents for Obsidian fidelity and commerce/staff usability review.
+- [ ] Record and resolve or explicitly accept all Checkpoint A senior-review findings.
 - [ ] Checkpoint A: Approve application/Storybook theme and shared component behavior.
 
 ## Phase 2 — Customer journey
@@ -15,6 +18,7 @@ criteria, focused verification, diff review, commit, and push are complete.
 - [ ] Task 4: Migrate customer shell, navigation, and route states.
 - [ ] Task 5: Migrate account access, auth forms, staff sign-in, and account landing.
 - [ ] Task 6: Migrate menu discovery, product cards, photography, and location selection.
+- [ ] Review real pale/dark drink and location photography on every dark surface and required width.
 - [ ] Task 7: Migrate drink customization and its responsive purchase action.
 - [ ] Task 8a: Migrate cart review, checkout, retry, and confirmation.
 - [ ] Task 8b: Migrate last-order quick add, history, and receipt detail.
@@ -31,6 +35,8 @@ criteria, focused verification, diff review, commit, and push are complete.
 - [ ] Task 12b: Migrate staff order queue, detail, cash completion, and shortages.
 - [ ] Task 13a: Migrate owner-only manager lifecycle and location assignments.
 - [ ] Task 13b: Migrate the operational audit timeline.
+- [ ] Repeat both fresh-context senior reviews across completed customer and staff routes.
+- [ ] Record and resolve or explicitly accept all Checkpoint C senior-review findings.
 - [ ] Checkpoint C: Pass dark-theme owner/manager desktop/mobile browser and accessibility review.
 
 ## Phase 4 — Removal and release gate
