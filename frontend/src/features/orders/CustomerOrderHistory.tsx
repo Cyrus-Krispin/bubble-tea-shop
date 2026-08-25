@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
-import { Pagination } from "../../components/ui/Pagination";
-import { ProblemState } from "../../components/ui/ProblemState";
+import { Pagination, ProblemState } from "../../components/shared";
 import { formatMoney } from "../catalog/formatMoney";
 import {
   listCustomerOrders,

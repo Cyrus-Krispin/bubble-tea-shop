@@ -1,5 +1,15 @@
 import { Fragment, type ReactNode } from "react";
 
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+
 export type DataTableColumn<Row> = {
   align?: "end" | "start";
   cell?: (row: Row) => ReactNode;
@@ -32,49 +42,49 @@ export function DataTable<Row>({
   rows,
 }: DataTableProps<Row>) {
   return (
-    <div aria-label={`${caption} table`} className="ui-table-scroll" role="region" tabIndex={0}>
-      <table className="ui-table">
-        <caption>{caption}</caption>
-        <thead>
-          <tr>
+    <div aria-label={`${caption} table`} className="overflow-hidden rounded-lg border bg-card" role="region" tabIndex={0}>
+      <Table>
+        <TableCaption className="sr-only">{caption}</TableCaption>
+        <TableHeader>
+          <TableRow>
             {columns.map((column) => (
-              <th className={column.align === "end" ? "ui-table__end" : undefined} key={column.key} scope="col">
+              <TableHead className={column.align === "end" ? "text-right" : undefined} key={column.key}>
                 {column.header}
-              </th>
+              </TableHead>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {rows.length === 0 ? (
-            <tr><td className="ui-table__empty" colSpan={columns.length}>{emptyMessage}</td></tr>
+            <TableRow><TableCell className="h-24 text-center text-muted-foreground" colSpan={columns.length}>{emptyMessage}</TableCell></TableRow>
           ) : rows.map((row) => {
             const rowKey = getRowKey(row);
             const isExpanded = rowKey === expandedRowKey && renderExpandedRow !== undefined;
             return (
               <Fragment key={rowKey}>
-                <tr>
+                <TableRow>
                   {columns.map((column) => (
-                    <td
-                      className={column.align === "end" ? "ui-table__end" : undefined}
+                    <TableCell
+                      className={column.align === "end" ? "text-right" : undefined}
                       data-label={typeof column.header === "string" ? column.header : undefined}
                       key={column.key}
                     >
-                      <div className="ui-table__value">
+                      <div>
                         {column.cell === undefined ? defaultCell(row, column.key) : column.cell(row)}
                       </div>
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
                 {isExpanded ? (
-                  <tr className="ui-table__expanded-row">
-                    <td colSpan={columns.length}>{renderExpandedRow(row)}</td>
-                  </tr>
+                  <TableRow className="bg-muted/30">
+                    <TableCell colSpan={columns.length}>{renderExpandedRow(row)}</TableCell>
+                  </TableRow>
                 ) : null}
               </Fragment>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

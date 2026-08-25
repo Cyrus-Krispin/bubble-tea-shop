@@ -6,7 +6,7 @@ import { CustomerHeader } from "../../app/CustomerHeader";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardFooter } from "../../components/ui/card";
-import { ProblemState } from "../../components/ui/ProblemState";
+import { ProblemState } from "../../components/shared";
 import { useCart } from "../cart/CartContext";
 import { LastOrderSuggestion } from "../orders/LastOrderSuggestion";
 import { DrinkArtwork } from "./DrinkArtwork";

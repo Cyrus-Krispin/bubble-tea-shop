@@ -2,12 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { expectNoAccessibilityViolations } from "../../test/accessibility";
+import { DataTable, Dialog, Field, Pagination, ProblemState } from "../shared";
 import { Button } from "./button";
-import { DataTable } from "./DataTable";
-import { Dialog } from "./Dialog";
-import { Field } from "./Field";
-import { Pagination } from "./Pagination";
-import { ProblemState } from "./ProblemState";
 
 describe("interface primitives", () => {
   it("connects field labels, help, and errors to the input", () => {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
-import { ProblemState } from "../../components/ui/ProblemState";
+import { ProblemState } from "../../components/shared";
 import { useAuth } from "../auth/useAuth";
 import { formatMoney } from "../catalog/formatMoney";
 import {
