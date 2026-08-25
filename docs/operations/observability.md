@@ -24,6 +24,22 @@ Only health endpoints may be routed through a public load balancer. Keep the Pro
 on the backend's private network and restrict it with platform network policy. Health details stay
 hidden. Do not expose the general Actuator surface.
 
+## Local dashboard
+
+The local Compose stack scrapes Spring every 15 seconds, retains metrics for seven days, and opens
+the provisioned `Bubble Tea Shop · System Overview` dashboard at <http://localhost:3000>. It shows:
+
+- backend scrape status, request rate, 5xx rate, and p50/p95/p99 latency;
+- request throughput by normalized route and responses by outcome;
+- process and system CPU, JVM memory, GC overhead, thread states, and file descriptors;
+- Logback event rate by level; and
+- HikariCP utilization, active/idle connections, pending threads, and timeouts.
+
+The local dashboard intentionally covers signals already emitted by Spring. PostgreSQL internals,
+container restarts, Nginx latency, Supabase Auth request metrics, backup age, logs, and traces need
+their own exporters or telemetry backends before they can appear in Grafana. Prometheus is available
+at <http://localhost:9090> for target inspection and PromQL exploration.
+
 ## Minimum dashboards
 
 - Request rate, 4xx/5xx rate, and p50/p95/p99 latency by normalized route and method.

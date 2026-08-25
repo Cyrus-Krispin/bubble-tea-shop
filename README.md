@@ -58,6 +58,7 @@ uses a generated OpenAPI client and never ships fallback catalog or business dat
 | Data | PostgreSQL, Flyway, JPA | Transactional state, constraints, migrations, and persistence |
 | Identity | Self-hosted Supabase Auth, Kong | Local sign-in, sessions, JWT issuing, and public JWKS |
 | Delivery | Docker Compose, Nginx, GitHub Actions | Reproducible local stack, production build, and quality gates |
+| Monitoring | Prometheus, Grafana, Spring Actuator | Local metric collection and operational dashboards |
 
 Read the [architecture overview](docs/architecture/overview.md) for module boundaries and the
 [MVP product scope](docs/product/mvp.md) for the supported workflows.
@@ -79,6 +80,8 @@ docker compose up --build
 
 The first run pulls the pinned images and downloads build dependencies. After the services become
 healthy, open [localhost:4173](http://localhost:4173) to browse the shop.
+Open [localhost:3000](http://localhost:3000) for the provisioned system dashboard; Grafana uses
+anonymous, read-only access in this loopback-only development stack.
 If another Docker runtime was previously installed, confirm that `docker context show` reports
 `desktop-linux` before starting the stack.
 
@@ -97,6 +100,8 @@ These URLs use the default ports from `.env.example`. Every published service bi
 | Spring Actuator | <http://localhost:8080/actuator> | Available operational endpoints |
 | Spring Boot health | <http://localhost:8080/actuator/health> | Backend and database readiness |
 | Prometheus metrics | <http://localhost:8080/actuator/prometheus> | Spring application metrics |
+| Grafana dashboard | <http://localhost:3000> | Provisioned RED, JVM, process, log-rate, and database-pool charts |
+| Prometheus | <http://localhost:9090> | Local metric collection, storage, and PromQL exploration |
 | Supabase Auth health | <http://localhost:8000/auth/v1/health> | Local Auth readiness |
 | Supabase Auth JWKS | <http://localhost:8000/auth/v1/.well-known/jwks.json> | Public JWT verification keys |
 | PostgreSQL | `localhost:54322` | Host and port for database clients |
