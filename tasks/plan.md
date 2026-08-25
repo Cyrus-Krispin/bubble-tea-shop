@@ -25,6 +25,8 @@ repository. The target boundary is:
   `Pagination`, and `ProblemState`.
 - The frontend contains 1,969 lines across seven global or feature CSS files and uses 100 native
   `input`, `select`, `textarea`, and `button` controls directly in route components.
+- The current desktop catalog is limited to three columns, uses tall 4:5 card imagery, and reserves
+  a 72px footer; this makes a complete product difficult to see in the initial viewport.
 - The only Radix dependency is the dialog package; Tailwind, shadcn configuration, path aliases,
   Lucide icons, and the `cn` utility are not configured.
 - There are 28 customer and staff route declarations. Existing tests already cover representative
@@ -278,7 +280,8 @@ shadcn fields, tabs, cards, alerts, buttons, and skeletons without changing Supa
 ### Task 6: Migrate menu discovery and pickup location selection
 
 Convert the API-backed menu, category rail, product cards, photography, and anchored pickup
-location disclosure. Preserve the documented ordinary-link semantics within the popover.
+location disclosure. Replace the oversized catalog presentation with a compact, scan-first card
+grid while preserving the documented ordinary-link semantics within the popover.
 
 **Acceptance criteria:**
 
@@ -287,10 +290,22 @@ location disclosure. Preserve the documented ordinary-link semantics within the 
   visible current location.
 - [ ] Images, dark-surface boundaries, availability, prices, loading, empty, and error states work
   at all required widths.
+- [ ] The catalog uses four equal columns at `>=1280px`, three at `1024-1279px`, two at
+  `640-1023px`, and one compact card/list column below `640px`; no card becomes narrower than its
+  readable minimum.
+- [ ] In the default guest menu state at 1280x800 and 1440x900 at 100% browser zoom, the menu
+  context, category controls, and at least one complete row of product cards are visible without
+  vertical scrolling.
+- [ ] Card imagery uses a shorter crop (prefer 4:3, with square as the fallback after visual review),
+  body copy is limited to two lines, and padding/footer height are reduced while names, prices,
+  availability, and the primary action remain immediately scannable.
+- [ ] Every `Customize` action retains a minimum 44px target, visible focus, descriptive accessible
+  name, and sufficient separation even in the four-column layout.
 - [ ] Photo QA covers pale and dark drinks, location imagery, unavailable products, crop consistency,
   matte/edge separation, and the absence of filters or tinting at 200% zoom.
 
-**Verification:** focused `ShopPage` tests, typecheck, lint, and visual review at all four widths.
+**Verification:** focused `ShopPage` tests, typecheck, lint, and screenshots at 320x800, 768x1024,
+1024x768, 1280x800, and 1440x900 at 100% zoom plus a 200%-zoom reflow check.
 
 **Dependencies:** Task 4
 
@@ -344,6 +359,8 @@ detail without altering order payloads or cart conflict behavior.
 - [ ] Pickup context, price, availability, and the primary action are identifiable at a glance;
   each major surface has only one strongest filled action.
 - [ ] Actual catalog photographs are reviewed at 320/768/1024/1440 and 200% zoom against the dark surfaces.
+- [ ] Wide-desktop screenshots show four complete, readable product cards across and at least one
+  complete product row above the fold at normal zoom.
 - [ ] Customer feature CSS is removed only when its final consumers are migrated.
 
 ### Task 9: Migrate the staff shell and workspace overview
@@ -509,6 +526,7 @@ and Storybook docs
 | Brand becomes generic | High | Map approved tokens first and review screenshots at checkpoints. |
 | Bright ube with white text fails contrast | High | Maintain separate foreground/deeper-primary tokens and measure every state. |
 | Product images feel harsh or misleading on dark surfaces | High | Use neutral matte boundaries and review real pale/dark catalog images without filters. |
+| Compact cards crop drinks or hide buying information | High | Review real assets at each breakpoint; keep name, price, availability, and 44px CTA visible. |
 | Near-black surfaces crush together on OLED displays | Medium | Avoid pure black and verify the surface ladder on multiple displays. |
 | Staff pages become nested-card dashboards | Medium | Prefer flat sections, borders, and semantic tables; review hierarchy at Checkpoint C. |
 | Radix changes form behavior | High | Preserve names/values and test keyboard, submission, focus, disabled states. |

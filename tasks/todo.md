@@ -17,7 +17,8 @@ criteria, focused verification, diff review, commit, and push are complete.
 
 - [ ] Task 4: Migrate customer shell, navigation, and route states.
 - [ ] Task 5: Migrate account access, auth forms, staff sign-in, and account landing.
-- [ ] Task 6: Migrate menu discovery, product cards, photography, and location selection.
+- [ ] Task 6: Migrate menu discovery and location selection with compact responsive product cards.
+- [ ] Show four complete cards per row at wide desktop and a complete first row above the fold.
 - [ ] Review real pale/dark drink and location photography on every dark surface and required width.
 - [ ] Task 7: Migrate drink customization and its responsive purchase action.
 - [ ] Task 8a: Migrate cart review, checkout, retry, and confirmation.
