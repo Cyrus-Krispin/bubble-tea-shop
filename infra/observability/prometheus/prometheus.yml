@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: local
+    application: bubble-tea-shop
+
+scrape_configs:
+  - job_name: bubble-tea-backend
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - backend:8080
+        labels:
+          service: backend

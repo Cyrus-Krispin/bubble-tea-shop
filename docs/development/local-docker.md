@@ -6,7 +6,9 @@ The development runtime is intentionally local-only. One Compose project starts:
 - Supabase Auth (GoTrue) from the official `supabase/gotrue` image;
 - Supabase Studio and Postgres Meta for local database and Auth administration;
 - the Spring Boot modular monolith; and
-- a React/Vite SPA served by Nginx with guest ordering and separate customer/staff authentication.
+- a React/Vite SPA served by Nginx with guest ordering and separate customer/staff authentication;
+- Prometheus for local metric collection and seven-day retention; and
+- Grafana with a provisioned Bubble Tea Shop system dashboard.
 
 There is no standalone generic PostgreSQL container and no hosted Supabase project. Postgres is
 the single database in the stack, and Flyway in the Spring backend remains the authority for the
@@ -116,6 +118,8 @@ Colima profile provides a rollback path until the Docker Desktop stack is valida
 | Swagger UI | <http://localhost:8080/swagger-ui.html> | Interactive documentation for the Spring application API |
 | OpenAPI JSON | <http://localhost:8080/v3/api-docs> | Runtime-generated OpenAPI 3.1 contract |
 | Spring health | <http://localhost:8080/actuator/health> | Backend and database readiness |
+| Grafana | <http://localhost:3000> | Read-only system overview dashboard for Spring and HikariCP metrics |
+| Prometheus | <http://localhost:9090> | Prometheus status, targets, and PromQL exploration |
 | Supabase Auth health | <http://localhost:8000/auth/v1/health> | Local GoTrue readiness through Kong |
 | PostgreSQL | `localhost:54322` | Optional host access for database tools |
 
@@ -134,6 +138,8 @@ curl --fail http://localhost:54323/api/platform/profile
 curl --fail http://localhost:8080/swagger-ui.html
 curl --fail http://localhost:8080/v3/api-docs
 curl --fail http://localhost:8080/actuator/health
+curl --fail http://localhost:9090/-/ready
+curl --fail http://localhost:3000/api/health
 curl --fail http://localhost:8000/auth/v1/health
 ```
 
@@ -150,6 +156,11 @@ fresh `JWT_SECRET` and private `JWT_KEYS` value. The generator writes secrets on
 output so they can be redirected into the ignored `.env`; it never writes or commits them itself.
 Every port mapping binds only to `127.0.0.1`; do not expose this stack to another machine or use it
 as a production deployment.
+
+Grafana starts with anonymous Viewer access and no login form because it is bound to loopback and
+contains development metrics only. Prometheus and Grafana retain their local data in named volumes.
+`docker compose down` preserves that history; `docker compose down --volumes` removes it along with
+the other local stack volumes.
 
 Change `POSTGRES_PASSWORD`, `JWT_SECRET`, `JWT_KEYS`, `ANON_KEY`, `SERVICE_ROLE_KEY`, and
 `PG_META_CRYPTO_KEY` before sharing an environment. Never commit real user data, production
