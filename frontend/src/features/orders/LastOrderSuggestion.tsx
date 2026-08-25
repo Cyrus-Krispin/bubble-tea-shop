@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "../../components/ui/button";
+import { Checkbox } from "../../components/ui/checkbox";
 import { useAuth } from "../auth/useAuth";
 import { type CartOrderLine } from "../cart/cartReducer";
 import { useCart } from "../cart/CartContext";
@@ -125,12 +126,11 @@ function ReorderPicker({
           const product = products.find((candidate) => candidate.slug === item.productSlug);
           return (
             <li key={index}>
-              <label className="last-order-item">
-                <input
+              <div className="last-order-item">
+                <Checkbox
                   aria-label={`Select ${item.quantity} ${item.productName}, ${configuration.join(", ")}`}
                   checked={selectedIndexes.has(index)}
-                  onChange={() => toggleItem(index)}
-                  type="checkbox"
+                  onCheckedChange={() => toggleItem(index)}
                 />
                 {product === undefined ? null : <DrinkArtwork drink={product} />}
                 <div className="last-order-item__copy">
@@ -141,7 +141,7 @@ function ReorderPicker({
                   <span>{configuration.join(" · ")}</span>
                   <strong>{formatMoney(item.unitPriceMinor * item.quantity, suggestion.currencyCode)}</strong>
                 </div>
-              </label>
+              </div>
             </li>
           );
         })}

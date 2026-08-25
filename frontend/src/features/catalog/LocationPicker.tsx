@@ -1,6 +1,9 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useState } from "react";
+import { ArrowRight, Check, ChevronDown } from "lucide-react";
 import { Link } from "react-router";
 
+import { Button } from "../../components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
 import type { CatalogLocation } from "./types";
 import { LocationArtwork } from "./LocationArtwork";
 
@@ -12,66 +15,37 @@ export function LocationPicker({
   selected: CatalogLocation;
 }) {
   const [open, setOpen] = useState(false);
-  const panelId = useId();
-  const root = useRef<HTMLDivElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function closeOutside(event: PointerEvent) {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
-    }
-    function closeWithEscape(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      trigger.current?.focus();
-    }
-    document.addEventListener("pointerdown", closeOutside);
-    document.addEventListener("keydown", closeWithEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOutside);
-      document.removeEventListener("keydown", closeWithEscape);
-    };
-  }, [open]);
 
   return (
-    <div className="location-picker" ref={root}>
-      <button
-        aria-controls={panelId}
-        aria-expanded={open}
-        aria-label={`Pickup at ${selected.name}`}
-        className="location-picker-trigger"
-        onClick={() => setOpen((current) => !current)}
-        ref={trigger}
-        type="button"
-      >
-        <LocationArtwork location={selected} priority />
-        <span><small>Pickup at</small><strong>{selected.name}</strong></span>
-        <span aria-hidden="true" className="location-picker-chevron">⌄</span>
-      </button>
-      {open ? (
-        <div className="location-picker-panel" id={panelId}>
-          <p>Choose a pickup shop</p>
-          <ul>
+    <Popover onOpenChange={setOpen} open={open}>
+      <PopoverTrigger asChild>
+        <Button aria-label={`Pickup at ${selected.name}`} className="h-16 w-full justify-start gap-3 px-2" variant="outline">
+          <LocationArtwork location={selected} priority />
+          <span className="grid min-w-0 flex-1 text-left"><small className="text-xs text-muted-foreground">Pickup at</small><strong className="truncate">{selected.name}</strong></span>
+          <ChevronDown aria-hidden="true" className="text-primary" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="location-picker-panel w-[var(--radix-popover-trigger-width)] min-w-72 p-2">
+          <p className="px-2 py-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">Choose a pickup shop</p>
+          <ul className="grid list-none gap-1 p-0">
             {locations.map((location) => {
               const current = location.id === selected.id;
               return (
                 <li key={location.id}>
-                  <Link
+                  <Link className="flex min-h-16 items-center gap-3 rounded-lg px-2 text-foreground no-underline hover:bg-muted"
                     aria-current={current ? "page" : undefined}
                     onClick={() => setOpen(false)}
                     to={`/shop/${location.slug}`}
                   >
                     <LocationArtwork location={location} />
-                    <span><strong>{location.name}</strong><small>{current ? "Current shop" : "View menu"}</small></span>
-                    <span aria-hidden="true" className="location-picker-check">{current ? "✓" : "→"}</span>
+                    <span className="grid min-w-0 flex-1"><strong className="truncate">{location.name}</strong><small className="text-xs text-muted-foreground">{current ? "Current shop" : "View menu"}</small></span>
+                    {current ? <Check aria-hidden="true" className="size-4 text-primary" /> : <ArrowRight aria-hidden="true" className="size-4 text-muted-foreground" />}
                   </Link>
                 </li>
               );
             })}
           </ul>
-        </div>
-      ) : null}
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }

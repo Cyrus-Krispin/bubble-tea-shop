@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
 import { Pagination, ProblemState } from "../../components/shared";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardHeader } from "../../components/ui/card";
+import { cn } from "../../lib/utils";
 import { formatMoney } from "../catalog/formatMoney";
 import {
   listCustomerOrders,
@@ -41,14 +45,14 @@ export function CustomerOrderHistory({ accessToken }: { accessToken: string }) {
     : state;
 
   return (
-    <section aria-labelledby="order-history-title" className="order-history" id="order-history">
-      <div className="order-section-heading">
+    <section aria-labelledby="order-history-title" className="grid gap-5" id="order-history">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="eyebrow">Receipts</p>
-          <h2 id="order-history-title">Order history</h2>
+          <p className="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">Receipts</p>
+          <h2 className="text-2xl" id="order-history-title">Order history</h2>
         </div>
         {visibleState.status === "ready" && visibleState.data.totalItems > 0 ? (
-          <p>{visibleState.data.totalItems} {visibleState.data.totalItems === 1 ? "order" : "orders"}</p>
+          <p className="text-sm text-muted-foreground">{visibleState.data.totalItems} {visibleState.data.totalItems === 1 ? "order" : "orders"}</p>
         ) : null}
       </div>
 
@@ -61,15 +65,15 @@ export function CustomerOrderHistory({ accessToken }: { accessToken: string }) {
         />
       ) : null}
       {visibleState.status === "ready" && visibleState.data.items.length === 0 ? (
-        <div className="order-empty">
+        <Card><CardContent className="grid justify-items-start gap-4 pt-4">
           <h3>No orders yet</h3>
-          <p>Your account-linked orders will appear here after checkout.</p>
-          <Link to="/">Browse the menu</Link>
-        </div>
+          <p className="text-muted-foreground">Your account-linked orders will appear here after checkout.</p>
+          <Button asChild variant="outline"><Link to="/">Browse the menu</Link></Button>
+        </CardContent></Card>
       ) : null}
       {visibleState.status === "ready" && visibleState.data.items.length > 0 ? (
         <>
-          <ol className="order-list">
+          <ol className="grid list-none gap-4 p-0">
             {visibleState.data.items.map((order) => <OrderCard key={order.id} order={order} />)}
           </ol>
           <Pagination
@@ -91,23 +95,25 @@ function OrderCard({ order }: { order: CustomerOrderSummary }) {
 
   return (
     <li>
-      <article className="order-card">
-        <div className="order-card__heading">
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between">
           <div>
-            <p className="card-kicker">{formatOrderDate(order.createdAt)}</p>
+            <p className="mb-2 text-xs font-semibold tracking-wider text-primary uppercase">{formatOrderDate(order.createdAt)}</p>
             <h3>Order {order.publicOrderNumber}</h3>
           </div>
-          <span className={`order-status order-status--${order.status.toLowerCase()}`}>
+          <Badge className={cn(order.status === "COMPLETED" && "bg-success text-success-foreground", order.status === "PENDING" && "bg-warning text-warning-foreground")} variant={order.status === "CANCELLED" ? "destructive" : "secondary"}>
             {orderStatusLabel(order.status)}
-          </span>
-        </div>
-        <p className="order-card__items">{preview}</p>
-        <p className="order-card__meta">
+          </Badge>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+        <p>{preview}</p>
+        <p className="flex flex-wrap justify-between gap-3 text-sm text-muted-foreground">
           <span>{order.location.name}</span>
-          <strong>{formatMoney(order.totalMinor, order.currencyCode)}</strong>
+          <strong className="text-foreground">{formatMoney(order.totalMinor, order.currencyCode)}</strong>
         </p>
-        <Link to={`/account/orders/${order.id}`}>View order {order.publicOrderNumber}</Link>
-      </article>
+        <Button asChild className="w-fit" variant="outline"><Link to={`/account/orders/${order.id}`}>View order {order.publicOrderNumber}</Link></Button>
+        </CardContent>
+      </Card>
     </li>
   );
 }

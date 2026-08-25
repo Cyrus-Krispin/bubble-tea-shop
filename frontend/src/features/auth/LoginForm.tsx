@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 
-import { Button, Field } from "../../components/ui";
+import { Field } from "../../components/shared";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Button } from "../../components/ui/button";
 import type { Credentials } from "./types";
 
 export type { Credentials } from "./types";
@@ -32,7 +34,7 @@ export function LoginForm({ onSignIn }: LoginFormProps) {
   }
 
   return (
-    <form className="login-form" onSubmit={handleSubmit}>
+    <form className="grid gap-5" onSubmit={handleSubmit}>
       <Field id="email" label="Email address">
         <input
           autoComplete="email"
@@ -54,23 +56,19 @@ export function LoginForm({ onSignIn }: LoginFormProps) {
           value={password}
         />
       </Field>
-      <button className="password-toggle" onClick={() => setShowPassword((value) => !value)} type="button">
+      <Button className="w-fit" onClick={() => setShowPassword((value) => !value)} size="compact" type="button" variant="ghost">
         {showPassword ? "Hide password" : "Show password"}
-      </button>
+      </Button>
 
       {status === "error" ? (
-        <p className="form-message form-message--error" role="alert">
-          We couldn't sign you in. Check your email and password and try again.
-        </p>
+        <Alert variant="destructive"><AlertDescription>We couldn't sign you in. Check your email and password and try again.</AlertDescription></Alert>
       ) : null}
 
       {status === "success" ? (
-        <p className="form-message form-message--success" role="status">
-          You're signed in.
-        </p>
+        <Alert role="status"><AlertDescription>You're signed in.</AlertDescription></Alert>
       ) : null}
 
-      <Button isLoading={isSubmitting} loadingLabel="Signing in" type="submit">Sign in</Button>
+      <Button className="w-full" isLoading={isSubmitting} loadingLabel="Signing in" type="submit">Sign in</Button>
     </form>
   );
 }

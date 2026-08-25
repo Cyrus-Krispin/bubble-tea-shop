@@ -1,6 +1,8 @@
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { useCart } from "../cart/CartContext";
 import { LoginForm } from "./LoginForm";
 import { RegistrationForm } from "./RegistrationForm";
@@ -37,27 +39,29 @@ export function AccountAccessPage() {
   }
 
   return (
-    <div className="customer-shell access-shell">
+    <div className="customer-shell">
       <a className="skip-link" href="#access-title">Skip to account access</a>
       <CustomerHeader itemCount={itemCount} />
-      <main aria-label="Customer access" className="access-main">
-        <section className="access-panel">
-          <div className="access-heading">
-            <p className="eyebrow">Customer account</p>
-            <h1 id="access-title">{mode === "create" ? "Create your account" : "Welcome back"}</h1>
-            <p>{mode === "create"
+      <main aria-label="Customer access" className="grid min-h-[calc(100vh-4.5rem)] place-items-center px-4 py-10">
+        <Card className="w-full max-w-lg">
+          <CardHeader>
+            <p className="text-xs font-semibold tracking-widest text-primary uppercase">Customer account</p>
+            <CardTitle><h1 className="text-3xl" id="access-title">{mode === "create" ? "Create your account" : "Welcome back"}</h1></CardTitle>
+            <CardDescription className="text-base leading-6">{mode === "create"
               ? "Create an optional account to keep receipts and order again. Guest checkout stays available."
-              : "Sign in to see receipts and order again. Guest checkout stays available."}</p>
-          </div>
-          <nav aria-label="Account access options" className="access-modes">
-            <Link aria-current={mode === "sign-in" ? "page" : undefined} to={accessHref("sign-in", next)}>Sign in</Link>
-            <Link aria-current={mode === "create" ? "page" : undefined} to={accessHref("create", next)}>Create account</Link>
+              : "Sign in to see receipts and order again. Guest checkout stays available."}</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-6">
+          <nav aria-label="Account access options" className="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
+            <Button asChild variant={mode === "sign-in" ? "secondary" : "ghost"}><Link aria-current={mode === "sign-in" ? "page" : undefined} to={accessHref("sign-in", next)}>Sign in</Link></Button>
+            <Button asChild variant={mode === "create" ? "secondary" : "ghost"}><Link aria-current={mode === "create" ? "page" : undefined} to={accessHref("create", next)}>Create account</Link></Button>
           </nav>
           {mode === "create"
             ? <RegistrationForm onRegister={handleRegistration} />
             : <LoginForm onSignIn={handleSignIn} />}
-          <Link className="access-continue" to="/">Continue to menu</Link>
-        </section>
+          <Button asChild variant="link"><Link to="/">Continue to menu</Link></Button>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

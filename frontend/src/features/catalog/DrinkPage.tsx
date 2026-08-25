@@ -2,7 +2,16 @@ import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
-import { ProblemState } from "../../components/ui";
+import { ProblemState } from "../../components/shared";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardHeader } from "../../components/ui/card";
+import { Checkbox } from "../../components/ui/checkbox";
+import { Label } from "../../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
+import { Separator } from "../../components/ui/separator";
+import { cn } from "../../lib/utils";
 import { useCart } from "../cart/CartContext";
 import { DrinkArtwork } from "./DrinkArtwork";
 import { formatMoney } from "./formatMoney";
@@ -108,56 +117,51 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
     <div className="customer-shell">
       <a className="skip-link" href="#customize-title">Skip to customization</a>
       <CustomerHeader itemCount={itemCount} />
-      <main className="customize-layout">
-        <section className="drink-feature" aria-labelledby="drink-name">
-          <Link className="back-link" to={locationSlug === undefined ? "/shop" : `/shop/${locationSlug}`}>← Back to menu</Link>
-          <DrinkArtwork drink={product} priority />
-          <p className="product-category">{product.category}</p>
-          <h1 id="drink-name">{product.name}</h1>
-          <p>{product.description}</p>
+      <main className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(32rem,1.2fr)] lg:items-start">
+        <section className="grid gap-4 lg:sticky lg:top-24" aria-labelledby="drink-name">
+          <Button asChild className="w-fit" variant="ghost"><Link to={locationSlug === undefined ? "/shop" : `/shop/${locationSlug}`}>← Back to menu</Link></Button>
+          <DrinkArtwork className="max-h-[28rem] w-full rounded-xl border object-cover object-[center_47%]" drink={product} priority />
+          <Badge variant="secondary">{product.category}</Badge>
+          <h1 className="text-3xl" id="drink-name">{product.name}</h1>
+          <p className="leading-6 text-muted-foreground">{product.description}</p>
         </section>
-        <form className="customizer" onSubmit={submit}>
-          <div className="customizer-heading">
-            <div><p className="eyebrow">Your drink</p><h2 id="customize-title">Customize your drink</h2></div>
-            <strong aria-live="polite">{formatMoney(previewTotalMinor, currency)}</strong>
-          </div>
-          <fieldset>
-            <legend>Size</legend>
-            <div className="option-row option-row--three">
+        <Card><form onSubmit={submit}>
+          <CardHeader className="flex flex-row items-end justify-between gap-4">
+            <div><p className="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">Your drink</p><h2 className="text-2xl" id="customize-title">Customize your drink</h2></div>
+            <strong aria-live="polite" className="text-xl">{formatMoney(previewTotalMinor, currency)}</strong>
+          </CardHeader>
+          <CardContent className="grid gap-6">
+          <fieldset className="grid gap-3">
+            <legend className="font-semibold">Size</legend>
+            <RadioGroup className="grid grid-cols-2 gap-2 sm:grid-cols-3" onValueChange={selectVariant} value={configuration.variantId}>
               {product.variants.map((option) => {
                 const defaultPrice = product.variants.find((candidate) => candidate.isDefault)?.price.amountMinor
                   ?? variant.price.amountMinor;
                 const delta = option.price.amountMinor - defaultPrice;
                 return (
-                  <label key={option.id}>
-                    <input
+                  <Label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-accent" htmlFor={`variant-${option.id}`} key={option.id}>
+                    <RadioGroupItem
                       aria-label={`${option.name} ${priceDeltaLabel(delta, option.price.currency)}`}
-                      checked={configuration.variantId === option.id}
                       disabled={!option.available}
-                      name="size"
-                      onChange={() => selectVariant(option.id)}
-                      type="radio"
+                      id={`variant-${option.id}`}
+                      value={option.id}
                     />
-                    <span>{option.name}</span><small>{option.available ? priceDeltaLabel(delta, option.price.currency) : "Unavailable"}</small>
-                  </label>
+                    <span className="grid"><span>{option.name}</span><small className="text-muted-foreground">{option.available ? priceDeltaLabel(delta, option.price.currency) : "Unavailable"}</small></span>
+                  </Label>
                 );
               })}
-            </div>
+            </RadioGroup>
           </fieldset>
           {variant.optionGroups.map((group) => (
-            <OptionGroup
-              configuration={configuration}
-              group={group}
-              key={group.id}
-              onSelect={selectChoice}
-            />
+            <div className="grid gap-6" key={group.id}><Separator /><OptionGroup configuration={configuration} group={group} onSelect={selectChoice} /></div>
           ))}
-          <div className="customizer-action">
-            <p className="preview-disclaimer">Menu total. The shop confirms the final price when you place the order.</p>
-            <button type="submit">Add to order · {formatMoney(previewTotalMinor, currency)}</button>
+          <div className="sticky bottom-0 z-10 -mx-4 grid gap-3 border-t bg-card px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:p-0">
+            <p className="text-sm leading-5 text-muted-foreground">Menu total. The shop confirms the final price when you place the order.</p>
+            <Button className="w-full" type="submit">Add to order · {formatMoney(previewTotalMinor, currency)}</Button>
           </div>
-          {addedMessage ? <p className="added-message" role="status">✓ {addedMessage} <Link to="/cart">View order</Link></p> : null}
-        </form>
+          {addedMessage ? <Alert role="status"><AlertDescription>✓ {addedMessage} <Link to="/cart">View order</Link></AlertDescription></Alert> : null}
+          </CardContent>
+        </form></Card>
       </main>
     </div>
   );
@@ -175,31 +179,39 @@ function OptionGroup({
   const selection = configuration.selections.find((candidate) => candidate.groupId === group.id);
   const selectedIds = selection?.choiceIds ?? [];
   const multiple = group.maximumSelections > 1;
-  const rowClass = multiple ? "topping-row" : `option-row option-row--${Math.min(group.choices.length, 5)}`;
+  const singleChoiceGrid = group.choices.length >= 3
+    ? "sm:grid-cols-3"
+    : group.choices.length === 2
+      ? "sm:grid-cols-2"
+      : "sm:grid-cols-1";
 
   return (
-    <fieldset>
-      <legend>{group.name} {group.minimumSelections === 0 ? <small>Optional</small> : null}</legend>
-      <div className={rowClass}>
+    <fieldset className="grid gap-3">
+      <legend className="font-semibold">{group.name} {group.minimumSelections === 0 ? <small className="ml-2 text-muted-foreground">Optional</small> : null}</legend>
+      {multiple ? <div className="grid gap-2">
         {group.choices.map((choice) => {
           const selected = selectedIds.includes(choice.id);
           const limitReached = multiple && !selected && selectedIds.length >= group.maximumSelections;
           return (
-            <label key={choice.id}>
-              <input
+            <Label className={cn("grid min-h-14 cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-input bg-input/30 px-3 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-accent", limitReached && "cursor-not-allowed opacity-50")} htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}>
+              <Checkbox
                 aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`}
                 checked={selected}
                 disabled={limitReached}
-                name={multiple ? undefined : group.id}
-                onChange={() => onSelect(group, choice)}
-                type={multiple ? "checkbox" : "radio"}
+                id={`choice-${group.id}-${choice.id}`}
+                onCheckedChange={() => onSelect(group, choice)}
               />
-              {multiple ? <strong>{choice.name}</strong> : <span>{choice.name}</span>}
-              <small>{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small>
-            </label>
+              <strong>{choice.name}</strong>
+              <small className="text-muted-foreground">{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small>
+            </Label>
           );
         })}
-      </div>
+      </div> : <RadioGroup className={cn("grid gap-2", singleChoiceGrid)} onValueChange={(choiceId) => {
+        const choice = group.choices.find((candidate) => candidate.id === choiceId);
+        if (choice) onSelect(group, choice);
+      }} value={selectedIds[0]}>
+        {group.choices.map((choice) => <Label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-accent" htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}><RadioGroupItem aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`} id={`choice-${group.id}-${choice.id}`} value={choice.id} /><span className="grid"><span>{choice.name}</span><small className="text-muted-foreground">{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small></span></Label>)}
+      </RadioGroup>}
     </fieldset>
   );
 }
@@ -218,11 +230,11 @@ function DrinkStatus({
   return (
     <div className="customer-shell">
       <CustomerHeader itemCount={itemCount} />
-      <main aria-label="Drink status" className="not-found">
+      <main aria-label="Drink status" className="mx-auto grid w-full max-w-2xl gap-5 px-4 py-12">
         {retry === undefined ? (
           <>
-            <p className="eyebrow">Menu update</p>
-            <h1>{message}</h1>
+            <p className="text-xs font-semibold tracking-widest text-primary uppercase">Menu update</p>
+            <h1 className="text-3xl">{message}</h1>
           </>
         ) : (
           <ProblemState
@@ -231,7 +243,7 @@ function DrinkStatus({
             title={message}
           />
         )}
-        <Link className="secondary-link" to={locationSlug === undefined ? "/shop" : `/shop/${locationSlug}`}>Return to menu</Link>
+        <Button asChild className="w-fit" variant="outline"><Link to={locationSlug === undefined ? "/shop" : `/shop/${locationSlug}`}>Return to menu</Link></Button>
       </main>
     </div>
   );
