@@ -174,12 +174,12 @@ test("customer sees an account-linked order across the personalized storefront a
   await expect(page.getByText("No orders yet")).toBeVisible();
   await expectProductionQuality(page);
 
-  await page.getByRole("link", { name: "Menu", exact: true }).click();
+  await page.getByRole("link", { name: "Bubble Tea Shop menu", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Drinks made your way" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Order again" })).toHaveCount(0);
   await page.getByRole("link", { name: /Customize / }).first().click();
   await page.getByRole("button", { name: /Add to order/ }).click();
-  await page.getByRole("link", { name: "Menu", exact: true }).click();
+  await page.getByRole("link", { name: "Bubble Tea Shop menu", exact: true }).click();
   await page.getByRole("link", { name: /Customize / }).nth(1).click();
   await page.getByRole("button", { name: /Add to order/ }).click();
   await page.getByRole("link", { name: "View order" }).click();
@@ -208,11 +208,12 @@ test("customer sees an account-linked order across the personalized storefront a
   await expect(page.getByText("Added 1 drink to your order.")).toBeVisible();
   await expectProductionQuality(page);
 
-  await page.getByRole("link", { name: "Order 1 item" }).click();
+  await page.getByRole("link", { name: "Current order, 1 item" }).click();
   await expect(page.getByRole("heading", { name: "Your current order" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Sunberry Oolong" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Moonlit Milk Tea" })).toHaveCount(0);
-  await page.getByRole("link", { name: "Account" }).click();
+  await page.getByRole("button", { name: `Account menu for ${email}` }).click();
+  await page.getByRole("link", { name: "View account" }).click();
   await expect(page.getByRole("heading", { name: "Order history" })).toBeVisible();
   const receiptLink = page.getByRole("link", { name: `View order ${publicOrderNumber}` });
   await expect(receiptLink).toBeVisible();

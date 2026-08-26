@@ -61,14 +61,14 @@ describe("CustomerHeader", () => {
       </MemoryRouter>,
     );
 
-    fireEvent.pointerDown(screen.getByRole("button", { name: "Guest account menu" }), { button: 0 });
+    fireEvent.click(screen.getByRole("button", { name: "Guest account menu" }));
 
     expect(screen.getByText("Guest")).toBeVisible();
-    expect(screen.getByRole("menuitem", { name: "Sign in" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Sign in" })).toHaveAttribute(
       "href",
       "/account/access?mode=sign-in",
     );
-    expect(screen.getByRole("menuitem", { name: "Create account" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Create account" })).toHaveAttribute(
       "href",
       "/account/access?mode=create",
     );
@@ -84,9 +84,9 @@ describe("CustomerHeader", () => {
       </MemoryRouter>,
     );
 
-    fireEvent.pointerDown(screen.getByRole("button", { name: "Account menu for customer@example.test" }), { button: 0 });
+    fireEvent.click(screen.getByRole("button", { name: "Account menu for customer@example.test" }));
 
     expect(screen.getByText("customer@example.test")).toBeVisible();
-    expect(screen.getByRole("menuitem", { name: "View account" })).toHaveAttribute("href", "/account");
+    expect(screen.getByRole("link", { name: "View account" })).toHaveAttribute("href", "/account");
   });
 });

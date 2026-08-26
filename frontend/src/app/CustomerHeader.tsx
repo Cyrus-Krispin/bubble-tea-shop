@@ -1,15 +1,8 @@
 import { CircleUserRound, LogIn, ShoppingBag, UserPlus, UserRound } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
 import { Button } from "../components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
 import { useAuth } from "../features/auth/useAuth";
 import { useOptionalCartItemCount } from "../features/cart/CartContext";
 
@@ -18,6 +11,8 @@ export function CustomerHeader({ itemCount: providedItemCount }: { itemCount?: n
   const itemCount = providedItemCount ?? contextItemCount;
   const { isLoading, session } = useAuth();
   const { pathname } = useLocation();
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const cartLabel = itemCount === 0
     ? "Current order, empty"
     : `Current order, ${itemCount} ${itemCount === 1 ? "item" : "items"}`;
@@ -26,6 +21,24 @@ export function CustomerHeader({ itemCount: providedItemCount }: { itemCount?: n
     : session === null
       ? "Guest account menu"
       : `Account menu for ${session.email}`;
+
+  useEffect(() => {
+    if (!isAccountMenuOpen) return;
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) setIsAccountMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsAccountMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isAccountMenuOpen]);
 
   return (
     <header className="sticky top-0 z-20 flex min-h-18 items-center justify-between gap-4 border-b bg-background px-4 py-3 sm:px-6 lg:px-10">
@@ -44,41 +57,45 @@ export function CustomerHeader({ itemCount: providedItemCount }: { itemCount?: n
             ) : null}
           </Link>
         </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button aria-label={accountLabel} className="size-11 rounded-full" disabled={isLoading} size="icon-lg" title="Account" variant="outline">
-              <CircleUserRound aria-hidden="true" className="size-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 max-w-[calc(100vw-2rem)]">
+        <div className="relative" ref={accountMenuRef}>
+          <Button
+            aria-controls="customer-account-menu"
+            aria-expanded={isAccountMenuOpen}
+            aria-label={accountLabel}
+            className="size-11 rounded-full"
+            disabled={isLoading}
+            onClick={() => setIsAccountMenuOpen((isOpen) => !isOpen)}
+            size="icon-lg"
+            title="Account"
+            variant="outline"
+          >
+            <CircleUserRound aria-hidden="true" className="size-5" />
+          </Button>
+          {isAccountMenuOpen ? (
+            <div className="absolute right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-md border bg-popover p-1 text-popover-foreground shadow-md" id="customer-account-menu">
             {session === null ? (
               <>
-                <DropdownMenuLabel className="grid gap-1 px-2 py-2">
+                <div className="grid gap-1 px-2 py-2">
                   <span>Guest</span>
                   <span className="text-xs font-normal text-muted-foreground">Sign in to view your orders and reorder favorites.</span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="min-h-11 px-2 py-2">
-                  <Link to="/account/access?mode=sign-in"><LogIn aria-hidden="true" /> Sign in</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="min-h-11 px-2 py-2">
-                  <Link to="/account/access?mode=create"><UserPlus aria-hidden="true" /> Create account</Link>
-                </DropdownMenuItem>
+                </div>
+                <div className="-mx-1 my-1 h-px bg-border" />
+                <Link className="flex min-h-11 items-center gap-2 rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent focus:bg-accent" onClick={() => setIsAccountMenuOpen(false)} to="/account/access?mode=sign-in"><LogIn aria-hidden="true" className="size-4" /> Sign in</Link>
+                <Link className="flex min-h-11 items-center gap-2 rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent focus:bg-accent" onClick={() => setIsAccountMenuOpen(false)} to="/account/access?mode=create"><UserPlus aria-hidden="true" className="size-4" /> Create account</Link>
               </>
             ) : (
               <>
-                <DropdownMenuLabel className="grid gap-1 px-2 py-2">
+                <div className="grid gap-1 px-2 py-2">
                   <span>Signed in</span>
                   <span className="truncate text-xs font-normal text-muted-foreground">{session.email}</span>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="min-h-11 px-2 py-2">
-                  <Link to="/account"><UserRound aria-hidden="true" /> View account</Link>
-                </DropdownMenuItem>
+                </div>
+                <div className="-mx-1 my-1 h-px bg-border" />
+                <Link className="flex min-h-11 items-center gap-2 rounded-sm px-2 py-2 text-sm outline-none hover:bg-accent focus:bg-accent" onClick={() => setIsAccountMenuOpen(false)} to="/account"><UserRound aria-hidden="true" className="size-4" /> View account</Link>
               </>
             )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </div>
+          ) : null}
+        </div>
       </nav>
     </header>
   );
