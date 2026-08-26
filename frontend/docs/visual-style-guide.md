@@ -81,8 +81,11 @@ thumbnails use empty alternative text because the adjacent shop name supplies th
 
 ## Customer information architecture
 
-`/` is the API-backed menu and `/shop` is a compatibility alias. The header contains the brand,
-menu link, account access, and cart count. Staff access remains a quiet secondary concern.
+`/` is the API-backed menu and `/shop` is a compatibility alias. The header uses the brand as its
+menu/home link, followed on the right by an icon-only cart with a nonzero item-count badge and a
+rightmost circular account menu. Guest account actions live in that menu. The compact action model
+is shared by desktop and mobile; it is not a mobile-only treatment. Staff access remains a quiet
+secondary concern. The cart also provides a visible route back to the applicable shop menu.
 
 The menu begins with a compact title and a “Pickup at” disclosure beside it. The closed control
 shows one small selected-shop photograph and name. Its anchored panel lists the API-returned shop

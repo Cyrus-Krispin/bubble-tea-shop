@@ -54,6 +54,7 @@ describe("interface primitives", () => {
     );
 
     expect(screen.getByRole("table", { name: "Ingredients" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Ingredients" }).parentElement).toHaveAttribute("tabindex", "0");
     expect(screen.getByRole("columnheader", { name: "Name" })).toBeInTheDocument();
     expect(screen.getByText("No ingredients yet.")).toHaveAttribute("colspan", "2");
   });
