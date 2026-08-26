@@ -84,6 +84,15 @@ describe("CartPage", () => {
     }]);
   });
 
+  it("provides a clear route back to the menu", () => {
+    renderCart();
+
+    expect(screen.getByRole("link", { name: "Back to menu" })).toHaveAttribute("href", "/shop");
+
+    fireEvent.click(screen.getByRole("button", { name: "Seed item" }));
+    expect(screen.getByRole("link", { name: "Back to menu" })).toHaveAttribute("href", "/shop/orchard-central");
+  });
+
   it("offers a route back to the menu when the order is empty", () => {
     renderCart();
 

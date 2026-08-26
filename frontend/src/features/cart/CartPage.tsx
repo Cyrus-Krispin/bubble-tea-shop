@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
@@ -48,6 +49,7 @@ export function CartPage() {
   const pickupLocation = locations.status === "ready"
     ? locations.data.find((location) => location.slug === items[0]?.locationSlug)
     : undefined;
+  const menuPath = items[0] === undefined ? "/shop" : `/shop/${items[0].locationSlug}`;
 
   useEffect(() => {
     retryKey.current = undefined;
@@ -97,6 +99,9 @@ export function CartPage() {
       <CustomerHeader itemCount={itemCount} />
       <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6" aria-labelledby="cart-title">
         <div className="mb-8 border-b pb-6">
+          <Button asChild className="mb-4 -ml-3 w-fit" size="compact" variant="ghost">
+            <Link to={menuPath}><ArrowLeft aria-hidden="true" /> Back to menu</Link>
+          </Button>
           <p className="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">Order review</p>
           <h1 className="text-3xl" id="cart-title">Your current order</h1>
           <p className="mt-2 text-muted-foreground">Check each drink, then place the order for cash pickup.</p>

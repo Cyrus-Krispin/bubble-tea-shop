@@ -35,7 +35,7 @@ describe("DrinkPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add to order · $7.20" }));
 
     expect(screen.getByRole("status")).toHaveTextContent("Added Moonlit Milk Tea to your order.");
-    expect(screen.getByRole("link", { name: "Order 1 item" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Current order, 1 item" })).toBeVisible();
 
     fireEvent.click(screen.getByRole("radio", { name: "Small −$0.50" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
