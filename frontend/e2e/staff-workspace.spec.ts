@@ -20,7 +20,12 @@ test("owner can navigate the responsive dark staff workspace", async ({ page }, 
   if (testInfo.project.name === "mobile-chromium") {
     await page.getByRole("button", { name: "Open staff navigation" }).click();
     const navigation = page.getByRole("navigation", { name: "Mobile staff navigation" });
-    await expect(navigation.getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");
+    const overviewLink = navigation.getByRole("link", { name: "Overview" });
+    const catalogLink = navigation.getByRole("link", { name: "Catalog" });
+    await expect(overviewLink).toHaveAttribute("aria-current", "page");
+    await expect(catalogLink).not.toHaveAttribute("aria-current", "page");
+    expect(await overviewLink.evaluate((element) => getComputedStyle(element).backgroundColor))
+      .not.toBe(await catalogLink.evaluate((element) => getComputedStyle(element).backgroundColor));
     await expect(navigation.getByRole("link", { name: "Orders" })).toBeVisible();
     await expect(navigation.getByRole("link", { name: "Audit" })).toBeVisible();
     await expect(navigation.getByRole("link", { name: "Team" })).toBeVisible();

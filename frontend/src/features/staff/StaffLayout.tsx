@@ -34,6 +34,13 @@ const navigation = [
   { end: false, icon: ScrollText, label: "Audit", to: "/staff/audit" },
 ] as const;
 
+const mobileNavigationClassName = "flex min-h-11 items-center gap-3 rounded-lg border border-transparent px-3 text-foreground no-underline hover:bg-interactive-hover";
+const mobileNavigationActiveClassName = "border-interactive-selected-border bg-interactive-selected text-interactive-selected-foreground shadow-[inset_3px_0_0_var(--primary)] hover:bg-interactive-selected";
+
+function isCurrentPath(pathname: string, to: string, end = false) {
+  return pathname === to || (!end && pathname.startsWith(`${to}/`));
+}
+
 export function StaffLayout() {
   const location = useLocation();
   const { isLoading: isSessionLoading, session } = useAuth();
@@ -110,10 +117,10 @@ export function StaffLayout() {
             </SheetHeader>
             <nav aria-label="Mobile staff navigation" className="grid gap-1 px-4">
               {navigation.map(({ end, icon: Icon, label, to }) => (
-                <SheetClose asChild key={to}><NavLink className={({ isActive }) => cn("flex min-h-11 items-center gap-3 rounded-lg border border-transparent px-3 text-foreground no-underline hover:bg-interactive-hover", isActive && "border-interactive-selected-border bg-interactive-selected text-interactive-selected-foreground shadow-[inset_3px_0_0_var(--primary)] hover:bg-interactive-selected")} end={end} to={to}><Icon aria-hidden="true" className="size-4" />{label}</NavLink></SheetClose>
+                <SheetClose asChild key={to}><NavLink className={cn(mobileNavigationClassName, isCurrentPath(location.pathname, to, end) && mobileNavigationActiveClassName)} end={end} to={to}><Icon aria-hidden="true" className="size-4" />{label}</NavLink></SheetClose>
               ))}
               {visibleState.status === "ready" && visibleState.context.memberships.some((membership) => membership.role === "OWNER") ? (
-                <SheetClose asChild><NavLink className={({ isActive }) => cn("flex min-h-11 items-center gap-3 rounded-lg border border-transparent px-3 text-foreground no-underline hover:bg-interactive-hover", isActive && "border-interactive-selected-border bg-interactive-selected text-interactive-selected-foreground shadow-[inset_3px_0_0_var(--primary)] hover:bg-interactive-selected")} to="/staff/managers"><Users aria-hidden="true" className="size-4" />Team</NavLink></SheetClose>
+                <SheetClose asChild><NavLink className={cn(mobileNavigationClassName, isCurrentPath(location.pathname, "/staff/managers") && mobileNavigationActiveClassName)} to="/staff/managers"><Users aria-hidden="true" className="size-4" />Team</NavLink></SheetClose>
               ) : null}
             </nav>
             <SheetFooter>
