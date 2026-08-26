@@ -3,7 +3,6 @@ import { cloneElement, type ComponentProps, type ReactElement, type ReactNode } 
 import { cn } from "../../lib/utils";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { NativeSelect } from "../ui/native-select";
 import { Textarea } from "../ui/textarea";
 
 type FieldControlProps = {
@@ -43,9 +42,7 @@ export function Field({ children, description, error, id, label }: FieldProps) {
     ? <Input {...controlProps as ComponentProps<"input">} />
     : children.type === "textarea"
       ? <Textarea {...controlProps as ComponentProps<"textarea">} />
-      : children.type === "select"
-        ? <NativeSelect {...controlProps as Omit<ComponentProps<"select">, "size">} className="w-full" />
-        : cloneElement(children, controlProps);
+      : cloneElement(children, controlProps);
 
   return (
     <div className="grid gap-2">

@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { expectNoAccessibilityViolations } from "../../test/accessibility";
-import { DataTable, Dialog, Field, Pagination, ProblemState } from "../shared";
+import { DataTable, Dialog, Field, Pagination, ProblemState, SelectField } from "../shared";
 import { Button } from "./button";
 
 describe("interface primitives", () => {
@@ -23,6 +23,50 @@ describe("interface primitives", () => {
     expect(input).toHaveAccessibleDescription(
       "Use the name shown on the menu. A product name is required.",
     );
+  });
+
+  it("renders labelled pickers with the shadcn select instead of a native select", async () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <SelectField
+        description="Choose the catalog scope."
+        id="catalog-location"
+        label="Store"
+        onValueChange={onValueChange}
+        options={[
+          { label: "Orchard Central", value: "orchard" },
+          { label: "Tiong Bahru", value: "tiong-bahru" },
+        ]}
+        value="orchard"
+      />,
+    );
+
+    const trigger = screen.getByRole("combobox", { name: "Store" });
+    expect(trigger).toHaveAttribute("data-slot", "select-trigger");
+    expect(trigger).toHaveAccessibleDescription("Choose the catalog scope.");
+    expect(container.querySelector("select")).not.toBeInTheDocument();
+
+    fireEvent.click(trigger);
+    fireEvent.click(await screen.findByRole("option", { name: "Tiong Bahru" }));
+    expect(onValueChange).toHaveBeenCalledWith("tiong-bahru");
+  });
+
+  it("maps an all-items select option back to an empty filter value", async () => {
+    const onValueChange = vi.fn();
+    render(
+      <SelectField
+        emptyLabel="All stores"
+        id="store-filter"
+        label="Store"
+        onValueChange={onValueChange}
+        options={[{ label: "Orchard Central", value: "orchard" }]}
+        value="orchard"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Store" }));
+    fireEvent.click(await screen.findByRole("option", { name: "All stores" }));
+    expect(onValueChange).toHaveBeenCalledWith("");
   });
 
   it("exposes loading button state without losing its accessible name", () => {

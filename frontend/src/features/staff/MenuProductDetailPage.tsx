@@ -13,7 +13,7 @@ import {
   useSearchParams,
 } from "react-router";
 
-import { Dialog, Field, ProblemState } from "../../components/shared";
+import { Dialog, Field, ProblemState, SelectField } from "../../components/shared";
 import { ConfirmDialog as DestructiveConfirmDialog } from "../../components/shared/ConfirmDialog";
 import { Button } from "../../components/ui/button";
 import { Checkbox } from "../../components/ui/checkbox";
@@ -615,19 +615,17 @@ function OfferingDialog({
       }
     >
       <form className="recipe-form" onSubmit={submit}>
-        <Field id={`${prefix}-recipe`} label="Published recipe">
-          <select
-            onChange={(event) => setRecipeVersionId(event.target.value)}
-            value={recipeVersionId}
-          >
-            <option value="">Choose recipe version</option>
-            {recipes.map((recipe) => (
-              <option key={recipe.id} value={recipe.id}>
-                {recipe.label}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <SelectField
+          emptyLabel="Choose recipe version"
+          id={`${prefix}-recipe`}
+          label="Published recipe"
+          onValueChange={setRecipeVersionId}
+          options={recipes.map((recipe) => ({
+            label: recipe.label,
+            value: recipe.id,
+          }))}
+          value={recipeVersionId}
+        />
         <Field
           id={`${prefix}-price`}
           label={`Price (${location.currencyCode} minor units)`}
@@ -801,19 +799,17 @@ function ChoiceConfigurationDialog({
     >
       <form className="recipe-form" onSubmit={submit}>
         {configured === undefined ? (
-          <Field id={`configuration-choice-${variant.id}`} label="Choice">
-            <select
-              onChange={(event) => setChoiceId(event.target.value)}
-              value={choiceId}
-            >
-              <option value="">Choose option</option>
-              {choices.map(({ choice, group }) => (
-                <option key={choice.id} value={choice.id}>
-                  {group.name} · {choice.name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <SelectField
+            emptyLabel="Choose option"
+            id={`configuration-choice-${variant.id}`}
+            label="Choice"
+            onValueChange={setChoiceId}
+            options={choices.map(({ choice, group }) => ({
+              label: `${group.name} · ${choice.name}`,
+              value: choice.id,
+            }))}
+            value={choiceId}
+          />
         ) : (
           <p>
             <strong>{configured.groupName}</strong> · {configured.choiceName}
@@ -842,38 +838,30 @@ function ChoiceConfigurationDialog({
         <div className="formula-rows">
           {rows.map((row, index) => (
             <div className="formula-row" key={row.key}>
-              <Field
+              <SelectField
+                emptyLabel="Choose ingredient"
                 id={`effect-ingredient-${variant.id}-${row.key}`}
                 label={`Effect ingredient ${index + 1}`}
-              >
-                <select
-                  onChange={(event) =>
-                    setRows((current) =>
-                      current.map((item) =>
-                        item.key === row.key
-                          ? { ...item, ingredientId: event.target.value }
-                          : item,
-                      ),
-                    )
-                  }
-                  value={row.ingredientId}
-                >
-                  <option value="">Choose ingredient</option>
-                  {ingredients.map((ingredient) => (
-                    <option
-                      disabled={rows.some(
-                        (item) =>
-                          item.key !== row.key &&
-                          item.ingredientId === ingredient.id,
-                      )}
-                      key={ingredient.id}
-                      value={ingredient.id}
-                    >
-                      {ingredient.name} · {ingredient.baseUnit.toLowerCase()}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+                onValueChange={(ingredientId) =>
+                  setRows((current) =>
+                    current.map((item) =>
+                      item.key === row.key
+                        ? { ...item, ingredientId }
+                        : item,
+                    ),
+                  )
+                }
+                options={ingredients.map((ingredient) => ({
+                  disabled: rows.some(
+                    (item) =>
+                      item.key !== row.key &&
+                      item.ingredientId === ingredient.id,
+                  ),
+                  label: `${ingredient.name} · ${ingredient.baseUnit.toLowerCase()}`,
+                  value: ingredient.id,
+                }))}
+                value={row.ingredientId}
+              />
               <Field
                 id={`effect-quantity-${variant.id}-${row.key}`}
                 label={`Signed quantity ${index + 1}`}

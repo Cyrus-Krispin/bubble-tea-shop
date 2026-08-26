@@ -3,6 +3,7 @@ import { MemoryRouter, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { catalogLocations, catalogMenu, catalogProduct } from "../test/catalogFixtures";
+import { selectOption } from "../test/selectOption";
 
 vi.mock("../features/auth/authClient", () => ({
   getCurrentAuthSession: vi.fn().mockResolvedValue(null),
@@ -388,7 +389,7 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add ingredient" }));
     fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Pearls" } });
     fireEvent.change(screen.getByLabelText("SKU"), { target: { value: "PEARL-1" } });
-    fireEvent.change(screen.getByLabelText("Base unit"), { target: { value: "EACH" } });
+    await selectOption(screen.getByLabelText("Base unit"), "Each");
     fireEvent.click(screen.getByRole("button", { name: "Create ingredient" }));
 
     await waitFor(() => expect(createIngredient).toHaveBeenCalledWith(

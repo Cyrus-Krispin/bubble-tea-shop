@@ -7,6 +7,7 @@ import {
   Field,
   Pagination,
   ProblemState,
+  SelectField,
   type DataTableColumn,
 } from "../../components/shared";
 import { Button } from "../../components/ui/button";
@@ -271,24 +272,19 @@ export default function MenuManagementPage() {
         />
       </div>
       <section aria-label="Menu filters" className="ingredient-toolbar">
-        <Field id="menu-organization" label="Organization">
-          <select
-            onChange={(event) => {
-              setOrganizationId(event.target.value);
-              setPage(0);
-            }}
-            value={organizationId}
-          >
-            {staffContext.memberships.map((membership) => (
-              <option
-                key={membership.organizationId}
-                value={membership.organizationId}
-              >
-                {membership.organizationName}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <SelectField
+          id="menu-organization"
+          label="Organization"
+          onValueChange={(nextOrganizationId) => {
+            setOrganizationId(nextOrganizationId);
+            setPage(0);
+          }}
+          options={staffContext.memberships.map((membership) => ({
+            label: membership.organizationName,
+            value: membership.organizationId,
+          }))}
+          value={organizationId}
+        />
         <form
           className="ingredient-search"
           onSubmit={(event) => {

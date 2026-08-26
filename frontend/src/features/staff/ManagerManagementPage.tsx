@@ -7,6 +7,7 @@ import {
   Field,
   Pagination,
   ProblemState,
+  SelectField,
   type DataTableColumn,
 } from "../../components/shared";
 import { Button } from "../../components/ui/button";
@@ -198,21 +199,21 @@ export default function ManagerManagementPage() {
           </div>
         </div>
         <form className="manager-form" onSubmit={add}>
-          <Field id="manager-organization" label="Organization">
-            <select
-              onChange={(event) => {
-                setOrganizationId(event.target.value);
-                setPageNumber(0);
-                setNewLocations([]);
-                setPageState({ status: "loading" });
-              }}
-              value={organizationId}
-            >
-              {ownerMemberships.map((item) => (
-                <option key={item.organizationId} value={item.organizationId}>{item.organizationName}</option>
-              ))}
-            </select>
-          </Field>
+          <SelectField
+            id="manager-organization"
+            label="Organization"
+            onValueChange={(nextOrganizationId) => {
+              setOrganizationId(nextOrganizationId);
+              setPageNumber(0);
+              setNewLocations([]);
+              setPageState({ status: "loading" });
+            }}
+            options={ownerMemberships.map((item) => ({
+              label: item.organizationName,
+              value: item.organizationId,
+            }))}
+            value={organizationId}
+          />
           <Field id="manager-email" label="Registered email">
             <input
               autoComplete="email"

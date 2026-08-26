@@ -7,6 +7,7 @@ import {
   Field,
   Pagination,
   ProblemState,
+  SelectField,
   type DataTableColumn,
 } from "../../components/shared";
 import { Button } from "../../components/ui/button";
@@ -263,24 +264,19 @@ export default function OptionManagementPage() {
         />
       </div>
       <section aria-label="Option filters" className="ingredient-toolbar">
-        <Field id="option-organization" label="Organization">
-          <select
-            onChange={(event) => {
-              setOrganizationId(event.target.value);
-              setPage(0);
-            }}
-            value={organizationId}
-          >
-            {staffContext.memberships.map((membership) => (
-              <option
-                key={membership.organizationId}
-                value={membership.organizationId}
-              >
-                {membership.organizationName}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <SelectField
+          id="option-organization"
+          label="Organization"
+          onValueChange={(nextOrganizationId) => {
+            setOrganizationId(nextOrganizationId);
+            setPage(0);
+          }}
+          options={staffContext.memberships.map((membership) => ({
+            label: membership.organizationName,
+            value: membership.organizationId,
+          }))}
+          value={organizationId}
+        />
         <form
           className="ingredient-search"
           onSubmit={(event) => {

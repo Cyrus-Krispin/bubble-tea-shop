@@ -9,6 +9,7 @@ import { MemoryRouter, Outlet, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { expectNoAccessibilityViolations } from "../../test/accessibility";
+import { selectOption } from "../../test/selectOption";
 vi.mock("./inventoryClient", () => ({
   getInventoryBalances: vi.fn(),
   getInventoryMovements: vi.fn(),
@@ -189,9 +190,7 @@ describe("InventoryManagementPage", () => {
     renderPage();
     fireEvent.click(await screen.findByRole("button", { name: "Record" }));
     const dialog = await screen.findByRole("dialog");
-    fireEvent.change(within(dialog).getByLabelText("Movement type"), {
-      target: { value: "ADJUSTMENT" },
-    });
+    await selectOption(within(dialog).getByLabelText("Movement type"), "Adjustment");
     fireEvent.change(within(dialog).getByLabelText("Quantity (g)"), {
       target: { value: "-12" },
     });
