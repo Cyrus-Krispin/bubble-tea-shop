@@ -1,8 +1,18 @@
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
+const sourceDirectory = fileURLToPath(new URL("./src", import.meta.url));
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(sourceDirectory),
+    },
+  },
   server: {
     proxy: {
       "/api": "http://localhost:8080",

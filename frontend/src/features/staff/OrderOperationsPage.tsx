@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router";
 
 import {
-  Button,
   DataTable,
   Dialog,
   Field,
   Pagination,
   ProblemState,
   type DataTableColumn,
-} from "../../components/ui";
+} from "../../components/shared";
+import { Button } from "../../components/ui/button";
 import { formatMoney } from "../catalog/formatMoney";
 import type { StaffOutletContext } from "./StaffLayout";
 import {

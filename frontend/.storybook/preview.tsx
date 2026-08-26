@@ -1,13 +1,16 @@
 import type { Preview } from "@storybook/react-vite";
 
-import "../src/components/ui/ui.css";
 import "../src/index.css";
+
+document.documentElement.classList.add("dark");
 
 const preview: Preview = {
   decorators: [
     (Story) => (
-      <div style={{ margin: "0 auto", maxWidth: "72rem", padding: "2rem" }}>
-        <Story />
+      <div className="dark min-h-screen bg-background p-8 text-foreground">
+        <div className="mx-auto max-w-6xl">
+          <Story />
+        </div>
       </div>
     ),
   ],

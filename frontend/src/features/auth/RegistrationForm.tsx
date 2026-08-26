@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 
-import { Button, Field } from "../../components/ui";
+import { Field } from "../../components/shared";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Button } from "../../components/ui/button";
 import type { RegistrationResult } from "./authClient";
 import type { Credentials } from "./types";
 
@@ -37,7 +39,7 @@ export function RegistrationForm({ onRegister }: RegistrationFormProps) {
   }
 
   return (
-    <form className="login-form" onSubmit={handleSubmit}>
+    <form className="grid gap-5" onSubmit={handleSubmit}>
       <Field id="registration-email" label="Email address">
         <input
           autoComplete="email"
@@ -81,23 +83,20 @@ export function RegistrationForm({ onRegister }: RegistrationFormProps) {
         />
       </Field>
 
-      <button className="password-toggle" onClick={() => setShowPasswords((value) => !value)} type="button">
+      <Button className="w-fit" onClick={() => setShowPasswords((value) => !value)} size="compact" type="button" variant="ghost">
         {showPasswords ? "Hide passwords" : "Show passwords"}
-      </button>
+      </Button>
 
       {message === "error" ? (
-        <p className="form-message form-message--error" role="alert">
-          We couldn&apos;t create your account. Please try again or sign in.
-        </p>
+        <Alert variant="destructive"><AlertDescription>We couldn&apos;t create your account. Please try again or sign in.</AlertDescription></Alert>
       ) : null}
-      {message === "ready" ? <p className="form-message form-message--success" role="status">Your account is ready.</p> : null}
+      {message === "ready" ? <Alert role="status"><AlertDescription>Your account is ready.</AlertDescription></Alert> : null}
       {message === "verify" ? (
-        <p className="form-message form-message--success" role="status">
-          Check your email to finish creating your account.
-        </p>
+        <Alert role="status"><AlertDescription>Check your email to finish creating your account.</AlertDescription></Alert>
       ) : null}
 
       <Button
+        className="w-full"
         isLoading={isSubmitting}
         loadingLabel="Creating account"
         type="submit"

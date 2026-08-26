@@ -46,7 +46,7 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
   await page.getByRole("link", { name: /Tiong Bahru/ }).click();
   await expect(page).toHaveURL(/\/shop\/tiong-bahru$/);
   await expect(page.getByRole("button", { name: "Pickup at Tiong Bahru" })).toBeVisible();
-  await expect(page.locator(".product-card")).toHaveCount(5);
+  await expect.poll(() => page.getByRole("region", { name: "All drinks" }).locator('[data-slot="card"]').count()).toBeGreaterThanOrEqual(5);
   const photos = page.locator(".drink-art");
   for (let index = 0; index < await photos.count(); index += 1) {
     const photo = photos.nth(index);
@@ -76,6 +76,74 @@ test("guest can place a cash order on the production stack", async ({ page }) =>
 
   expect(apiFailures).toEqual([]);
   expect(consoleProblems).toEqual([]);
+});
+
+test("guest menu keeps a compact responsive product grid", async ({ page }) => {
+  const viewports = [
+    { width: 320, height: 800, columns: 1 },
+    { width: 768, height: 900, columns: 2 },
+    { width: 1024, height: 900, columns: 3 },
+    { width: 1280, height: 800, columns: 4 },
+    { width: 1366, height: 768, columns: 4 },
+    { width: 1440, height: 900, columns: 4 },
+  ];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    const grid = page.getByRole("region", { name: "All drinks" });
+    const cards = grid.locator('[data-slot="card"]');
+    await expect.poll(() => cards.count()).toBeGreaterThanOrEqual(5);
+
+    const firstRow = await Promise.all(
+      Array.from({ length: viewport.columns }, (_, index) => cards.nth(index).boundingBox()),
+    );
+    const firstY = firstRow[0]?.y ?? 0;
+    for (const card of firstRow) {
+      expect(Math.abs((card?.y ?? 0) - firstY)).toBeLessThan(2);
+    }
+
+    if (viewport.columns === 4) {
+      const firstCard = firstRow[0];
+      expect((firstCard?.y ?? 0) + (firstCard?.height ?? 0)).toBeLessThanOrEqual(viewport.height);
+    }
+  }
+
+  const images = page.getByRole("region", { name: "All drinks" }).locator(".drink-art");
+  await expect(images.nth(3)).toHaveAttribute("loading", "eager");
+  await expect(images.nth(3)).toHaveAttribute("fetchpriority", "high");
+  await expect(images.nth(4)).toHaveAttribute("loading", "lazy");
+  await expect(images.nth(4)).toHaveAttribute("fetchpriority", "auto");
+  await expectProductionQuality(page);
+});
+
+test("customer controls make selected and actionable states visually explicit", async ({ page }) => {
+  await page.goto("/account/access?mode=sign-in");
+
+  const accessNavigation = page.getByRole("navigation", { name: "Account access options" });
+  const signIn = accessNavigation.getByRole("link", { name: "Sign in" });
+  const createAccount = accessNavigation.getByRole("link", { name: "Create account" });
+  await expect(signIn).toHaveAttribute("aria-current", "page");
+  await expect(signIn).toHaveAttribute("data-variant", "default");
+  await expect(createAccount).toHaveAttribute("data-variant", "ghost");
+
+  await page.goto("/");
+  const customize = page.getByRole("link", { name: /Customize / }).first();
+  await expect(customize).toHaveAttribute("data-variant", "default");
+});
+
+test("catalog artwork keeps a crop-safe landscape source ratio", async ({ page }) => {
+  await page.goto("/");
+  const artwork = page.locator(".drink-art");
+  await expect.poll(() => artwork.count()).toBeGreaterThanOrEqual(5);
+  await expect(artwork.first()).toHaveAttribute("src", /\.webp\?v=2$/);
+
+  for (let index = 0; index < await artwork.count(); index += 1) {
+    await expect.poll(() => artwork.nth(index).evaluate((image) => {
+      const productImage = image as HTMLImageElement;
+      return productImage.complete ? productImage.naturalWidth / productImage.naturalHeight : 0;
+    })).toBeCloseTo(4 / 3, 2);
+  }
 });
 
 test("customer sees an account-linked order across the personalized storefront and history", async ({

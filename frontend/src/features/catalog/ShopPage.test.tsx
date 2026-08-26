@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -34,7 +34,7 @@ describe("ShopPage", () => {
       "/shop/orchard-central/drinks/moonlit-milk-tea",
     );
     expect(screen.getByRole("img", { name: "Moonlit Milk Tea in a clear cup" }))
-      .toHaveAttribute("src", "/assets/catalog/moonlit-milk-tea.webp");
+      .toHaveAttribute("src", "/assets/catalog/moonlit-milk-tea.webp?v=2");
     for (const image of screen.getAllByRole("img", { name: /in a clear cup/ })) {
       expect(image).toHaveAttribute("loading", "eager");
       expect(image).toHaveAttribute("fetchpriority", "high");
@@ -56,7 +56,7 @@ describe("ShopPage", () => {
 
     fireEvent.keyDown(document, { key: "Escape" });
     expect(trigger).toHaveAttribute("aria-expanded", "false");
-    expect(trigger).toHaveFocus();
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 
   it("filters the menu by categories returned by the API", async () => {

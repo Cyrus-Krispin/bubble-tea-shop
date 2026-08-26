@@ -13,7 +13,10 @@ import {
   useSearchParams,
 } from "react-router";
 
-import { Button, Dialog, Field, ProblemState } from "../../components/ui";
+import { Dialog, Field, ProblemState } from "../../components/shared";
+import { ConfirmDialog as DestructiveConfirmDialog } from "../../components/shared/ConfirmDialog";
+import { Button } from "../../components/ui/button";
+import { Checkbox } from "../../components/ui/checkbox";
 import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import type { StaffLocation } from "./staffClient";
@@ -218,8 +221,12 @@ function ConfirmDialog({
     }
   }
   return (
-    <Dialog
+    <DestructiveConfirmDialog
+      confirmLabel="Archive"
       description={description}
+      error={error}
+      isLoading={saving}
+      onConfirm={act}
       onOpenChange={(next) => {
         setOpen(next);
         if (next) setError(undefined);
@@ -231,23 +238,7 @@ function ConfirmDialog({
           {children}
         </Button>
       }
-    >
-      {error === undefined ? null : (
-        <p className="form-message form-message--error" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="recipe-form-actions">
-        <Button
-          isLoading={saving}
-          loadingLabel="Archiving"
-          onClick={act}
-          variant="danger"
-        >
-          Archive
-        </Button>
-      </div>
-    </Dialog>
+    />
   );
 }
 
@@ -505,10 +496,9 @@ function VariantDialog({
           />
         </Field>
         <label className="ingredient-archive-filter">
-          <input
+          <Checkbox
             checked={defaultVariant}
-            onChange={(event) => setDefaultVariant(event.target.checked)}
-            type="checkbox"
+            onCheckedChange={(checked) => setDefaultVariant(checked === true)}
           />
           Default variant
         </label>
@@ -652,10 +642,9 @@ function OfferingDialog({
           />
         </Field>
         <label className="ingredient-archive-filter">
-          <input
+          <Checkbox
             checked={available}
-            onChange={(event) => setAvailable(event.target.checked)}
-            type="checkbox"
+            onCheckedChange={(checked) => setAvailable(checked === true)}
           />
           Available to guests
         </label>
@@ -843,10 +832,9 @@ function ChoiceConfigurationDialog({
             />
           </Field>
           <label className="ingredient-archive-filter">
-            <input
+            <Checkbox
               checked={enabled}
-              onChange={(event) => setEnabled(event.target.checked)}
-              type="checkbox"
+              onCheckedChange={(checked) => setEnabled(checked === true)}
             />
             Enabled for this variant
           </label>

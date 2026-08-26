@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
 import { formatMoney } from "../catalog/formatMoney";
 import type { DrinkConfiguration } from "../catalog/pricing";
 import { useGuestLocations } from "../catalog/useGuestCatalog";
@@ -9,7 +13,6 @@ import { useAuth } from "../auth/useAuth";
 import { useCart } from "./CartContext";
 import { MAX_LINE_QUANTITY, MAX_ORDER_QUANTITY } from "./cartReducer";
 import { OrderError, placeGuestOrder, type GuestOrder } from "./orderClient";
-import "./cart.css";
 
 function locationNameFromSlug(slug: string | undefined) {
   if (slug === undefined) return "Pickup shop";
@@ -92,69 +95,52 @@ export function CartPage() {
     <div className="customer-shell">
       <a className="skip-link" href="#cart-title">Skip to current order</a>
       <CustomerHeader itemCount={itemCount} />
-      <main className="cart-main" aria-labelledby="cart-title">
-        <div className="cart-heading">
-          <p className="eyebrow">Order review</p>
-          <h1 id="cart-title">Your current order</h1>
-          <p>Check each drink, then place the order for cash pickup.</p>
+      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6" aria-labelledby="cart-title">
+        <div className="mb-8 border-b pb-6">
+          <p className="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">Order review</p>
+          <h1 className="text-3xl" id="cart-title">Your current order</h1>
+          <p className="mt-2 text-muted-foreground">Check each drink, then place the order for cash pickup.</p>
         </div>
         {placedOrder !== undefined ? (
-          <section className="cart-confirmation" aria-labelledby="confirmation-title">
-            <p className="eyebrow">Order confirmed</p>
-            <h2 id="confirmation-title">Pickup {placedOrder.publicOrderNumber}</h2>
-            <p>Your order is pending. Pay {formatMoney(placedOrder.totalMinor, placedOrder.currencyCode)} in cash at the shop when it is ready.</p>
-            <dl>
-              <div><dt>Status</dt><dd>Pending</dd></div>
-              <div><dt>Items</dt><dd>{placedOrder.items.reduce((total, item) => total + item.quantity, 0)}</dd></div>
-              <div><dt>Confirmed total</dt><dd>{formatMoney(placedOrder.totalMinor, placedOrder.currencyCode)}</dd></div>
+          <Card aria-labelledby="confirmation-title" className="mx-auto max-w-2xl">
+            <CardHeader><p className="text-xs font-semibold tracking-widest text-primary uppercase">Order confirmed</p><CardTitle><h2 id="confirmation-title">Pickup {placedOrder.publicOrderNumber}</h2></CardTitle></CardHeader>
+            <CardContent className="grid gap-5"><p className="text-muted-foreground">Your order is pending. Pay {formatMoney(placedOrder.totalMinor, placedOrder.currencyCode)} in cash at the shop when it is ready.</p>
+            <dl className="grid gap-3 rounded-lg bg-muted p-4">
+              <div className="flex justify-between gap-4"><dt>Status</dt><dd>Pending</dd></div>
+              <div className="flex justify-between gap-4"><dt>Items</dt><dd>{placedOrder.items.reduce((total, item) => total + item.quantity, 0)}</dd></div>
+              <div className="flex justify-between gap-4 font-semibold"><dt>Confirmed total</dt><dd>{formatMoney(placedOrder.totalMinor, placedOrder.currencyCode)}</dd></div>
             </dl>
-            <Link className="secondary-link" to={placedLocationSlug === undefined ? "/shop" : `/shop/${placedLocationSlug}`}>Start another order</Link>
-          </section>
+            <Button asChild variant="outline"><Link to={placedLocationSlug === undefined ? "/shop" : `/shop/${placedLocationSlug}`}>Start another order</Link></Button>
+            </CardContent>
+          </Card>
         ) : items.length === 0 ? (
-          <section className="cart-empty" aria-labelledby="empty-title">
-            <span aria-hidden="true">0</span>
-            <h2 id="empty-title">Your order is empty</h2>
-            <p>Choose a drink and customize it to get started.</p>
-            <Link className="secondary-link" to="/shop">Browse the menu</Link>
-          </section>
+          <Card aria-labelledby="empty-title" className="mx-auto max-w-2xl text-center"><CardHeader><CardTitle><h2 id="empty-title">Your order is empty</h2></CardTitle></CardHeader><CardContent className="grid justify-items-center gap-5"><p className="text-muted-foreground">Choose a drink and customize it to get started.</p><Button asChild variant="outline"><Link to="/shop">Browse the menu</Link></Button></CardContent></Card>
         ) : (
-          <div className="cart-layout">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <section aria-label="Order items">
-              <ul className="cart-list">
+              <ul className="grid list-none gap-4 p-0">
                 {items.map((item) => (
-                  <li className="cart-item" key={item.id}>
-                    <div className="cart-item-copy">
-                      <p className="product-category">Customized drink</p>
-                      <h2>{item.drinkName}</h2>
-                      <p>{configurationSummary(item.configuration)}</p>
-                      <button className="remove-button" disabled={submitting} onClick={() => removeItem(item.id)} type="button">Remove {item.drinkName}</button>
-                    </div>
-                    <div className="cart-item-actions">
-                      <strong>{formatMoney(item.unitPriceMinor * item.quantity, item.currency)}</strong>
-                      <div className="quantity-control">
-                        <button aria-label={`Decrease ${item.drinkName} quantity`} disabled={submitting} onClick={() => decrementItem(item.id)} type="button">−</button>
-                        <span aria-live="polite">Quantity {item.quantity}</span>
-                        <button aria-label={`Increase ${item.drinkName} quantity`} disabled={submitting || item.quantity >= MAX_LINE_QUANTITY || itemCount >= MAX_ORDER_QUANTITY} onClick={() => incrementItem(item.id)} type="button">+</button>
+                  <li key={item.id}>
+                    <Card><CardContent className="grid gap-5 pt-4 sm:grid-cols-[1fr_auto] sm:items-center">
+                      <div><Badge className="mb-2" variant="secondary">Customized drink</Badge><h2 className="text-xl">{item.drinkName}</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">{configurationSummary(item.configuration)}</p><Button className="mt-3 px-0" disabled={submitting} onClick={() => removeItem(item.id)} size="compact" type="button" variant="link">Remove {item.drinkName}</Button></div>
+                      <div className="grid justify-items-start gap-3 sm:justify-items-end"><strong>{formatMoney(item.unitPriceMinor * item.quantity, item.currency)}</strong>
+                        <div className="flex items-center gap-2"><Button aria-label={`Decrease ${item.drinkName} quantity`} className="w-11 px-0" disabled={submitting} onClick={() => decrementItem(item.id)} type="button" variant="outline">−</Button><span aria-live="polite" className="min-w-20 text-center text-sm">Quantity {item.quantity}</span><Button aria-label={`Increase ${item.drinkName} quantity`} className="w-11 px-0" disabled={submitting || item.quantity >= MAX_LINE_QUANTITY || itemCount >= MAX_ORDER_QUANTITY} onClick={() => incrementItem(item.id)} type="button" variant="outline">+</Button></div>
                       </div>
-                    </div>
+                    </CardContent></Card>
                   </li>
                 ))}
               </ul>
-              <Link className="back-link" to={`/shop/${items[0].locationSlug}`}>← Add another drink</Link>
+              <Button asChild className="mt-4" variant="ghost"><Link to={`/shop/${items[0].locationSlug}`}>← Add another drink</Link></Button>
             </section>
-            <aside className="order-summary" aria-labelledby="summary-title">
-              <p className="eyebrow">Cash pickup</p>
-              <h2 id="summary-title">Pay at the shop</h2>
-              <p>Review the total, place the order, then pay cash when you pick it up.</p>
-              <dl>
-                <div><dt>Pickup at</dt><dd>{pickupLocation?.name ?? locationNameFromSlug(items[0]?.locationSlug)}</dd></div>
-                <div><dt>Items</dt><dd>{itemCount}</dd></div>
-                <div className="summary-total"><dt>Preview total</dt><dd>{formatMoney(previewTotalMinor, items[0].currency)}</dd></div>
-              </dl>
-              <button aria-describedby="checkout-note" disabled={submitting} onClick={checkout} type="button">{submitting ? "Placing order…" : `Place order · ${formatMoney(previewTotalMinor, items[0].currency)}`}</button>
-              <small id="checkout-note">This sends a pending order to the shop. Pay cash at pickup.</small>
-              {submitError === undefined ? null : <p className="checkout-error" role="alert">{submitError}</p>}
-            </aside>
+            <Card className="h-fit lg:sticky lg:top-24" aria-labelledby="summary-title">
+              <CardHeader><p className="text-xs font-semibold tracking-widest text-primary uppercase">Cash pickup</p><CardTitle><h2 id="summary-title">Pay at the shop</h2></CardTitle><p className="text-sm leading-6 text-muted-foreground">Review the total, place the order, then pay cash when you pick it up.</p></CardHeader>
+              <CardContent><dl className="grid gap-3">
+                <div className="flex justify-between gap-4"><dt>Pickup at</dt><dd className="text-right font-medium">{pickupLocation?.name ?? locationNameFromSlug(items[0]?.locationSlug)}</dd></div>
+                <div className="flex justify-between gap-4"><dt>Items</dt><dd>{itemCount}</dd></div>
+                <div className="flex justify-between gap-4 border-t pt-3 text-lg font-semibold"><dt>Preview total</dt><dd>{formatMoney(previewTotalMinor, items[0].currency)}</dd></div>
+              </dl></CardContent>
+              <CardFooter className="grid gap-3"><Button aria-describedby="checkout-note" className="w-full" isLoading={submitting} loadingLabel="Placing order…" onClick={checkout} type="button">{`Place order · ${formatMoney(previewTotalMinor, items[0].currency)}`}</Button><small className="text-muted-foreground" id="checkout-note">This sends a pending order to the shop. Pay cash at pickup.</small>{submitError === undefined ? null : <Alert variant="destructive"><AlertDescription>{submitError}</AlertDescription></Alert>}</CardFooter>
+            </Card>
           </div>
         )}
       </main>

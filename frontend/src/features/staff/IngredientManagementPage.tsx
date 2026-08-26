@@ -2,14 +2,16 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { useOutletContext } from "react-router";
 
 import {
-  Button,
   DataTable,
   Dialog,
   Field,
   Pagination,
   ProblemState,
   type DataTableColumn,
-} from "../../components/ui";
+} from "../../components/shared";
+import { Button } from "../../components/ui/button";
+import { ConfirmDialog } from "../../components/shared/ConfirmDialog";
+import { Checkbox } from "../../components/ui/checkbox";
 import { CatalogSectionNav } from "./CatalogSectionNav";
 import type { StaffOutletContext } from "./StaffLayout";
 import {
@@ -211,8 +213,12 @@ function ArchiveIngredientDialog({
   }
 
   return (
-    <Dialog
+    <ConfirmDialog
+      confirmLabel="Archive ingredient"
       description="Archived ingredients leave active lists but remain in historical recipes, orders, and audit records."
+      error={error}
+      isLoading={saving}
+      onConfirm={archive}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
         if (nextOpen) setError(undefined);
@@ -220,12 +226,7 @@ function ArchiveIngredientDialog({
       open={open}
       title={`Archive ${ingredient.name}?`}
       trigger={<Button size="compact" variant="danger">Archive</Button>}
-    >
-      {error === undefined ? null : <p className="form-message form-message--error" role="alert">{error}</p>}
-      <div className="ingredient-form-actions">
-        <Button isLoading={saving} loadingLabel="Archiving ingredient" onClick={archive} variant="danger">Archive ingredient</Button>
-      </div>
-    </Dialog>
+    />
   );
 }
 
@@ -334,10 +335,10 @@ export default function IngredientManagementPage() {
           <Button size="compact" type="submit" variant="secondary">Search</Button>
         </form>
         <label className="ingredient-archive-filter">
-          <input checked={includeArchived} onChange={(event) => {
-            setIncludeArchived(event.target.checked);
+          <Checkbox checked={includeArchived} onCheckedChange={(checked) => {
+            setIncludeArchived(checked === true);
             setPage(0);
-          }} type="checkbox" />
+          }} />
           Include archived
         </label>
       </section>

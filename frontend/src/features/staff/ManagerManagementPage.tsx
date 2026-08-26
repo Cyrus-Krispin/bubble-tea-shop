@@ -2,14 +2,16 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router";
 
 import {
-  Button,
   DataTable,
   Dialog,
   Field,
   Pagination,
   ProblemState,
   type DataTableColumn,
-} from "../../components/ui";
+} from "../../components/shared";
+import { Button } from "../../components/ui/button";
+import { ConfirmDialog } from "../../components/shared/ConfirmDialog";
+import { Checkbox } from "../../components/ui/checkbox";
 import type { StaffLocation } from "./staffClient";
 import type { StaffOutletContext } from "./StaffLayout";
 import {
@@ -291,12 +293,11 @@ function LocationChoices({
       <legend>{legend}</legend>
       {locations.map((location) => (
         <label key={location.id}>
-          <input
+          <Checkbox
             checked={selected.includes(location.id)}
-            onChange={(event) => onChange(event.target.checked
+            onCheckedChange={(checked) => onChange(checked === true
               ? [...selected, location.id]
               : selected.filter((id) => id !== location.id))}
-            type="checkbox"
           />
           <span>{location.name}</span>
         </label>
@@ -392,8 +393,12 @@ function DeactivateDialog({ accessToken, manager, onSaved, organizationId }: {
   }
 
   return (
-    <Dialog
+    <ConfirmDialog
+      confirmLabel="Confirm deactivation"
       description={`${manager.email} will immediately lose staff access. Historical assignments and audit events remain.`}
+      error={error}
+      isLoading={saving}
+      onConfirm={deactivate}
       onOpenChange={(next) => {
         setOpen(next);
         if (next) setError(undefined);
@@ -401,14 +406,7 @@ function DeactivateDialog({ accessToken, manager, onSaved, organizationId }: {
       open={open}
       title="Deactivate manager?"
       trigger={<Button size="compact" variant="danger">Deactivate</Button>}
-    >
-      <div className="manager-dialog-body">
-        {error === undefined ? null : <p className="form-message form-message--error" role="alert">{error}</p>}
-        <Button disabled={saving} onClick={deactivate} variant="danger">
-          {saving ? "Deactivating…" : "Confirm deactivation"}
-        </Button>
-      </div>
-    </Dialog>
+    />
   );
 }
 

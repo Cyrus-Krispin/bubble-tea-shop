@@ -2,14 +2,15 @@ import { useEffect, useId, useMemo, useState, type FormEvent } from "react";
 import { useOutletContext } from "react-router";
 
 import {
-  Button,
   DataTable,
   Dialog,
   Field,
   Pagination,
   ProblemState,
   type DataTableColumn,
-} from "../../components/ui";
+} from "../../components/shared";
+import { Button } from "../../components/ui/button";
+import { Checkbox } from "../../components/ui/checkbox";
 import type { StaffLocation } from "./staffClient";
 import type { StaffOutletContext } from "./StaffLayout";
 import {
@@ -641,13 +642,12 @@ export default function InventoryManagementPage() {
                 </Button>
               </form>
               <label className="ingredient-archive-filter">
-                <input
+                <Checkbox
                   checked={includeArchived}
-                  onChange={(event) => {
-                    setIncludeArchived(event.target.checked);
+                  onCheckedChange={(checked) => {
+                    setIncludeArchived(checked === true);
                     setBalancePage(0);
                   }}
-                  type="checkbox"
                 />
                 Include archived
               </label>
