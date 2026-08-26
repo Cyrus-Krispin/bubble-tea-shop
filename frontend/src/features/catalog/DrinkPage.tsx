@@ -139,7 +139,7 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
                   ?? variant.price.amountMinor;
                 const delta = option.price.amountMinor - defaultPrice;
                 return (
-                  <Label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-accent" htmlFor={`variant-${option.id}`} key={option.id}>
+                  <Label className={cn("flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors hover:border-primary/70 hover:bg-interactive-hover has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60", !option.available && "cursor-not-allowed opacity-50")} htmlFor={`variant-${option.id}`} key={option.id}>
                     <RadioGroupItem
                       aria-label={`${option.name} ${priceDeltaLabel(delta, option.price.currency)}`}
                       disabled={!option.available}
@@ -193,7 +193,7 @@ function OptionGroup({
           const selected = selectedIds.includes(choice.id);
           const limitReached = multiple && !selected && selectedIds.length >= group.maximumSelections;
           return (
-            <Label className={cn("grid min-h-14 cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-input bg-input/30 px-3 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-accent", limitReached && "cursor-not-allowed opacity-50")} htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}>
+            <Label className={cn("grid min-h-14 cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors hover:border-primary/70 hover:bg-interactive-hover has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60", limitReached && "cursor-not-allowed opacity-50")} htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}>
               <Checkbox
                 aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`}
                 checked={selected}
@@ -210,7 +210,7 @@ function OptionGroup({
         const choice = group.choices.find((candidate) => candidate.id === choiceId);
         if (choice) onSelect(group, choice);
       }} value={selectedIds[0]}>
-        {group.choices.map((choice) => <Label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 has-data-[state=checked]:border-primary has-data-[state=checked]:bg-accent" htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}><RadioGroupItem aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`} id={`choice-${group.id}-${choice.id}`} value={choice.id} /><span className="grid"><span>{choice.name}</span><small className="text-muted-foreground">{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small></span></Label>)}
+        {group.choices.map((choice) => <Label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors hover:border-primary/70 hover:bg-interactive-hover has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60" htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}><RadioGroupItem aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`} id={`choice-${group.id}-${choice.id}`} value={choice.id} /><span className="grid"><span>{choice.name}</span><small className="text-muted-foreground">{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small></span></Label>)}
       </RadioGroup>}
     </fieldset>
   );

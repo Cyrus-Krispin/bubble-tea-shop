@@ -91,7 +91,7 @@ export function ShopPage() {
                     {drink.available ? `From ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}` : "Unavailable today"}
                   </strong>
                   {drink.available ? (
-                    <Button asChild className="shrink-0" size="regular" variant="secondary">
+                    <Button asChild className="shrink-0" size="regular">
                       <Link aria-label={`Customize ${drink.name}, from ${formatMoney(drink.startingPrice.amountMinor, drink.startingPrice.currency)}`} to={`/shop/${state.data.location.slug}/drinks/${drink.slug}`}>
                         Customize <ArrowRight aria-hidden="true" />
                       </Link>

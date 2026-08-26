@@ -117,6 +117,21 @@ test("guest menu keeps a compact responsive product grid", async ({ page }) => {
   await expectProductionQuality(page);
 });
 
+test("customer controls make selected and actionable states visually explicit", async ({ page }) => {
+  await page.goto("/account/access?mode=sign-in");
+
+  const accessNavigation = page.getByRole("navigation", { name: "Account access options" });
+  const signIn = accessNavigation.getByRole("link", { name: "Sign in" });
+  const createAccount = accessNavigation.getByRole("link", { name: "Create account" });
+  await expect(signIn).toHaveAttribute("aria-current", "page");
+  await expect(signIn).toHaveAttribute("data-variant", "default");
+  await expect(createAccount).toHaveAttribute("data-variant", "ghost");
+
+  await page.goto("/");
+  const customize = page.getByRole("link", { name: /Customize / }).first();
+  await expect(customize).toHaveAttribute("data-variant", "default");
+});
+
 test("customer sees an account-linked order across the personalized storefront and history", async ({
   page,
 }, testInfo) => {

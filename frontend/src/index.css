@@ -56,10 +56,15 @@
   --primary-foreground: #1c1c1c;
   --secondary: #302a3d;
   --secondary-foreground: #e6dff0;
+  --secondary-hover: #493763;
   --muted: #2e2e2e;
   --muted-foreground: #b3b3b3;
   --accent: #342b45;
   --accent-foreground: #eadfff;
+  --interactive-hover: #3d3548;
+  --interactive-selected: #493763;
+  --interactive-selected-foreground: #f3ecff;
+  --interactive-selected-border: #b596ff;
   --destructive: #ff6b70;
   --success: #1c3827;
   --success-foreground: #7ce59a;
@@ -235,7 +240,12 @@ h2 {
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
   --color-secondary: var(--secondary);
+  --color-interactive-selected-border: var(--interactive-selected-border);
+  --color-interactive-selected-foreground: var(--interactive-selected-foreground);
+  --color-interactive-selected: var(--interactive-selected);
+  --color-interactive-hover: var(--interactive-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-primary: var(--primary);

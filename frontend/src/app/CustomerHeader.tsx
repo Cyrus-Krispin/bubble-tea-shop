@@ -19,8 +19,8 @@ export function CustomerHeader({ itemCount: providedItemCount }: { itemCount?: n
         <span className="hidden min-w-0 sm:block"><strong className="block text-sm font-semibold sm:text-base">Bubble Tea Shop</strong><small className="text-xs text-muted-foreground">Fresh tea · made to order</small></span>
       </Link>
       <nav aria-label="Customer navigation" className="flex items-center gap-1">
-        <NavLink className={({ isActive }) => cn("inline-flex h-11 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground no-underline hover:bg-muted hover:text-foreground", isActive && "bg-accent text-accent-foreground")} end to="/">Menu</NavLink>
-        <NavLink className={({ isActive }) => cn("inline-flex h-11 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground no-underline hover:bg-muted hover:text-foreground", isActive && "bg-accent text-accent-foreground")} to={session === null ? "/account/access?mode=sign-in" : "/account"}>
+        <NavLink className={({ isActive }) => cn("inline-flex h-11 items-center rounded-lg border border-transparent px-3 text-sm font-medium text-muted-foreground no-underline hover:bg-interactive-hover hover:text-foreground", isActive && "border-interactive-selected-border bg-interactive-selected text-interactive-selected-foreground hover:bg-interactive-selected")} end to="/">Menu</NavLink>
+        <NavLink className={({ isActive }) => cn("inline-flex h-11 items-center rounded-lg border border-transparent px-3 text-sm font-medium text-muted-foreground no-underline hover:bg-interactive-hover hover:text-foreground", isActive && "border-interactive-selected-border bg-interactive-selected text-interactive-selected-foreground hover:bg-interactive-selected")} to={session === null ? "/account/access?mode=sign-in" : "/account"}>
           {session === null || isLoading ? "Sign in" : "Account"}
         </NavLink>
         <Button asChild className="ml-1">

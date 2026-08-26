@@ -32,7 +32,7 @@ export function LocationPicker({
               const current = location.id === selected.id;
               return (
                 <li key={location.id}>
-                  <Link className="flex min-h-16 items-center gap-3 rounded-lg px-2 text-foreground no-underline hover:bg-muted"
+                  <Link className={`flex min-h-16 items-center gap-3 rounded-lg border px-2 text-foreground no-underline hover:bg-interactive-hover ${current ? "border-interactive-selected-border bg-interactive-selected text-interactive-selected-foreground" : "border-transparent"}`}
                     aria-current={current ? "page" : undefined}
                     onClick={() => setOpen(false)}
                     to={`/shop/${location.slug}`}

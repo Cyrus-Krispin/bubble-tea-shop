@@ -53,8 +53,8 @@ export function AccountAccessPage() {
           </CardHeader>
           <CardContent className="grid gap-6">
           <nav aria-label="Account access options" className="grid grid-cols-2 gap-2 rounded-lg bg-muted p-1">
-            <Button asChild variant={mode === "sign-in" ? "secondary" : "ghost"}><Link aria-current={mode === "sign-in" ? "page" : undefined} to={accessHref("sign-in", next)}>Sign in</Link></Button>
-            <Button asChild variant={mode === "create" ? "secondary" : "ghost"}><Link aria-current={mode === "create" ? "page" : undefined} to={accessHref("create", next)}>Create account</Link></Button>
+            <Button asChild variant={mode === "sign-in" ? "default" : "ghost"}><Link aria-current={mode === "sign-in" ? "page" : undefined} className={mode === "sign-in" ? undefined : "text-muted-foreground"} to={accessHref("sign-in", next)}>Sign in</Link></Button>
+            <Button asChild variant={mode === "create" ? "default" : "ghost"}><Link aria-current={mode === "create" ? "page" : undefined} className={mode === "create" ? undefined : "text-muted-foreground"} to={accessHref("create", next)}>Create account</Link></Button>
           </nav>
           {mode === "create"
             ? <RegistrationForm onRegister={handleRegistration} />
