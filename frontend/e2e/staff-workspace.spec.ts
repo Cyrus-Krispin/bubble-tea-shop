@@ -30,7 +30,23 @@ test("owner can navigate the responsive dark staff workspace", async ({ page }, 
     await expect(navigation.getByRole("link", { name: "Audit" })).toBeVisible();
     await expect(navigation.getByRole("link", { name: "Team" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
-    await navigation.getByRole("link", { name: "Orders" }).click();
+    await catalogLink.click();
+  } else {
+    await page.getByRole("navigation", { name: "Staff navigation" }).getByRole("link", { name: "Catalog" }).click();
+  }
+
+  await expect(page).toHaveURL(/\/staff\/catalog\/ingredients$/);
+  await expect(page.getByRole("heading", { name: "Ingredients", exact: true })).toBeVisible();
+  const organizationPicker = page.getByRole("combobox", { name: "Organization" });
+  await expect(organizationPicker).toHaveAttribute("data-slot", "select-trigger");
+  await organizationPicker.click();
+  await expect(page.getByRole("option").first()).toHaveAttribute("data-slot", "select-item");
+  await expect(page.getByRole("option").first()).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  if (testInfo.project.name === "mobile-chromium") {
+    await page.getByRole("button", { name: "Open staff navigation" }).click();
+    await page.getByRole("navigation", { name: "Mobile staff navigation" }).getByRole("link", { name: "Orders" }).click();
   } else {
     await page.getByRole("navigation", { name: "Staff navigation" }).getByRole("link", { name: "Orders" }).click();
   }

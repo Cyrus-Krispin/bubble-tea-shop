@@ -4,9 +4,9 @@ import { useOutletContext } from "react-router";
 import {
   DataTable,
   Dialog,
-  Field,
   Pagination,
   ProblemState,
+  SelectField,
   type DataTableColumn,
 } from "../../components/shared";
 import { Button } from "../../components/ui/button";
@@ -282,69 +282,65 @@ export default function OrderOperationsPage() {
       </div>
 
       <section aria-label="Order scope and filters" className="order-toolbar">
-        <Field id="order-organization" label="Organization">
-          <select
-            onChange={(event) => {
-              const nextId = event.target.value;
-              const next = staffContext.memberships.find(
-                (item) => item.organizationId === nextId,
-              );
-              setOrganizationId(nextId);
-              setLocationId(next?.locations[0]?.id ?? "");
-              setPageNumber(0);
-              setPageState({ status: "loading" });
-              setSelectedOrderId(undefined);
-              setDetailState({ status: "idle" });
-            }}
-            value={organizationId}
-          >
-            {staffContext.memberships.map((item) => (
-              <option key={item.organizationId} value={item.organizationId}>
-                {item.organizationName}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field id="order-location" label="Location">
-          <select
-            disabled={membership?.locations.length === 0}
-            onChange={(event) => {
-              setLocationId(event.target.value);
-              setPageNumber(0);
-              setPageState({ status: "loading" });
-              setSelectedOrderId(undefined);
-              setDetailState({ status: "idle" });
-            }}
-            value={locationId}
-          >
-            {membership?.locations.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field id="order-status" label="Order status">
-          <select
-            onChange={(event) => {
-              setStatusFilter(
-                (event.target.value || undefined) as
-                  | StaffOrderStatus
-                  | undefined,
-              );
-              setPageNumber(0);
-              setPageState({ status: "loading" });
-              setSelectedOrderId(undefined);
-              setDetailState({ status: "idle" });
-            }}
-            value={statusFilter ?? ""}
-          >
-            <option value="PENDING">Pending</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
-            <option value="">All statuses</option>
-          </select>
-        </Field>
+        <SelectField
+          id="order-organization"
+          label="Organization"
+          onValueChange={(nextId) => {
+            const next = staffContext.memberships.find(
+              (item) => item.organizationId === nextId,
+            );
+            setOrganizationId(nextId);
+            setLocationId(next?.locations[0]?.id ?? "");
+            setPageNumber(0);
+            setPageState({ status: "loading" });
+            setSelectedOrderId(undefined);
+            setDetailState({ status: "idle" });
+          }}
+          options={staffContext.memberships.map((item) => ({
+            label: item.organizationName,
+            value: item.organizationId,
+          }))}
+          value={organizationId}
+        />
+        <SelectField
+          disabled={membership?.locations.length === 0}
+          id="order-location"
+          label="Location"
+          onValueChange={(nextLocationId) => {
+            setLocationId(nextLocationId);
+            setPageNumber(0);
+            setPageState({ status: "loading" });
+            setSelectedOrderId(undefined);
+            setDetailState({ status: "idle" });
+          }}
+          options={(membership?.locations ?? []).map((item) => ({
+            label: item.name,
+            value: item.id,
+          }))}
+          value={locationId}
+        />
+        <SelectField
+          emptyLabel="All statuses"
+          id="order-status"
+          label="Order status"
+          onValueChange={(nextStatus) => {
+            setStatusFilter(
+              (nextStatus || undefined) as
+                | StaffOrderStatus
+                | undefined,
+            );
+            setPageNumber(0);
+            setPageState({ status: "loading" });
+            setSelectedOrderId(undefined);
+            setDetailState({ status: "idle" });
+          }}
+          options={[
+            { label: "Pending", value: "PENDING" },
+            { label: "Completed", value: "COMPLETED" },
+            { label: "Cancelled", value: "CANCELLED" },
+          ]}
+          value={statusFilter ?? ""}
+        />
         {location === undefined ? null : (
           <p className="inventory-location-meta">
             {location.currencyCode} · {location.timezone}

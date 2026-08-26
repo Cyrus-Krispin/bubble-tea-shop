@@ -3,9 +3,9 @@ import { useOutletContext } from "react-router";
 
 import {
   DataTable,
-  Field,
   Pagination,
   ProblemState,
+  SelectField,
   type DataTableColumn,
 } from "../../components/shared";
 import { Button } from "../../components/ui/button";
@@ -128,38 +128,37 @@ export default function AuditPage() {
       </div>
 
       <section aria-label="Audit scope and filters" className="audit-toolbar">
-        <Field id="audit-organization" label="Organization">
-          <select
-            onChange={(event) => {
-              setOrganizationId(event.target.value);
-              setPageNumber(0);
-              setPageState({ status: "loading" });
-            }}
-            value={organizationId}
-          >
-            {staffContext.memberships.map((membership) => (
-              <option key={membership.organizationId} value={membership.organizationId}>
-                {membership.organizationName}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field id="audit-category" label="Category">
-          <select
-            onChange={(event) => {
-              setCategoryFilter((event.target.value || undefined) as AuditCategory | undefined);
-              setPageNumber(0);
-              setPageState({ status: "loading" });
-            }}
-            value={categoryFilter ?? ""}
-          >
-            <option value="">All activity</option>
-            <option value="CATALOG">Catalog</option>
-            <option value="INVENTORY">Inventory</option>
-            <option value="ORDER">Orders</option>
-            <option value="STAFF">Staff access</option>
-          </select>
-        </Field>
+        <SelectField
+          id="audit-organization"
+          label="Organization"
+          onValueChange={(nextOrganizationId) => {
+            setOrganizationId(nextOrganizationId);
+            setPageNumber(0);
+            setPageState({ status: "loading" });
+          }}
+          options={staffContext.memberships.map((membership) => ({
+            label: membership.organizationName,
+            value: membership.organizationId,
+          }))}
+          value={organizationId}
+        />
+        <SelectField
+          emptyLabel="All activity"
+          id="audit-category"
+          label="Category"
+          onValueChange={(nextCategory) => {
+            setCategoryFilter((nextCategory || undefined) as AuditCategory | undefined);
+            setPageNumber(0);
+            setPageState({ status: "loading" });
+          }}
+          options={[
+            { label: "Catalog", value: "CATALOG" },
+            { label: "Inventory", value: "INVENTORY" },
+            { label: "Orders", value: "ORDER" },
+            { label: "Staff access", value: "STAFF" },
+          ]}
+          value={categoryFilter ?? ""}
+        />
         <Button
           onClick={() => {
             setPageState({ status: "loading" });

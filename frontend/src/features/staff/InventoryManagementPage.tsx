@@ -7,6 +7,7 @@ import {
   Field,
   Pagination,
   ProblemState,
+  SelectField,
   type DataTableColumn,
 } from "../../components/shared";
 import { Button } from "../../components/ui/button";
@@ -219,22 +220,23 @@ function MovementDialog({
       }
     >
       <form className="inventory-movement-form" onSubmit={submit}>
-        <Field id={`${prefix}-type`} label="Movement type">
-          <select
-            onChange={(event) => {
-              const next = event.target.value as ManualInventoryMovementType;
-              setMovementType(next);
-              if (next !== "RECEIPT") setTotalCostMinor("");
-            }}
-            value={movementType}
-          >
-            {!balance.openingRecorded ? (
-              <option value="OPENING">Opening stock</option>
-            ) : null}
-            <option value="RECEIPT">Receipt</option>
-            <option value="ADJUSTMENT">Adjustment</option>
-          </select>
-        </Field>
+        <SelectField
+          id={`${prefix}-type`}
+          label="Movement type"
+          onValueChange={(nextValue) => {
+            const next = nextValue as ManualInventoryMovementType;
+            setMovementType(next);
+            if (next !== "RECEIPT") setTotalCostMinor("");
+          }}
+          options={[
+            ...(!balance.openingRecorded
+              ? [{ label: "Opening stock", value: "OPENING" }]
+              : []),
+            { label: "Receipt", value: "RECEIPT" },
+            { label: "Adjustment", value: "ADJUSTMENT" },
+          ]}
+          value={movementType}
+        />
         <Field
           description={
             movementType === "ADJUSTMENT"
@@ -550,50 +552,45 @@ export default function InventoryManagementPage() {
         </div>
       </div>
       <section aria-label="Inventory scope" className="inventory-scope">
-        <Field id="inventory-organization" label="Organization">
-          <select
-            onChange={(event) => {
-              const nextOrganizationId = event.target.value;
-              const nextMembership = staffContext.memberships.find(
-                (item) => item.organizationId === nextOrganizationId,
-              );
-              setOrganizationId(nextOrganizationId);
-              setLocationId(nextMembership?.locations[0]?.id ?? "");
-              setBalancePage(0);
-              setMovementPage(0);
-              setMovementIngredientId(undefined);
-              setBalanceState({ status: "loading" });
-              setMovementState({ status: "loading" });
-            }}
-            value={organizationId}
-          >
-            {staffContext.memberships.map((item) => (
-              <option key={item.organizationId} value={item.organizationId}>
-                {item.organizationName}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field id="inventory-location" label="Location">
-          <select
-            disabled={membership?.locations.length === 0}
-            onChange={(event) => {
-              setLocationId(event.target.value);
-              setBalancePage(0);
-              setMovementPage(0);
-              setMovementIngredientId(undefined);
-              setBalanceState({ status: "loading" });
-              setMovementState({ status: "loading" });
-            }}
-            value={locationId}
-          >
-            {membership?.locations.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <SelectField
+          id="inventory-organization"
+          label="Organization"
+          onValueChange={(nextOrganizationId) => {
+            const nextMembership = staffContext.memberships.find(
+              (item) => item.organizationId === nextOrganizationId,
+            );
+            setOrganizationId(nextOrganizationId);
+            setLocationId(nextMembership?.locations[0]?.id ?? "");
+            setBalancePage(0);
+            setMovementPage(0);
+            setMovementIngredientId(undefined);
+            setBalanceState({ status: "loading" });
+            setMovementState({ status: "loading" });
+          }}
+          options={staffContext.memberships.map((item) => ({
+            label: item.organizationName,
+            value: item.organizationId,
+          }))}
+          value={organizationId}
+        />
+        <SelectField
+          disabled={membership?.locations.length === 0}
+          id="inventory-location"
+          label="Location"
+          onValueChange={(nextLocationId) => {
+            setLocationId(nextLocationId);
+            setBalancePage(0);
+            setMovementPage(0);
+            setMovementIngredientId(undefined);
+            setBalanceState({ status: "loading" });
+            setMovementState({ status: "loading" });
+          }}
+          options={(membership?.locations ?? []).map((item) => ({
+            label: item.name,
+            value: item.id,
+          }))}
+          value={locationId}
+        />
         {location === undefined ? null : (
           <p className="inventory-location-meta">
             {location.currencyCode} · {location.timezone}
@@ -695,42 +692,41 @@ export default function InventoryManagementPage() {
               </p>
             </div>
             <div className="inventory-filters">
-              <Field id="movement-ingredient" label="Ingredient">
-                <select
-                  onChange={(event) => {
-                    setMovementIngredientId(event.target.value || undefined);
-                    setMovementPage(0);
-                  }}
-                  value={movementIngredientId ?? ""}
-                >
-                  <option value="">All ingredients</option>
-                  {balances.map((row) => (
-                    <option key={row.ingredientId} value={row.ingredientId}>
-                      {row.ingredientName}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field id="movement-type" label="Movement type">
-                <select
-                  onChange={(event) => {
-                    setMovementType(
-                      (event.target.value || undefined) as
-                        | InventoryMovementType
-                        | undefined,
-                    );
-                    setMovementPage(0);
-                  }}
-                  value={movementType ?? ""}
-                >
-                  <option value="">All movement types</option>
-                  <option value="OPENING">Opening stock</option>
-                  <option value="RECEIPT">Receipt</option>
-                  <option value="SALE">Sale</option>
-                  <option value="REVERSAL">Reversal</option>
-                  <option value="ADJUSTMENT">Adjustment</option>
-                </select>
-              </Field>
+              <SelectField
+                emptyLabel="All ingredients"
+                id="movement-ingredient"
+                label="Ingredient"
+                onValueChange={(nextIngredientId) => {
+                  setMovementIngredientId(nextIngredientId || undefined);
+                  setMovementPage(0);
+                }}
+                options={balances.map((row) => ({
+                  label: row.ingredientName,
+                  value: row.ingredientId,
+                }))}
+                value={movementIngredientId ?? ""}
+              />
+              <SelectField
+                emptyLabel="All movement types"
+                id="movement-type"
+                label="Movement type"
+                onValueChange={(nextMovementType) => {
+                  setMovementType(
+                    (nextMovementType || undefined) as
+                      | InventoryMovementType
+                      | undefined,
+                  );
+                  setMovementPage(0);
+                }}
+                options={[
+                  { label: "Opening stock", value: "OPENING" },
+                  { label: "Receipt", value: "RECEIPT" },
+                  { label: "Sale", value: "SALE" },
+                  { label: "Reversal", value: "REVERSAL" },
+                  { label: "Adjustment", value: "ADJUSTMENT" },
+                ]}
+                value={movementType ?? ""}
+              />
             </div>
             {movementState.status === "loading" ? (
               <p role="status">Loading movement history…</p>

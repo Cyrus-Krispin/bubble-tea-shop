@@ -3,6 +3,7 @@ import { MemoryRouter, Outlet, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { expectNoAccessibilityViolations } from "../../test/accessibility";
+import { selectOption } from "../../test/selectOption";
 vi.mock("./auditClient", () => ({ listAuditEvents: vi.fn() }));
 
 import AuditPage from "./AuditPage";
@@ -99,7 +100,7 @@ describe("AuditPage", () => {
   it("reloads from page one when the category changes and supports retry", async () => {
     renderPage();
     await screen.findByText("Moonlit Milk Tea");
-    fireEvent.change(screen.getByLabelText("Category"), { target: { value: "ORDER" } });
+    await selectOption(screen.getByLabelText("Category"), "Orders");
 
     await waitFor(() => expect(listAuditEvents).toHaveBeenLastCalledWith(
       "staff-token",

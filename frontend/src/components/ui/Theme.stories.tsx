@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from "./checkbox";
 import { Input } from "./input";
 import { Label } from "./label";
-import { NativeSelect, NativeSelectOption } from "./native-select";
 import { RadioGroup, RadioGroupItem } from "./radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 import { Separator } from "./separator";
 import { Skeleton } from "./skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
@@ -80,10 +80,15 @@ export const Complete: Story = {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="theme-location">Pickup location</Label>
-              <NativeSelect className="w-full" id="theme-location">
-                <NativeSelectOption>Orchard Central</NativeSelectOption>
-                <NativeSelectOption>Tiong Bahru</NativeSelectOption>
-              </NativeSelect>
+              <Select defaultValue="orchard">
+                <SelectTrigger className="h-11 w-full" id="theme-location">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="orchard">Orchard Central</SelectItem>
+                  <SelectItem value="tiong-bahru">Tiong Bahru</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Textarea aria-label="Order note" placeholder="Order note" />
             <div className="flex flex-wrap gap-5">

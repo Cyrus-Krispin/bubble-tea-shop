@@ -1,7 +1,7 @@
 import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useOutletContext, useParams, useSearchParams } from "react-router";
 
-import { Dialog, Field, ProblemState } from "../../components/shared";
+import { Dialog, Field, ProblemState, SelectField } from "../../components/shared";
 import { Button } from "../../components/ui/button";
 import { ConfirmDialog } from "../../components/shared/ConfirmDialog";
 import { CatalogSectionNav } from "./CatalogSectionNav";
@@ -232,32 +232,33 @@ function FormulaDialog({
             <p className="staff-muted">This draft is empty. Add an ingredient to begin.</p>
           ) : rows.map((row, index) => (
             <div className="formula-row" key={row.key}>
-              <Field id={`formula-ingredient-${row.key}`} label={`Ingredient ${index + 1}`}>
-                <select onChange={(event) => setRows((current) => current.map((item) => (
-                  item.key === row.key ? { ...item, ingredientId: event.target.value } : item
-                )))} required value={row.ingredientId}>
-                  <option value="">Choose ingredient</option>
-                  {ingredients.map((ingredient) => (
-                    <option
-                      disabled={rows.some((item) => item.key !== row.key
-                        && item.ingredientId === ingredient.id)}
-                      key={ingredient.id}
-                      value={ingredient.id}
-                    >
-                      {ingredient.name} · {ingredient.baseUnit.toLowerCase()}
-                    </option>
-                  ))}
-                  {row.ingredientId === "" || ingredients.some((ingredient) => (
+              <SelectField
+                emptyLabel="Choose ingredient"
+                id={`formula-ingredient-${row.key}`}
+                label={`Ingredient ${index + 1}`}
+                onValueChange={(ingredientId) => setRows((current) => current.map((item) => (
+                  item.key === row.key ? { ...item, ingredientId } : item
+                )))}
+                options={[
+                  ...ingredients.map((ingredient) => ({
+                    disabled: rows.some((item) => item.key !== row.key
+                      && item.ingredientId === ingredient.id),
+                    label: `${ingredient.name} · ${ingredient.baseUnit.toLowerCase()}`,
+                    value: ingredient.id,
+                  })),
+                  ...(row.ingredientId === "" || ingredients.some((ingredient) => (
                     ingredient.id === row.ingredientId
-                  )) ? null : (
-                    <option disabled value={row.ingredientId}>
-                      {draft.components.find((component) => (
-                        component.ingredientId === row.ingredientId
-                      ))?.ingredientName ?? "Unavailable ingredient"} · unavailable
-                    </option>
-                  )}
-                </select>
-              </Field>
+                  )) ? [] : [{
+                    disabled: true,
+                    label: `${draft.components.find((component) => (
+                      component.ingredientId === row.ingredientId
+                    ))?.ingredientName ?? "Unavailable ingredient"} · unavailable`,
+                    value: row.ingredientId,
+                  }]),
+                ]}
+                required
+                value={row.ingredientId}
+              />
               <Field id={`formula-quantity-${row.key}`} label={`Quantity ${index + 1}`}>
                 <input inputMode="decimal" onChange={(event) => setRows((current) => current.map((item) => (
                   item.key === row.key ? { ...item, quantity: event.target.value } : item

@@ -7,6 +7,7 @@ import {
   Field,
   Pagination,
   ProblemState,
+  SelectField,
   type DataTableColumn,
 } from "../../components/shared";
 import { Button } from "../../components/ui/button";
@@ -195,18 +196,19 @@ export default function RecipeManagementPage() {
       </div>
 
       <section aria-label="Recipe filters" className="ingredient-toolbar">
-        <Field id="recipe-organization" label="Organization">
-          <select value={organizationId} onChange={(event) => {
-            setOrganizationId(event.target.value);
+        <SelectField
+          id="recipe-organization"
+          label="Organization"
+          onValueChange={(nextOrganizationId) => {
+            setOrganizationId(nextOrganizationId);
             setPage(0);
-          }}>
-            {staffContext.memberships.map((membership) => (
-              <option key={membership.organizationId} value={membership.organizationId}>
-                {membership.organizationName}
-              </option>
-            ))}
-          </select>
-        </Field>
+          }}
+          options={staffContext.memberships.map((membership) => ({
+            label: membership.organizationName,
+            value: membership.organizationId,
+          }))}
+          value={organizationId}
+        />
         <form className="ingredient-search" onSubmit={(event) => {
           event.preventDefault();
           setQuery(queryInput.trim() || undefined);

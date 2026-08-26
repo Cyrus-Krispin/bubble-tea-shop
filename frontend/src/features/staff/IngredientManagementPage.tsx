@@ -7,6 +7,7 @@ import {
   Field,
   Pagination,
   ProblemState,
+  SelectField,
   type DataTableColumn,
 } from "../../components/shared";
 import { Button } from "../../components/ui/button";
@@ -159,13 +160,19 @@ function IngredientFormDialog({
         <Field id={`${prefix}-sku`} label="SKU" description="Optional. It will be saved in uppercase.">
           <input maxLength={80} onChange={(event) => setValues({ ...values, sku: event.target.value })} value={values.sku} />
         </Field>
-        <Field id={`${prefix}-unit`} label="Base unit" description={ingredient === undefined ? "This cannot be changed later." : "Base units are immutable after creation."}>
-          <select disabled={ingredient !== undefined} onChange={(event) => setValues({ ...values, baseUnit: event.target.value as BaseUnit })} value={values.baseUnit}>
-            <option value="GRAM">Grams</option>
-            <option value="MILLILITER">Milliliters</option>
-            <option value="EACH">Each</option>
-          </select>
-        </Field>
+        <SelectField
+          description={ingredient === undefined ? "This cannot be changed later." : "Base units are immutable after creation."}
+          disabled={ingredient !== undefined}
+          id={`${prefix}-unit`}
+          label="Base unit"
+          onValueChange={(baseUnit) => setValues({ ...values, baseUnit: baseUnit as BaseUnit })}
+          options={[
+            { label: "Grams", value: "GRAM" },
+            { label: "Milliliters", value: "MILLILITER" },
+            { label: "Each", value: "EACH" },
+          ]}
+          value={values.baseUnit}
+        />
         <Field error={thresholdError} id={`${prefix}-threshold`} label="Reorder threshold" description="Optional quantity with up to 6 decimal places.">
           <input inputMode="decimal" onChange={(event) => setValues({ ...values, reorderThreshold: event.target.value })} value={values.reorderThreshold} />
         </Field>
@@ -313,16 +320,19 @@ export default function IngredientManagementPage() {
       </div>
 
       <section aria-label="Ingredient filters" className="ingredient-toolbar">
-        <Field id="ingredient-organization" label="Organization">
-          <select value={organizationId} onChange={(event) => {
-            setOrganizationId(event.target.value);
+        <SelectField
+          id="ingredient-organization"
+          label="Organization"
+          onValueChange={(nextOrganizationId) => {
+            setOrganizationId(nextOrganizationId);
             setPage(0);
-          }}>
-            {staffContext.memberships.map((membership) => (
-              <option key={membership.organizationId} value={membership.organizationId}>{membership.organizationName}</option>
-            ))}
-          </select>
-        </Field>
+          }}
+          options={staffContext.memberships.map((membership) => ({
+            label: membership.organizationName,
+            value: membership.organizationId,
+          }))}
+          value={organizationId}
+        />
         <form className="ingredient-search" onSubmit={(event) => {
           event.preventDefault();
           setQuery(queryInput.trim() || undefined);

@@ -9,6 +9,7 @@ class TestResizeObserver implements ResizeObserver {
 }
 
 globalThis.ResizeObserver = TestResizeObserver;
+HTMLElement.prototype.scrollIntoView = () => {};
 
 afterEach(() => {
   cleanup();
