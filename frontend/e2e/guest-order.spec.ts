@@ -132,6 +132,19 @@ test("customer controls make selected and actionable states visually explicit", 
   await expect(customize).toHaveAttribute("data-variant", "default");
 });
 
+test("catalog artwork keeps a crop-safe landscape source ratio", async ({ page }) => {
+  await page.goto("/");
+  const artwork = page.locator(".drink-art");
+  await expect.poll(() => artwork.count()).toBeGreaterThanOrEqual(5);
+
+  for (let index = 0; index < await artwork.count(); index += 1) {
+    await expect.poll(() => artwork.nth(index).evaluate((image) => {
+      const productImage = image as HTMLImageElement;
+      return productImage.complete ? productImage.naturalWidth / productImage.naturalHeight : 0;
+    })).toBeCloseTo(4 / 3, 2);
+  }
+});
+
 test("customer sees an account-linked order across the personalized storefront and history", async ({
   page,
 }, testInfo) => {

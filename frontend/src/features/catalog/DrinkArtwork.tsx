@@ -16,10 +16,10 @@ export function DrinkArtwork({
       className={cn("drink-art", className)}
       decoding="async"
       fetchPriority={priority ? "high" : "auto"}
-      height="1125"
+      height="1086"
       loading={priority ? "eager" : "lazy"}
       src={`/assets/catalog/${drink.artworkKey}.webp`}
-      width="900"
+      width="1448"
     />
   );
 }
