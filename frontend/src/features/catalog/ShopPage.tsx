@@ -77,7 +77,7 @@ export function ShopPage() {
             <article className="min-w-0" key={drink.id}>
               <Card className={`group h-full gap-0 overflow-hidden py-0 transition-shadow duration-150 hover:ring-foreground/20${drink.available ? "" : " bg-muted/35"}`}>
                 <DrinkArtwork
-                  className={cn("aspect-[4/3] w-full object-cover object-[center_47%] xl:aspect-[16/9]", !drink.available && "grayscale")}
+                  className={cn("aspect-[4/3] w-full object-cover object-center xl:aspect-[16/9]", !drink.available && "grayscale")}
                   drink={drink}
                   priority={index < 4}
                 />

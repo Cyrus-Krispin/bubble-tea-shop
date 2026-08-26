@@ -136,6 +136,7 @@ test("catalog artwork keeps a crop-safe landscape source ratio", async ({ page }
   await page.goto("/");
   const artwork = page.locator(".drink-art");
   await expect.poll(() => artwork.count()).toBeGreaterThanOrEqual(5);
+  await expect(artwork.first()).toHaveAttribute("src", /\.webp\?v=2$/);
 
   for (let index = 0; index < await artwork.count(); index += 1) {
     await expect.poll(() => artwork.nth(index).evaluate((image) => {

@@ -120,7 +120,7 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
       <main className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(32rem,1.2fr)] lg:items-start">
         <section className="grid gap-4 lg:sticky lg:top-24" aria-labelledby="drink-name">
           <Button asChild className="w-fit" variant="ghost"><Link to={locationSlug === undefined ? "/shop" : `/shop/${locationSlug}`}>← Back to menu</Link></Button>
-          <DrinkArtwork className="max-h-[28rem] w-full rounded-xl border object-cover object-[center_47%]" drink={product} priority />
+          <DrinkArtwork className="max-h-[28rem] w-full rounded-xl border object-cover object-center" drink={product} priority />
           <Badge variant="secondary">{product.category}</Badge>
           <h1 className="text-3xl" id="drink-name">{product.name}</h1>
           <p className="leading-6 text-muted-foreground">{product.description}</p>
@@ -139,7 +139,7 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
                   ?? variant.price.amountMinor;
                 const delta = option.price.amountMinor - defaultPrice;
                 return (
-                  <Label className={cn("flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors hover:border-primary/70 hover:bg-interactive-hover has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60", !option.available && "cursor-not-allowed opacity-50")} htmlFor={`variant-${option.id}`} key={option.id}>
+                  <Label className={cn("flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60", option.available ? "hover:border-primary/70 hover:bg-interactive-hover" : "cursor-not-allowed opacity-50")} htmlFor={`variant-${option.id}`} key={option.id}>
                     <RadioGroupItem
                       aria-label={`${option.name} ${priceDeltaLabel(delta, option.price.currency)}`}
                       disabled={!option.available}
@@ -193,7 +193,7 @@ function OptionGroup({
           const selected = selectedIds.includes(choice.id);
           const limitReached = multiple && !selected && selectedIds.length >= group.maximumSelections;
           return (
-            <Label className={cn("grid min-h-14 cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors hover:border-primary/70 hover:bg-interactive-hover has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60", limitReached && "cursor-not-allowed opacity-50")} htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}>
+            <Label className={cn("grid min-h-14 cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60", limitReached ? "cursor-not-allowed opacity-50" : "hover:border-primary/70 hover:bg-interactive-hover")} htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}>
               <Checkbox
                 aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`}
                 checked={selected}

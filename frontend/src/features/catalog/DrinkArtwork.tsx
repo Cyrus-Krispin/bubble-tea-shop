@@ -18,7 +18,7 @@ export function DrinkArtwork({
       fetchPriority={priority ? "high" : "auto"}
       height="1086"
       loading={priority ? "eager" : "lazy"}
-      src={`/assets/catalog/${drink.artworkKey}.webp`}
+      src={`/assets/catalog/${drink.artworkKey}.webp?v=2`}
       width="1448"
     />
   );

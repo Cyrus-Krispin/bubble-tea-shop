@@ -34,7 +34,7 @@ describe("ShopPage", () => {
       "/shop/orchard-central/drinks/moonlit-milk-tea",
     );
     expect(screen.getByRole("img", { name: "Moonlit Milk Tea in a clear cup" }))
-      .toHaveAttribute("src", "/assets/catalog/moonlit-milk-tea.webp");
+      .toHaveAttribute("src", "/assets/catalog/moonlit-milk-tea.webp?v=2");
     for (const image of screen.getAllByRole("img", { name: /in a clear cup/ })) {
       expect(image).toHaveAttribute("loading", "eager");
       expect(image).toHaveAttribute("fetchpriority", "high");
