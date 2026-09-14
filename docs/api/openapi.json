@@ -3213,6 +3213,60 @@
         } ]
       }
     },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts" : {
+      "get" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "Summarize projected stock shortages",
+        "operationId" : "getInventoryAlerts",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Projected shortage summary",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InventoryAlertSummary"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/v1/staff/organizations/{organizationId}/audit-events" : {
       "get" : {
         "tags" : [ "Staff audit" ],
@@ -5428,6 +5482,29 @@
           "totalPages" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "InventoryAlertSummary" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InventoryForecast"
+            }
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "horizonDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "calculatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },

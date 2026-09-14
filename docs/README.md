@@ -66,6 +66,8 @@ The Flyway migration remains the executable source of truth for the database.
 
 - [Ingredient consumption forecast](specs/ingredient-consumption-forecast.md) — observed demand and days of remaining stock.
 
+- [Projected low-stock alerts](specs/projected-low-stock-alerts.md) — automatic in-app shortage warnings.
+
 ## Documentation rules
 
 1. Add an ADR when a decision is expensive to reverse or affects more than one module.

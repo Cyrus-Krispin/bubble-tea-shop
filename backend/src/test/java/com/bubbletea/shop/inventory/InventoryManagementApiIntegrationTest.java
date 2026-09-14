@@ -219,6 +219,17 @@ class InventoryManagementApiIntegrationTest {
             .andExpect(jsonPath("$.items[0].daysRemaining").value("5"))
             .andExpect(jsonPath("$.items[0].observedDays").value(30))
             .andExpect(jsonPath("$.items[0].status").value("ESTIMATED"));
+        mvc.perform(get("/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts",
+                owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalItems").value(1))
+            .andExpect(jsonPath("$.horizonDays").value(7))
+            .andExpect(jsonPath("$.items[0].ingredientId").value(tea.toString()));
+        record(owner, locationId, """
+            {"ingredientId":"%s","movementType":"RECEIPT","quantityDelta":"100"}
+            """.formatted(tea));
+        mvc.perform(get("/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts",
+                owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalItems").value(0));
         mvc.perform(get(path, owner.organizationId(), locationId).with(token(staff("MANAGER"))))
             .andExpect(status().isForbidden());
         mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)).param("size", "101"))

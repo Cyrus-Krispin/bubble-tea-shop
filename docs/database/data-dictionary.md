@@ -63,3 +63,9 @@ Movement types:
 - Time: `timestamptz` in UTC.
 - Archival: nullable `archived_at`; historical foreign keys remain valid.
 - Optimistic concurrency: non-negative `bigint` versions supplied by staff clients and incremented on mutation.
+
+## Derived inventory views
+
+Consumption forecasts and projected alerts combine `ingredient`, `location`, `inventory_balance`,
+`inventory_movement`, and completed `customer_order` records at read time. They add no persisted
+balances or alert-history tables; the UI refreshes current warnings once per minute while visible.

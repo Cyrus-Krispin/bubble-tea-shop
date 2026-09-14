@@ -78,3 +78,6 @@ race returns `409 INVENTORY_STATE_CONFLICT`; and a movement that would make stoc
 
 The [forecast specification](../specs/ingredient-consumption-forecast.md) defines the authorized
 `GET .../inventory/forecasts` projection and on-demand inventory forecast panel.
+
+The [alert specification](../specs/projected-low-stock-alerts.md) defines automatic in-app warnings
+from `GET .../inventory/alerts` for stock projected to exhaust within seven days.
