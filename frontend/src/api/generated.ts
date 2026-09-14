@@ -643,6 +643,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Summarize projected stock shortages */
+        readonly get: operations["getInventoryAlerts"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/audit-events": {
         readonly parameters: {
             readonly query?: never;
@@ -1498,6 +1515,15 @@ export interface components {
             readonly totalItems: number;
             /** Format: int64 */
             readonly totalPages: number;
+        };
+        readonly InventoryAlertSummary: {
+            readonly items: readonly components["schemas"]["InventoryForecast"][];
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int32 */
+            readonly horizonDays: number;
+            /** Format: date-time */
+            readonly calculatedAt: string;
         };
         readonly IngredientPage: {
             readonly items: readonly components["schemas"]["Ingredient"][];
@@ -3397,6 +3423,34 @@ export interface operations {
                 };
                 content: {
                     readonly "application/json": components["schemas"]["StaffInventoryBalancePage"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly getInventoryAlerts: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Projected shortage summary */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["InventoryAlertSummary"];
                 };
             };
             readonly 400: components["responses"]["Problem"];

@@ -61,6 +61,17 @@ public class InventoryManagementController {
         this.forecasts = forecasts;
     }
 
+    @GetMapping("/alerts")
+    @Operation(operationId = "getInventoryAlerts", summary = "Summarize projected stock shortages",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "Projected shortage summary",
+        content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = InventoryForecastService.AlertSummary.class)))
+    InventoryForecastService.AlertSummary alerts(@AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID organizationId, @PathVariable UUID locationId) {
+        return forecasts.alerts(authSubject(jwt), organizationId, locationId);
+    }
+
     @GetMapping("/forecasts")
     @Operation(operationId = "listInventoryForecasts", summary = "Estimate ingredient consumption and remaining stock",
         security = @SecurityRequirement(name = "bearerAuth"))

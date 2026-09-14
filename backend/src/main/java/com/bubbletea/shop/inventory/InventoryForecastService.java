@@ -16,22 +16,10 @@ import java.util.UUID;
 
 @Service
 public class InventoryForecastService {
-    private final JdbcClient jdbc;
-    private final InventoryStaffAccessService access;
+    private static final int ALERT_HORIZON_DAYS = 7;
+    private static final String ROWS = """
+        WITH forecast_rows AS (
 
-    InventoryForecastService(JdbcClient jdbc, InventoryStaffAccessService access) {
-        this.jdbc = jdbc;
-        this.access = access;
-    }
-
-    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
-    public ForecastPage forecasts(UUID subject, UUID organizationId, UUID locationId, int page, int size) {
-        if (page < 0 || size < 1 || size > 100) throw new InvalidInventoryException();
-        access.authorize(subject, organizationId, locationId);
-        Instant asOf = jdbc.sql("SELECT now()").query(Timestamp.class).single().toInstant();
-        long total = jdbc.sql("SELECT count(*) FROM ingredient WHERE organization_id = :org AND archived_at IS NULL")
-            .param("org", organizationId).query(Long.class).single();
-        List<Forecast> items = jdbc.sql("""
             WITH observed AS (
                 SELECT i.id, i.name, i.base_unit, i.reorder_threshold,
                        coalesce(b.quantity, 0) AS quantity, l.timezone,
@@ -42,7 +30,6 @@ public class InventoryForecastService {
                   JOIN location l ON l.organization_id = i.organization_id AND l.id = :loc
                   LEFT JOIN inventory_balance b ON b.location_id = l.id AND b.ingredient_id = i.id
                  WHERE i.organization_id = :org AND i.archived_at IS NULL
-                 ORDER BY lower(i.name), i.id LIMIT :size OFFSET :offset
             )
             SELECT observed.*, greatest(0, end_day - start_day) AS observed_days,
                    coalesce(sales.consumed, 0) AS consumed
@@ -56,8 +43,38 @@ public class InventoryForecastService {
                      AND m.created_at >= (observed.start_day::timestamp AT TIME ZONE observed.timezone)
                      AND m.created_at < (observed.end_day::timestamp AT TIME ZONE observed.timezone)
               ) sales ON true
-             ORDER BY lower(observed.name), observed.id
-            """).param("org", organizationId).param("loc", locationId)
+        )
+        """;
+    private final JdbcClient jdbc;
+    private final InventoryStaffAccessService access;
+
+    InventoryForecastService(JdbcClient jdbc, InventoryStaffAccessService access) {
+        this.jdbc = jdbc;
+        this.access = access;
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public ForecastPage forecasts(UUID subject, UUID organizationId, UUID locationId, int page, int size) {
+        return load(subject, organizationId, locationId, page, size, false);
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public AlertSummary alerts(UUID subject, UUID organizationId, UUID locationId) {
+        ForecastPage page = load(subject, organizationId, locationId, 0, 5, true);
+        return new AlertSummary(page.items(), page.totalItems(), ALERT_HORIZON_DAYS, page.calculatedAt());
+    }
+
+    private ForecastPage load(UUID subject, UUID organizationId, UUID locationId, int page, int size, boolean alerts) {
+        if (page < 0 || size < 1 || size > 100) throw new InvalidInventoryException();
+        access.authorize(subject, organizationId, locationId);
+        Instant asOf = jdbc.sql("SELECT now()").query(Timestamp.class).single().toInstant();
+        String filter = alerts ? " WHERE quantity = 0 OR (observed_days > 0 AND consumed > 0 AND quantity * observed_days <= consumed * :horizon)" : " WHERE :horizon > 0";
+        long total = jdbc.sql(ROWS + " SELECT count(*) FROM forecast_rows" + filter)
+            .param("org", organizationId).param("loc", locationId).param("horizon", ALERT_HORIZON_DAYS)
+            .query(Long.class).single();
+        List<Forecast> items = jdbc.sql(ROWS + " SELECT * FROM forecast_rows" + filter
+            + " ORDER BY CASE WHEN quantity = 0 THEN 0 ELSE 1 END, quantity * observed_days / nullif(consumed, 0), lower(name), id LIMIT :size OFFSET :offset")
+            .param("org", organizationId).param("loc", locationId).param("horizon", ALERT_HORIZON_DAYS)
             .param("size", size).param("offset", (long) page * size)
             .query((rs, row) -> calculate(rs.getObject("id", UUID.class), rs.getString("name"),
                 BaseUnit.valueOf(rs.getString("base_unit")), rs.getBigDecimal("quantity"),
@@ -89,6 +106,9 @@ public class InventoryForecastService {
                            @Schema(nullable = true) String dailyConsumption,
                            @Schema(nullable = true) String daysRemaining,
                            int observedDays, String status) { }
+
+    @Schema(name = "InventoryAlertSummary")
+    public record AlertSummary(List<Forecast> items, long totalItems, int horizonDays, Instant calculatedAt) { }
 
     @Schema(name = "InventoryForecastPage")
     public record ForecastPage(List<Forecast> items, int page, int size, long totalItems,

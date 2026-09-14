@@ -89,3 +89,6 @@ erDiagram
     CUSTOMER_ORDER ||--|| PAYMENT : paid_by
     CUSTOMER_ORDER o|--o{ INVENTORY_MOVEMENT : causes
 ```
+
+Inventory consumption forecasts and projected alerts are derived reads over the existing inventory,
+location, ingredient, and order relationships above; they introduce no new stored entities.

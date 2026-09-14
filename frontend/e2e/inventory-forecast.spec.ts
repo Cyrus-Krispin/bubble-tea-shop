@@ -9,7 +9,11 @@ test("manager reads scoped inventory forecasts", async ({ page }, testInfo) => {
   await page.getByLabel("Password", { exact: true }).fill("Manager@1234");
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { name: "Operations overview" })).toBeVisible();
+  const alertsResponse = page.waitForResponse((res) => res.url().includes("/inventory/alerts") && res.status() === 200);
   await page.goto("/staff/inventory");
+  const alerts = await (await alertsResponse).json();
+  expect(alerts.horizonDays).toBe(7);
+  await expect(page.getByText(alerts.totalItems === 0 ? /No projected shortages within 7 days/ : /may run out within 7 days/)).toBeVisible();
   const response = page.waitForResponse((res) => res.url().includes("/inventory/forecasts") && res.status() === 200);
   await page.getByRole("button", { name: "Show consumption forecasts" }).click();
   const payload = await (await response).json();

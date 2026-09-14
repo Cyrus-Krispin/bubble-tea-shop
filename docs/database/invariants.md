@@ -127,3 +127,12 @@
   reads; it changes no domain relationship or lifecycle.
 - V15 gives Orchard Central and Tiong Bahru distinct product assortments and adds auditable opening
   balances for the local catalog ingredients at both seeded locations.
+
+## Inventory forecasting and alerts
+
+- Forecasts and projected alerts are read-only projections of active ingredients, balances, and
+  completed-order SALE movements. They do not reserve, deduct, or promise stock.
+- Rate windows use complete location-calendar days and include zero-sale days; quantities remain
+  in the immutable ingredient base unit. Current stock and consumption use one repeatable-read snapshot.
+- Alert filtering precedes pagination; the total covers all qualifying ingredients in the authorized
+  location, including zero balances. The initial warning horizon is seven days.

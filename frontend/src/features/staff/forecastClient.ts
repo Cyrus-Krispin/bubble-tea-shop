@@ -14,8 +14,13 @@ export async function getForecasts(token: string, organizationId: string, locati
   );
   if (!data || !Array.isArray(data.items) || !Number.isSafeInteger(data.totalPages)
     || data.totalPages < 0 || !Number.isFinite(Date.parse(data.calculatedAt))) throw new Error("Invalid forecast response");
+  validateForecasts(data.items);
+  return { ...data, items: data.items.map((item) => ({ ...item })) };
+}
+
+function validateForecasts(items: readonly Forecast[]) {
   const decimal = (value: unknown) => typeof value === "string" && /^\d+(\.\d+)?$/.test(value);
-  for (const item of data.items) {
+  for (const item of items) {
     if (typeof item.ingredientId !== "string" || typeof item.ingredientName !== "string"
       || !["GRAM", "MILLILITER", "EACH"].includes(item.baseUnit) || !decimal(item.quantity)
       || (item.dailyConsumption !== null && !decimal(item.dailyConsumption))
@@ -26,5 +31,19 @@ export async function getForecasts(token: string, organizationId: string, locati
       throw new Error("Invalid forecast response");
     }
   }
+}
+
+export async function getInventoryAlerts(token: string, organizationId: string, locationId: string,
+  signal?: AbortSignal): Promise<components["schemas"]["InventoryAlertSummary"]> {
+  const client = createClient<paths>({ baseUrl: window.location.origin,
+    headers: { Authorization: `Bearer ${token}` } });
+  const { data } = await client.GET(
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts",
+    { params: { path: { organizationId, locationId } }, signal },
+  );
+  if (!data || !Array.isArray(data.items) || !Number.isSafeInteger(data.totalItems) || data.totalItems < 0
+    || !Number.isInteger(data.horizonDays) || data.horizonDays < 1
+    || !Number.isFinite(Date.parse(data.calculatedAt))) throw new Error("Invalid alerts");
+  validateForecasts(data.items);
   return { ...data, items: data.items.map((item) => ({ ...item })) };
 }
