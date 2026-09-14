@@ -609,6 +609,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/reorder": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** List ingredients needing reorder */
+        readonly get: operations["listInventoryReorderCandidates"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts": {
         readonly parameters: {
             readonly query?: never;
@@ -1450,17 +1467,6 @@ export interface components {
             /** Format: date-time */
             readonly completedAt: string | null;
         };
-        readonly StaffInventoryMovementPage: {
-            readonly items: readonly components["schemas"]["StaffInventoryMovement"][];
-            /** Format: int32 */
-            readonly page: number;
-            /** Format: int32 */
-            readonly size: number;
-            /** Format: int64 */
-            readonly totalItems: number;
-            /** Format: int64 */
-            readonly totalPages: number;
-        };
         readonly InventoryForecast: {
             /** Format: uuid */
             readonly ingredientId: string;
@@ -1474,6 +1480,7 @@ export interface components {
             /** Format: int32 */
             readonly observedDays: number;
             readonly status: string;
+            readonly reorderReason: string;
         };
         readonly InventoryForecastPage: {
             readonly items: readonly components["schemas"]["InventoryForecast"][];
@@ -1487,6 +1494,17 @@ export interface components {
             readonly totalPages: number;
             /** Format: date-time */
             readonly calculatedAt: string;
+        };
+        readonly StaffInventoryMovementPage: {
+            readonly items: readonly components["schemas"]["StaffInventoryMovement"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int64 */
+            readonly totalPages: number;
         };
         readonly StaffInventoryBalance: {
             /** Format: uuid */
@@ -3359,6 +3377,37 @@ export interface operations {
                 };
                 content: {
                     readonly "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly listInventoryReorderCandidates: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Prioritized reorder page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["InventoryForecastPage"];
                 };
             };
             readonly 400: components["responses"]["Problem"];

@@ -136,3 +136,6 @@
   in the immutable ingredient base unit. Current stock and consumption use one repeatable-read snapshot.
 - Alert filtering precedes pagination; the total covers all qualifying ingredients in the authorized
   location, including zero balances. The initial warning horizon is seven days.
+
+- Reorder candidates additionally include ingredients at or below their configured threshold, even
+  when consumption is unknown. Server filtering and count share the same snapshot as the rows.

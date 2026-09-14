@@ -61,6 +61,19 @@ public class InventoryManagementController {
         this.forecasts = forecasts;
     }
 
+    @GetMapping("/reorder")
+    @Operation(operationId = "listInventoryReorderCandidates", summary = "List ingredients needing reorder",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "Prioritized reorder page",
+        content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = InventoryForecastService.ForecastPage.class)))
+    InventoryForecastService.ForecastPage reorder(@AuthenticationPrincipal Jwt jwt,
+        @PathVariable UUID organizationId, @PathVariable UUID locationId,
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "25") @Min(1) @Max(100) int size) {
+        return forecasts.reorder(authSubject(jwt), organizationId, locationId, page, size);
+    }
+
     @GetMapping("/alerts")
     @Operation(operationId = "getInventoryAlerts", summary = "Summarize projected stock shortages",
         security = @SecurityRequirement(name = "bearerAuth"))

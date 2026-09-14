@@ -252,6 +252,31 @@ class InventoryManagementApiIntegrationTest {
             .andExpect(jsonPath("$.items[0].daysRemaining").isEmpty());
     }
 
+    @Test
+    void filtersReorderCandidatesBeforePaginationAndIncludesThresholdOnlyStock() throws Exception {
+        Staff owner = staff("OWNER");
+        UUID locationId = location(owner.organizationId(), "Reorder", "SGD");
+        UUID safe = ingredient(owner.organizationId(), "Alpha Safe", null, "GRAM", "5");
+        UUID low = ingredient(owner.organizationId(), "Beta Low", null, "GRAM", "100");
+        ingredient(owner.organizationId(), "Gamma Empty", null, "GRAM", null);
+        for (UUID id : new UUID[]{safe, low}) {
+            record(owner, locationId, """
+                {"ingredientId":"%s","movementType":"OPENING","quantityDelta":"50"}
+                """.formatted(id));
+        }
+        String path = "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/reorder";
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)).param("size", "1"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalItems").value(2))
+            .andExpect(jsonPath("$.totalPages").value(2))
+            .andExpect(jsonPath("$.items[0].ingredientName").value("Gamma Empty"));
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)).param("size", "1").param("page", "1"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].ingredientName").value("Beta Low"))
+            .andExpect(jsonPath("$.items[0].reorderReason").value("THRESHOLD"))
+            .andExpect(jsonPath("$.items[0].daysRemaining").isEmpty());
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(staff("MANAGER"))))
+            .andExpect(status().isForbidden());
+    }
+
     private JsonNode record(Staff staff, UUID locationId, String body) throws Exception {
         MvcResult result = mvc.perform(post(movementPath(), staff.organizationId(), locationId)
                 .with(token(staff)).contentType("application/json").content(body))

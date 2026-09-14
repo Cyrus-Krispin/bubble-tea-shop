@@ -609,6 +609,7 @@ export default function InventoryManagementPage() {
         <div className="inventory-workspace">
           <InventoryAlerts accessToken={accessToken} organizationId={organizationId} locationId={locationId} key={`alerts:${locationId}:${reloadVersion}`} />
           <InventoryForecastPanel accessToken={accessToken} organizationId={organizationId} locationId={locationId} key={`${locationId}:${reloadVersion}`} />
+          <InventoryForecastPanel accessToken={accessToken} organizationId={organizationId} locationId={locationId} mode="reorder" key={`reorder:${locationId}:${reloadVersion}`} />
           <section
             aria-labelledby="inventory-balances-title"
             className="inventory-panel"

@@ -7,7 +7,7 @@ afterEach(() => vi.unstubAllGlobals());
 it("loads real forecast results on request and labels limited history", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
     items: [{ ingredientId: "tea", ingredientName: "Tea", baseUnit: "GRAM", quantity: "50",
-      dailyConsumption: "10", daysRemaining: "5", observedDays: 7, status: "ESTIMATED", reorderThreshold: null }],
+      dailyConsumption: "10", daysRemaining: "5", observedDays: 7, status: "ESTIMATED", reorderThreshold: null, reorderReason: "PROJECTED" }],
     page: 0, size: 25, totalItems: 1, totalPages: 1, calculatedAt: "2026-09-15T00:00:00Z",
   }), { headers: { "Content-Type": "application/json" } })));
   render(<InventoryForecastPanel accessToken="test-token" organizationId="org" locationId="loc" />);
@@ -24,4 +24,17 @@ it("shows an actionable error for unavailable or malformed forecasts", async () 
   fireEvent.click(screen.getByRole("button", { name: "Show consumption forecasts" }));
   expect(await screen.findByText("Forecasts unavailable")).toBeVisible();
   expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
+});
+
+it("shows why a threshold-only ingredient needs reordering despite unknown demand", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+    items: [{ ingredientId: "tea", ingredientName: "Tea", baseUnit: "GRAM", quantity: "50",
+      dailyConsumption: null, daysRemaining: null, observedDays: 0, status: "INSUFFICIENT_HISTORY",
+      reorderThreshold: "100", reorderReason: "THRESHOLD" }],
+    page: 0, size: 25, totalItems: 1, totalPages: 1, calculatedAt: "2026-09-15T00:00:00Z",
+  }), { headers: { "Content-Type": "application/json" } })));
+  render(<InventoryForecastPanel accessToken="test-token" organizationId="org" locationId="loc" mode="reorder" />);
+  fireEvent.click(screen.getByRole("button", { name: "Show reorder list" }));
+  expect(await screen.findByText("Below reorder threshold")).toBeVisible();
+  expect(screen.getByText("Insufficient history")).toBeVisible();
 });

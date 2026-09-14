@@ -81,3 +81,6 @@ The [forecast specification](../specs/ingredient-consumption-forecast.md) define
 
 The [alert specification](../specs/projected-low-stock-alerts.md) defines automatic in-app warnings
 from `GET .../inventory/alerts` for stock projected to exhaust within seven days.
+
+The [reorder list](../specs/ingredient-reorder-planning.md), `GET .../inventory/reorder`, combines
+quantity thresholds and projected shortages before pagination and explains each inclusion.

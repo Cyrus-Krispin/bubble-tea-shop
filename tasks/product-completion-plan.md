@@ -21,7 +21,7 @@ PRs so each diff remains reviewable. Preserve the earlier shadcn task files.
 ## Delivery and verification
 
 - [x] Consumption forecasts: API, UI, calculation and scope tests; PR #35.
-- [ ] Projected low-stock alerts: visible in-app alerts and update behavior.
+- [x] Projected low-stock alerts: visible in-app alerts and update behavior; PR #36.
 - [ ] Reorder planning: server-filtered prioritized list.
 - [ ] Counter order entry: staff actor, guest ownership, pricing, idempotency, safe completion.
 - [ ] Cash-flow reporting: outflow capture and 1/7/30-day summaries.

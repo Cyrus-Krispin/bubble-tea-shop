@@ -6,31 +6,37 @@ import { Pagination } from "../../components/shared/Pagination";
 import { ProblemState } from "../../components/shared/ProblemState";
 import { getForecasts, type ForecastPage } from "./forecastClient";
 
-type Props = { accessToken: string; organizationId: string; locationId: string };
+const reorderReasons: Record<string, string> = {
+  OUT_OF_STOCK: "Out of stock", THRESHOLD: "Below reorder threshold",
+  PROJECTED: "Projected shortage", BOTH: "Threshold and projected shortage", NONE: "",
+};
 
-function ForecastResults({ accessToken, organizationId, locationId }: Props) {
+type Props = { accessToken: string; organizationId: string; locationId: string; mode?: "forecasts" | "reorder" };
+
+function ForecastResults({ accessToken, organizationId, locationId, mode = "forecasts" }: Props) {
   const [page, setPage] = useState(0);
   const [reload, setReload] = useState(0);
   const [state, setState] = useState<{ data?: ForecastPage; error?: boolean }>({});
   useEffect(() => {
     const controller = new AbortController();
-    getForecasts(accessToken, organizationId, locationId, page, controller.signal)
+    getForecasts(accessToken, organizationId, locationId, page, controller.signal, mode)
       .then((data) => { if (!controller.signal.aborted) setState({ data }); })
       .catch(() => { if (!controller.signal.aborted) setState({ error: true }); });
     return () => controller.abort();
-  }, [accessToken, organizationId, locationId, page, reload]);
+  }, [accessToken, organizationId, locationId, page, reload, mode]);
   function refresh(nextPage = page) { setState({}); setPage(nextPage); setReload((n) => n + 1); }
-  if (state.error) return <ProblemState title="Forecasts unavailable" message="We could not load current estimates. Try again."
+  if (state.error) return <ProblemState title={mode === "reorder" ? "Reorder list unavailable" : "Forecasts unavailable"} message="We could not load current estimates. Try again."
     actionLabel="Try again" onRetry={() => refresh()} />;
   if (!state.data) return <p role="status">Calculating consumption…</p>;
   return <div className="grid gap-4">
     <p className="text-sm text-muted-foreground">Based on completed sales over up to 30 full local days. Stockouts can understate demand.
       {" "}Calculated {new Date(state.data.calculatedAt).toLocaleString()}.</p>
-    <Button variant="outline" onClick={() => refresh()}>Refresh forecasts</Button>
-    {state.data.items.length === 0 ? <p role="status">No active ingredients.</p> : <Table>
+    <Button variant="outline" onClick={() => refresh()}>{mode === "reorder" ? "Refresh reorder list" : "Refresh forecasts"}</Button>
+    {state.data.items.length === 0 ? <p role="status">{mode === "reorder" ? "No ingredients need reordering." : "No active ingredients."}</p> : <Table>
       <TableHeader><TableRow><TableHead>Ingredient</TableHead><TableHead>Estimated stock remaining</TableHead></TableRow></TableHeader>
       <TableBody>{state.data.items.map((item) => <TableRow key={item.ingredientId}>
         <TableCell className="whitespace-normal"><strong>{item.ingredientName}</strong>
+          {mode === "reorder" ? <div className="text-xs font-medium">{reorderReasons[item.reorderReason]}</div> : null}
           <div className="text-xs text-muted-foreground">{item.quantity} {item.baseUnit.toLowerCase()} on hand</div>
           <div className="text-xs text-muted-foreground">{item.dailyConsumption ?? "Unknown"} used per day</div>
         </TableCell>
@@ -46,7 +52,7 @@ function ForecastResults({ accessToken, organizationId, locationId }: Props) {
 
 export function InventoryForecastPanel(props: Props) {
   const [visible, setVisible] = useState(false);
-  return <Card><CardHeader><CardTitle><h2>Consumption forecasts</h2></CardTitle></CardHeader>
+  return <Card><CardHeader><CardTitle><h2>{props.mode === "reorder" ? "Reorder planning" : "Consumption forecasts"}</h2></CardTitle></CardHeader>
     <CardContent>{visible ? <ForecastResults key={`${props.accessToken}:${props.organizationId}:${props.locationId}`} {...props} />
-      : <Button variant="outline" onClick={() => setVisible(true)}>Show consumption forecasts</Button>}</CardContent></Card>;
+      : <Button variant="outline" onClick={() => setVisible(true)}>{props.mode === "reorder" ? "Show reorder list" : "Show consumption forecasts"}</Button>}</CardContent></Card>;
 }
