@@ -54,9 +54,25 @@ import java.util.UUID;
 public class InventoryManagementController {
     private static final String QUANTITY_PATTERN = "^-?(0|[0-9]+)(\\.[0-9]{1,6})?$";
     private final InventoryManagementService inventory;
+    private final InventoryForecastService forecasts;
 
-    public InventoryManagementController(InventoryManagementService inventory) {
+    public InventoryManagementController(InventoryManagementService inventory, InventoryForecastService forecasts) {
         this.inventory = inventory;
+        this.forecasts = forecasts;
+    }
+
+    @GetMapping("/forecasts")
+    @Operation(operationId = "listInventoryForecasts", summary = "Estimate ingredient consumption and remaining stock",
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponse(responseCode = "200", description = "Consumption forecast page",
+        content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = InventoryForecastService.ForecastPage.class)))
+    InventoryForecastService.ForecastPage forecasts(
+        @AuthenticationPrincipal Jwt jwt, @PathVariable UUID organizationId, @PathVariable UUID locationId,
+        @RequestParam(defaultValue = "0") @PositiveOrZero int page,
+        @RequestParam(defaultValue = "25") @Min(1) @Max(100) int size
+    ) {
+        return forecasts.forecasts(authSubject(jwt), organizationId, locationId, page, size);
     }
 
     @GetMapping("/balances")
@@ -145,7 +161,8 @@ public class InventoryManagementController {
     @RestControllerAdvice(assignableTypes = InventoryManagementController.class)
     static class InventoryExceptionHandler {
         @ExceptionHandler({InvalidInventoryException.class, MethodArgumentNotValidException.class,
-            HttpMessageNotReadableException.class})
+            HttpMessageNotReadableException.class, jakarta.validation.ConstraintViolationException.class,
+            org.springframework.web.method.annotation.HandlerMethodValidationException.class})
         ResponseEntity<ProblemDetail> invalid() {
             return problem(HttpStatus.BAD_REQUEST, "inventory-invalid", "Invalid inventory request",
                 "Check the stock movement or filter values and try again.", "INVENTORY_INVALID");

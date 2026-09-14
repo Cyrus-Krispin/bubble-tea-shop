@@ -1,3 +1,4 @@
+import { InventoryForecastPanel } from "./InventoryForecastPanel";
 import { useEffect, useId, useMemo, useState, type FormEvent } from "react";
 import { useOutletContext } from "react-router";
 
@@ -605,6 +606,7 @@ export default function InventoryManagementPage() {
         />
       ) : (
         <div className="inventory-workspace">
+          <InventoryForecastPanel accessToken={accessToken} organizationId={organizationId} locationId={locationId} key={`${locationId}:${reloadVersion}`} />
           <section
             aria-labelledby="inventory-balances-title"
             className="inventory-panel"

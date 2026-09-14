@@ -187,6 +187,60 @@ class InventoryManagementApiIntegrationTest {
             .andExpect(jsonPath("$.items[0].ingredientArchived").value(true));
     }
 
+    @Test
+    void forecastsCompletedSalesWithScopeAndBoundedPages() throws Exception {
+        Staff owner = staff("OWNER");
+        UUID locationId = location(owner.organizationId(), "Forecast", "SGD");
+        UUID tea = ingredient(owner.organizationId(), "Tea", null, "GRAM", "5");
+        jdbc.update("UPDATE location SET created_at = now() - interval '40 days' WHERE id = ?", locationId);
+        jdbc.update("UPDATE ingredient SET created_at = now() - interval '40 days' WHERE id = ?", tea);
+        jdbc.update("INSERT INTO inventory_balance (organization_id, location_id, ingredient_id, quantity) VALUES (?, ?, ?, 50)",
+            owner.organizationId(), locationId, tea);
+        UUID order = UUID.randomUUID();
+        jdbc.update("""
+            INSERT INTO customer_order (id, organization_id, location_id, public_order_number,
+                status, payment_method, currency_code, subtotal_minor, total_minor, completed_at)
+            VALUES (?, ?, ?, 'FORECAST', 'COMPLETED', 'CASH', 'SGD', 100, 100, now() - interval '2 days')
+            """, order, owner.organizationId(), locationId);
+        jdbc.update("""
+            INSERT INTO inventory_movement (organization_id, location_id, ingredient_id,
+                movement_type, quantity_delta, customer_order_id, created_at)
+            VALUES (?, ?, ?, 'SALE', -300, ?, now() - interval '2 days')
+            """, owner.organizationId(), locationId, tea, order);
+        jdbc.update("""
+            INSERT INTO inventory_movement (organization_id, location_id, ingredient_id,
+                movement_type, quantity_delta, created_at)
+            VALUES (?, ?, ?, 'RECEIPT', 999, now() - interval '2 days')
+            """, owner.organizationId(), locationId, tea);
+        String path = "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts";
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.items[0].dailyConsumption").value("10"))
+            .andExpect(jsonPath("$.items[0].daysRemaining").value("5"))
+            .andExpect(jsonPath("$.items[0].observedDays").value(30))
+            .andExpect(jsonPath("$.items[0].status").value("ESTIMATED"));
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(staff("MANAGER"))))
+            .andExpect(status().isForbidden());
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)).param("size", "101"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void identifiesEmptyStockAndInsufficientHistory() throws Exception {
+        Staff owner = staff("OWNER");
+        UUID locationId = location(owner.organizationId(), "New shop", "SGD");
+        UUID tea = ingredient(owner.organizationId(), "Tea", null, "GRAM", null);
+        String path = "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts";
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].status").value("OUT_OF_STOCK"));
+        record(owner, locationId, """
+            {"ingredientId":"%s","movementType":"OPENING","quantityDelta":"50"}
+            """.formatted(tea));
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].status").value("INSUFFICIENT_HISTORY"))
+            .andExpect(jsonPath("$.items[0].daysRemaining").isEmpty());
+    }
+
     private JsonNode record(Staff staff, UUID locationId, String body) throws Exception {
         MvcResult result = mvc.perform(post(movementPath(), staff.organizationId(), locationId)
                 .with(token(staff)).contentType("application/json").content(body))

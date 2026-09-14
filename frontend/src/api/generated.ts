@@ -609,6 +609,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Estimate ingredient consumption and remaining stock */
+        readonly get: operations["listInventoryForecasts"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/balances": {
         readonly parameters: {
             readonly query?: never;
@@ -1426,6 +1443,33 @@ export interface components {
             readonly totalItems: number;
             /** Format: int64 */
             readonly totalPages: number;
+        };
+        readonly InventoryForecast: {
+            /** Format: uuid */
+            readonly ingredientId: string;
+            readonly ingredientName: string;
+            /** @enum {string} */
+            readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
+            readonly quantity: string;
+            readonly reorderThreshold: string | null;
+            readonly dailyConsumption: string | null;
+            readonly daysRemaining: string | null;
+            /** Format: int32 */
+            readonly observedDays: number;
+            readonly status: string;
+        };
+        readonly InventoryForecastPage: {
+            readonly items: readonly components["schemas"]["InventoryForecast"][];
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly size: number;
+            /** Format: int64 */
+            readonly totalItems: number;
+            /** Format: int64 */
+            readonly totalPages: number;
+            /** Format: date-time */
+            readonly calculatedAt: string;
         };
         readonly StaffInventoryBalance: {
             /** Format: uuid */
@@ -3289,6 +3333,37 @@ export interface operations {
                 };
                 content: {
                     readonly "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly listInventoryForecasts: {
+        readonly parameters: {
+            readonly query?: {
+                readonly page?: number;
+                readonly size?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Consumption forecast page */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["InventoryForecastPage"];
                 };
             };
             readonly 400: components["responses"]["Problem"];
