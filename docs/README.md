@@ -62,6 +62,10 @@ The Flyway migration remains the executable source of truth for the database.
 - [`operations/incident-response.md`](operations/incident-response.md) — incident severity,
   command, containment, recovery, communications, and post-incident procedure.
 
+## Feature specifications
+
+- [Ingredient consumption forecast](specs/ingredient-consumption-forecast.md) — observed demand and days of remaining stock.
+
 ## Documentation rules
 
 1. Add an ADR when a decision is expensive to reverse or affects more than one module.

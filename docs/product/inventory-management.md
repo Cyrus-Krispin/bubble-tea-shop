@@ -73,3 +73,8 @@ race returns `409 INVENTORY_STATE_CONFLICT`; and a movement that would make stoc
 - The OpenAPI snapshot and generated frontend types remain drift-free.
 - The staff workspace lists live balances, records each allowed manual movement, displays history,
   handles conflict/shortage recovery, and passes responsive browser verification.
+
+## Consumption forecast
+
+The [forecast specification](../specs/ingredient-consumption-forecast.md) defines the authorized
+`GET .../inventory/forecasts` projection and on-demand inventory forecast panel.
