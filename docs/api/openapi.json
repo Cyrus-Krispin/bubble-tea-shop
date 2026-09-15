@@ -876,6 +876,147 @@
         } ]
       }
     },
+    "/api/v1/customer/locations/{locationSlug}/favorite" : {
+      "get" : {
+        "tags" : [ "customer-favorite-controller" ],
+        "summary" : "Read the customer's organization favorite and available recipes",
+        "operationId" : "getCustomerFavorite",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Favorite selection",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerFavorite"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "customer-favorite-controller" ],
+        "summary" : "Choose a favorite recipe from this shop menu",
+        "operationId" : "setCustomerFavorite",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FavoriteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Favorite saved",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerFavorite"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "customer-favorite-controller" ],
+        "summary" : "Remove the favorite preference while preserving order history",
+        "operationId" : "clearCustomerFavorite",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Favorite removed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerFavorite"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/v1/staff/organizations/{organizationId}/recipes" : {
       "get" : {
         "tags" : [ "Recipe management" ],
@@ -3082,6 +3223,61 @@
         }
       }
     },
+    "/api/v1/customer/locations/{locationSlug}/order-quote" : {
+      "post" : {
+        "tags" : [ "customer-favorite-controller" ],
+        "summary" : "Estimate server prices and the customer's favorite discount",
+        "operationId" : "quoteCustomerOrder",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGuestOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Current checkout estimate",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerOrderQuote"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/v1/customer/account" : {
       "post" : {
         "tags" : [ "Customer account" ],
@@ -4849,6 +5045,50 @@
           }
         }
       },
+      "FavoriteRequest" : {
+        "type" : "object",
+        "properties" : {
+          "recipeId" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        },
+        "required" : [ "recipeId" ]
+      },
+      "CustomerFavorite" : {
+        "type" : "object",
+        "properties" : {
+          "recipeId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "recipeName" : {
+            "type" : [ "string", "null" ]
+          },
+          "recipes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FavoriteRecipe"
+            }
+          },
+          "discountPercent" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "FavoriteRecipe" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
       "CreateRecipeRequest" : {
         "type" : "object",
         "properties" : {
@@ -5475,6 +5715,26 @@
           }
         },
         "required" : [ "version" ]
+      },
+      "CustomerOrderQuote" : {
+        "type" : "object",
+        "properties" : {
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "subtotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "discountMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
       },
       "CustomerAccountDto" : {
         "type" : "object",

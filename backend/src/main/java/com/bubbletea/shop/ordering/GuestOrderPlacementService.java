@@ -89,6 +89,8 @@ public class GuestOrderPlacementService {
             }
         }
 
+        Discount discount = discount(customerAccountId, location.organizationId(), lines);
+        long finalTotal = total - discount.amount();
         UUID orderId = UUID.randomUUID();
         String publicNumber = jdbc.sql("SELECT 'BT' || lpad(nextval('customer_order_public_number_seq')::text, 10, '0')")
             .query(String.class).single();
@@ -96,11 +98,11 @@ public class GuestOrderPlacementService {
                 INSERT INTO customer_order (
                     id, organization_id, location_id, customer_account_id,
                     placement_key, placement_fingerprint, public_order_number, status,
-                    payment_method, currency_code, subtotal_minor, total_minor
+                    payment_method, currency_code, subtotal_minor, total_minor, discount_minor, discount_recipe_id
                 ) VALUES (
                     :id, :organizationId, :locationId, :customerAccountId,
                     :placementKey, :fingerprint, :publicNumber, 'PENDING',
-                    'CASH', :currency, :total, :total
+                    'CASH', :currency, :total, :finalTotal, :discount, :discountRecipe
                 )
                 ON CONFLICT (location_id, placement_key) WHERE placement_key IS NOT NULL DO NOTHING
                 """)
@@ -108,7 +110,7 @@ public class GuestOrderPlacementService {
             .param("locationId", location.id()).param("customerAccountId", customerAccountId)
             .param("placementKey", placementKey).param("fingerprint", fingerprint)
             .param("publicNumber", publicNumber).param("currency", location.currency())
-            .param("total", total).update();
+            .param("total", total).param("finalTotal", finalTotal).param("discount", discount.amount()).param("discountRecipe", discount.recipeId()).update();
         if (inserted == 0) return requiredReplay(location.id(), placementKey, fingerprint);
 
         for (int index = 0; index < lines.size(); index++) {
@@ -128,10 +130,40 @@ public class GuestOrderPlacementService {
                 ) VALUES (:id, :organizationId, :orderId, 'CASH', 'PENDING', :total, :currency)
                 """)
             .param("id", UUID.randomUUID()).param("organizationId", location.organizationId())
-            .param("orderId", orderId).param("total", total).param("currency", location.currency())
+            .param("orderId", orderId).param("total", finalTotal).param("currency", location.currency())
             .update();
         return loadOrder(orderId, false);
     }
+
+    @Transactional(readOnly = true)
+    public OrderQuote quote(String locationSlug, UUID subject, List<CreateLine> requested) {
+        if (requested == null || requested.isEmpty() || requested.size() > 25
+            || requested.stream().anyMatch(java.util.Objects::isNull)
+            || requested.stream().mapToLong(CreateLine::quantity).sum() > MAX_TOTAL_QUANTITY) throw new InvalidGuestOrderException();
+        Location location = findLocation(locationSlug);
+        UUID account = resolveCustomerAccount(subject);
+        var lines = requested.stream().map(line -> resolveLine(location, line)).toList();
+        long subtotal = 0;
+        try { for (var line : lines) subtotal = Math.addExact(subtotal, line.lineTotalMinor()); }
+        catch (ArithmeticException error) { throw new InvalidGuestOrderException(); }
+        long discount = discount(account, location.organizationId(), lines).amount();
+        return new OrderQuote(location.currency(), subtotal, discount, subtotal - discount);
+    }
+
+    private Discount discount(UUID accountId, UUID organizationId, List<ResolvedLine> lines) {
+        if (accountId == null) return new Discount(null, 0);
+        UUID recipe = jdbc.sql("""
+            SELECT f.recipe_id FROM customer_favorite f JOIN recipe r ON r.id = f.recipe_id
+            WHERE f.account_id = :account AND f.organization_id = :org AND r.archived_at IS NULL
+            """).param("account", accountId).param("org", organizationId).query(UUID.class).optional().orElse(null);
+        if (recipe == null) return new Discount(null, 0);
+        long amount = lines.stream().filter(line -> recipe.equals(line.recipeId()))
+            .mapToLong(line -> Math.min(line.basePriceMinor() / 20, line.unitPriceMinor())).max().orElse(0);
+        return new Discount(amount > 0 ? recipe : null, amount);
+    }
+    private record Discount(UUID recipeId, long amount) {}
+    @Schema(name = "CustomerOrderQuote")
+    public record OrderQuote(String currencyCode, long subtotalMinor, long discountMinor, long totalMinor) {}
 
     private Location findLocation(String locationSlug) {
         return jdbc.sql("""
@@ -166,7 +198,7 @@ public class GuestOrderPlacementService {
 
         Variant variant = jdbc.sql("""
                 SELECT product.name AS product_name, variant.name AS variant_name,
-                       offering.price_minor, offering.currency_code, offering.recipe_version_id
+                       offering.price_minor, offering.currency_code, offering.recipe_version_id, recipe_version.recipe_id
                   FROM menu_variant variant
                   JOIN menu_product product
                     ON product.id = variant.menu_product_id
@@ -191,7 +223,7 @@ public class GuestOrderPlacementService {
             .query((rs, row) -> new Variant(
                 rs.getString("product_name"), rs.getString("variant_name"),
                 rs.getLong("price_minor"), rs.getString("currency_code"),
-                rs.getObject("recipe_version_id", UUID.class)))
+                rs.getObject("recipe_version_id", UUID.class), rs.getObject("recipe_id", UUID.class)))
             .optional().orElseThrow(GuestOrderCatalogChangedException::new);
         if (!location.currency().equals(variant.currency())) throw new GuestOrderCatalogChangedException();
 
@@ -244,7 +276,7 @@ public class GuestOrderPlacementService {
             Map<UUID, BigDecimal> consumption = loadConsumption(
                 location.organizationId(), variant.recipeVersionId(), selected, requested.quantity());
             return new ResolvedLine(requested.variantId(), variant.productName(), variant.variantName(),
-                requested.quantity(), unitPrice, lineTotal, selected, consumption);
+                requested.quantity(), unitPrice, lineTotal, selected, consumption, variant.recipeId(), variant.priceMinor());
         } catch (ArithmeticException exception) {
             throw new InvalidGuestOrderException();
         }
@@ -456,7 +488,7 @@ public class GuestOrderPlacementService {
     private record Location(UUID id, UUID organizationId, String currency) { }
     private record Account(UUID id, boolean enabled) { }
     private record Variant(String productName, String variantName, long priceMinor,
-                           String currency, UUID recipeVersionId) { }
+                           String currency, UUID recipeVersionId, UUID recipeId) { }
     private record Choice(UUID groupId, String groupName, int minimumSelections,
                           int maximumSelections, UUID choiceId, String choiceName,
                           UUID variantChoiceId, long priceDeltaMinor) { }
@@ -464,7 +496,7 @@ public class GuestOrderPlacementService {
     private record IngredientDelta(UUID ingredientId, BigDecimal quantity) { }
     private record ResolvedLine(UUID variantId, String productName, String variantName, int quantity,
                                 long unitPriceMinor, long lineTotalMinor, List<Choice> selectedChoices,
-                                Map<UUID, BigDecimal> consumption) { }
+                                Map<UUID, BigDecimal> consumption, UUID recipeId, long basePriceMinor) { }
     private record Existing(UUID id, String fingerprint) { }
     private record OrderHeader(String publicNumber, String status, String paymentMethod,
                                String currency, long subtotalMinor, long totalMinor,

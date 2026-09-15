@@ -140,7 +140,7 @@ public class GuestOrderPlacementController {
         }
     }
 
-    @RestControllerAdvice(assignableTypes = {GuestOrderPlacementController.class, CounterOrderController.class})
+    @RestControllerAdvice(assignableTypes = {GuestOrderPlacementController.class, CounterOrderController.class, CustomerFavoriteController.class})
     static class Advice {
         @ExceptionHandler({
             InvalidGuestOrderException.class,

@@ -489,6 +489,7 @@ function OrderDetail({
       </div>
       <div className="order-detail-grid">
         <div>
+          {order.subtotalMinor > order.totalMinor ? <p>Discount: −{formatMoney(order.subtotalMinor - order.totalMinor, order.currencyCode)}</p> : null}
           <h3>Items</h3>
           <ol className="order-line-list">
             {order.lines.map((line) => (

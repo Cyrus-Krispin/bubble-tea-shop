@@ -107,3 +107,16 @@ erDiagram
 
 Expense and void rows are immutable. Composite foreign keys keep the expense and any correction
 in the same organization and location. This ledger is ordering-owned; it does not imply a receipt.
+
+## Customer favorites (V17)
+
+```mermaid
+erDiagram
+    ACCOUNT ||--o{ CUSTOMER_FAVORITE : chooses
+    ORGANIZATION ||--o{ CUSTOMER_FAVORITE : scopes
+    RECIPE ||--o{ CUSTOMER_FAVORITE : preferred
+    RECIPE o|--o{ CUSTOMER_ORDER : discount_snapshot
+```
+
+A favorite has a composite account/organization primary key. Preference removal preserves order
+history; discounted orders retain their immutable recipe reference and monetary snapshots.

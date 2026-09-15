@@ -82,3 +82,5 @@ The Flyway migration remains the executable source of truth for the database.
 - [Session expiry and refresh](specs/session-expiry-handling.md)
 
 - [Cash-flow dashboard and paid expense ledger](specs/cash-flow-dashboard.md)
+
+- [Favorite drink and checkout discount](specs/favorite-drink-discount.md)
