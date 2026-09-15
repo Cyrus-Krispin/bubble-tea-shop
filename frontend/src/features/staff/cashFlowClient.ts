@@ -27,6 +27,7 @@ function validateExpense(expense: Expense) {
 }
 export async function recordExpense(token: string, organizationId: string, locationId: string, key: string, amountMinor: number, description: string) {
   const { data, response } = await client(token).POST(`${root}/expenses`, {
+    signal: AbortSignal.timeout(30_000),
     params: { path: { organizationId, locationId }, header: { "Idempotency-Key": key } }, body: { amountMinor, description },
   });
   if (!data) throw new CashFlowError(response.status);

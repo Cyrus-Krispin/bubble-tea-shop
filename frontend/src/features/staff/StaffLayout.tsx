@@ -1,3 +1,4 @@
+import { StaffDraftProvider } from "./StaffDraftProvider";
 import { useEffect, useState } from "react";
 import { ClipboardList, LayoutDashboard, LogOut, Menu, PackageSearch, ScrollText, ShoppingBag, Users } from "lucide-react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
@@ -47,6 +48,7 @@ export function StaffLayout() {
   const location = useLocation();
   const { isLoading: isSessionLoading, session } = useAuth();
   const [contextState, setContextState] = useState<ContextState>({ status: "idle" });
+  const [draftAccountId, setDraftAccountId] = useState<string>();
   const [requestVersion, setRequestVersion] = useState(0);
   const [signOutFailed, setSignOutFailed] = useState(false);
   const accessToken = session?.accessToken ?? null;
@@ -57,6 +59,7 @@ export function StaffLayout() {
     getStaffContext(accessToken, controller.signal)
       .then((context) => {
         if (!controller.signal.aborted) {
+          setDraftAccountId(context.accountId);
           setContextState({ status: "ready", accessToken, context });
         }
       })
@@ -93,7 +96,7 @@ export function StaffLayout() {
     && visibleState.error.status === 403;
 
   return (
-    <div className="staff-shell bg-background text-foreground">
+    <StaffDraftProvider key={draftAccountId ?? "unresolved"}><div className="staff-shell bg-background text-foreground">
       <a className="skip-link" href="#staff-workspace">Skip to workspace</a>
       <aside className="staff-header bg-sidebar text-sidebar-foreground" aria-label="Staff workspace navigation">
         <Link className="staff-brand" to="/staff" aria-label="Bubble Tea Shop staff home">
@@ -149,11 +152,11 @@ export function StaffLayout() {
       {visibleState.status === "error" ? (
         <main aria-label="Staff workspace" className="staff-status" id="staff-workspace">
           <ProblemState
-            actionLabel={accessError ? "Sign out" : "Try again"}
+            actionLabel="Try again"
             message={accessError
               ? "Your identity is signed in, but it does not have an active staff membership."
               : "We couldn’t load your current permissions. Try again before using staff tools."}
-            onRetry={accessError ? handleSignOut : () => {
+            onRetry={() => {
               setContextState({ status: "loading" });
               setRequestVersion((value) => value + 1);
             }}
@@ -164,6 +167,6 @@ export function StaffLayout() {
       {visibleState.status === "ready" ? (
         <Outlet context={{ accessToken: session.accessToken, staffContext: visibleState.context } satisfies StaffOutletContext} />
       ) : null}
-    </div>
+    </div></StaffDraftProvider>
   );
 }
