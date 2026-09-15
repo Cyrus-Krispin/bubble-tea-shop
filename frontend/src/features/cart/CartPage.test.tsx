@@ -161,7 +161,7 @@ describe("CartPage", () => {
     expect(placeGuestOrder).toHaveBeenCalledTimes(1);
 
     rejectRequest?.(new TypeError("network unavailable"));
-    expect(await screen.findByRole("alert")).toHaveTextContent("couldn’t confirm");
+    expect(await screen.findByText(/We couldn’t confirm/)).toBeVisible();
     const firstKey = vi.mocked(placeGuestOrder).mock.calls[0]?.[1];
     fireEvent.click(screen.getByRole("button", { name: "Place order · $7.20" }));
     await waitFor(() => expect(placeGuestOrder).toHaveBeenCalledTimes(2));
@@ -173,7 +173,7 @@ describe("CartPage", () => {
     const view = renderCart();
     fireEvent.click(screen.getByRole("button", { name: "Seed item" }));
     fireEvent.click(screen.getByRole("button", { name: "Place order · $7.20" }));
-    await screen.findByRole("alert");
+    await screen.findByText(/We couldn’t confirm/);
     const key = vi.mocked(placeGuestOrder).mock.calls[0]?.[1];
     vi.mocked(useCustomerQuote).mockReturnValue({ quote: undefined, error: true, loading: false, retry: vi.fn() });
     view.rerender(<MemoryRouter><CartProvider><SeedControl /><CartPage /></CartProvider></MemoryRouter>);

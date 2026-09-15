@@ -85,13 +85,13 @@ function line(value: unknown): GuestOrderLine {
   };
 }
 
-function order(value: unknown, allowCompleted = false): GuestOrder {
+function order(value: unknown): GuestOrder {
   const input = object(value);
-  if ((input.status !== "PENDING" && !(allowCompleted && input.status === "COMPLETED")) || input.paymentMethod !== "CASH") invalid();
+  if (!["PENDING", "COMPLETED", "CANCELLED"].includes(String(input.status)) || input.paymentMethod !== "CASH") invalid();
   return {
     id: string(input.id),
     publicOrderNumber: string(input.publicOrderNumber),
-    status: input.status as "PENDING" | "COMPLETED",
+    status: input.status as "PENDING" | "COMPLETED" | "CANCELLED",
     paymentMethod: "CASH",
     currencyCode: string(input.currencyCode),
     subtotalMinor: integer(input.subtotalMinor),
@@ -140,6 +140,7 @@ export async function placeGuestOrder(
         ? undefined
         : { Authorization: `Bearer ${accessToken}` },
     body: input,
+    signal: AbortSignal.timeout(30_000),
   } as const;
   const { data, error, response } = locationSlug === undefined
     ? await client.POST("/api/v1/guest/orders", request)
@@ -160,5 +161,5 @@ export async function placeCounterOrder(accessToken: string, organizationId: str
     { signal: AbortSignal.timeout(30_000), params: { path: { organizationId, locationId }, header: { "Idempotency-Key": idempotencyKey } }, body: input },
   );
   if (data === undefined) throw apiError(error, response.status);
-  return order(data, true);
+  return order(data);
 }

@@ -45,7 +45,7 @@ describe("AuthProvider", () => {
 
   it("does not overwrite a fresh auth event with a stale initial lookup", async () => {
     let resolveInitialSession: ((value: null) => void) | undefined;
-    let authListener: ((session: { accessToken: string; expiresAt: number; email: string } | null) => void) | undefined;
+    let authListener: ((session: { userId: string; accessToken: string; expiresAt: number; email: string } | null) => void) | undefined;
     vi.mocked(getCurrentAuthSession).mockReturnValue(new Promise((resolve) => {
       resolveInitialSession = resolve;
     }));
@@ -61,7 +61,7 @@ describe("AuthProvider", () => {
     );
 
     await act(async () => {
-      authListener?.({ accessToken: "fresh-token", expiresAt: 4102444800, email: "customer@example.test" });
+      authListener?.({ userId: "test-user", accessToken: "fresh-token", expiresAt: 4102444800, email: "customer@example.test" });
     });
     expect(screen.getByText("Signed in as customer@example.test")).toBeVisible();
 
@@ -74,10 +74,10 @@ describe("AuthProvider", () => {
 
 function setupSession(expiresAt: number) {
   let emit: (session: AuthSession | null) => void = () => undefined;
-  vi.mocked(getCurrentAuthSession).mockResolvedValue({ accessToken: "first", email: "test@example.test", expiresAt });
+  vi.mocked(getCurrentAuthSession).mockResolvedValue({ userId: "test-user", accessToken: "first", email: "test@example.test", expiresAt });
   vi.mocked(subscribeToAuthState).mockImplementation((listener) => { emit = listener; return () => undefined; });
   render(<AuthProvider><AuthStateProbe /></AuthProvider>);
-  return (expires: number) => emit({ accessToken: "renewed", email: "test@example.test", expiresAt: expires });
+  return (expires: number) => emit({ userId: "test-user", accessToken: "renewed", email: "test@example.test", expiresAt: expires });
 }
 
 it("clears the private session at expiry even when the issuer is unavailable", async () => {

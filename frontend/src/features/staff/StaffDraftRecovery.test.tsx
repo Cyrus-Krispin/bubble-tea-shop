@@ -25,7 +25,7 @@ beforeEach(() => {
   vi.mocked(recordExpense).mockRejectedValue(new Error("Lost response"));
 });
 function app(token: string, counter = false) {
-  return <AuthContext.Provider value={{ isLoading: false, session: { accessToken: token, expiresAt: 4102444800, email: "staff@example.test" } }}>
+  return <AuthContext.Provider value={{ isLoading: false, session: { userId: "test-user", accessToken: token, expiresAt: 4102444800, email: "staff@example.test" } }}>
     <MemoryRouter initialEntries={[counter ? "/staff/counter" : "/staff/cash-flow"]}><Routes><Route path="/staff" element={<StaffLayout />}><Route path="cash-flow" element={<CashFlowPage />} /><Route path="counter" element={<CounterOrderPage />} /></Route></Routes></MemoryRouter>
   </AuthContext.Provider>;
 }
@@ -99,4 +99,13 @@ it("keeps a pending expense single-flight across refresh and retains the origina
   fireEvent.click(await screen.findByRole("button", { name: "Retry same expense" }));
   await vi.waitFor(() => expect(recordExpense).toHaveBeenCalledTimes(2));
   expect(vi.mocked(recordExpense).mock.calls[1].slice(1)).toEqual(vi.mocked(recordExpense).mock.calls[0].slice(1));
+});
+
+it("shows no payment due for a cancelled counter replay", async () => {
+  vi.mocked(placeCounterOrder).mockResolvedValue({ id: "order", publicOrderNumber: "BT123", status: "CANCELLED", paymentMethod: "CASH", currencyCode: "SGD", subtotalMinor: 660, totalMinor: 660, createdAt: "2026-09-15T00:00:00Z", replayed: true, items: [] });
+  render(app("token", true));
+  fireEvent.click(await screen.findByRole("button", { name: /^Add drink/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Place counter order" }));
+  expect(await screen.findByText(/This order was cancelled. Do not collect payment./)).toBeVisible();
+  expect(screen.queryByText(/Collect cash and complete/)).not.toBeInTheDocument();
 });
