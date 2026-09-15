@@ -20,6 +20,11 @@ test("manager reads scoped inventory forecasts", async ({ page }, testInfo) => {
   expect(payload.items.length).toBeGreaterThan(0);
   await expect(page.getByRole("columnheader", { name: "Estimated stock remaining" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Refresh forecasts" })).toBeVisible();
+  const reorderResponse = page.waitForResponse((res) => res.url().includes("/inventory/reorder") && res.status() === 200);
+  await page.getByRole("button", { name: "Show reorder list" }).click();
+  const reorder = await (await reorderResponse).json();
+  expect(reorder.items.every((item: { reorderReason: string }) => item.reorderReason !== "NONE")).toBe(true);
+  await expect(page.getByRole("button", { name: "Refresh reorder list" })).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   expect(errors).toEqual([]);
   await page.screenshot({ path: testInfo.outputPath("inventory-forecast.png"), fullPage: true });

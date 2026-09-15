@@ -68,6 +68,8 @@ The Flyway migration remains the executable source of truth for the database.
 
 - [Projected low-stock alerts](specs/projected-low-stock-alerts.md) — automatic in-app shortage warnings.
 
+- [Ingredient reorder planning](specs/ingredient-reorder-planning.md) — prioritized stock purchasing list.
+
 ## Documentation rules
 
 1. Add an ADR when a decision is expensive to reverse or affects more than one module.
