@@ -59,7 +59,7 @@ function CounterComposer({ scope, accessToken, onBusyChange }: { scope: Scope; a
     } finally { setSubmitting(false); }
   }
   if (placed) return <Card><CardHeader><CardTitle><h2>Counter order {placed.publicOrderNumber}</h2></CardTitle></CardHeader>
-    <CardContent className="grid gap-4"><p role="status">{placed.status === "COMPLETED" ? "Paid and completed" : "Pending"} · {formatMoney(placed.totalMinor, placed.currencyCode)}. {placed.status === "COMPLETED" ? "This order was already completed." : "Collect cash and complete it in the order queue."}</p>
+    <CardContent className="grid gap-4"><p role="status">{placed.status === "COMPLETED" ? "Paid and completed" : placed.status === "CANCELLED" ? "Cancelled" : "Pending"} · {formatMoney(placed.totalMinor, placed.currencyCode)}. {placed.status === "COMPLETED" ? "This order was already completed." : placed.status === "CANCELLED" ? "This order was cancelled. Do not collect payment." : "Collect cash and complete it in the order queue."}</p>
       <Button asChild><Link to="/staff/orders">Open order queue</Link></Button>
       <Button variant="outline" onClick={() => { setPlaced(undefined); setAttempt(undefined); setLines([]); }}>New counter order</Button>
     </CardContent></Card>;

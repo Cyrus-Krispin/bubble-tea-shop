@@ -84,3 +84,5 @@ The Flyway migration remains the executable source of truth for the database.
 - [Cash-flow dashboard and paid expense ledger](specs/cash-flow-dashboard.md)
 
 - [Favorite drink and checkout discount](specs/favorite-drink-discount.md)
+
+- [Customer checkout recovery](specs/customer-checkout-recovery.md)

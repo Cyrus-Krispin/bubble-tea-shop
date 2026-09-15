@@ -25,7 +25,7 @@ PRs so each diff remains reviewable. Preserve the earlier shadcn task files.
 - [x] Reorder planning: server-filtered prioritized list; PR #37.
 - [x] Counter order entry: staff actor, guest ownership, pricing, idempotency, safe completion; PR #38.
 - [x] Cash-flow reporting: outflow capture and 1/7/30-day summaries; PR #40.
-- [x] Favorite recipe discount: ownership, deterministic pricing, immutable receipt; PR pending.
+- [x] Favorite recipe discount: ownership, deterministic pricing, immutable receipt; PR #42.
 - [ ] Multi-currency: location configuration and currency-specific option prices.
 - [ ] Localization: translated UI, catalog content, formatting and persistence.
 - [x] Session expiry: safe refresh/expiry behavior and race tests; PR #39.
@@ -38,3 +38,5 @@ PRs so each diff remains reviewable. Preserve the earlier shadcn task files.
 For each increment: spec + code + meaningful tests, full affected Maven/frontend checks, real-browser
 verification, reviewed diff, focused commit, push and PR. Regenerate OpenAPI/types for API changes.
 Never declare a live external integration verified without its provider sandbox/live evidence.
+
+- [x] Customer checkout recovery: preserve original attempt across routes, token changes and ambiguous errors; PR pending.
