@@ -94,3 +94,16 @@ Inventory consumption forecasts and projected alerts are derived reads over the 
 location, ingredient, and order relationships above; they introduce no new stored entities.
 
 Counter entry reuses the existing order-to-status-history actor relationship and creates no new entity.
+
+## Operational expenses (V16)
+
+```mermaid
+erDiagram
+    location ||--o{ cash_expense : scopes
+    account ||--o{ cash_expense : records
+    cash_expense ||--o| cash_expense_void : corrects
+    account ||--o{ cash_expense_void : records
+```
+
+Expense and void rows are immutable. Composite foreign keys keep the expense and any correction
+in the same organization and location. This ledger is ordering-owned; it does not imply a receipt.

@@ -32,6 +32,7 @@ const navigation = [
   { end: false, icon: PackageSearch, label: "Inventory", to: "/staff/inventory" },
   { end: false, icon: ClipboardList, label: "Orders", to: "/staff/orders" },
   { end: false, icon: ShoppingBag, label: "Counter order", to: "/staff/counter" },
+  { end: false, icon: LayoutDashboard, label: "Cash flow", to: "/staff/cash-flow" },
   { end: false, icon: ScrollText, label: "Audit", to: "/staff/audit" },
 ] as const;
 

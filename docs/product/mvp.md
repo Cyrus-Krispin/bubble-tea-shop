@@ -54,3 +54,9 @@ Guests choose an active shop before browsing its database-owned menu and pricing
 - Cash-flow dashboards, purchase orders, and detailed cost-of-goods accounting.
 - Multiple active currencies, translations, and self-service location lifecycle management.
 - Inventory reservations, delivery lots, expiry dates, and FIFO consumption.
+
+## Authorized product completion: operational cash flow
+
+The 2026-09-15 expanded request adds a manager dashboard for today and the last 7/30 local calendar
+days, collected payment totals, and a paid-expense form with audited correction. Stock receipt costs
+are not automatically treated as payments. See [cash-flow rules](../specs/cash-flow-dashboard.md).

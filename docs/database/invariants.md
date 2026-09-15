@@ -146,3 +146,16 @@
   customer ownership null. Its idempotency fingerprint binds the creating actor and requested lines.
 - Guest fingerprints remain unchanged. Cross-channel/actor key reuse conflicts without disclosure.
 - Pending counter creation does not deduct inventory; existing atomic cash completion owns deduction.
+
+## Collected-payment and expense reporting
+
+- Cash-flow windows include today and begin at local midnight 0/6/29 days ago. The database report
+  timestamp bounds all queries in a repeatable-read snapshot; currencies are never summed together.
+- Only PAID payments with payment timestamps count as inflow. Pending orders and inventory receipt
+  costs do not represent money collected/spent. This operational report is not profit or settlement reconciliation.
+- Expenses are positive, bounded, actor-attributed, server-timestamped and in the current shop
+  currency. `(location_id, request_key)` prevents duplicate writes, with actor/payload verification
+  on replay. Currency snapshots are retained if shop configuration later changes.
+- UPDATE/DELETE of an expense or void is rejected. At most one scoped void per expense can correct
+  a mistaken entry; it changes the original reporting period, never records a refund or alters stock.
+- Report and expense mutation services resolve current staff scope before accessing records.

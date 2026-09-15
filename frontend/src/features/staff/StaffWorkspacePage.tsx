@@ -27,6 +27,7 @@ export function StaffWorkspacePage() {
           <Link to="/staff/orders"><ClipboardList aria-hidden="true" /><strong>Review orders</strong><span>Collect cash and complete pickups</span><ArrowRight aria-hidden="true" /></Link>
           <Link to="/staff/inventory"><PackageSearch aria-hidden="true" /><strong>Check inventory</strong><span>Review balances and movements</span><ArrowRight aria-hidden="true" /></Link>
           <Link to="/staff/catalog/menu"><ShoppingBag aria-hidden="true" /><strong>Manage menu</strong><span>Update products, prices, and availability</span><ArrowRight aria-hidden="true" /></Link>
+          <Link to="/staff/cash-flow"><ScrollText aria-hidden="true" /><strong>Review cash flow</strong><span>Collected payments and paid expenses</span><ArrowRight aria-hidden="true" /></Link>
           <Link to="/staff/audit"><ScrollText aria-hidden="true" /><strong>Review audit</strong><span>Trace recent operational changes</span><ArrowRight aria-hidden="true" /></Link>
         </nav>
       </section>
