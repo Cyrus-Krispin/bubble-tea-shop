@@ -11,19 +11,24 @@ const reorderReasons: Record<string, string> = {
   PROJECTED: "Projected shortage", BOTH: "Threshold and projected shortage", NONE: "",
 };
 
-type Props = { accessToken: string; organizationId: string; locationId: string; mode?: "forecasts" | "reorder" };
+type Props = { accessToken: string; organizationId: string; locationId: string; mode?: "forecasts" | "reorder"; refreshVersion?: number };
 
-function ForecastResults({ accessToken, organizationId, locationId, mode = "forecasts" }: Props) {
+function ForecastResults({ accessToken, organizationId, locationId, mode = "forecasts", refreshVersion = 0 }: Props) {
   const [page, setPage] = useState(0);
   const [reload, setReload] = useState(0);
   const [state, setState] = useState<{ data?: ForecastPage; error?: boolean }>({});
   useEffect(() => {
     const controller = new AbortController();
     getForecasts(accessToken, organizationId, locationId, page, controller.signal, mode)
-      .then((data) => { if (!controller.signal.aborted) setState({ data }); })
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        const lastPage = Math.max(0, data.totalPages - 1);
+        if (page > lastPage) { setState({}); setPage(lastPage); }
+        else setState({ data });
+      })
       .catch(() => { if (!controller.signal.aborted) setState({ error: true }); });
     return () => controller.abort();
-  }, [accessToken, organizationId, locationId, page, reload, mode]);
+  }, [accessToken, organizationId, locationId, page, reload, mode, refreshVersion]);
   function refresh(nextPage = page) { setState({}); setPage(nextPage); setReload((n) => n + 1); }
   if (state.error) return <ProblemState title={mode === "reorder" ? "Reorder list unavailable" : "Forecasts unavailable"} message="We could not load current estimates. Try again."
     actionLabel="Try again" onRetry={() => refresh()} />;
@@ -53,6 +58,6 @@ function ForecastResults({ accessToken, organizationId, locationId, mode = "fore
 export function InventoryForecastPanel(props: Props) {
   const [visible, setVisible] = useState(false);
   return <Card><CardHeader><CardTitle><h2>{props.mode === "reorder" ? "Reorder planning" : "Consumption forecasts"}</h2></CardTitle></CardHeader>
-    <CardContent>{visible ? <ForecastResults key={`${props.accessToken}:${props.organizationId}:${props.locationId}`} {...props} />
+    <CardContent>{visible ? <ForecastResults key={`${props.organizationId}:${props.locationId}`} {...props} />
       : <Button variant="outline" onClick={() => setVisible(true)}>{props.mode === "reorder" ? "Show reorder list" : "Show consumption forecasts"}</Button>}</CardContent></Card>;
 }
