@@ -18,6 +18,12 @@ public class InventoryLedgerService {
 
     @Transactional
     public UUID recordManualMovement(ManualMovement command) {
+        return recordManualMovement(command, UUID.randomUUID());
+    }
+
+    @Transactional
+    public UUID recordManualMovement(ManualMovement command, UUID movementId) {
+        Objects.requireNonNull(movementId, "movementId");
         validateManualMovement(command);
 
         jdbc.update("""
@@ -59,7 +65,6 @@ public class InventoryLedgerService {
             """,
             resultingQuantity, command.locationId(), command.ingredientId());
 
-        UUID movementId = UUID.randomUUID();
         jdbc.update("""
             INSERT INTO inventory_movement (
                 id, organization_id, location_id, ingredient_id, movement_type,

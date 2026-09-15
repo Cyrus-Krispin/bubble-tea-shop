@@ -132,3 +132,12 @@ erDiagram
 Location offering base prices continue to belong to a location. Alternate-currency option prices
 belong to a variant choice and preserve organization ownership. Historical order snapshots do not
 reference mutable prices.
+
+## Manual movement retry identity
+
+```mermaid
+erDiagram
+    location ||--o{ inventory_movement_request : scopes
+    account ||--o{ inventory_movement_request : requests
+    inventory_movement ||--o| inventory_movement_request : identifies
+```

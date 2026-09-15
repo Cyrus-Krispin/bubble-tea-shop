@@ -90,3 +90,5 @@ The Flyway migration remains the executable source of truth for the database.
 - [Location currencies and option prices](specs/location-currency-pricing.md)
 
 - [Currency-correct reorder suggestions](specs/currency-reorder-consistency.md)
+
+- [Safe retries for manual stock movements](specs/manual-stock-retry-safety.md)

@@ -143,26 +143,63 @@ public class InventoryManagementService {
         UUID subject,
         UUID organizationId,
         UUID locationId,
+        UUID requestKey,
         CreateMovement command
     ) {
         InventoryStaffAccessService.AuthorizedLocation authorized =
             access.authorize(subject, organizationId, locationId);
-        requireIngredient(organizationId, command.ingredientId(), true);
+        if (requestKey == null) throw new InvalidInventoryException();
         BigDecimal quantity = normalizeQuantity(command.quantityDelta());
         validate(command, quantity);
         String sourceReference = trimToNull(command.sourceReference());
         String note = trimToNull(command.note());
         String currency = command.totalCostMinor() == null ? null : authorized.currencyCode();
-        UUID movementId;
+        String fingerprint = fingerprint(command.ingredientId(), command.movementType(), quantity,
+            sourceReference, note, command.totalCostMinor(), currency);
+        UUID movementId = UUID.randomUUID();
+        int inserted = jdbc.sql("""
+            INSERT INTO inventory_movement_request (location_id, request_key, organization_id, actor_account_id,
+                request_fingerprint, inventory_movement_id)
+            VALUES (:location, :key, :org, :actor, :fingerprint, :movement)
+            ON CONFLICT (location_id, request_key) DO NOTHING
+            """).param("location", locationId).param("key", requestKey).param("org", organizationId)
+            .param("actor", authorized.accountId()).param("fingerprint", fingerprint).param("movement", movementId).update();
+        if (inserted == 0) {
+            RequestIdentity existing = jdbc.sql("""
+                SELECT actor_account_id, request_fingerprint, inventory_movement_id
+                FROM inventory_movement_request WHERE location_id = :location AND request_key = :key
+                """).param("location", locationId).param("key", requestKey)
+                .query((rs, row) -> new RequestIdentity(rs.getObject(1, UUID.class), rs.getString(2), rs.getObject(3, UUID.class))).single();
+            if (!existing.actor().equals(authorized.accountId()) || !existing.fingerprint().equals(fingerprint)) {
+                throw new InventoryIdempotencyConflictException();
+            }
+            return findMovement(organizationId, locationId, existing.movement());
+        }
+        requireIngredient(organizationId, command.ingredientId(), true);
         try {
-            movementId = ledger.recordManualMovement(new InventoryLedgerService.ManualMovement(
+            ledger.recordManualMovement(new InventoryLedgerService.ManualMovement(
                 organizationId, locationId, command.ingredientId(),
                 InventoryMovementType.valueOf(command.movementType().name()), quantity,
-                authorized.accountId(), sourceReference, note, command.totalCostMinor(), currency));
+                authorized.accountId(), sourceReference, note, command.totalCostMinor(), currency), movementId);
         } catch (DataIntegrityViolationException exception) {
             throw new InventoryStateConflictException();
         }
         return findMovement(organizationId, locationId, movementId);
+    }
+
+    private record RequestIdentity(UUID actor, String fingerprint, UUID movement) {}
+
+    private String fingerprint(Object... values) {
+        StringBuilder canonical = new StringBuilder("inventory-v1:");
+        for (Object value : values) {
+            String text = value == null ? null : value.toString();
+            canonical.append(text == null ? -1 : text.length()).append(':');
+            if (text != null) canonical.append(text);
+        }
+        try {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                .digest(canonical.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        } catch (java.security.NoSuchAlgorithmException error) { throw new IllegalStateException(error); }
     }
 
     private void validate(CreateMovement command, BigDecimal quantity) {

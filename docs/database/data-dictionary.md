@@ -106,3 +106,10 @@ write. SGD retains the existing `menu_variant_option_choice.price_delta_minor` f
 
 `variant_currency_ready` requires a configured price for every enabled active choice in the shop's
 currency. Location currency is immutable by trigger. No existing money values are converted.
+
+### Inventory movement request
+
+`inventory_movement_request` is an immutable manual movement retry identity, keyed by location and
+request UUID. It binds the resolved actor and normalized payload fingerprint to one ledger movement.
+Its deferred movement foreign key permits reserving a key before updating stock, with both records
+committed in the same transaction. Failed attempts leave neither a request nor a movement.

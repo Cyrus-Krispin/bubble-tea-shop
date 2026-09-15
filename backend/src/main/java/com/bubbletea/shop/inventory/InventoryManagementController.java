@@ -154,10 +154,11 @@ public class InventoryManagementController {
         @AuthenticationPrincipal Jwt jwt,
         @PathVariable UUID organizationId,
         @PathVariable UUID locationId,
+        @org.springframework.web.bind.annotation.RequestHeader("Idempotency-Key") UUID requestKey,
         @Valid @RequestBody MovementRequest request
     ) {
         InventoryManagementService.Movement created = inventory.record(
-            authSubject(jwt), organizationId, locationId,
+            authSubject(jwt), organizationId, locationId, requestKey,
             new InventoryManagementService.CreateMovement(request.ingredientId(),
                 request.movementType(), request.quantityDelta(), request.sourceReference(),
                 request.note(), request.totalCostMinor()));
@@ -185,6 +186,8 @@ public class InventoryManagementController {
     @RestControllerAdvice(assignableTypes = InventoryManagementController.class)
     static class InventoryExceptionHandler {
         @ExceptionHandler({InvalidInventoryException.class, MethodArgumentNotValidException.class,
+            org.springframework.web.bind.MissingRequestHeaderException.class,
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
             HttpMessageNotReadableException.class, jakarta.validation.ConstraintViolationException.class,
             org.springframework.web.method.annotation.HandlerMethodValidationException.class})
         ResponseEntity<ProblemDetail> invalid() {
@@ -216,6 +219,12 @@ public class InventoryManagementController {
         ResponseEntity<ProblemDetail> notFound() {
             return problem(HttpStatus.NOT_FOUND, "inventory-not-found", "Inventory resource not found",
                 "The requested inventory resource is unavailable.", "INVENTORY_NOT_FOUND");
+        }
+
+        @ExceptionHandler(InventoryIdempotencyConflictException.class)
+        ResponseEntity<ProblemDetail> retryConflict() {
+            return problem(HttpStatus.CONFLICT, "inventory-idempotency-conflict", "Stock movement retry conflict",
+                "This key identifies a different stock movement or staff account.", "INVENTORY_IDEMPOTENCY_CONFLICT");
         }
 
         @ExceptionHandler(InventoryStateConflictException.class)

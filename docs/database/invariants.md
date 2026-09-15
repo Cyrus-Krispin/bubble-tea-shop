@@ -182,3 +182,10 @@
   stale replacements fail. Price edits append an actor-attributed catalog change in the transaction.
 - Orders, favorite savings, payments and expenses retain their original currency and minor units.
   Currency changes never revalue a historical record.
+
+## Manual movement retry identity
+
+- Manual receipt/opening/adjustment requests require a location-scoped UUID key bound to actor and
+  normalized input. Concurrent retries serialize on this identity and return the original movement.
+- Request identity, immutable movement and balance change commit atomically. Request rows cannot be
+  updated or deleted. Authorization precedes replay; ingredient activity is checked only for new work.
