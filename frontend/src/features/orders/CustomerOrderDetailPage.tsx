@@ -108,6 +108,7 @@ function Receipt({ order }: { order: CustomerOrderDetail }) {
 
       <dl className="grid gap-3 rounded-lg bg-muted p-4">
         <div className="flex justify-between gap-4"><dt>Subtotal</dt><dd>{formatMoney(order.subtotalMinor, order.currencyCode)}</dd></div>
+        {order.subtotalMinor > order.totalMinor ? <div className="flex justify-between gap-4"><dt>Discount</dt><dd>−{formatMoney(order.subtotalMinor - order.totalMinor, order.currencyCode)}</dd></div> : null}
         <div className="flex justify-between gap-4 text-lg font-semibold"><dt>Total</dt><dd>{formatMoney(order.totalMinor, order.currencyCode)}</dd></div>
         <div className="flex justify-between gap-4"><dt>Payment</dt><dd>{order.paymentMethod === "CASH" ? "Cash" : order.paymentMethod}</dd></div>
       </dl>

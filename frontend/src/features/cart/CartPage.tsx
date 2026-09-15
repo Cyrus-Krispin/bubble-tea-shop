@@ -1,5 +1,6 @@
+import { useCustomerQuote } from "./useCustomerQuote";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 
 import { CustomerHeader } from "../../app/CustomerHeader";
@@ -40,27 +41,26 @@ export function CartPage() {
     removeItem,
     clearCart,
   } = useCart();
+  const pricing = useCustomerQuote(session?.accessToken, items);
+  const checkoutTotal = pricing.quote?.totalMinor ?? previewTotalMinor;
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>();
   const [placedOrder, setPlacedOrder] = useState<GuestOrder>();
   const [placedLocationSlug, setPlacedLocationSlug] = useState<string>();
-  const retryKey = useRef<string | undefined>(undefined);
+  const [attempt, setAttempt] = useState<{ items: typeof items; key: string }>();
+  const retryKey = attempt?.items === items ? attempt.key : undefined;
   const locations = useGuestLocations();
   const pickupLocation = locations.status === "ready"
     ? locations.data.find((location) => location.slug === items[0]?.locationSlug)
     : undefined;
   const menuPath = items[0] === undefined ? "/shop" : `/shop/${items[0].locationSlug}`;
 
-  useEffect(() => {
-    retryKey.current = undefined;
-  }, [items]);
-
   async function checkout() {
-    if (submitting || items.length === 0) return;
+    if (submitting || items.length === 0 || (!retryKey && (pricing.loading || pricing.error))) return;
     setSubmitting(true);
     setSubmitError(undefined);
-    const key = retryKey.current ?? crypto.randomUUID();
-    retryKey.current = key;
+    const key = retryKey ?? crypto.randomUUID();
+    setAttempt({ items, key });
     try {
       const order = await placeGuestOrder({
         items: items.map((item) => ({
@@ -69,13 +69,13 @@ export function CartPage() {
           optionChoiceIds: item.configuration.selections.flatMap((selection) => selection.choiceIds),
         })),
       }, key, session?.accessToken, items[0].locationSlug);
-      retryKey.current = undefined;
+      setAttempt(undefined);
       setPlacedLocationSlug(items[0].locationSlug);
       setPlacedOrder(order);
       clearCart();
     } catch (error) {
       if (error instanceof OrderError) {
-        retryKey.current = undefined;
+        setAttempt(undefined);
         if (error.code === "ORDER_CATALOG_CHANGED") {
           setSubmitError("The menu changed while you were ordering. Review the current menu and update this order before trying again.");
         } else if (error.code === "CUSTOMER_ACCOUNT_DISABLED") {
@@ -113,6 +113,7 @@ export function CartPage() {
             <dl className="grid gap-3 rounded-lg bg-muted p-4">
               <div className="flex justify-between gap-4"><dt>Status</dt><dd>Pending</dd></div>
               <div className="flex justify-between gap-4"><dt>Items</dt><dd>{placedOrder.items.reduce((total, item) => total + item.quantity, 0)}</dd></div>
+              {placedOrder.subtotalMinor > placedOrder.totalMinor ? <div className="flex justify-between gap-4"><dt>Favorite discount</dt><dd>−{formatMoney(placedOrder.subtotalMinor - placedOrder.totalMinor, placedOrder.currencyCode)}</dd></div> : null}
               <div className="flex justify-between gap-4 font-semibold"><dt>Confirmed total</dt><dd>{formatMoney(placedOrder.totalMinor, placedOrder.currencyCode)}</dd></div>
             </dl>
             <Button asChild variant="outline"><Link to={placedLocationSlug === undefined ? "/shop" : `/shop/${placedLocationSlug}`}>Start another order</Link></Button>
@@ -142,9 +143,10 @@ export function CartPage() {
               <CardContent><dl className="grid gap-3">
                 <div className="flex justify-between gap-4"><dt>Pickup at</dt><dd className="text-right font-medium">{pickupLocation?.name ?? locationNameFromSlug(items[0]?.locationSlug)}</dd></div>
                 <div className="flex justify-between gap-4"><dt>Items</dt><dd>{itemCount}</dd></div>
-                <div className="flex justify-between gap-4 border-t pt-3 text-lg font-semibold"><dt>Preview total</dt><dd>{formatMoney(previewTotalMinor, items[0].currency)}</dd></div>
+                {pricing.quote && pricing.quote.discountMinor > 0 ? <div className="flex justify-between gap-4"><dt>Favorite discount</dt><dd>−{formatMoney(pricing.quote.discountMinor, pricing.quote.currencyCode)}</dd></div> : null}
+                <div className="flex justify-between gap-4 border-t pt-3 text-lg font-semibold"><dt>Preview total</dt><dd>{pricing.loading ? "Calculating…" : formatMoney(checkoutTotal, items[0].currency)}</dd></div>
               </dl></CardContent>
-              <CardFooter className="grid gap-3"><Button aria-describedby="checkout-note" className="w-full" isLoading={submitting} loadingLabel="Placing order…" onClick={checkout} type="button">{`Place order · ${formatMoney(previewTotalMinor, items[0].currency)}`}</Button><small className="text-muted-foreground" id="checkout-note">This sends a pending order to the shop. Pay cash at pickup.</small>{submitError === undefined ? null : <Alert variant="destructive"><AlertDescription>{submitError}</AlertDescription></Alert>}</CardFooter>
+              <CardFooter className="grid gap-3"><Button aria-describedby="checkout-note" className="w-full" disabled={!retryKey && (pricing.loading || pricing.error)} isLoading={submitting} loadingLabel="Placing order…" onClick={checkout} type="button">{`Place order · ${formatMoney(checkoutTotal, items[0].currency)}`}</Button>{pricing.error ? <div role="alert">Current prices could not be loaded. <Button variant="outline" onClick={pricing.retry}>Refresh prices</Button></div> : null}<small className="text-muted-foreground" id="checkout-note">This sends a pending order to the shop. Pay cash at pickup.</small>{submitError === undefined ? null : <Alert variant="destructive"><AlertDescription>{submitError}</AlertDescription></Alert>}</CardFooter>
             </Card>
           </div>
         )}

@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { expectNoAccessibilityViolations } from "../../test/accessibility";
+vi.mock("./useCustomerQuote", () => ({ useCustomerQuote: vi.fn() }));
 vi.mock("./orderClient", () => ({
   placeGuestOrder: vi.fn(),
   OrderError: class OrderError extends Error {
@@ -17,6 +18,7 @@ vi.mock("../catalog/catalogClient", () => ({
 
 import { CartProvider } from "./CartProvider";
 import { useCart } from "./CartContext";
+import { useCustomerQuote } from "./useCustomerQuote";
 import { CartPage } from "./CartPage";
 import { placeGuestOrder } from "./orderClient";
 import { getGuestLocations } from "../catalog/catalogClient";
@@ -74,6 +76,7 @@ function renderCart() {
 describe("CartPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useCustomerQuote).mockReturnValue({ quote: undefined, error: undefined, loading: false, retry: vi.fn() });
     vi.mocked(placeGuestOrder).mockResolvedValue(placedOrder);
     vi.mocked(getGuestLocations).mockResolvedValue([{
       id: "location-id",
@@ -165,4 +168,19 @@ describe("CartPage", () => {
     expect(vi.mocked(placeGuestOrder).mock.calls[1]?.[1]).toBe(firstKey);
     expect(screen.getByRole("heading", { name: "Moonlit Milk Tea" })).toBeVisible();
   });
+  it("replays an uncertain placement even when current quote prices are unavailable", async () => {
+    vi.mocked(placeGuestOrder).mockRejectedValueOnce(new TypeError("lost response"));
+    const view = renderCart();
+    fireEvent.click(screen.getByRole("button", { name: "Seed item" }));
+    fireEvent.click(screen.getByRole("button", { name: "Place order · $7.20" }));
+    await screen.findByRole("alert");
+    const key = vi.mocked(placeGuestOrder).mock.calls[0]?.[1];
+    vi.mocked(useCustomerQuote).mockReturnValue({ quote: undefined, error: true, loading: false, retry: vi.fn() });
+    view.rerender(<MemoryRouter><CartProvider><SeedControl /><CartPage /></CartProvider></MemoryRouter>);
+    expect(screen.getByRole("button", { name: "Place order · $7.20" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Place order · $7.20" }));
+    expect(await screen.findByRole("heading", { name: "Pickup BT0000000001" })).toBeVisible();
+    expect(vi.mocked(placeGuestOrder).mock.calls[1]?.[1]).toBe(key);
+  });
+
 });

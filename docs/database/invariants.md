@@ -159,3 +159,14 @@
 - UPDATE/DELETE of an expense or void is rejected. At most one scoped void per expense can correct
   a mistaken entry; it changes the original reporting period, never records a refund or alters stock.
 - Report and expense mutation services resolve current staff scope before accessing records.
+
+## Favorite pricing
+
+- Resolve customer identity and shop organization server-side. Favorite selection requires a current
+  active offering; archived recipes cannot earn new savings.
+- Apply 5% of one matching base unit, rounded down to minor units; choose the largest eligible
+  discount and cap it at that unit's configured price. Guests and counter orders receive no discount.
+- Placement snapshots subtotal, discount, discount recipe and total; all are immutable. The database
+  enforces nonnegative savings and `total = subtotal - discount`. Payments use that total.
+- Idempotency replay returns the original pricing before considering changed preferences or prices.
+  Quotes are estimates and do not reserve prices or stock.

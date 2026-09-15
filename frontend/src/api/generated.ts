@@ -177,6 +177,25 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/customer/locations/{locationSlug}/favorite": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Read the customer's organization favorite and available recipes */
+        readonly get: operations["getCustomerFavorite"];
+        /** Choose a favorite recipe from this shop menu */
+        readonly put: operations["setCustomerFavorite"];
+        readonly post?: never;
+        /** Remove the favorite preference while preserving order history */
+        readonly delete: operations["clearCustomerFavorite"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/recipes": {
         readonly parameters: {
             readonly query?: never;
@@ -603,6 +622,23 @@ export interface paths {
         readonly put?: never;
         /** Place an order at a public location */
         readonly post: operations["placeGuestLocationOrder"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/customer/locations/{locationSlug}/order-quote": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Estimate server prices and the customer's favorite discount */
+        readonly post: operations["quoteCustomerOrder"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -1213,6 +1249,23 @@ export interface components {
             /** Format: date-time */
             readonly updatedAt: string;
         };
+        readonly FavoriteRequest: {
+            /** Format: uuid */
+            readonly recipeId: string;
+        };
+        readonly CustomerFavorite: {
+            /** Format: uuid */
+            readonly recipeId: string | null;
+            readonly recipeName: string | null;
+            readonly recipes: readonly components["schemas"]["FavoriteRecipe"][];
+            /** Format: int32 */
+            readonly discountPercent: number;
+        };
+        readonly FavoriteRecipe: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+        };
         readonly CreateRecipeRequest: {
             readonly name: string;
             readonly description?: string | null;
@@ -1436,6 +1489,15 @@ export interface components {
         readonly ArchiveIngredientRequest: {
             /** Format: int64 */
             readonly version: number;
+        };
+        readonly CustomerOrderQuote: {
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly subtotalMinor: number;
+            /** Format: int64 */
+            readonly discountMinor: number;
+            /** Format: int64 */
+            readonly totalMinor: number;
         };
         readonly CustomerAccountDto: {
             /** Format: uuid */
@@ -2387,6 +2449,91 @@ export interface operations {
                     readonly "application/problem+json": components["schemas"]["ProblemDetail"];
                 };
             };
+        };
+    };
+    readonly getCustomerFavorite: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly locationSlug: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Favorite selection */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CustomerFavorite"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly setCustomerFavorite: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly locationSlug: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["FavoriteRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Favorite saved */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CustomerFavorite"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly clearCustomerFavorite: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly locationSlug: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Favorite removed */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CustomerFavorite"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
         };
     };
     readonly listRecipes: {
@@ -3526,6 +3673,37 @@ export interface operations {
             readonly 400: components["responses"]["Problem"];
             readonly 409: components["responses"]["Problem"];
             readonly 503: components["responses"]["Problem"];
+        };
+    };
+    readonly quoteCustomerOrder: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly locationSlug: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateGuestOrderRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current checkout estimate */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CustomerOrderQuote"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
         };
     };
     readonly provisionCustomerAccount: {

@@ -56,3 +56,10 @@ The frontend is one React/TypeScript/Vite SPA:
 - Local development uses PostgreSQL, Supabase Auth, its gateway, and Spring through Compose. The
   backend retrieves only public verification keys from the private network and uses no hosted
   Supabase service.
+
+## Favorite pricing ownership
+
+Ordering owns customer favorite preferences, checkout quotes and discount snapshots. It reads
+identity and catalog records through its application service; controllers never update their tables.
+The same pricing calculation serves quotes and placement. Customer IDs, discount percentages and
+monetary values are never accepted from checkout clients.

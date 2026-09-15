@@ -1,3 +1,4 @@
+import { CustomerFavoritePanel } from "./CustomerFavoritePanel";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -47,6 +48,7 @@ export function CustomerAccountPage() {
               <Button onClick={handleSignOut} variant="outline">Sign out</Button>
               {signOutFailed ? <Alert className="basis-full" variant="destructive"><AlertDescription>We couldn&apos;t sign you out. Please try again.</AlertDescription></Alert> : null}
             </CardContent></Card>
+            <CustomerFavoritePanel accessToken={session.accessToken} />
             <CustomerOrderHistory accessToken={session.accessToken} />
           </>
         ) : null}

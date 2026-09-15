@@ -85,3 +85,14 @@ Ordering owns these append-only records. No inventory balance or movement is cha
 Both tables reject UPDATE/DELETE. A void excludes the original amount from its report period while
 retaining the original and correcting actor. Payment reporting uses PAID records and `paid_at`.
 Expense history and paid-payment indexes bound location/time queries; endpoint expense pages are 25.
+
+## Customer favorite and discount snapshots (V17)
+
+`customer_favorite` stores one `recipe_id` per (`account_id`, `organization_id`) and server `updated_at`.
+The composite recipe/organization FK prevents cross-organization preferences. Customers may replace
+or delete their own preference; ordering owns it.
+
+`customer_order.discount_minor` is nonnegative and `total_minor = subtotal_minor - discount_minor`.
+Nullable `discount_recipe_id` retains the recipe responsible for savings, scoped to the order's
+organization. A trigger rejects changes to all four money/discount snapshot fields after insertion.
+Payment amount equals the confirmed discounted total; items retain their undiscounted unit prices.
