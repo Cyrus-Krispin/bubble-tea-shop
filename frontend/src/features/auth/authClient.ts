@@ -103,15 +103,21 @@ export async function getCurrentAuthSession(): Promise<AuthSession | null> {
 }
 
 export function subscribeToAuthState(listener: (session: AuthSession | null) => void): () => void {
+  let active = true;
+  let sequence = 0;
   const { data } = authClient.auth.onAuthStateChange((_event, session) => {
+    const eventSequence = ++sequence;
     const gate = customerAccessGate;
-    if (gate === null) {
+    if (!active) return;
+    if (gate === null || session === null) {
       listener(summarizeSession(session));
       return;
     }
-    void gate.then((provisioned) => listener(provisioned ? summarizeSession(session) : null));
+    void gate.then((provisioned) => {
+      if (active && sequence === eventSequence) listener(provisioned ? summarizeSession(session) : null);
+    });
   });
-  return () => data.subscription.unsubscribe();
+  return () => { active = false; data.subscription.unsubscribe(); };
 }
 
 export async function signOut(): Promise<void> {
@@ -123,7 +129,9 @@ export async function signOut(): Promise<void> {
 
 function summarizeSession(session: Session | null): AuthSession | null {
   const email = session?.user.email;
-  return email === undefined || session === null
+  const expiresAt = session?.expires_at;
+  return email === undefined || session === null || expiresAt === undefined || !Number.isFinite(expiresAt)
+    || expiresAt * 1000 <= Date.now()
     ? null
-    : { accessToken: session.access_token, email };
+    : { accessToken: session.access_token, email, expiresAt };
 }

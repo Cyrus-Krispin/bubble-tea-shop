@@ -78,3 +78,5 @@ The Flyway migration remains the executable source of truth for the database.
 2. Update the ERD, dictionary, and invariants in the same change as a Flyway schema migration.
 3. Never edit an applied Flyway migration; add a new versioned migration instead.
 4. Keep generated OpenAPI artifacts separate from human-authored API conventions.
+
+- [Session expiry and refresh](specs/session-expiry-handling.md)

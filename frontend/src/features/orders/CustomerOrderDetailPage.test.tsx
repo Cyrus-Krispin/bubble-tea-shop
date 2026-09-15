@@ -45,7 +45,7 @@ const detail = {
   }],
 };
 
-function renderPage(session: { accessToken: string; email: string } | null) {
+function renderPage(session: { accessToken: string; expiresAt: number; email: string } | null) {
   return render(
     <AuthContext.Provider value={{ isLoading: false, session }}>
       <MemoryRouter initialEntries={[`/account/orders/${orderId}`]}>
@@ -65,7 +65,7 @@ describe("CustomerOrderDetailPage", () => {
 
   it("renders an immutable, accessible customer receipt", async () => {
     const { container } = renderPage({
-      accessToken: "customer-token",
+      accessToken: "customer-token", expiresAt: 4102444800,
       email: "customer@example.test",
     });
 
