@@ -14,6 +14,7 @@ import { StaffWorkspacePage } from "../features/staff/StaffWorkspacePage";
 import { StaffLayout } from "../features/staff/StaffLayout";
 import { NotFoundPage } from "./NotFoundPage";
 
+const CashFlowPage = lazy(() => import("../features/staff/CashFlowPage"));
 const CounterOrderPage = lazy(() => import("../features/staff/CounterOrderPage"));
 const IngredientManagementPage = lazy(() => import("../features/staff/IngredientManagementPage"));
 const RecipeManagementPage = lazy(() => import("../features/staff/RecipeManagementPage"));
@@ -122,6 +123,7 @@ export function App() {
                 <InventoryManagementPage />
               </Suspense>
             )} />
+            <Route path="cash-flow" element={<Suspense fallback={<CatalogLoading label="Cash flow" />}><CashFlowPage /></Suspense>} />
             <Route path="counter" element={<Suspense fallback={<CatalogLoading label="Counter order entry" />}><CounterOrderPage /></Suspense>} />
             <Route path="orders" element={(
               <Suspense fallback={<CatalogLoading label="Order operations" />}>

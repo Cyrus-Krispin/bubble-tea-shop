@@ -72,3 +72,16 @@ balances or alert-history tables; the UI refreshes current warnings once per min
 
 Counter orders reuse `customer_order` with no customer account and record the creating employee
 in the initial `order_status_history.changed_by_account_id`; no employee purchase is implied.
+
+## Paid expense ledger (V16)
+
+Ordering owns these append-only records. No inventory balance or movement is changed by an expense.
+
+| Table | Fields and meaning |
+|---|---|
+| `cash_expense` | `id`; `organization_id`/`location_id` form a scoped location FK; `currency_code` is the server-resolved payment-time shop currency; positive `amount_minor` up to 100,000,000; nonblank `description` up to 240 characters; server `paid_at`; actor `recorded_by_account_id`; location-unique `request_key`. |
+| `cash_expense_void` | `expense_id` is a unique scoped FK to the original expense; `organization_id`/`location_id`; actor `recorded_by_account_id`; nonblank correction `reason` up to 240 characters; server `recorded_at`. |
+
+Both tables reject UPDATE/DELETE. A void excludes the original amount from its report period while
+retaining the original and correcting actor. Payment reporting uses PAID records and `paid_at`.
+Expense history and paid-payment indexes bound location/time queries; endpoint expense pages are 25.

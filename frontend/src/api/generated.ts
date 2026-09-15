@@ -506,6 +506,40 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/cash-flow/expenses": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Record an expense paid now in the shop currency */
+        readonly post: operations["recordPaidExpense"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/cash-flow/expenses/{expenseId}/void": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Correct a mistaken expense without deleting its history */
+        readonly post: operations["voidPaidExpense"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/ingredients": {
         readonly parameters: {
             readonly query?: never;
@@ -686,6 +720,23 @@ export interface paths {
         };
         /** Summarize projected stock shortages */
         readonly get: operations["getInventoryAlerts"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/cash-flow": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Summarize collected payments and recorded expenses */
+        readonly get: operations["getCashFlow"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -1348,6 +1399,33 @@ export interface components {
             /** Format: int64 */
             readonly priceDeltaMinor: number;
         };
+        readonly ExpenseRequest: {
+            /** Format: int64 */
+            readonly amountMinor?: number;
+            readonly description: string;
+        };
+        readonly CashFlowExpense: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly amountMinor: number;
+            readonly description: string;
+            /** Format: date-time */
+            readonly paidAt: string;
+            /** Format: uuid */
+            readonly recordedByAccountId: string;
+            readonly voided: boolean;
+            readonly voidReason: string;
+            /** Format: date-time */
+            readonly voidedAt: string;
+            /** Format: uuid */
+            readonly voidedByAccountId: string;
+            readonly replayed: boolean;
+        };
+        readonly VoidRequest: {
+            readonly reason: string;
+        };
         readonly CreateIngredientRequest: {
             readonly name: string;
             readonly sku?: string | null;
@@ -1559,6 +1637,43 @@ export interface components {
             readonly horizonDays: number;
             /** Format: date-time */
             readonly calculatedAt: string;
+        };
+        readonly CashFlowDaily: {
+            /** Format: date */
+            readonly date: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly incomeMinor: number;
+            /** Format: int64 */
+            readonly outflowMinor: number;
+        };
+        readonly CashFlowReport: {
+            /** Format: int32 */
+            readonly days: number;
+            readonly timezone: string;
+            readonly currencyCode: string;
+            /** Format: date */
+            readonly startDate: string;
+            /** Format: date-time */
+            readonly asOf: string;
+            readonly totals: readonly components["schemas"]["CashFlowTotal"][];
+            readonly daily: readonly components["schemas"]["CashFlowDaily"][];
+            readonly expenses: readonly components["schemas"]["CashFlowExpense"][];
+            /** Format: int64 */
+            readonly totalExpenses: number;
+            /** Format: int32 */
+            readonly page: number;
+            /** Format: int32 */
+            readonly totalPages: number;
+        };
+        readonly CashFlowTotal: {
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly incomeMinor: number;
+            /** Format: int64 */
+            readonly outflowMinor: number;
+            /** Format: int64 */
+            readonly netMinor: number;
         };
         readonly IngredientPage: {
             readonly items: readonly components["schemas"]["Ingredient"][];
@@ -3069,6 +3184,82 @@ export interface operations {
             readonly 409: components["responses"]["Problem"];
         };
     };
+    readonly recordPaidExpense: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly "Idempotency-Key": string;
+            };
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ExpenseRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Matching expense replayed */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CashFlowExpense"];
+                };
+            };
+            /** @description Expense recorded */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CashFlowExpense"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly voidPaidExpense: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+                readonly expenseId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["VoidRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Expense correction */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CashFlowExpense"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
     readonly listIngredients: {
         readonly parameters: {
             readonly query?: {
@@ -3559,6 +3750,37 @@ export interface operations {
                 };
                 content: {
                     readonly "application/json": components["schemas"]["InventoryAlertSummary"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
+            readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly getCashFlow: {
+        readonly parameters: {
+            readonly query?: {
+                readonly days?: number;
+                readonly page?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Cash flow report */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CashFlowReport"];
                 };
             };
             readonly 400: components["responses"]["Problem"];

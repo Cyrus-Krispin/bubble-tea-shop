@@ -80,3 +80,5 @@ The Flyway migration remains the executable source of truth for the database.
 4. Keep generated OpenAPI artifacts separate from human-authored API conventions.
 
 - [Session expiry and refresh](specs/session-expiry-handling.md)
+
+- [Cash-flow dashboard and paid expense ledger](specs/cash-flow-dashboard.md)

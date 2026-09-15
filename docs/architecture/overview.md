@@ -29,7 +29,7 @@ PostgreSQL owns relational integrity; Spring owns workflows and server-side auth
 | `identity` | Supabase identity mapping, organizations, locations, accounts, memberships | shared infrastructure |
 | `catalog` | Ingredients, recipes, products, variants, choices, offerings | identity identifiers |
 | `inventory` | Balances, immutable movements, manual stock transactions, consumption forecasts and in-app shortage alerts | identity and catalog identifiers |
-| `ordering` | Order snapshots, payments, status history, completion | identity, catalog, inventory |
+| `ordering` | Order snapshots, payments, status history, completion, operational paid expenses and cash-flow reporting | identity, catalog, inventory |
 
 Entities are persistence details and are not returned directly from controllers.
 Cross-module changes go through application services rather than writing another module's tables
