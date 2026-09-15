@@ -43,5 +43,5 @@ Never declare a live external integration verified without its provider sandbox/
 
 - [x] Final review follow-up: currency-correct reorder suggestions and availability; PR #45.
 
-- [x] Final review follow-up: idempotent manual stock movements and preserved UI recovery; focused PR pending.
-- [ ] Final review follow-up: clear optional single-choice customizations in guest and counter flows.
+- [x] Final review follow-up: idempotent manual stock movements and preserved UI recovery; PR #46.
+- [x] Final review follow-up: clear optional single-choice customizations in guest and counter flows; focused PR pending.
