@@ -1,3 +1,4 @@
+import { useStaffDraft } from "./StaffDraftContext";
 import { useEffect, useState, type FormEvent } from "react";
 import { useOutletContext } from "react-router";
 import { Field, Dialog, Pagination, ProblemState, SelectField } from "../../components/shared";
@@ -12,8 +13,8 @@ type Scope = { organizationId: string; id: string; name: string; currencyCode: s
 type Access = { token: string; scope: Scope };
 
 function ExpenseForm({ token, scope, onRecorded, onDraftChange }: Access & { onRecorded: () => void; onDraftChange: (value: boolean) => void }) {
-  const [amount, setAmount] = useState(""); const [description, setDescription] = useState("");
-  const [key, setKey] = useState<string>(); const [busy, setBusy] = useState(false); const [message, setMessage] = useState("");
+  const [amount, setAmount] = useStaffDraft(`expense:${scope.id}:amount`, ""); const [description, setDescription] = useStaffDraft(`expense:${scope.id}:description`, "");
+  const [key, setKey] = useStaffDraft<string | undefined>(`expense:${scope.id}:key`, undefined); const [busy, setBusy] = useStaffDraft(`expense:${scope.id}:busy`, false); const [message, setMessage] = useStaffDraft(`expense:${scope.id}:message`, "");
   useEffect(() => {
     onDraftChange(amount !== "" || description !== "" || key !== undefined);
     return () => onDraftChange(false);
@@ -27,7 +28,7 @@ function ExpenseForm({ token, scope, onRecorded, onDraftChange }: Access & { onR
       await recordExpense(token, scope.organizationId, scope.id, requestKey, minor, description.trim());
       setAmount(""); setDescription(""); setKey(undefined); setMessage("Expense recorded."); onRecorded();
     } catch (error) {
-      if (error instanceof CashFlowError && error.status >= 400 && error.status < 500) {
+      if (key === undefined && error instanceof CashFlowError && error.status >= 400 && error.status < 500) {
         setKey(undefined); setMessage("The expense was not accepted. Check the amount and your shop access.");
       } else setMessage("The outcome is unknown. Retry this same expense to avoid recording it twice.");
     } finally { setBusy(false); }
@@ -37,7 +38,7 @@ function ExpenseForm({ token, scope, onRecorded, onDraftChange }: Access & { onR
       <p className="text-sm text-muted-foreground">Record money paid now. Stock receipts alone do not record expenses.</p>
       <Field id="expense-description" label="Expense description"><input required maxLength={240} disabled={key !== undefined} value={description} onChange={(event) => setDescription(event.target.value)} /></Field>
       <Field id="expense-amount" label={`Amount paid (${scope.currencyCode})`} description="Up to 1,000,000.00, with at most two decimal places."><input required inputMode="decimal" disabled={key !== undefined} value={amount} onChange={(event) => setAmount(event.target.value)} /></Field>
-      <Button type="submit" isLoading={busy} disabled={expenseMinorUnits(amount) === null || !description.trim()}>{key ? "Retry same expense" : "Record expense"}</Button>
+      <Button type="submit" isLoading={busy} loadingLabel="Recording expense…" disabled={expenseMinorUnits(amount) === null || !description.trim()}>{key ? "Retry same expense" : "Record expense"}</Button>
       {message ? <p role="status">{message}</p> : null}
     </form>
   </CardContent></Card>;
@@ -65,7 +66,7 @@ function VoidExpense({ token, scope, expense, onVoided }: Access & { expense: Ex
 }
 
 function Report({ token, scope, onDraftChange }: Access & { onDraftChange: (value: boolean) => void }) {
-  const [days, setDays] = useState(7); const [page, setPage] = useState(0); const [reload, setReload] = useState(0);
+  const [days, setDays] = useState(7); const [page, setPage] = useState(0); const [reload, setReload] = useStaffDraft(`expense:${scope.id}:reload`, 0);
   const [state, setState] = useState<{ data?: CashFlowReport; error?: boolean }>({}); const [currency, setCurrency] = useState("");
   useEffect(() => {
     const controller = new AbortController();
@@ -113,10 +114,13 @@ function Report({ token, scope, onDraftChange }: Access & { onDraftChange: (valu
 
 export default function CashFlowPage() {
   const { accessToken, staffContext } = useOutletContext<StaffOutletContext>();
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useStaffDraft("expense:selected-location", "");
   const [scopeLocked, setScopeLocked] = useState(false);
   const scopes = staffContext.memberships.flatMap((member) => member.locations.map((shop) => ({ ...shop, organizationId: member.organizationId })));
   const scope = scopes.find((shop) => shop.id === location) ?? scopes[0];
+  useEffect(() => {
+    if (scope && location !== scope.id) setLocation(scope.id);
+  }, [scope, location, setLocation]);
   return <main id="staff-workspace" className="staff-main grid gap-5"><h1>Cash flow</h1>
     <p className="text-muted-foreground">Collected payments minus recorded paid expenses. This is not profit; expenses must be entered to make outflow complete.</p>
     {!scope ? <p>No active shops are assigned to your account.</p> : <><SelectField id="cash-flow-shop" label="Shop" disabled={scopeLocked} value={scope.id}

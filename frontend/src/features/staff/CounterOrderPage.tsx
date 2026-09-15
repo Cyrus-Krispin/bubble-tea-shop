@@ -1,3 +1,4 @@
+import { useStaffDraft } from "./StaffDraftContext";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router";
 import { Alert, AlertDescription } from "../../components/ui/alert";
@@ -18,13 +19,13 @@ function CounterComposer({ scope, accessToken, onBusyChange }: { scope: Scope; a
   const [menu, setMenu] = useState<CatalogMenu>();
   const [product, setProduct] = useState<CatalogProduct>();
   const [productSlug, setProductSlug] = useState("");
-  const [lines, setLines] = useState<CounterLine[]>([]);
-  const [error, setError] = useState("");
+  const [lines, setLines] = useStaffDraft<CounterLine[]>(`counter:${scope.id}:lines`, []);
+  const [error, setError] = useStaffDraft(`counter:${scope.id}:error`, "");
   const [loadError, setLoadError] = useState(false);
   const [reload, setReload] = useState(0);
-  const [attempt, setAttempt] = useState<string>();
-  const [submitting, setSubmitting] = useState(false);
-  const [placed, setPlaced] = useState<GuestOrder>();
+  const [attempt, setAttempt] = useStaffDraft<string | undefined>(`counter:${scope.id}:key`, undefined);
+  const [submitting, setSubmitting] = useStaffDraft(`counter:${scope.id}:busy`, false);
+  const [placed, setPlaced] = useStaffDraft<GuestOrder | undefined>(`counter:${scope.id}:placed`, undefined);
   useEffect(() => {
     onBusyChange(lines.length > 0 || attempt !== undefined);
     return () => onBusyChange(false);
@@ -52,7 +53,7 @@ function CounterComposer({ scope, accessToken, onBusyChange }: { scope: Scope; a
       setPlaced(await placeCounterOrder(accessToken, scope.organizationId, scope.id, key,
         { items: lines.map(({ variantId, quantity, optionChoiceIds }) => ({ variantId, quantity, optionChoiceIds })) }));
     } catch (failure) {
-      if (failure instanceof OrderError && failure.status >= 400 && failure.status < 500) {
+      if (attempt === undefined && failure instanceof OrderError && failure.status >= 400 && failure.status < 500) {
         setAttempt(undefined); setError("The order was not accepted. Check your access and current menu, then try again.");
       } else setError("The outcome is not yet known. Retry this same order to avoid a duplicate.");
     } finally { setSubmitting(false); }
@@ -82,7 +83,7 @@ function CounterComposer({ scope, accessToken, onBusyChange }: { scope: Scope; a
       <p>Preview total: {formatMoney(lines.reduce((total, line) => total + line.unitPrice * line.quantity, 0), scope.currency)}</p>
       <p className="text-sm text-muted-foreground">The server confirms prices. Stock changes only when cash is confirmed and the order is completed.</p>
       {lines.reduce((sum, line) => sum + line.quantity, 0) > 50 ? <p role="alert">An order can contain at most 50 drinks.</p> : null}
-      <Button disabled={lines.length === 0 || lines.reduce((sum, line) => sum + line.quantity, 0) > 50} isLoading={submitting} onClick={submit}>
+      <Button disabled={lines.length === 0 || lines.reduce((sum, line) => sum + line.quantity, 0) > 50} isLoading={submitting} loadingLabel="Recording counter order…" onClick={submit}>
         {attempt ? "Retry same order" : "Place counter order"}</Button>
       <Button variant="outline" disabled={attempt !== undefined} onClick={() => { setLines([]); setError(""); }}>Clear order</Button>
       {error ? <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert> : null}
@@ -93,7 +94,7 @@ function CounterComposer({ scope, accessToken, onBusyChange }: { scope: Scope; a
 export default function CounterOrderPage() {
   const { accessToken, staffContext } = useOutletContext<StaffOutletContext>();
   const [locations, setLocations] = useState<CatalogLocation[]>();
-  const [selection, setSelection] = useState("");
+  const [selection, setSelection] = useStaffDraft("counter:selected-location", "");
   const [scopeLocked, setScopeLocked] = useState(false);
   const [failed, setFailed] = useState(false);
   const [reload, setReload] = useState(0);
@@ -108,6 +109,9 @@ export default function CounterOrderPage() {
     return catalog ? [{ ...catalog, organizationId: member.organizationId }] : [];
   }));
   const scope = scopes.find((item) => item.id === selection) ?? scopes[0];
+  useEffect(() => {
+    if (scope && selection !== scope.id) setSelection(scope.id);
+  }, [scope, selection, setSelection]);
   return <main id="staff-workspace" className="staff-main grid gap-5"><h1>Counter orders</h1>
     <p className="text-muted-foreground">Record walk-in drink orders for your shop.</p>
     {failed ? <ProblemState title="Shops unavailable" message="We could not load your shop menu locations." actionLabel="Try again" onRetry={() => setReload((n) => n + 1)} />

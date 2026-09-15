@@ -157,7 +157,7 @@ export async function placeCounterOrder(accessToken: string, organizationId: str
     headers: { Authorization: `Bearer ${accessToken}` } });
   const { data, error, response } = await client.POST(
     "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/counter-orders",
-    { params: { path: { organizationId, locationId }, header: { "Idempotency-Key": idempotencyKey } }, body: input },
+    { signal: AbortSignal.timeout(30_000), params: { path: { organizationId, locationId }, header: { "Idempotency-Key": idempotencyKey } }, body: input },
   );
   if (data === undefined) throw apiError(error, response.status);
   return order(data, true);

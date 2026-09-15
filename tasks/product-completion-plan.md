@@ -24,13 +24,14 @@ PRs so each diff remains reviewable. Preserve the earlier shadcn task files.
 - [x] Projected low-stock alerts: visible in-app alerts and update behavior; PR #36.
 - [x] Reorder planning: server-filtered prioritized list; PR #37.
 - [x] Counter order entry: staff actor, guest ownership, pricing, idempotency, safe completion; PR #38.
-- [x] Cash-flow reporting: outflow capture and 1/7/30-day summaries.
+- [x] Cash-flow reporting: outflow capture and 1/7/30-day summaries; PR #40.
 - [ ] Favorite recipe discount: ownership, deterministic pricing, immutable receipt.
 - [ ] Multi-currency: location configuration and currency-specific option prices.
 - [ ] Localization: translated UI, catalog content, formatting and persistence.
 - [x] Session expiry: safe refresh/expiry behavior and race tests; PR #39.
 - [ ] Card checkout: hosted provider integration, event idempotency, stock/payment reconciliation.
 - [x] Supplier restocking decision: user chose existing manual inventory UI; verify it during final review.
+- [x] Intermediate subagent review: inventory refresh/pagination and staff retry recovery findings fixed and regression-tested.
 - [ ] Subagent final audit across all 31 original stories; address findings and rerun affected checks.
 
 For each increment: spec + code + meaningful tests, full affected Maven/frontend checks, real-browser

@@ -131,3 +131,8 @@ Spring remains the authority for signature, timestamp, account, and scope valida
 Session refresh replaces the expiry timer. Initial lookup results and deferred customer-provisioning
 callbacks cannot overwrite newer auth events or restore a signed-out/unmounted subscriber.
 See [acceptance and verification](../specs/session-expiry-handling.md).
+
+Staff form drafts and retry keys survive temporary route removal during refreshed-token permission
+revalidation in an in-memory cache above the route. Only the same resolved account can recover that
+cache; changing accounts or leaving the signed-in staff boundary discards it. No token or draft is
+written to browser storage. Private routes remain hidden until current staff access is resolved.

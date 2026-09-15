@@ -28,3 +28,14 @@ Test current scope, invalid amounts, key replay/conflicts, immutable storage, ex
 paid/pending exclusions, currency separation, timezone boundaries, zero days, and 1/7/30 filters.
 Run the backend and frontend suites and verify a manager recording and voiding an expense in
 real desktop/mobile browsers. Add Flyway V16 and update ERD, dictionary, invariants, API, and scope.
+
+## Retry recovery
+
+An in-memory staff draft cache preserves the selected location, description, amount, and request key
+while a refreshed token triggers permission revalidation. The cache is keyed to the resolved account
+and discarded on sign-out/account replacement. A failed authorization retry cannot establish that
+an earlier uncertain expense was rejected, so it must not unlock a new request key. The form stays
+frozen until the original operation is confirmed. Regression tests use the real staff layout.
+The in-flight flag also survives revalidation, preventing overlapping callbacks for one draft.
+A 30-second timeout retains the same key for recovery. Successful background completion refreshes
+the current report through the shared version counter.
