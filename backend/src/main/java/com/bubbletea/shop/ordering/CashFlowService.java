@@ -72,13 +72,17 @@ public class CashFlowService {
               FROM (
                 SELECT p.paid_at, p.currency_code, p.amount_minor AS income, 0::bigint AS outflow
                   FROM payment p JOIN customer_order o ON o.id = p.customer_order_id
-                 WHERE p.organization_id = :org AND o.location_id = :loc AND p.status = 'PAID'
+                 WHERE p.organization_id = :org AND o.location_id = :loc AND p.status IN ('PAID','REFUNDED')
                    AND p.paid_at >= :from AND p.paid_at <= :until
                 UNION ALL
                 SELECT e.paid_at, e.currency_code, 0::bigint, e.amount_minor
                   FROM cash_expense e
                  WHERE e.organization_id = :org AND e.location_id = :loc AND e.paid_at >= :from AND e.paid_at <= :until
                    AND NOT EXISTS (SELECT 1 FROM cash_expense_void v WHERE v.expense_id = e.id)
+                UNION ALL
+                SELECT r.refunded_at, r.currency_code, 0::bigint, r.amount_minor
+                  FROM card_refund r WHERE r.organization_id = :org AND r.location_id = :loc
+                    AND r.refunded_at >= :from AND r.refunded_at <= :until
               ) events GROUP BY day, currency_code ORDER BY day, currency_code
             """).param("zone", scope.timezone()).param("org", org).param("loc", loc).param("from", from).param("until", until)
             .query((rs, row) -> new Daily(rs.getDate("day").toLocalDate(), rs.getString("currency_code"), rs.getLong("income"), rs.getLong("outflow"))).list();

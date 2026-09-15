@@ -143,6 +143,7 @@ function detail(value: unknown): CustomerOrderDetail {
     status: status(input.status),
     paymentMethod: string(input.paymentMethod),
     currencyCode: string(input.currencyCode),
+    cardCheckoutId: input.cardCheckoutId === null ? null : string(input.cardCheckoutId),
     subtotalMinor: integer(input.subtotalMinor),
     totalMinor: integer(input.totalMinor),
     createdAt: instant(input.createdAt),

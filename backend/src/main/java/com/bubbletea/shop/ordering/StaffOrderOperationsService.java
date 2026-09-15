@@ -160,7 +160,8 @@ public class StaffOrderOperationsService {
         List<StockRequirement> requirements = jdbc.query("""
             SELECT ingredient.id, ingredient.name, ingredient.base_unit,
                    SUM(consumption.quantity) AS required_quantity,
-                   COALESCE(balance.quantity, 0) AS available_quantity
+                   COALESCE(balance.quantity, 0) - COALESCE((SELECT SUM(r.quantity) FROM inventory_reservation r
+                       WHERE r.location_id = ? AND r.ingredient_id = ingredient.id AND r.active AND r.customer_order_id <> ?), 0) AS available_quantity
               FROM order_item_consumption consumption
               JOIN order_item item ON item.id = consumption.order_item_id
               JOIN ingredient ON ingredient.id = consumption.ingredient_id
@@ -175,7 +176,7 @@ public class StaffOrderOperationsService {
                 return new StockRequirement(rs.getObject("id", UUID.class), rs.getString("name"),
                     rs.getString("base_unit"), decimal(required), decimal(available),
                     available.compareTo(required) >= 0);
-            }, locationId, orderId);
+            }, locationId, orderId, locationId, orderId);
 
         OrderDetailHeader header = headers.getFirst();
         return new OrderDetail(header.id(), header.publicOrderNumber(), header.status(),

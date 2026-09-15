@@ -68,6 +68,8 @@ const balance = {
   sku: "TEA-001",
   baseUnit: "GRAM" as const,
   quantity: "4.000000",
+  reservedQuantity: "0",
+  availableQuantity: "4.000000",
   reorderThreshold: "5.000000",
   belowReorderThreshold: true,
   version: 1,

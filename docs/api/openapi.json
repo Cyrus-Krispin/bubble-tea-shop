@@ -1115,6 +1115,94 @@
         } ]
       }
     },
+    "/api/v1/staff/organizations/{org}/locations/{location}/orders/{order}/card-payment/refresh" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Verify a scoped order payment and refunds",
+        "operationId" : "refreshStaffCardPayment",
+        "parameters" : [ {
+          "name" : "org",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "location",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "order",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/staff/organizations/{org}/locations/{location}/orders/{order}/card-payment/cancel" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Cancel an unfulfilled card order and refund any collected payment",
+        "operationId" : "cancelStaffCardOrder",
+        "parameters" : [ {
+          "name" : "org",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "location",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "order",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/staff/organizations/{organizationId}/recipes" : {
       "get" : {
         "tags" : [ "Recipe management" ],
@@ -3336,6 +3424,51 @@
         }
       }
     },
+    "/api/v1/guest/locations/{slug}/card-checkouts" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Reserve stock and start an idempotent hosted card checkout",
+        "operationId" : "createCardCheckout",
+        "parameters" : [ {
+          "name" : "slug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGuestOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/guest/locations/{locationSlug}/orders" : {
       "post" : {
         "tags" : [ "Guest ordering" ],
@@ -3396,6 +3529,62 @@
           },
           "503" : {
             "$ref" : "#/components/responses/Problem"
+          }
+        }
+      }
+    },
+    "/api/v1/guest/card-checkouts/{id}/refresh" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Verify the latest hosted payment status",
+        "operationId" : "refreshCardCheckout",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/card-checkouts/{id}/cancel" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Cancel an unpaid hosted checkout before releasing stock",
+        "operationId" : "cancelUnpaidCardCheckout",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
           }
         }
       }
@@ -4122,6 +4311,25 @@
         } ]
       }
     },
+    "/api/v1/guest/payment-methods" : {
+      "get" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Read configured payment methods",
+        "operationId" : "getGuestPaymentMethods",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaymentMethods"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/guest/menu" : {
       "get" : {
         "tags" : [ "Guest catalog" ],
@@ -4291,6 +4499,34 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/card-checkouts/{id}" : {
+      "get" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Read a card checkout using its private recovery identifier",
+        "operationId" : "getCardCheckout",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
                 }
               }
             }
@@ -5339,6 +5575,124 @@
           }
         }
       },
+      "CardCheckoutStatus" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "checkoutUrl" : {
+            "type" : [ "string", "null" ]
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "cancellationRequested" : {
+            "type" : "boolean"
+          },
+          "recoveryCode" : {
+            "type" : [ "string", "null" ]
+          },
+          "refundedMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "order" : {
+            "$ref" : "#/components/schemas/GuestOrder"
+          }
+        }
+      },
+      "GuestOrder" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "publicOrderNumber" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "paymentMethod" : {
+            "type" : "string"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "subtotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "replayed" : {
+            "type" : "boolean"
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GuestOrderLine"
+            }
+          }
+        }
+      },
+      "GuestOrderLine" : {
+        "type" : "object",
+        "properties" : {
+          "productName" : {
+            "type" : "string"
+          },
+          "variantName" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "unitPriceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "lineTotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GuestOrderOption"
+            }
+          }
+        }
+      },
+      "GuestOrderOption" : {
+        "type" : "object",
+        "properties" : {
+          "groupName" : {
+            "type" : "string"
+          },
+          "choiceName" : {
+            "type" : "string"
+          },
+          "priceDeltaMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "CreateRecipeRequest" : {
         "type" : "object",
         "properties" : {
@@ -5831,92 +6185,6 @@
           }
         },
         "required" : [ "items" ]
-      },
-      "GuestOrder" : {
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "format" : "uuid"
-          },
-          "publicOrderNumber" : {
-            "type" : "string"
-          },
-          "status" : {
-            "type" : "string"
-          },
-          "paymentMethod" : {
-            "type" : "string"
-          },
-          "currencyCode" : {
-            "type" : "string"
-          },
-          "subtotalMinor" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "totalMinor" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "createdAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "replayed" : {
-            "type" : "boolean"
-          },
-          "items" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/GuestOrderLine"
-            }
-          }
-        }
-      },
-      "GuestOrderLine" : {
-        "type" : "object",
-        "properties" : {
-          "productName" : {
-            "type" : "string"
-          },
-          "variantName" : {
-            "type" : "string"
-          },
-          "quantity" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "unitPriceMinor" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "lineTotalMinor" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "options" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/GuestOrderOption"
-            }
-          }
-        }
-      },
-      "GuestOrderOption" : {
-        "type" : "object",
-        "properties" : {
-          "groupName" : {
-            "type" : "string"
-          },
-          "choiceName" : {
-            "type" : "string"
-          },
-          "priceDeltaMinor" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        }
       },
       "ExpenseRequest" : {
         "type" : "object",
@@ -6457,6 +6725,12 @@
           "quantity" : {
             "type" : "string"
           },
+          "reservedQuantity" : {
+            "type" : "string"
+          },
+          "availableQuantity" : {
+            "type" : "string"
+          },
           "reorderThreshold" : {
             "type" : [ "string", "null" ]
           },
@@ -6778,6 +7052,17 @@
             "items" : {
               "$ref" : "#/components/schemas/StaffLocation"
             }
+          }
+        }
+      },
+      "PaymentMethods" : {
+        "type" : "object",
+        "properties" : {
+          "cash" : {
+            "type" : "boolean"
+          },
+          "card" : {
+            "type" : "boolean"
           }
         }
       },
@@ -7127,6 +7412,10 @@
             "items" : {
               "$ref" : "#/components/schemas/CustomerOrderLine"
             }
+          },
+          "cardCheckoutId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
           }
         }
       },

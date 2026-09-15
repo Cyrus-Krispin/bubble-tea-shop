@@ -113,3 +113,14 @@ currency. Location currency is immutable by trigger. No existing money values ar
 request UUID. It binds the resolved actor and normalized payload fingerprint to one ledger movement.
 Its deferred movement foreign key permits reserving a key before updating stock, with both records
 committed in the same transaction. Failed attempts leave neither a request nor a movement.
+
+## Card checkout and held stock (V20)
+
+- `card_checkout`: one private recovery capability per online order; scoped organization/location,
+  immutable provider references after discovery, original expiry, reconciliation lease/generation,
+  cancellation actor/request and safe diagnostic code. Provider HTTP occurs outside transactions.
+- `inventory_reservation`: positive ingredient quantities by order/ingredient, with scoped foreign
+  keys and active/released timestamp consistency. Released rows remain for audit.
+- `card_refund`: immutable provider refund identity, scoped order, currency, amount and actual refund
+  timestamp. Successful records contribute to outflow without removing original paid income.
+- `payment.paid_at` remains present after a card refund to preserve collection chronology.

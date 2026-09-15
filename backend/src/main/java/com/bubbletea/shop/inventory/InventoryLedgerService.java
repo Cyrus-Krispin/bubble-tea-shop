@@ -11,9 +11,11 @@ import java.util.UUID;
 @Service
 public class InventoryLedgerService {
     private final JdbcTemplate jdbc;
+    private final InventoryReservationService reservations;
 
-    public InventoryLedgerService(JdbcTemplate jdbc) {
+    public InventoryLedgerService(JdbcTemplate jdbc, InventoryReservationService reservations) {
         this.jdbc = jdbc;
+        this.reservations = reservations;
     }
 
     @Transactional
@@ -51,11 +53,12 @@ public class InventoryLedgerService {
         }
 
         BigDecimal resultingQuantity = balance.quantity().add(command.quantityDelta());
-        if (resultingQuantity.signum() < 0) {
+        BigDecimal reserved = reservations.reserved(command.locationId(), command.ingredientId(), null);
+        if (resultingQuantity.compareTo(reserved) < 0) {
             throw new InsufficientStockException(java.util.Map.of(
                 command.ingredientId(),
                 new InsufficientStockException.StockShortage(
-                    command.quantityDelta().abs(), balance.quantity())));
+                    command.quantityDelta().abs(), balance.quantity().subtract(reserved))));
         }
 
         jdbc.update("""
