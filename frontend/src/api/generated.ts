@@ -3436,7 +3436,9 @@ export interface operations {
     readonly createInventoryMovement: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header: {
+                readonly "Idempotency-Key": string;
+            };
             readonly path: {
                 readonly organizationId: string;
                 readonly locationId: string;

@@ -15,6 +15,7 @@ export type ManualInventoryMovementType =
   CreateInventoryMovementInput["movementType"];
 
 export type InventoryErrorCode =
+  | "INVENTORY_IDEMPOTENCY_CONFLICT"
   | "INVENTORY_INVALID"
   | "INVENTORY_NOT_FOUND"
   | "INVENTORY_STATE_CONFLICT"
@@ -153,6 +154,7 @@ function parsePage<T>(value: unknown, parseItem: (item: unknown) => T) {
 
 function knownCode(value: unknown): InventoryErrorCode {
   if (
+    value === "INVENTORY_IDEMPOTENCY_CONFLICT" ||
     value === "INVENTORY_INVALID" ||
     value === "INVENTORY_NOT_FOUND" ||
     value === "INVENTORY_STATE_CONFLICT" ||
@@ -255,11 +257,12 @@ export async function recordInventoryMovement(
   accessToken: string,
   organizationId: string,
   locationId: string,
+  requestKey: string,
   input: CreateInventoryMovementInput,
 ): Promise<InventoryMovement> {
   const { data, error, response } = await client(accessToken).POST(
     "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/movements",
-    { params: { path: { organizationId, locationId } }, body: input },
+    { params: { path: { organizationId, locationId }, header: { "Idempotency-Key": requestKey } }, body: input, signal: AbortSignal.timeout(30_000) },
   );
   if (data === undefined) throw apiError(error, response.status);
   return parseMovement(data);

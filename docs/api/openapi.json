@@ -2712,6 +2712,14 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
         } ],
         "requestBody" : {
           "content" : {

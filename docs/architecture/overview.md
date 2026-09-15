@@ -70,3 +70,7 @@ Identity owns owner-only location creation. Catalog owns per-currency option pri
 readiness rule; ordering resolves those prices during placement. New shops start without offerings
 or stock. Managers need an explicit location assignment through the existing owner team workflow.
 The guest storefront uses an honest generic shop icon until location artwork is supplied.
+
+Inventory owns manual-movement retry identities. Its application service authorizes each request,
+claims the location-scoped key, compares the resolved actor and normalized payload, and returns an
+existing immutable movement or records one new ledger mutation in the same transaction.

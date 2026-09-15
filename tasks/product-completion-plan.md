@@ -41,4 +41,7 @@ Never declare a live external integration verified without its provider sandbox/
 
 - [x] Customer checkout recovery: preserve original attempt across routes, token changes and ambiguous errors; PR #43.
 
-- [x] Final review follow-up: currency-correct reorder suggestions and availability; focused PR pending.
+- [x] Final review follow-up: currency-correct reorder suggestions and availability; PR #45.
+
+- [x] Final review follow-up: idempotent manual stock movements and preserved UI recovery; focused PR pending.
+- [ ] Final review follow-up: clear optional single-choice customizations in guest and counter flows.
