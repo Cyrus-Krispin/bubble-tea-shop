@@ -1,0 +1,21 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, expect, it, vi } from "vitest";
+import { selectOption } from "../../test/selectOption";
+import { CurrencyPriceEditor } from "./CurrencyPriceEditor";
+import { getCurrencyPrices, saveCurrencyPrices } from "./currencyClient";
+vi.mock("./currencyClient", () => ({ getCurrencyPrices: vi.fn(), saveCurrencyPrices: vi.fn() }));
+const choices = [{ linkId: "choice", groupName: "Toppings", choiceName: "Pearls", priceDeltaMinor: null }];
+beforeEach(() => { vi.resetAllMocks(); vi.mocked(getCurrencyPrices).mockImplementation(async (_t, _o, variantId, currencyCode) => ({ variantId, currencyCode, version: 2, choices })); });
+it("requires explicit currency prices including zero and saves the selected currency", async () => {
+  vi.mocked(saveCurrencyPrices).mockResolvedValue({ variantId: "variant", currencyCode: "MYR", version: 3, choices: [{ ...choices[0], priceDeltaMinor: 150 }] });
+  render(<CurrencyPriceEditor token="token" organizationId="org" variantId="variant" onChanged={vi.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Set currency prices" }));
+  await screen.findByLabelText("Toppings · Pearls (SGD)");
+  await selectOption(screen.getByRole("combobox", { name: "Price currency" }), "MYR");
+  const input = await screen.findByLabelText("Toppings · Pearls (MYR)");
+  expect(input).toHaveValue("");
+  fireEvent.change(input, { target: { value: "1.50" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save currency prices" }));
+  expect(await screen.findByText("Currency prices saved.")).toBeVisible();
+  expect(saveCurrencyPrices).toHaveBeenCalledWith("token", "org", expect.objectContaining({ currencyCode: "MYR", version: 2 }), { choice: "1.50" });
+});

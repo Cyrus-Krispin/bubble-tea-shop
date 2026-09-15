@@ -1,3 +1,4 @@
+import { Store } from "lucide-react";
 import type { CatalogLocation } from "./types";
 
 export function LocationArtwork({
@@ -7,6 +8,7 @@ export function LocationArtwork({
   location: CatalogLocation;
   priority?: boolean;
 }) {
+  if (location.imageKey === "generic") return <div className="location-picker-placeholder flex items-center justify-center bg-muted" aria-hidden="true"><Store className="size-12 text-muted-foreground" /></div>;
   return (
     <img
       alt=""

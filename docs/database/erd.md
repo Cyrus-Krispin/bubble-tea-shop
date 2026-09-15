@@ -120,3 +120,15 @@ erDiagram
 
 A favorite has a composite account/organization primary key. Preference removal preserves order
 history; discounted orders retain their immutable recipe reference and monetary snapshots.
+
+## Currency prices (V18)
+
+```mermaid
+erDiagram
+    ORGANIZATION ||--o{ MENU_VARIANT_CURRENCY_PRICE : scopes
+    MENU_VARIANT_OPTION_CHOICE ||--o{ MENU_VARIANT_CURRENCY_PRICE : prices_in_currency
+```
+
+Location offering base prices continue to belong to a location. Alternate-currency option prices
+belong to a variant choice and preserve organization ownership. Historical order snapshots do not
+reference mutable prices.

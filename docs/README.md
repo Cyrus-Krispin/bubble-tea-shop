@@ -86,3 +86,5 @@ The Flyway migration remains the executable source of truth for the database.
 - [Favorite drink and checkout discount](specs/favorite-drink-discount.md)
 
 - [Customer checkout recovery](specs/customer-checkout-recovery.md)
+
+- [Location currencies and option prices](specs/location-currency-pricing.md)
