@@ -136,3 +136,12 @@ Staff form drafts and retry keys survive temporary route removal during refreshe
 revalidation in an in-memory cache above the route. Only the same resolved account can recover that
 cache; changing accounts or leaving the signed-in staff boundary discards it. No token or draft is
 written to browser storage. Private routes remain hidden until current staff access is resolved.
+
+### Card checkout boundary
+
+Public card recovery uses an unpredictable UUID capability separate from order IDs. It exposes
+receipt/status and unpaid cancellation; paid refunds require server-resolved staff scope. Customer
+history reveals the capability only after ownership checks. Raw-body Stripe HMAC verification uses
+a five-minute timestamp tolerance and constant-time comparison; event receipt only queues server
+retrieval. Secrets stay in backend environment configuration. Hosted URLs must be HTTPS on
+`checkout.stripe.com`; outbound API requests use a fixed Stripe origin without redirects.

@@ -113,6 +113,8 @@ function parseBalance(value: unknown): InventoryBalance {
     sku: nullableString(input.sku),
     baseUnit: baseUnit(input.baseUnit),
     quantity: string(input.quantity),
+    reservedQuantity: string(input.reservedQuantity),
+    availableQuantity: string(input.availableQuantity),
     reorderThreshold: nullableString(input.reorderThreshold),
     belowReorderThreshold: boolean(input.belowReorderThreshold),
     version: integer(input.version),

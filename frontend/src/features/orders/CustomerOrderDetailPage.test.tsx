@@ -19,6 +19,7 @@ const detail = {
   status: "COMPLETED" as const,
   paymentMethod: "CASH",
   currencyCode: "SGD",
+  cardCheckoutId: null,
   subtotalMinor: 720,
   totalMinor: 720,
   createdAt: "2026-08-22T09:30:00Z",
