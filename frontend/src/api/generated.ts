@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    readonly "/api/v1/staff/organizations/{organizationId}/variants/{variantId}/currency-prices/{currency}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["getVariantCurrencyPrices"];
+        readonly put: operations["setVariantCurrencyPrices"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}": {
         readonly parameters: {
             readonly query?: never;
@@ -449,6 +465,22 @@ export interface paths {
         readonly put?: never;
         /** Deactivate a manager membership */
         readonly post: operations["deactivateOrganizationManager"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["listOwnerLocations"];
+        readonly put?: never;
+        readonly post: operations["createOwnerLocation"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -968,6 +1000,33 @@ export interface components {
                 readonly [key: string]: unknown;
             };
         };
+        readonly PriceInput: {
+            /** Format: uuid */
+            readonly linkId: string;
+            /** Format: int64 */
+            readonly priceDeltaMinor: number;
+        };
+        readonly ReplacePrices: {
+            /** Format: int64 */
+            readonly version: number;
+            readonly prices: readonly components["schemas"]["PriceInput"][];
+        };
+        readonly CurrencyChoicePrice: {
+            /** Format: uuid */
+            readonly linkId: string;
+            readonly groupName: string;
+            readonly choiceName: string;
+            /** Format: int64 */
+            readonly priceDeltaMinor: number | null;
+        };
+        readonly VariantCurrencyPriceSet: {
+            /** Format: uuid */
+            readonly variantId: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly version: number;
+            readonly choices: readonly components["schemas"]["CurrencyChoicePrice"][];
+        };
         readonly UpdateRecipeRequest: {
             readonly name: string;
             readonly description?: string | null;
@@ -1315,6 +1374,23 @@ export interface components {
             /** Format: email */
             readonly email: string;
             readonly locationIds: readonly string[];
+        };
+        readonly CreateLocation: {
+            readonly name: string;
+            readonly slug: string;
+            readonly currencyCode: string;
+            readonly timezone: string;
+            readonly defaultLocale: string;
+        };
+        readonly OwnerShopLocation: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly slug: string | null;
+            readonly currencyCode: string;
+            readonly timezone: string;
+            readonly defaultLocale: string;
+            readonly active: boolean;
         };
         readonly OrderDetail: {
             /** Format: uuid */
@@ -2006,6 +2082,58 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    readonly getVariantCurrencyPrices: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly variantId: string;
+                readonly currency: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["VariantCurrencyPriceSet"];
+                };
+            };
+        };
+    };
+    readonly setVariantCurrencyPrices: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+                readonly variantId: string;
+                readonly currency: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ReplacePrices"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["VariantCurrencyPriceSet"];
+                };
+            };
+        };
+    };
     readonly getRecipe: {
         readonly parameters: {
             readonly query?: never;
@@ -3129,6 +3257,54 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ManagerSummary"];
+                };
+            };
+        };
+    };
+    readonly listOwnerLocations: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": readonly components["schemas"]["OwnerShopLocation"][];
+                };
+            };
+        };
+    };
+    readonly createOwnerLocation: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly organizationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateLocation"];
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["OwnerShopLocation"];
                 };
             };
         };

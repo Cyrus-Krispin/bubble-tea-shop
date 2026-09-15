@@ -170,3 +170,15 @@
   enforces nonnegative savings and `total = subtotal - discount`. Payments use that total.
 - Idempotency replay returns the original pricing before considering changed preferences or prices.
   Quotes are estimates and do not reserve prices or stock.
+
+## Currency pricing
+
+- Each location retains its creation-time currency. Owner creation supports SGD, MYR and CNY only.
+- MYR/CNY options require explicit configured prices, including zero. They never inherit SGD or FX
+  conversions. Missing prices make offerings unavailable and placement rejects a null price even if
+  a concurrent configuration changed after the initial availability check.
+- Catalog product reads use one repeatable snapshot so variant availability and choices agree.
+- Currency price-set edits and legacy option configuration share the variant version and row lock;
+  stale replacements fail. Price edits append an actor-attributed catalog change in the transaction.
+- Orders, favorite savings, payments and expenses retain their original currency and minor units.
+  Currency changes never revalue a historical record.

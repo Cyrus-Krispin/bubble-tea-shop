@@ -96,3 +96,13 @@ or delete their own preference; ordering owns it.
 Nullable `discount_recipe_id` retains the recipe responsible for savings, scoped to the order's
 organization. A trigger rejects changes to all four money/discount snapshot fields after insertion.
 Payment amount equals the confirmed discounted total; items retain their undiscounted unit prices.
+
+## Currency option prices (V18)
+
+`menu_variant_currency_price` is catalog-owned. Its composite primary key is
+(`menu_variant_option_choice_id`, `currency_code`); a scoped FK includes `organization_id`. MYR and
+CNY deltas are explicit signed minor units bounded to ±100,000,000; `updated_at` records the last
+write. SGD retains the existing `menu_variant_option_choice.price_delta_minor` field.
+
+`variant_currency_ready` requires a configured price for every enabled active choice in the shop's
+currency. Location currency is immutable by trigger. No existing money values are converted.

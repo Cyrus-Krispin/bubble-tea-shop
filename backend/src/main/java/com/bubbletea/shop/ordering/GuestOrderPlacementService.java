@@ -212,7 +212,7 @@ public class GuestOrderPlacementService {
                  WHERE variant.id = :variantId
                    AND variant.organization_id = :organizationId
                    AND offering.location_id = :locationId
-                   AND offering.available
+                   AND offering.available AND variant_currency_ready(variant.id, offering.currency_code)
                    AND variant.archived_at IS NULL
                    AND product.archived_at IS NULL
                    AND recipe_version.status = 'PUBLISHED'
@@ -231,8 +231,9 @@ public class GuestOrderPlacementService {
                 SELECT option_group.id AS group_id, option_group.name AS group_name,
                        option_group.minimum_selections, option_group.maximum_selections,
                        choice.id AS choice_id, choice.name AS choice_name,
-                       variant_choice.id AS variant_choice_id, variant_choice.price_delta_minor
+                       variant_choice.id AS variant_choice_id, CASE WHEN :currency = 'SGD' THEN variant_choice.price_delta_minor ELSE currency_price.price_delta_minor END AS price_delta_minor
                   FROM menu_variant_option_choice variant_choice
+                  LEFT JOIN menu_variant_currency_price currency_price ON currency_price.menu_variant_option_choice_id = variant_choice.id AND currency_price.currency_code = :currency
                   JOIN option_choice choice
                     ON choice.id = variant_choice.option_choice_id
                    AND choice.organization_id = variant_choice.organization_id
@@ -247,12 +248,15 @@ public class GuestOrderPlacementService {
               ORDER BY option_group.display_order, choice.display_order, choice.id
                 """)
             .param("organizationId", location.organizationId())
-            .param("variantId", requested.variantId())
-            .query((rs, row) -> new Choice(
+            .param("variantId", requested.variantId()).param("currency", location.currency())
+            .query((rs, row) -> {
+                Long price = rs.getObject("price_delta_minor", Long.class);
+                if (price == null) throw new GuestOrderCatalogChangedException();
+                return new Choice(
                 rs.getObject("group_id", UUID.class), rs.getString("group_name"),
                 rs.getInt("minimum_selections"), rs.getInt("maximum_selections"),
                 rs.getObject("choice_id", UUID.class), rs.getString("choice_name"),
-                rs.getObject("variant_choice_id", UUID.class), rs.getLong("price_delta_minor")))
+                rs.getObject("variant_choice_id", UUID.class), price); })
             .list();
         Map<UUID, Group> groups = new LinkedHashMap<>();
         availableChoices.forEach(choice -> groups.computeIfAbsent(choice.groupId(), ignored ->
