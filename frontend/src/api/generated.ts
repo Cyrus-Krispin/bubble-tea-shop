@@ -489,6 +489,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/counter-orders": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Record an attributed pending cash counter order */
+        readonly post: operations["placeCounterOrder"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/ingredients": {
         readonly parameters: {
             readonly query?: never;
@@ -1288,17 +1305,6 @@ export interface components {
             /** Format: date-time */
             readonly createdAt: string;
         };
-        readonly CreateIngredientRequest: {
-            readonly name: string;
-            readonly sku?: string | null;
-            /** @enum {string} */
-            readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
-            readonly reorderThreshold?: string | null;
-        };
-        readonly ArchiveIngredientRequest: {
-            /** Format: int64 */
-            readonly version: number;
-        };
         readonly CreateGuestOrderLineRequest: {
             /** Format: uuid */
             readonly variantId: string;
@@ -1341,6 +1347,17 @@ export interface components {
             readonly choiceName: string;
             /** Format: int64 */
             readonly priceDeltaMinor: number;
+        };
+        readonly CreateIngredientRequest: {
+            readonly name: string;
+            readonly sku?: string | null;
+            /** @enum {string} */
+            readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
+            readonly reorderThreshold?: string | null;
+        };
+        readonly ArchiveIngredientRequest: {
+            /** Format: int64 */
+            readonly version: number;
         };
         readonly CustomerAccountDto: {
             /** Format: uuid */
@@ -3007,6 +3024,48 @@ export interface operations {
             readonly 401: components["responses"]["Problem"];
             readonly 403: components["responses"]["Problem"];
             readonly 404: components["responses"]["Problem"];
+            readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly placeCounterOrder: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly "Idempotency-Key": string;
+            };
+            readonly path: {
+                readonly organizationId: string;
+                readonly locationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateGuestOrderRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Matching counter order replayed */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["GuestOrder"];
+                };
+            };
+            /** @description Counter order placed */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["GuestOrder"];
+                };
+            };
+            readonly 400: components["responses"]["Problem"];
+            readonly 401: components["responses"]["Problem"];
+            readonly 403: components["responses"]["Problem"];
             readonly 409: components["responses"]["Problem"];
         };
     };

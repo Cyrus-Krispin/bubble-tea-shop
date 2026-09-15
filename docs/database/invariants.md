@@ -139,3 +139,10 @@
 
 - Reorder candidates additionally include ingredients at or below their configured threshold, even
   when consumption is unknown. Server filtering and count share the same snapshot as the rows.
+
+## Counter orders
+
+- Counter placement records its staff actor on the initial immutable status event and leaves
+  customer ownership null. Its idempotency fingerprint binds the creating actor and requested lines.
+- Guest fingerprints remain unchanged. Cross-channel/actor key reuse conflicts without disclosure.
+- Pending counter creation does not deduct inventory; existing atomic cash completion owns deduction.

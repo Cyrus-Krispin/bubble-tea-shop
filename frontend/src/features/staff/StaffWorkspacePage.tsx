@@ -23,6 +23,7 @@ export function StaffWorkspacePage() {
           <p>Go straight to the task that needs your attention.</p>
         </div>
         <nav aria-label="Common staff tasks" className="staff-quick-links">
+          <Link to="/staff/counter"><ShoppingBag aria-hidden="true" /><strong>Record counter order</strong><span>Create a walk-in cash order</span><ArrowRight aria-hidden="true" /></Link>
           <Link to="/staff/orders"><ClipboardList aria-hidden="true" /><strong>Review orders</strong><span>Collect cash and complete pickups</span><ArrowRight aria-hidden="true" /></Link>
           <Link to="/staff/inventory"><PackageSearch aria-hidden="true" /><strong>Check inventory</strong><span>Review balances and movements</span><ArrowRight aria-hidden="true" /></Link>
           <Link to="/staff/catalog/menu"><ShoppingBag aria-hidden="true" /><strong>Manage menu</strong><span>Update products, prices, and availability</span><ArrowRight aria-hidden="true" /></Link>

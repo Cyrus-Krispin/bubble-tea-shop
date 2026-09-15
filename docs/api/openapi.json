@@ -2445,6 +2445,85 @@
         } ]
       }
     },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/counter-orders" : {
+      "post" : {
+        "tags" : [ "counter-order-controller" ],
+        "summary" : "Record an attributed pending cash counter order",
+        "operationId" : "placeCounterOrder",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGuestOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Counter order placed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GuestOrder"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Matching counter order replayed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GuestOrder"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/v1/staff/organizations/{organizationId}/ingredients" : {
       "get" : {
         "tags" : [ "Ingredient management" ],
@@ -4941,40 +5020,6 @@
           }
         }
       },
-      "CreateIngredientRequest" : {
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string",
-            "maxLength" : 160,
-            "minLength" : 0
-          },
-          "sku" : {
-            "type" : [ "string", "null" ],
-            "maxLength" : 80,
-            "minLength" : 0
-          },
-          "baseUnit" : {
-            "type" : "string",
-            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
-          },
-          "reorderThreshold" : {
-            "type" : [ "string", "null" ],
-            "pattern" : "^(0|[0-9]+)(\\.[0-9]{1,6})?$"
-          }
-        },
-        "required" : [ "baseUnit", "name" ]
-      },
-      "ArchiveIngredientRequest" : {
-        "type" : "object",
-        "properties" : {
-          "version" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        },
-        "required" : [ "version" ]
-      },
       "CreateGuestOrderLineRequest" : {
         "type" : "object",
         "properties" : {
@@ -5099,6 +5144,40 @@
             "format" : "int64"
           }
         }
+      },
+      "CreateIngredientRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "sku" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "reorderThreshold" : {
+            "type" : [ "string", "null" ],
+            "pattern" : "^(0|[0-9]+)(\\.[0-9]{1,6})?$"
+          }
+        },
+        "required" : [ "baseUnit", "name" ]
+      },
+      "ArchiveIngredientRequest" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "version" ]
       },
       "CustomerAccountDto" : {
         "type" : "object",

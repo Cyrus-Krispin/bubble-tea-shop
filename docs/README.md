@@ -70,6 +70,8 @@ The Flyway migration remains the executable source of truth for the database.
 
 - [Ingredient reorder planning](specs/ingredient-reorder-planning.md) — prioritized stock purchasing list.
 
+- [Staff counter order entry](specs/staff-counter-order-entry.md) — attributed walk-in cash orders.
+
 ## Documentation rules
 
 1. Add an ADR when a decision is expensive to reverse or affects more than one module.

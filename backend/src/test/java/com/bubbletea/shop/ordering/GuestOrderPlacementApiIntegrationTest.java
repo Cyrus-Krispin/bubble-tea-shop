@@ -282,6 +282,35 @@ class GuestOrderPlacementApiIntegrationTest {
             .isEqualTo(1);
     }
 
+    @Test
+    void staffCreatesAttributedCounterOrderWithoutBecomingCustomerAndReplaysSafely() throws Exception {
+        UUID subject = UUID.randomUUID();
+        UUID account = UUID.randomUUID();
+        UUID key = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", account, subject);
+        jdbc.update("INSERT INTO organization_membership (organization_id, account_id, role, active) VALUES (?, ?, 'OWNER', true)", ORGANIZATION, account);
+        String path = "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/counter-orders";
+        mvc.perform(post(path, ORGANIZATION, LOCATION).with(jwt().jwt(value -> value.subject(subject.toString())))
+                .header("Idempotency-Key", key).contentType("application/json").content(orderBody(1)))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.paymentMethod").value("CASH"));
+        mvc.perform(post(path, ORGANIZATION, LOCATION).with(jwt().jwt(value -> value.subject(subject.toString())))
+                .header("Idempotency-Key", UUID.randomUUID()).contentType("application/json").content("{\"items\":[null]}"))
+            .andExpect(status().isBadRequest());
+        UUID orderId = jdbc.queryForObject("SELECT id FROM customer_order WHERE placement_key = ?", UUID.class, key);
+        assertThat(jdbc.queryForObject("SELECT customer_account_id FROM customer_order WHERE id = ?", UUID.class, orderId)).isNull();
+        assertThat(jdbc.queryForObject("SELECT changed_by_account_id FROM order_status_history WHERE customer_order_id = ? AND from_status IS NULL", UUID.class, orderId)).isEqualTo(account);
+        mvc.perform(post(path, ORGANIZATION, LOCATION).with(jwt().jwt(value -> value.subject(subject.toString())))
+                .header("Idempotency-Key", key).contentType("application/json").content(orderBody(1)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.replayed").value(true));
+        mvc.perform(post("/api/v1/guest/orders").header("Idempotency-Key", key)
+                .contentType("application/json").content(orderBody(1)))
+            .andExpect(status().isConflict());
+        mvc.perform(post(path, ORGANIZATION, UUID.randomUUID()).with(jwt().jwt(value -> value.subject(subject.toString())))
+                .header("Idempotency-Key", UUID.randomUUID()).contentType("application/json").content(orderBody(1)))
+            .andExpect(status().isForbidden());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_movement WHERE customer_order_id = ?", Integer.class, orderId)).isZero();
+    }
+
     private String orderBody(int quantity) {
         return """
             {"items":[{"variantId":"%s","quantity":%d,

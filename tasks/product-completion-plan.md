@@ -22,8 +22,8 @@ PRs so each diff remains reviewable. Preserve the earlier shadcn task files.
 
 - [x] Consumption forecasts: API, UI, calculation and scope tests; PR #35.
 - [x] Projected low-stock alerts: visible in-app alerts and update behavior; PR #36.
-- [ ] Reorder planning: server-filtered prioritized list.
-- [ ] Counter order entry: staff actor, guest ownership, pricing, idempotency, safe completion.
+- [x] Reorder planning: server-filtered prioritized list; PR #37.
+- [x] Counter order entry: staff actor, guest ownership, pricing, idempotency, safe completion.
 - [ ] Cash-flow reporting: outflow capture and 1/7/30-day summaries.
 - [ ] Favorite recipe discount: ownership, deterministic pricing, immutable receipt.
 - [ ] Multi-currency: location configuration and currency-specific option prices.

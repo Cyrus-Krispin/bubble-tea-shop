@@ -120,7 +120,7 @@ public class GuestOrderPlacementController {
 
     @Schema(name = "CreateGuestOrderRequest")
     public record CreateOrderRequest(
-        @NotEmpty @Size(max = 25) List<@Valid CreateOrderLineRequest> items
+        @NotEmpty @Size(max = 25) List<@NotNull @Valid CreateOrderLineRequest> items
     ) {
         @JsonAnySetter
         public void rejectUnknown(String field, Object value) {
@@ -140,7 +140,7 @@ public class GuestOrderPlacementController {
         }
     }
 
-    @RestControllerAdvice(assignableTypes = GuestOrderPlacementController.class)
+    @RestControllerAdvice(assignableTypes = {GuestOrderPlacementController.class, CounterOrderController.class})
     static class Advice {
         @ExceptionHandler({
             InvalidGuestOrderException.class,
