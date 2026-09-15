@@ -27,10 +27,12 @@ public class GuestOrderPlacementService {
     private static final int MAX_TOTAL_QUANTITY = 50;
     private final JdbcClient jdbc;
     private final GuestCatalogProperties properties;
+    private final OrderStaffAccessService staffAccess;
 
-    public GuestOrderPlacementService(JdbcClient jdbc, GuestCatalogProperties properties) {
+    public GuestOrderPlacementService(JdbcClient jdbc, GuestCatalogProperties properties, OrderStaffAccessService staffAccess) {
         this.jdbc = jdbc;
         this.properties = properties;
+        this.staffAccess = staffAccess;
     }
 
     @Transactional
@@ -45,6 +47,23 @@ public class GuestOrderPlacementService {
         UUID authSubject,
         List<CreateLine> requestedLines
     ) {
+        return placeAt(findLocation(locationSlug), placementKey, authSubject, null, requestedLines);
+    }
+
+    @Transactional
+    public PlacedOrder placeCounter(UUID subject, UUID organizationId, UUID locationId,
+                                    UUID placementKey, List<CreateLine> lines) {
+        UUID actor = staffAccess.authorize(subject, organizationId, locationId);
+        Location location = jdbc.sql("SELECT id, organization_id, currency_code FROM location WHERE id = :id AND organization_id = :org AND active")
+            .param("id", locationId).param("org", organizationId)
+            .query((rs, row) -> new Location(rs.getObject("id", UUID.class),
+                rs.getObject("organization_id", UUID.class), rs.getString("currency_code")))
+            .optional().orElseThrow(GuestOrderCatalogChangedException::new);
+        return placeAt(location, placementKey, null, actor, lines);
+    }
+
+    private PlacedOrder placeAt(Location location, UUID placementKey, UUID authSubject,
+                               UUID staffActor, List<CreateLine> requestedLines) {
         if (placementKey == null || requestedLines == null || requestedLines.isEmpty()
             || requestedLines.size() > 25) throw new InvalidGuestOrderException();
         long totalQuantity = requestedLines.stream().mapToLong(CreateLine::quantity).sum();
@@ -53,9 +72,8 @@ public class GuestOrderPlacementService {
             throw new InvalidGuestOrderException();
         }
 
-        Location location = findLocation(locationSlug);
         UUID customerAccountId = resolveCustomerAccount(authSubject);
-        String fingerprint = fingerprint(customerAccountId, requestedLines);
+        String fingerprint = fingerprint(customerAccountId, staffActor, requestedLines);
         PlacedOrder replay = findByPlacementKey(location.id(), placementKey, fingerprint, true);
         if (replay != null) return replay;
 
@@ -98,11 +116,11 @@ public class GuestOrderPlacementService {
         }
         jdbc.sql("""
                 INSERT INTO order_status_history (
-                    id, organization_id, customer_order_id, from_status, to_status
-                ) VALUES (:id, :organizationId, :orderId, NULL, 'PENDING')
+                    id, organization_id, customer_order_id, from_status, to_status, changed_by_account_id
+                ) VALUES (:id, :organizationId, :orderId, NULL, 'PENDING', :actor)
                 """)
             .param("id", UUID.randomUUID()).param("organizationId", location.organizationId())
-            .param("orderId", orderId).update();
+            .param("orderId", orderId).param("actor", staffActor).update();
         jdbc.sql("""
                 INSERT INTO payment (
                     id, organization_id, customer_order_id, method, status,
@@ -389,8 +407,9 @@ public class GuestOrderPlacementService {
             replayed, lines);
     }
 
-    private String fingerprint(UUID accountId, List<CreateLine> lines) {
+    private String fingerprint(UUID accountId, UUID staffActor, List<CreateLine> lines) {
         StringBuilder canonical = new StringBuilder(accountId == null ? "guest" : accountId.toString());
+        if (staffActor != null) canonical.append("|counter:").append(staffActor);
         for (CreateLine line : lines) {
             canonical.append('|').append(line.variantId()).append(':').append(line.quantity()).append(':');
             if (line.optionChoiceIds() != null) line.optionChoiceIds().stream()

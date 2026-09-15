@@ -85,13 +85,13 @@ function line(value: unknown): GuestOrderLine {
   };
 }
 
-function order(value: unknown): GuestOrder {
+function order(value: unknown, allowCompleted = false): GuestOrder {
   const input = object(value);
-  if (input.status !== "PENDING" || input.paymentMethod !== "CASH") invalid();
+  if ((input.status !== "PENDING" && !(allowCompleted && input.status === "COMPLETED")) || input.paymentMethod !== "CASH") invalid();
   return {
     id: string(input.id),
     publicOrderNumber: string(input.publicOrderNumber),
-    status: "PENDING",
+    status: input.status as "PENDING" | "COMPLETED",
     paymentMethod: "CASH",
     currencyCode: string(input.currencyCode),
     subtotalMinor: integer(input.subtotalMinor),
@@ -149,4 +149,16 @@ export async function placeGuestOrder(
     });
   if (data === undefined) throw apiError(error, response.status);
   return order(data);
+}
+
+export async function placeCounterOrder(accessToken: string, organizationId: string, locationId: string,
+  idempotencyKey: string, input: CreateGuestOrderInput): Promise<GuestOrder> {
+  const client = createClient<paths>({ baseUrl: window.location.origin,
+    headers: { Authorization: `Bearer ${accessToken}` } });
+  const { data, error, response } = await client.POST(
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/counter-orders",
+    { params: { path: { organizationId, locationId }, header: { "Idempotency-Key": idempotencyKey } }, body: input },
+  );
+  if (data === undefined) throw apiError(error, response.status);
+  return order(data, true);
 }

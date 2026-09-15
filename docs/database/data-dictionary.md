@@ -69,3 +69,6 @@ Movement types:
 Consumption forecasts and projected alerts combine `ingredient`, `location`, `inventory_balance`,
 `inventory_movement`, and completed `customer_order` records at read time. They add no persisted
 balances or alert-history tables; the UI refreshes current warnings once per minute while visible.
+
+Counter orders reuse `customer_order` with no customer account and record the creating employee
+in the initial `order_status_history.changed_by_account_id`; no employee purchase is implied.

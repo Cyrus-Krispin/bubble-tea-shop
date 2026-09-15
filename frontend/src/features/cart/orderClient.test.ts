@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { OrderError, placeGuestOrder } from "./orderClient";
+import { OrderError, placeGuestOrder, placeCounterOrder } from "./orderClient";
 
 const response = {
   id: "order-id",
@@ -104,4 +104,15 @@ describe("orderClient", () => {
       new OrderError("ORDER_CATALOG_CHANGED", 409),
     );
   });
+});
+
+it("replays a completed counter order through the authorized staff route", async () => {
+  const completed = { ...response, status: "COMPLETED", replayed: true };
+  const mock = vi.fn().mockResolvedValue(new Response(JSON.stringify(completed), { status: 200 }));
+  vi.stubGlobal("fetch", mock);
+  await expect(placeCounterOrder("staff-token", "org", "loc", "retry-key", { items: [] })).resolves.toEqual(completed);
+  const request = mock.mock.calls[0][0] as Request;
+  expect(request.url).toContain("/staff/organizations/org/locations/loc/counter-orders");
+  expect(request.headers.get("authorization")).toBe("Bearer staff-token");
+  expect(request.headers.get("idempotency-key")).toBe("retry-key");
 });
