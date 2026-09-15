@@ -119,3 +119,15 @@ public menu when personalization is unavailable.
 - Access tokens must not be logged or placed in URLs.
 - Authentication failures use generic messages so username enumeration is not exposed.
 - Audit records retain the acting account identifier where a staff action caused a state change.
+
+### Expired browser sessions
+
+The in-memory session summary includes the SDK's absolute expiry timestamp. An expiry timer and
+focus/visibility checks remove private React state when no fresh token has arrived; protected
+routes return to their existing sign-in screen. This never waits for a network request. A later
+valid SDK auth event can restore access. Supabase continues to own persistence and refresh, and
+Spring remains the authority for signature, timestamp, account, and scope validation.
+
+Session refresh replaces the expiry timer. Initial lookup results and deferred customer-provisioning
+callbacks cannot overwrite newer auth events or restore a signed-out/unmounted subscriber.
+See [acceptance and verification](../specs/session-expiry-handling.md).
