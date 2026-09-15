@@ -13,6 +13,8 @@ purchasing aid; the user explicitly chose manual receipts/adjustments instead of
   quantity, demand estimate, history length, and days remaining; unknown demand stays unknown.
 - Refresh after receipts or adjustments; never submit a supplier purchase or mutate balances from
   this read-only view. Empty, loading, unavailable, and inaccessible states must be explicit.
+- Keep an open panel visible during stock updates and reload its results. If a refresh removes the
+  current page, load the last available page before showing an empty state.
 - Tests prove that a safe first ingredient cannot hide later qualifying items on a bounded page,
   and that threshold-only ingredients qualify even without historical demand.
 
