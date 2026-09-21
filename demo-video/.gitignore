@@ -1,0 +1,4 @@
+.venv/
+frames/
+output/
+scenes.json
