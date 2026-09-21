@@ -101,7 +101,7 @@ function ConflictingCartSeed() {
 }
 
 function renderSuggestion(
-  session: { accessToken: string; email: string } | null,
+  session: { userId: string; accessToken: string; expiresAt: number; email: string } | null,
   { seedConflict = false }: { seedConflict?: boolean } = {},
 ) {
   return render(
@@ -125,7 +125,7 @@ describe("LastOrderSuggestion", () => {
 
   it("shows saved drinks as selected quick-add choices and adds only the chosen lines", async () => {
     const { container } = renderSuggestion({
-      accessToken: "customer-token",
+      userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800,
       email: "customer@example.test",
     });
 
@@ -164,7 +164,7 @@ describe("LastOrderSuggestion", () => {
   });
 
   it("disables quick add until at least one saved drink is selected", async () => {
-    renderSuggestion({ accessToken: "customer-token", email: "customer@example.test" });
+    renderSuggestion({ userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800, email: "customer@example.test" });
 
     fireEvent.click(await screen.findByRole("checkbox", {
       name: "Select 2 Moonlit Milk Tea, Medium, 50%, Pearls",
@@ -179,7 +179,7 @@ describe("LastOrderSuggestion", () => {
 
   it("keeps a conflicting cart unchanged when selected drinks cannot be added", async () => {
     renderSuggestion(
-      { accessToken: "customer-token", email: "customer@example.test" },
+      { userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800, email: "customer@example.test" },
       { seedConflict: true },
     );
 
@@ -202,7 +202,7 @@ describe("LastOrderSuggestion", () => {
     rerender(
       <AuthContext.Provider value={{
         isLoading: false,
-        session: { accessToken: "customer-token", email: "customer@example.test" },
+        session: { userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800, email: "customer@example.test" },
       }}>
         <MemoryRouter>
           <CartProvider>
@@ -217,7 +217,7 @@ describe("LastOrderSuggestion", () => {
 
   it("keeps a recoverable personalization error separate from the menu", async () => {
     vi.mocked(getLatestCustomerReorder).mockRejectedValueOnce(new Error("offline"));
-    renderSuggestion({ accessToken: "customer-token", email: "customer@example.test" });
+    renderSuggestion({ userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800, email: "customer@example.test" });
 
     expect(await screen.findByText("We couldn’t load your last order.")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));

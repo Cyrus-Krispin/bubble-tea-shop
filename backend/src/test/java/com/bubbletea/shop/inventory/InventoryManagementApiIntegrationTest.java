@@ -109,13 +109,13 @@ class InventoryManagementApiIntegrationTest {
             {"ingredientId":"%s","movementType":"OPENING","quantityDelta":"2.000000"}
             """.formatted(tea));
 
-        mvc.perform(post(movementPath(), owner.organizationId(), locationId).with(token(owner))
+        mvc.perform(post(movementPath(), owner.organizationId(), locationId).header("Idempotency-Key", UUID.randomUUID()).with(token(owner))
                 .contentType("application/json").content("""
                     {"ingredientId":"%s","movementType":"OPENING","quantityDelta":"1.000000"}
                     """.formatted(tea)))
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.code").value("INVENTORY_STATE_CONFLICT"));
-        mvc.perform(post(movementPath(), owner.organizationId(), locationId).with(token(owner))
+        mvc.perform(post(movementPath(), owner.organizationId(), locationId).header("Idempotency-Key", UUID.randomUUID()).with(token(owner))
                 .contentType("application/json").content("""
                     {"ingredientId":"%s","movementType":"ADJUSTMENT","quantityDelta":"-3.000000",
                      "note":"Damaged stock"}
@@ -123,12 +123,12 @@ class InventoryManagementApiIntegrationTest {
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.code").value("INVENTORY_INSUFFICIENT_STOCK"))
             .andExpect(jsonPath("$.shortages.%s.available".formatted(tea)).value("2.000000"));
-        mvc.perform(post(movementPath(), owner.organizationId(), locationId).with(token(owner))
+        mvc.perform(post(movementPath(), owner.organizationId(), locationId).header("Idempotency-Key", UUID.randomUUID()).with(token(owner))
                 .contentType("application/json").content("""
                     {"ingredientId":"%s","movementType":"ADJUSTMENT","quantityDelta":"1.000000"}
                     """.formatted(tea)))
             .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVENTORY_INVALID"));
-        mvc.perform(post(movementPath(), owner.organizationId(), locationId).with(token(owner))
+        mvc.perform(post(movementPath(), owner.organizationId(), locationId).header("Idempotency-Key", UUID.randomUUID()).with(token(owner))
                 .contentType("application/json").content("""
                     {"ingredientId":"%s","movementType":"SALE","quantityDelta":"-1.000000"}
                     """.formatted(tea)))
@@ -153,7 +153,7 @@ class InventoryManagementApiIntegrationTest {
             .andExpect(status().isOk());
         mvc.perform(get(balancePath(), manager.organizationId(), unassigned).with(token(manager)))
             .andExpect(status().isForbidden()).andExpect(jsonPath("$.code").value("STAFF_ACCESS_DENIED"));
-        mvc.perform(post(movementPath(), manager.organizationId(), assigned).with(token(manager))
+        mvc.perform(post(movementPath(), manager.organizationId(), assigned).header("Idempotency-Key", UUID.randomUUID()).with(token(manager))
                 .contentType("application/json").content("""
                     {"ingredientId":"%s","movementType":"OPENING","quantityDelta":"3.000000"}
                     """.formatted(foreignIngredient)))
@@ -187,8 +187,152 @@ class InventoryManagementApiIntegrationTest {
             .andExpect(jsonPath("$.items[0].ingredientArchived").value(true));
     }
 
+    @Test
+    void forecastsCompletedSalesWithScopeAndBoundedPages() throws Exception {
+        Staff owner = staff("OWNER");
+        UUID locationId = location(owner.organizationId(), "Forecast", "SGD");
+        UUID tea = ingredient(owner.organizationId(), "Tea", null, "GRAM", "5");
+        jdbc.update("UPDATE location SET created_at = now() - interval '40 days' WHERE id = ?", locationId);
+        jdbc.update("UPDATE ingredient SET created_at = now() - interval '40 days' WHERE id = ?", tea);
+        jdbc.update("INSERT INTO inventory_balance (organization_id, location_id, ingredient_id, quantity) VALUES (?, ?, ?, 50)",
+            owner.organizationId(), locationId, tea);
+        UUID order = UUID.randomUUID();
+        jdbc.update("""
+            INSERT INTO customer_order (id, organization_id, location_id, public_order_number,
+                status, payment_method, currency_code, subtotal_minor, total_minor, completed_at)
+            VALUES (?, ?, ?, 'FORECAST', 'COMPLETED', 'CASH', 'SGD', 100, 100, now() - interval '2 days')
+            """, order, owner.organizationId(), locationId);
+        jdbc.update("""
+            INSERT INTO inventory_movement (organization_id, location_id, ingredient_id,
+                movement_type, quantity_delta, customer_order_id, created_at)
+            VALUES (?, ?, ?, 'SALE', -300, ?, now() - interval '2 days')
+            """, owner.organizationId(), locationId, tea, order);
+        jdbc.update("""
+            INSERT INTO inventory_movement (organization_id, location_id, ingredient_id,
+                movement_type, quantity_delta, created_at)
+            VALUES (?, ?, ?, 'RECEIPT', 999, now() - interval '2 days')
+            """, owner.organizationId(), locationId, tea);
+        String path = "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts";
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.items[0].dailyConsumption").value("10"))
+            .andExpect(jsonPath("$.items[0].daysRemaining").value("5"))
+            .andExpect(jsonPath("$.items[0].observedDays").value(30))
+            .andExpect(jsonPath("$.items[0].status").value("ESTIMATED"));
+        mvc.perform(get("/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts",
+                owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalItems").value(1))
+            .andExpect(jsonPath("$.horizonDays").value(7))
+            .andExpect(jsonPath("$.items[0].ingredientId").value(tea.toString()));
+        record(owner, locationId, """
+            {"ingredientId":"%s","movementType":"RECEIPT","quantityDelta":"100"}
+            """.formatted(tea));
+        mvc.perform(get("/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts",
+                owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalItems").value(0));
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(staff("MANAGER"))))
+            .andExpect(status().isForbidden());
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)).param("size", "101"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void identifiesEmptyStockAndInsufficientHistory() throws Exception {
+        Staff owner = staff("OWNER");
+        UUID locationId = location(owner.organizationId(), "New shop", "SGD");
+        UUID tea = ingredient(owner.organizationId(), "Tea", null, "GRAM", null);
+        String path = "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts";
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].status").value("OUT_OF_STOCK"));
+        record(owner, locationId, """
+            {"ingredientId":"%s","movementType":"OPENING","quantityDelta":"50"}
+            """.formatted(tea));
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].status").value("INSUFFICIENT_HISTORY"))
+            .andExpect(jsonPath("$.items[0].daysRemaining").isEmpty());
+    }
+
+    @Test
+    void filtersReorderCandidatesBeforePaginationAndIncludesThresholdOnlyStock() throws Exception {
+        Staff owner = staff("OWNER");
+        UUID locationId = location(owner.organizationId(), "Reorder", "SGD");
+        UUID safe = ingredient(owner.organizationId(), "Alpha Safe", null, "GRAM", "5");
+        UUID low = ingredient(owner.organizationId(), "Beta Low", null, "GRAM", "100");
+        ingredient(owner.organizationId(), "Gamma Empty", null, "GRAM", null);
+        for (UUID id : new UUID[]{safe, low}) {
+            record(owner, locationId, """
+                {"ingredientId":"%s","movementType":"OPENING","quantityDelta":"50"}
+                """.formatted(id));
+        }
+        String path = "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/reorder";
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)).param("size", "1"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalItems").value(2))
+            .andExpect(jsonPath("$.totalPages").value(2))
+            .andExpect(jsonPath("$.items[0].ingredientName").value("Gamma Empty"));
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(owner)).param("size", "1").param("page", "1"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].ingredientName").value("Beta Low"))
+            .andExpect(jsonPath("$.items[0].reorderReason").value("THRESHOLD"))
+            .andExpect(jsonPath("$.items[0].daysRemaining").isEmpty());
+        mvc.perform(get(path, owner.organizationId(), locationId).with(token(staff("MANAGER"))))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void concurrentRetriesApplyOneReceiptAndRejectChangedInputOrActor() throws Exception {
+        Staff owner = staff("OWNER");
+        UUID loc = location(owner.organizationId(), "Retry", "SGD");
+        UUID ingredient = ingredient(owner.organizationId(), "Retry tea", null, "GRAM", null);
+        UUID key = UUID.randomUUID();
+        String body = "{\"ingredientId\":\"" + ingredient + "\",\"movementType\":\"RECEIPT\",\"quantityDelta\":\"100\"}";
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            java.util.concurrent.Callable<String> request = () -> mvc.perform(post(movementPath(), owner.organizationId(), loc)
+                    .header("Idempotency-Key", key).with(token(owner)).contentType("application/json").content(body))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+            var first = executor.submit(request);
+            var second = executor.submit(request);
+            assertThat(json.readTree(first.get()).get("id")).isEqualTo(json.readTree(second.get()).get("id"));
+        }
+        assertThat(jdbc.queryForObject("SELECT quantity FROM inventory_balance WHERE location_id = ? AND ingredient_id = ?",
+            java.math.BigDecimal.class, loc, ingredient)).isEqualByComparingTo("100");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_movement WHERE location_id = ?", Integer.class, loc)).isEqualTo(1);
+        mvc.perform(post(movementPath(), owner.organizationId(), loc).header("Idempotency-Key", key)
+                .with(token(owner)).contentType("application/json").content(body.replace("100", "200")))
+            .andExpect(status().isConflict());
+        UUID otherAccount = UUID.randomUUID(), otherSubject = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", otherAccount, otherSubject);
+        jdbc.update("INSERT INTO organization_membership (organization_id, account_id, role) VALUES (?, ?, 'OWNER')", owner.organizationId(), otherAccount);
+        mvc.perform(post(movementPath(), owner.organizationId(), loc).header("Idempotency-Key", key)
+                .with(jwt().jwt(t -> t.subject(otherSubject.toString()))).contentType("application/json").content(body))
+            .andExpect(status().isConflict());
+        jdbc.update("UPDATE ingredient SET archived_at = now() WHERE id = ?", ingredient);
+        mvc.perform(post(movementPath(), owner.organizationId(), loc).header("Idempotency-Key", key)
+                .with(token(owner)).contentType("application/json").content(body))
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void rejectedMovementDoesNotConsumeItsRetryIdentity() throws Exception {
+        Staff owner = staff("OWNER");
+        UUID loc = location(owner.organizationId(), "Retry rejected", "SGD");
+        UUID ingredient = ingredient(owner.organizationId(), "Counted tea", null, "GRAM", null);
+        UUID key = UUID.randomUUID();
+        String body = "{\"ingredientId\":\"" + ingredient + "\",\"movementType\":\"ADJUSTMENT\",\"quantityDelta\":\"-1\",\"note\":\"Count correction\"}";
+        mvc.perform(post(movementPath(), owner.organizationId(), loc).header("Idempotency-Key", key)
+                .with(token(owner)).contentType("application/json").content(body))
+            .andExpect(status().isConflict());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_movement_request WHERE location_id = ?", Integer.class, loc)).isZero();
+        record(owner, loc, "{\"ingredientId\":\"" + ingredient + "\",\"movementType\":\"RECEIPT\",\"quantityDelta\":\"10\"}");
+        mvc.perform(post(movementPath(), owner.organizationId(), loc).header("Idempotency-Key", key)
+                .with(token(owner)).contentType("application/json").content(body))
+            .andExpect(status().isCreated());
+        assertThat(jdbc.queryForObject("SELECT quantity FROM inventory_balance WHERE location_id = ? AND ingredient_id = ?",
+            java.math.BigDecimal.class, loc, ingredient)).isEqualByComparingTo("9");
+        mvc.perform(post(movementPath(), owner.organizationId(), loc).with(token(owner)).contentType("application/json").content(body))
+            .andExpect(status().isBadRequest());
+    }
+
     private JsonNode record(Staff staff, UUID locationId, String body) throws Exception {
-        MvcResult result = mvc.perform(post(movementPath(), staff.organizationId(), locationId)
+        MvcResult result = mvc.perform(post(movementPath(), staff.organizationId(), locationId).header("Idempotency-Key", UUID.randomUUID())
                 .with(token(staff)).contentType("application/json").content(body))
             .andExpect(status().isCreated()).andReturn();
         return json.readTree(result.getResponse().getContentAsByteArray());

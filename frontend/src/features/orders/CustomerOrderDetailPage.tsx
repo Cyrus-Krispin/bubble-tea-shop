@@ -82,7 +82,7 @@ export function CustomerOrderDetailPage() {
 
 function Receipt({ order }: { order: CustomerOrderDetail }) {
   const nextStep = order.status === "PENDING"
-    ? "Your order is pending. Pay cash at the shop when you pick it up."
+    ? order.paymentMethod === "CARD" ? "This order uses online card payment. Check its payment receipt for the current status before pickup." : "Your order is pending. Pay cash at the shop when you pick it up."
     : order.status === "COMPLETED"
       ? "This order is complete. Your receipt remains available here."
       : "This order was cancelled. No pickup is required.";
@@ -102,12 +102,14 @@ function Receipt({ order }: { order: CustomerOrderDetail }) {
 
       <p className={cn("rounded-lg border-l-3 p-4 text-sm leading-6", order.status === "COMPLETED" ? "border-success-foreground bg-success" : order.status === "PENDING" ? "border-warning-foreground bg-warning" : "border-destructive bg-destructive/10")}>{nextStep}</p>
 
+      {order.cardCheckoutId ? <Button asChild variant="outline"><Link to={`/card-checkout/${order.cardCheckoutId}`}>View card payment and refund status</Link></Button> : null}
       <ol className="grid list-none divide-y rounded-lg border p-0">
         {order.items.map((line) => <ReceiptLine currency={order.currencyCode} key={line.lineNumber} line={line} />)}
       </ol>
 
       <dl className="grid gap-3 rounded-lg bg-muted p-4">
         <div className="flex justify-between gap-4"><dt>Subtotal</dt><dd>{formatMoney(order.subtotalMinor, order.currencyCode)}</dd></div>
+        {order.subtotalMinor > order.totalMinor ? <div className="flex justify-between gap-4"><dt>Discount</dt><dd>−{formatMoney(order.subtotalMinor - order.totalMinor, order.currencyCode)}</dd></div> : null}
         <div className="flex justify-between gap-4 text-lg font-semibold"><dt>Total</dt><dd>{formatMoney(order.totalMinor, order.currencyCode)}</dd></div>
         <div className="flex justify-between gap-4"><dt>Payment</dt><dd>{order.paymentMethod === "CASH" ? "Cash" : order.paymentMethod}</dd></div>
       </dl>

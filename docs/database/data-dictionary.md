@@ -63,3 +63,64 @@ Movement types:
 - Time: `timestamptz` in UTC.
 - Archival: nullable `archived_at`; historical foreign keys remain valid.
 - Optimistic concurrency: non-negative `bigint` versions supplied by staff clients and incremented on mutation.
+
+## Derived inventory views
+
+Consumption forecasts and projected alerts combine `ingredient`, `location`, `inventory_balance`,
+`inventory_movement`, and completed `customer_order` records at read time. They add no persisted
+balances or alert-history tables; the UI refreshes current warnings once per minute while visible.
+
+Counter orders reuse `customer_order` with no customer account and record the creating employee
+in the initial `order_status_history.changed_by_account_id`; no employee purchase is implied.
+
+## Paid expense ledger (V16)
+
+Ordering owns these append-only records. No inventory balance or movement is changed by an expense.
+
+| Table | Fields and meaning |
+|---|---|
+| `cash_expense` | `id`; `organization_id`/`location_id` form a scoped location FK; `currency_code` is the server-resolved payment-time shop currency; positive `amount_minor` up to 100,000,000; nonblank `description` up to 240 characters; server `paid_at`; actor `recorded_by_account_id`; location-unique `request_key`. |
+| `cash_expense_void` | `expense_id` is a unique scoped FK to the original expense; `organization_id`/`location_id`; actor `recorded_by_account_id`; nonblank correction `reason` up to 240 characters; server `recorded_at`. |
+
+Both tables reject UPDATE/DELETE. A void excludes the original amount from its report period while
+retaining the original and correcting actor. Payment reporting uses PAID records and `paid_at`.
+Expense history and paid-payment indexes bound location/time queries; endpoint expense pages are 25.
+
+## Customer favorite and discount snapshots (V17)
+
+`customer_favorite` stores one `recipe_id` per (`account_id`, `organization_id`) and server `updated_at`.
+The composite recipe/organization FK prevents cross-organization preferences. Customers may replace
+or delete their own preference; ordering owns it.
+
+`customer_order.discount_minor` is nonnegative and `total_minor = subtotal_minor - discount_minor`.
+Nullable `discount_recipe_id` retains the recipe responsible for savings, scoped to the order's
+organization. A trigger rejects changes to all four money/discount snapshot fields after insertion.
+Payment amount equals the confirmed discounted total; items retain their undiscounted unit prices.
+
+## Currency option prices (V18)
+
+`menu_variant_currency_price` is catalog-owned. Its composite primary key is
+(`menu_variant_option_choice_id`, `currency_code`); a scoped FK includes `organization_id`. MYR and
+CNY deltas are explicit signed minor units bounded to ±100,000,000; `updated_at` records the last
+write. SGD retains the existing `menu_variant_option_choice.price_delta_minor` field.
+
+`variant_currency_ready` requires a configured price for every enabled active choice in the shop's
+currency. Location currency is immutable by trigger. No existing money values are converted.
+
+### Inventory movement request
+
+`inventory_movement_request` is an immutable manual movement retry identity, keyed by location and
+request UUID. It binds the resolved actor and normalized payload fingerprint to one ledger movement.
+Its deferred movement foreign key permits reserving a key before updating stock, with both records
+committed in the same transaction. Failed attempts leave neither a request nor a movement.
+
+## Card checkout and held stock (V20)
+
+- `card_checkout`: one private recovery capability per online order; scoped organization/location,
+  immutable provider references after discovery, original expiry, reconciliation lease/generation,
+  cancellation actor/request and safe diagnostic code. Provider HTTP occurs outside transactions.
+- `inventory_reservation`: positive ingredient quantities by order/ingredient, with scoped foreign
+  keys and active/released timestamp consistency. Released rows remain for audit.
+- `card_refund`: immutable provider refund identity, scoped order, currency, amount and actual refund
+  timestamp. Successful records contribute to outflow without removing original paid income.
+- `payment.paid_at` remains present after a card refund to preserve collection chronology.

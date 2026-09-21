@@ -10,6 +10,104 @@
     "description" : "Generated server url"
   } ],
   "paths" : {
+    "/api/v1/staff/organizations/{organizationId}/variants/{variantId}/currency-prices/{currency}" : {
+      "get" : {
+        "tags" : [ "currency-price-controller" ],
+        "operationId" : "getVariantCurrencyPrices",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "variantId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "currency",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VariantCurrencyPriceSet"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "currency-price-controller" ],
+        "operationId" : "setVariantCurrencyPrices",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "variantId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "currency",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ReplacePrices"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VariantCurrencyPriceSet"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/v1/staff/organizations/{organizationId}/recipes/{recipeId}" : {
       "get" : {
         "tags" : [ "Recipe management" ],
@@ -874,6 +972,235 @@
         "security" : [ {
           "bearerAuth" : [ ]
         } ]
+      }
+    },
+    "/api/v1/customer/locations/{locationSlug}/favorite" : {
+      "get" : {
+        "tags" : [ "customer-favorite-controller" ],
+        "summary" : "Read the customer's organization favorite and available recipes",
+        "operationId" : "getCustomerFavorite",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Favorite selection",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerFavorite"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "customer-favorite-controller" ],
+        "summary" : "Choose a favorite recipe from this shop menu",
+        "operationId" : "setCustomerFavorite",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/FavoriteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Favorite saved",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerFavorite"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "customer-favorite-controller" ],
+        "summary" : "Remove the favorite preference while preserving order history",
+        "operationId" : "clearCustomerFavorite",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Favorite removed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerFavorite"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{org}/locations/{location}/orders/{order}/card-payment/refresh" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Verify a scoped order payment and refunds",
+        "operationId" : "refreshStaffCardPayment",
+        "parameters" : [ {
+          "name" : "org",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "location",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "order",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/staff/organizations/{org}/locations/{location}/orders/{order}/card-payment/cancel" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Cancel an unfulfilled card order and refund any collected payment",
+        "operationId" : "cancelStaffCardOrder",
+        "parameters" : [ {
+          "name" : "org",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "location",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "order",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/staff/organizations/{organizationId}/recipes" : {
@@ -2103,6 +2430,77 @@
         } ]
       }
     },
+    "/api/v1/staff/organizations/{organizationId}/locations" : {
+      "get" : {
+        "tags" : [ "owner-location-controller" ],
+        "operationId" : "listOwnerLocations",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/OwnerShopLocation"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "owner-location-controller" ],
+        "operationId" : "createOwnerLocation",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateLocation"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OwnerShopLocation"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/orders/{orderId}/completion" : {
       "post" : {
         "tags" : [ "Staff order operations" ],
@@ -2402,6 +2800,14 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
         } ],
         "requestBody" : {
           "content" : {
@@ -2438,6 +2844,239 @@
           },
           "409" : {
             "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/counter-orders" : {
+      "post" : {
+        "tags" : [ "counter-order-controller" ],
+        "summary" : "Record an attributed pending cash counter order",
+        "operationId" : "placeCounterOrder",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGuestOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Counter order placed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GuestOrder"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Matching counter order replayed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GuestOrder"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/cash-flow/expenses" : {
+      "post" : {
+        "tags" : [ "cash-flow-controller" ],
+        "summary" : "Record an expense paid now in the shop currency",
+        "operationId" : "recordPaidExpense",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ExpenseRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Expense recorded",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CashFlowExpense"
+                }
+              }
+            }
+          },
+          "200" : {
+            "description" : "Matching expense replayed",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CashFlowExpense"
+                }
+              }
+            }
+          },
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/cash-flow/expenses/{expenseId}/void" : {
+      "post" : {
+        "tags" : [ "cash-flow-controller" ],
+        "summary" : "Correct a mistaken expense without deleting its history",
+        "operationId" : "voidPaidExpense",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "expenseId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VoidRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Expense correction",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CashFlowExpense"
+                }
+              }
+            }
           }
         },
         "security" : [ {
@@ -2785,6 +3424,51 @@
         }
       }
     },
+    "/api/v1/guest/locations/{slug}/card-checkouts" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Reserve stock and start an idempotent hosted card checkout",
+        "operationId" : "createCardCheckout",
+        "parameters" : [ {
+          "name" : "slug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "Idempotency-Key",
+          "in" : "header",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGuestOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/guest/locations/{locationSlug}/orders" : {
       "post" : {
         "tags" : [ "Guest ordering" ],
@@ -2847,6 +3531,117 @@
             "$ref" : "#/components/responses/Problem"
           }
         }
+      }
+    },
+    "/api/v1/guest/card-checkouts/{id}/refresh" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Verify the latest hosted payment status",
+        "operationId" : "refreshCardCheckout",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/card-checkouts/{id}/cancel" : {
+      "post" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Cancel an unpaid hosted checkout before releasing stock",
+        "operationId" : "cancelUnpaidCardCheckout",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/customer/locations/{locationSlug}/order-quote" : {
+      "post" : {
+        "tags" : [ "customer-favorite-controller" ],
+        "summary" : "Estimate server prices and the customer's favorite discount",
+        "operationId" : "quoteCustomerOrder",
+        "parameters" : [ {
+          "name" : "locationSlug",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateGuestOrderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Current checkout estimate",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerOrderQuote"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
       }
     },
     "/api/v1/customer/account" : {
@@ -3046,6 +3841,156 @@
         } ]
       }
     },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/reorder" : {
+      "get" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "List ingredients needing reorder",
+        "operationId" : "listInventoryReorderCandidates",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Prioritized reorder page",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InventoryForecastPage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts" : {
+      "get" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "Estimate ingredient consumption and remaining stock",
+        "operationId" : "listInventoryForecasts",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0,
+            "minimum" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 25,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Consumption forecast page",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InventoryForecastPage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
     "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/balances" : {
       "get" : {
         "tags" : [ "Inventory management" ],
@@ -3128,6 +4073,132 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/StaffInventoryBalancePage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts" : {
+      "get" : {
+        "tags" : [ "Inventory management" ],
+        "summary" : "Summarize projected stock shortages",
+        "operationId" : "getInventoryAlerts",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Projected shortage summary",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InventoryAlertSummary"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/cash-flow" : {
+      "get" : {
+        "tags" : [ "cash-flow-controller" ],
+        "summary" : "Summarize collected payments and recorded expenses",
+        "operationId" : "getCashFlow",
+        "parameters" : [ {
+          "name" : "organizationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "locationId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "days",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 7
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        } ],
+        "responses" : {
+          "400" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "409" : {
+            "$ref" : "#/components/responses/Problem"
+          },
+          "200" : {
+            "description" : "Cash flow report",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CashFlowReport"
                 }
               }
             }
@@ -3238,6 +4309,25 @@
         "security" : [ {
           "bearerAuth" : [ ]
         } ]
+      }
+    },
+    "/api/v1/guest/payment-methods" : {
+      "get" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Read configured payment methods",
+        "operationId" : "getGuestPaymentMethods",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaymentMethods"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/guest/menu" : {
@@ -3409,6 +4499,34 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/guest/card-checkouts/{id}" : {
+      "get" : {
+        "tags" : [ "card-checkout-controller" ],
+        "summary" : "Read a card checkout using its private recovery identifier",
+        "operationId" : "getCardCheckout",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CardCheckoutStatus"
                 }
               }
             }
@@ -3594,6 +4712,79 @@
           "properties" : {
             "type" : "object",
             "additionalProperties" : { }
+          }
+        }
+      },
+      "PriceInput" : {
+        "type" : "object",
+        "properties" : {
+          "linkId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "priceDeltaMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "linkId", "priceDeltaMinor" ]
+      },
+      "ReplacePrices" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "prices" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PriceInput"
+            },
+            "maxItems" : 1000,
+            "minItems" : 0
+          }
+        },
+        "required" : [ "prices", "version" ]
+      },
+      "CurrencyChoicePrice" : {
+        "type" : "object",
+        "properties" : {
+          "linkId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "groupName" : {
+            "type" : "string"
+          },
+          "choiceName" : {
+            "type" : "string"
+          },
+          "priceDeltaMinor" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          }
+        }
+      },
+      "VariantCurrencyPriceSet" : {
+        "type" : "object",
+        "properties" : {
+          "variantId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "choices" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CurrencyChoicePrice"
+            }
           }
         }
       },
@@ -4340,6 +5531,168 @@
           }
         }
       },
+      "FavoriteRequest" : {
+        "type" : "object",
+        "properties" : {
+          "recipeId" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        },
+        "required" : [ "recipeId" ]
+      },
+      "CustomerFavorite" : {
+        "type" : "object",
+        "properties" : {
+          "recipeId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
+          },
+          "recipeName" : {
+            "type" : [ "string", "null" ]
+          },
+          "recipes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FavoriteRecipe"
+            }
+          },
+          "discountPercent" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "FavoriteRecipe" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CardCheckoutStatus" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "checkoutUrl" : {
+            "type" : [ "string", "null" ]
+          },
+          "expiresAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "cancellationRequested" : {
+            "type" : "boolean"
+          },
+          "recoveryCode" : {
+            "type" : [ "string", "null" ]
+          },
+          "refundedMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "order" : {
+            "$ref" : "#/components/schemas/GuestOrder"
+          }
+        }
+      },
+      "GuestOrder" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "publicOrderNumber" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "paymentMethod" : {
+            "type" : "string"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "subtotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "replayed" : {
+            "type" : "boolean"
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GuestOrderLine"
+            }
+          }
+        }
+      },
+      "GuestOrderLine" : {
+        "type" : "object",
+        "properties" : {
+          "productName" : {
+            "type" : "string"
+          },
+          "variantName" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "unitPriceMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "lineTotalMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GuestOrderOption"
+            }
+          }
+        }
+      },
+      "GuestOrderOption" : {
+        "type" : "object",
+        "properties" : {
+          "groupName" : {
+            "type" : "string"
+          },
+          "choiceName" : {
+            "type" : "string"
+          },
+          "priceDeltaMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "CreateRecipeRequest" : {
         "type" : "object",
         "properties" : {
@@ -4502,6 +5855,63 @@
           }
         },
         "required" : [ "email", "locationIds" ]
+      },
+      "CreateLocation" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "slug" : {
+            "type" : "string",
+            "maxLength" : 120,
+            "minLength" : 0,
+            "pattern" : "[a-z0-9]+(?:-[a-z0-9]+)*"
+          },
+          "currencyCode" : {
+            "type" : "string",
+            "minLength" : 1
+          },
+          "timezone" : {
+            "type" : "string",
+            "maxLength" : 64,
+            "minLength" : 0
+          },
+          "defaultLocale" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "currencyCode", "defaultLocale", "name", "slug", "timezone" ]
+      },
+      "OwnerShopLocation" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : [ "string", "null" ]
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "timezone" : {
+            "type" : "string"
+          },
+          "defaultLocale" : {
+            "type" : "string"
+          },
+          "active" : {
+            "type" : "boolean"
+          }
+        }
       },
       "OrderDetail" : {
         "type" : "object",
@@ -4737,40 +6147,6 @@
           }
         }
       },
-      "CreateIngredientRequest" : {
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string",
-            "maxLength" : 160,
-            "minLength" : 0
-          },
-          "sku" : {
-            "type" : [ "string", "null" ],
-            "maxLength" : 80,
-            "minLength" : 0
-          },
-          "baseUnit" : {
-            "type" : "string",
-            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
-          },
-          "reorderThreshold" : {
-            "type" : [ "string", "null" ],
-            "pattern" : "^(0|[0-9]+)(\\.[0-9]{1,6})?$"
-          }
-        },
-        "required" : [ "baseUnit", "name" ]
-      },
-      "ArchiveIngredientRequest" : {
-        "type" : "object",
-        "properties" : {
-          "version" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        },
-        "required" : [ "version" ]
-      },
       "CreateGuestOrderLineRequest" : {
         "type" : "object",
         "properties" : {
@@ -4810,22 +6186,114 @@
         },
         "required" : [ "items" ]
       },
-      "GuestOrder" : {
+      "ExpenseRequest" : {
+        "type" : "object",
+        "properties" : {
+          "amountMinor" : {
+            "type" : "integer",
+            "format" : "int64",
+            "maximum" : 100000000
+          },
+          "description" : {
+            "type" : "string",
+            "maxLength" : 240,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "description" ]
+      },
+      "CashFlowExpense" : {
         "type" : "object",
         "properties" : {
           "id" : {
             "type" : "string",
             "format" : "uuid"
           },
-          "publicOrderNumber" : {
+          "currencyCode" : {
             "type" : "string"
           },
-          "status" : {
+          "amountMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "description" : {
             "type" : "string"
           },
-          "paymentMethod" : {
+          "paidAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "recordedByAccountId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "voided" : {
+            "type" : "boolean"
+          },
+          "voidReason" : {
             "type" : "string"
           },
+          "voidedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "voidedByAccountId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "replayed" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "VoidRequest" : {
+        "type" : "object",
+        "properties" : {
+          "reason" : {
+            "type" : "string",
+            "maxLength" : 240,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "reason" ]
+      },
+      "CreateIngredientRequest" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "maxLength" : 160,
+            "minLength" : 0
+          },
+          "sku" : {
+            "type" : [ "string", "null" ],
+            "maxLength" : 80,
+            "minLength" : 0
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "reorderThreshold" : {
+            "type" : [ "string", "null" ],
+            "pattern" : "^(0|[0-9]+)(\\.[0-9]{1,6})?$"
+          }
+        },
+        "required" : [ "baseUnit", "name" ]
+      },
+      "ArchiveIngredientRequest" : {
+        "type" : "object",
+        "properties" : {
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "version" ]
+      },
+      "CustomerOrderQuote" : {
+        "type" : "object",
+        "properties" : {
           "currencyCode" : {
             "type" : "string"
           },
@@ -4833,64 +6301,11 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "discountMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
           "totalMinor" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "createdAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "replayed" : {
-            "type" : "boolean"
-          },
-          "items" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/GuestOrderLine"
-            }
-          }
-        }
-      },
-      "GuestOrderLine" : {
-        "type" : "object",
-        "properties" : {
-          "productName" : {
-            "type" : "string"
-          },
-          "variantName" : {
-            "type" : "string"
-          },
-          "quantity" : {
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "unitPriceMinor" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "lineTotalMinor" : {
-            "type" : "integer",
-            "format" : "int64"
-          },
-          "options" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/GuestOrderOption"
-            }
-          }
-        }
-      },
-      "GuestOrderOption" : {
-        "type" : "object",
-        "properties" : {
-          "groupName" : {
-            "type" : "string"
-          },
-          "choiceName" : {
-            "type" : "string"
-          },
-          "priceDeltaMinor" : {
             "type" : "integer",
             "format" : "int64"
           }
@@ -5194,6 +6609,75 @@
           }
         }
       },
+      "InventoryForecast" : {
+        "type" : "object",
+        "properties" : {
+          "ingredientId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "ingredientName" : {
+            "type" : "string"
+          },
+          "baseUnit" : {
+            "type" : "string",
+            "enum" : [ "GRAM", "MILLILITER", "EACH" ]
+          },
+          "quantity" : {
+            "type" : "string"
+          },
+          "reorderThreshold" : {
+            "type" : [ "string", "null" ]
+          },
+          "dailyConsumption" : {
+            "type" : [ "string", "null" ]
+          },
+          "daysRemaining" : {
+            "type" : [ "string", "null" ]
+          },
+          "observedDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "reorderReason" : {
+            "type" : "string"
+          }
+        }
+      },
+      "InventoryForecastPage" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InventoryForecast"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "calculatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "StaffInventoryMovementPage" : {
         "type" : "object",
         "properties" : {
@@ -5241,6 +6725,12 @@
           "quantity" : {
             "type" : "string"
           },
+          "reservedQuantity" : {
+            "type" : "string"
+          },
+          "availableQuantity" : {
+            "type" : "string"
+          },
           "reorderThreshold" : {
             "type" : [ "string", "null" ]
           },
@@ -5285,6 +6775,122 @@
             "format" : "int64"
           },
           "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "InventoryAlertSummary" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InventoryForecast"
+            }
+          },
+          "totalItems" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "horizonDays" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "calculatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "CashFlowDaily" : {
+        "type" : "object",
+        "properties" : {
+          "date" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "incomeMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "outflowMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "CashFlowReport" : {
+        "type" : "object",
+        "properties" : {
+          "days" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "timezone" : {
+            "type" : "string"
+          },
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "startDate" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "asOf" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "totals" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CashFlowTotal"
+            }
+          },
+          "daily" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CashFlowDaily"
+            }
+          },
+          "expenses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CashFlowExpense"
+            }
+          },
+          "totalExpenses" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "CashFlowTotal" : {
+        "type" : "object",
+        "properties" : {
+          "currencyCode" : {
+            "type" : "string"
+          },
+          "incomeMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "outflowMinor" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "netMinor" : {
             "type" : "integer",
             "format" : "int64"
           }
@@ -5446,6 +7052,17 @@
             "items" : {
               "$ref" : "#/components/schemas/StaffLocation"
             }
+          }
+        }
+      },
+      "PaymentMethods" : {
+        "type" : "object",
+        "properties" : {
+          "cash" : {
+            "type" : "boolean"
+          },
+          "card" : {
+            "type" : "boolean"
           }
         }
       },
@@ -5795,6 +7412,10 @@
             "items" : {
               "$ref" : "#/components/schemas/CustomerOrderLine"
             }
+          },
+          "cardCheckoutId" : {
+            "type" : [ "string", "null" ],
+            "format" : "uuid"
           }
         }
       },

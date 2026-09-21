@@ -119,3 +119,30 @@ public menu when personalization is unavailable.
 - Access tokens must not be logged or placed in URLs.
 - Authentication failures use generic messages so username enumeration is not exposed.
 - Audit records retain the acting account identifier where a staff action caused a state change.
+
+### Expired browser sessions
+
+The in-memory session summary includes the SDK's absolute expiry timestamp. An expiry timer and
+focus/visibility checks remove private React state when no fresh token has arrived; protected
+routes return to their existing sign-in screen. This never waits for a network request. A later
+valid SDK auth event can restore access. Supabase continues to own persistence and refresh, and
+Spring remains the authority for signature, timestamp, account, and scope validation.
+
+Session refresh replaces the expiry timer. Initial lookup results and deferred customer-provisioning
+callbacks cannot overwrite newer auth events or restore a signed-out/unmounted subscriber.
+See [acceptance and verification](../specs/session-expiry-handling.md).
+
+Staff form drafts and retry keys survive navigation between staff and customer routes and temporary
+route removal during refreshed-token permission revalidation. The in-memory cache lives above the
+routes and is scoped to the stable signed-in user ID; signing out or changing users discards it.
+No token or draft is written to browser storage. Private routes remain hidden until current staff
+access is resolved.
+
+### Card checkout boundary
+
+Public card recovery uses an unpredictable UUID capability separate from order IDs. It exposes
+receipt/status and unpaid cancellation; paid refunds require server-resolved staff scope. Customer
+history reveals the capability only after ownership checks. Raw-body Stripe HMAC verification uses
+a five-minute timestamp tolerance and constant-time comparison; event receipt only queues server
+retrieval. Secrets stay in backend environment configuration. Hosted URLs must be HTTPS on
+`checkout.stripe.com`; outbound API requests use a fixed Stripe origin without redirects.
