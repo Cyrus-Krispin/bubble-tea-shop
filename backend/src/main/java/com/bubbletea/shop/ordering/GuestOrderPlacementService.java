@@ -47,7 +47,7 @@ public class GuestOrderPlacementService {
         UUID authSubject,
         List<CreateLine> requestedLines
     ) {
-        return placeAt(findLocation(locationSlug), placementKey, authSubject, null, requestedLines);
+        return placeAt(findLocation(locationSlug), placementKey, authSubject, null, "CASH", requestedLines);
     }
 
     @Transactional
@@ -59,11 +59,16 @@ public class GuestOrderPlacementService {
             .query((rs, row) -> new Location(rs.getObject("id", UUID.class),
                 rs.getObject("organization_id", UUID.class), rs.getString("currency_code")))
             .optional().orElseThrow(GuestOrderCatalogChangedException::new);
-        return placeAt(location, placementKey, null, actor, lines);
+        return placeAt(location, placementKey, null, actor, "CASH", lines);
+    }
+
+    @Transactional
+    public PlacedOrder placeCard(String slug, UUID key, UUID subject, List<CreateLine> lines) {
+        return placeAt(findLocation(slug), key, subject, null, "CARD", lines);
     }
 
     private PlacedOrder placeAt(Location location, UUID placementKey, UUID authSubject,
-                               UUID staffActor, List<CreateLine> requestedLines) {
+                               UUID staffActor, String paymentMethod, List<CreateLine> requestedLines) {
         if (placementKey == null || requestedLines == null || requestedLines.isEmpty()
             || requestedLines.size() > 25) throw new InvalidGuestOrderException();
         long totalQuantity = requestedLines.stream().mapToLong(CreateLine::quantity).sum();
@@ -73,7 +78,7 @@ public class GuestOrderPlacementService {
         }
 
         UUID customerAccountId = resolveCustomerAccount(authSubject);
-        String fingerprint = fingerprint(customerAccountId, staffActor, requestedLines);
+        String fingerprint = fingerprint(customerAccountId, staffActor, paymentMethod, requestedLines);
         PlacedOrder replay = findByPlacementKey(location.id(), placementKey, fingerprint, true);
         if (replay != null) return replay;
 
@@ -102,14 +107,14 @@ public class GuestOrderPlacementService {
                 ) VALUES (
                     :id, :organizationId, :locationId, :customerAccountId,
                     :placementKey, :fingerprint, :publicNumber, 'PENDING',
-                    'CASH', :currency, :total, :finalTotal, :discount, :discountRecipe
+                    :method, :currency, :total, :finalTotal, :discount, :discountRecipe
                 )
                 ON CONFLICT (location_id, placement_key) WHERE placement_key IS NOT NULL DO NOTHING
                 """)
             .param("id", orderId).param("organizationId", location.organizationId())
             .param("locationId", location.id()).param("customerAccountId", customerAccountId)
             .param("placementKey", placementKey).param("fingerprint", fingerprint)
-            .param("publicNumber", publicNumber).param("currency", location.currency())
+            .param("publicNumber", publicNumber).param("method", paymentMethod).param("currency", location.currency())
             .param("total", total).param("finalTotal", finalTotal).param("discount", discount.amount()).param("discountRecipe", discount.recipeId()).update();
         if (inserted == 0) return requiredReplay(location.id(), placementKey, fingerprint);
 
@@ -127,10 +132,10 @@ public class GuestOrderPlacementService {
                 INSERT INTO payment (
                     id, organization_id, customer_order_id, method, status,
                     amount_minor, currency_code
-                ) VALUES (:id, :organizationId, :orderId, 'CASH', 'PENDING', :total, :currency)
+                ) VALUES (:id, :organizationId, :orderId, :method, 'PENDING', :total, :currency)
                 """)
             .param("id", UUID.randomUUID()).param("organizationId", location.organizationId())
-            .param("orderId", orderId).param("total", finalTotal).param("currency", location.currency())
+            .param("orderId", orderId).param("method", paymentMethod).param("total", finalTotal).param("currency", location.currency())
             .update();
         return loadOrder(orderId, false);
     }
@@ -212,7 +217,7 @@ public class GuestOrderPlacementService {
                  WHERE variant.id = :variantId
                    AND variant.organization_id = :organizationId
                    AND offering.location_id = :locationId
-                   AND offering.available
+                   AND offering.available AND variant_currency_ready(variant.id, offering.currency_code)
                    AND variant.archived_at IS NULL
                    AND product.archived_at IS NULL
                    AND recipe_version.status = 'PUBLISHED'
@@ -231,8 +236,9 @@ public class GuestOrderPlacementService {
                 SELECT option_group.id AS group_id, option_group.name AS group_name,
                        option_group.minimum_selections, option_group.maximum_selections,
                        choice.id AS choice_id, choice.name AS choice_name,
-                       variant_choice.id AS variant_choice_id, variant_choice.price_delta_minor
+                       variant_choice.id AS variant_choice_id, CASE WHEN :currency = 'SGD' THEN variant_choice.price_delta_minor ELSE currency_price.price_delta_minor END AS price_delta_minor
                   FROM menu_variant_option_choice variant_choice
+                  LEFT JOIN menu_variant_currency_price currency_price ON currency_price.menu_variant_option_choice_id = variant_choice.id AND currency_price.currency_code = :currency
                   JOIN option_choice choice
                     ON choice.id = variant_choice.option_choice_id
                    AND choice.organization_id = variant_choice.organization_id
@@ -247,12 +253,15 @@ public class GuestOrderPlacementService {
               ORDER BY option_group.display_order, choice.display_order, choice.id
                 """)
             .param("organizationId", location.organizationId())
-            .param("variantId", requested.variantId())
-            .query((rs, row) -> new Choice(
+            .param("variantId", requested.variantId()).param("currency", location.currency())
+            .query((rs, row) -> {
+                Long price = rs.getObject("price_delta_minor", Long.class);
+                if (price == null) throw new GuestOrderCatalogChangedException();
+                return new Choice(
                 rs.getObject("group_id", UUID.class), rs.getString("group_name"),
                 rs.getInt("minimum_selections"), rs.getInt("maximum_selections"),
                 rs.getObject("choice_id", UUID.class), rs.getString("choice_name"),
-                rs.getObject("variant_choice_id", UUID.class), rs.getLong("price_delta_minor")))
+                rs.getObject("variant_choice_id", UUID.class), price); })
             .list();
         Map<UUID, Group> groups = new LinkedHashMap<>();
         availableChoices.forEach(choice -> groups.computeIfAbsent(choice.groupId(), ignored ->
@@ -397,7 +406,7 @@ public class GuestOrderPlacementService {
         return replay;
     }
 
-    private PlacedOrder loadOrder(UUID orderId, boolean replayed) {
+    PlacedOrder loadOrder(UUID orderId, boolean replayed) {
         OrderHeader header = jdbc.sql("""
                 SELECT public_order_number, status, payment_method, currency_code,
                        subtotal_minor, total_minor, created_at
@@ -439,9 +448,10 @@ public class GuestOrderPlacementService {
             replayed, lines);
     }
 
-    private String fingerprint(UUID accountId, UUID staffActor, List<CreateLine> lines) {
+    private String fingerprint(UUID accountId, UUID staffActor, String paymentMethod, List<CreateLine> lines) {
         StringBuilder canonical = new StringBuilder(accountId == null ? "guest" : accountId.toString());
         if (staffActor != null) canonical.append("|counter:").append(staffActor);
+        if (paymentMethod.equals("CARD")) canonical.append("|payment:CARD");
         for (CreateLine line : lines) {
             canonical.append('|').append(line.variantId()).append(':').append(line.quantity()).append(':');
             if (line.optionChoiceIds() != null) line.optionChoiceIds().stream()

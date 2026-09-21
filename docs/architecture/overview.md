@@ -63,3 +63,21 @@ Ordering owns customer favorite preferences, checkout quotes and discount snapsh
 identity and catalog records through its application service; controllers never update their tables.
 The same pricing calculation serves quotes and placement. Customer IDs, discount percentages and
 monetary values are never accepted from checkout clients.
+
+## Currency configuration
+
+Identity owns owner-only location creation. Catalog owns per-currency option pricing and its
+readiness rule; ordering resolves those prices during placement. New shops start without offerings
+or stock. Managers need an explicit location assignment through the existing owner team workflow.
+The guest storefront uses an honest generic shop icon until location artwork is supplied.
+
+Inventory owns manual-movement retry identities. Its application service authorizes each request,
+claims the location-scoped key, compares the resolved actor and normalized payload, and returns an
+existing immutable movement or records one new ledger mutation in the same transaction.
+
+### Hosted card checkout
+
+Ordering owns the Stripe adapter, checkout reconciliation and successful refund ledger. It calls
+inventory's reservation service for holds/releases; every stock writer respects active holds.
+Provider network requests execute outside local transactions. React uses hosted Stripe checkout
+and server-verified receipts; it never collects card data. See [operations](../operations/card-payments.md).

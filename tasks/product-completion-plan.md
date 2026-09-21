@@ -25,11 +25,11 @@ PRs so each diff remains reviewable. Preserve the earlier shadcn task files.
 - [x] Reorder planning: server-filtered prioritized list; PR #37.
 - [x] Counter order entry: staff actor, guest ownership, pricing, idempotency, safe completion; PR #38.
 - [x] Cash-flow reporting: outflow capture and 1/7/30-day summaries; PR #40.
-- [x] Favorite recipe discount: ownership, deterministic pricing, immutable receipt; PR pending.
-- [ ] Multi-currency: location configuration and currency-specific option prices.
+- [x] Favorite recipe discount: ownership, deterministic pricing, immutable receipt; PR #42.
+- [x] Multi-currency: location configuration and currency-specific option prices; PR #44.
 - [ ] Localization: translated UI, catalog content, formatting and persistence.
 - [x] Session expiry: safe refresh/expiry behavior and race tests; PR #39.
-- [ ] Card checkout: hosted provider integration, event idempotency, stock/payment reconciliation.
+- [x] Card checkout: hosted provider integration, event idempotency, stock/payment reconciliation; implementation PR prepared. Actual Stripe merchant sandbox verification still requires credentials.
 - [x] Supplier restocking decision: user chose existing manual inventory UI; verify it during final review.
 - [x] Staff retry safety: retain uncertain counter/expense drafts across token refresh; PR #41.
 - [x] Intermediate subagent review: inventory refresh/pagination and staff retry recovery findings fixed and regression-tested.
@@ -38,3 +38,10 @@ PRs so each diff remains reviewable. Preserve the earlier shadcn task files.
 For each increment: spec + code + meaningful tests, full affected Maven/frontend checks, real-browser
 verification, reviewed diff, focused commit, push and PR. Regenerate OpenAPI/types for API changes.
 Never declare a live external integration verified without its provider sandbox/live evidence.
+
+- [x] Customer checkout recovery: preserve original attempt across routes, token changes and ambiguous errors; PR #43.
+
+- [x] Final review follow-up: currency-correct reorder suggestions and availability; PR #45.
+
+- [x] Final review follow-up: idempotent manual stock movements and preserved UI recovery; PR #46.
+- [x] Final review follow-up: clear optional single-choice customizations in guest and counter flows; PR #47.

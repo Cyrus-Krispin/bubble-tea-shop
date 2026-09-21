@@ -82,7 +82,7 @@ export function CustomerOrderDetailPage() {
 
 function Receipt({ order }: { order: CustomerOrderDetail }) {
   const nextStep = order.status === "PENDING"
-    ? "Your order is pending. Pay cash at the shop when you pick it up."
+    ? order.paymentMethod === "CARD" ? "This order uses online card payment. Check its payment receipt for the current status before pickup." : "Your order is pending. Pay cash at the shop when you pick it up."
     : order.status === "COMPLETED"
       ? "This order is complete. Your receipt remains available here."
       : "This order was cancelled. No pickup is required.";
@@ -102,6 +102,7 @@ function Receipt({ order }: { order: CustomerOrderDetail }) {
 
       <p className={cn("rounded-lg border-l-3 p-4 text-sm leading-6", order.status === "COMPLETED" ? "border-success-foreground bg-success" : order.status === "PENDING" ? "border-warning-foreground bg-warning" : "border-destructive bg-destructive/10")}>{nextStep}</p>
 
+      {order.cardCheckoutId ? <Button asChild variant="outline"><Link to={`/card-checkout/${order.cardCheckoutId}`}>View card payment and refund status</Link></Button> : null}
       <ol className="grid list-none divide-y rounded-lg border p-0">
         {order.items.map((line) => <ReceiptLine currency={order.currencyCode} key={line.lineNumber} line={line} />)}
       </ol>

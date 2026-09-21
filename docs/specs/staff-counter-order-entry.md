@@ -25,8 +25,10 @@ needed; the existing immutable status history already records the creating actor
 ## Retry recovery
 
 Keep the draft, shop selection, confirmed result, and request key in an account-scoped in-memory
-staff cache above route permission revalidation. Routine token refresh can temporarily hide the
-route without erasing the transaction. Sign-out/account replacement discards private cached state.
+staff cache above all app routes, scoped by the stable authenticated user ID. Visiting customer
+pages and returning to staff tools retains the transaction. Routine token refresh and permission
+revalidation can temporarily hide the route without erasing it. Sign-out/account replacement discards
+private cached state.
 If an earlier attempt has an uncertain outcome, a later authorization error must preserve its key;
 restored access retries the same immutable payload. An explicit first-attempt rejection may unlock
 correction. The permission error screen offers another access check without requiring sign-out.

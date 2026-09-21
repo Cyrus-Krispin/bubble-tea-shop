@@ -18,7 +18,7 @@ public class GuestCatalogService {
         this.jdbc = jdbc;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
     public List<GuestCatalogDto.Location> listLocations(String defaultLocationSlug) {
         return jdbc.query("""
                 SELECT id, organization_id, public_slug, name, currency_code, image_key
@@ -30,7 +30,7 @@ public class GuestCatalogService {
                 """, (rs, rowNum) -> mapLocation(rs).toDto(), defaultLocationSlug);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
     public GuestCatalogDto.Menu loadMenu(String locationSlug) {
         LocationRecord location = findLocation(locationSlug);
         List<GuestCatalogDto.ProductSummary> products = jdbc.query("""
@@ -40,8 +40,8 @@ public class GuestCatalogService {
                    product.description,
                    product.category,
                    product.artwork_key,
-                   MIN(offering.price_minor) AS starting_price_minor,
-                   bool_or(offering.available) AS available
+                   COALESCE(MIN(offering.price_minor) FILTER (WHERE offering.available AND variant_currency_ready(variant.id, offering.currency_code)), MIN(offering.price_minor)) AS starting_price_minor,
+                   bool_or(offering.available AND variant_currency_ready(variant.id, offering.currency_code)) AS available
               FROM menu_product product
               JOIN menu_variant variant
                 ON variant.menu_product_id = product.id
@@ -74,7 +74,7 @@ public class GuestCatalogService {
         return new GuestCatalogDto.Menu(location.toDto(), List.copyOf(products));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
     public GuestCatalogDto.Product loadProduct(String locationSlug, String productSlug) {
         LocationRecord location = findLocation(locationSlug);
         ProductRecord product = jdbc.query("""
@@ -118,7 +118,7 @@ public class GuestCatalogService {
                    variant.name,
                    variant.display_order,
                    variant.is_default,
-                   offering.available,
+                   (offering.available AND variant_currency_ready(variant.id, offering.currency_code)) AS available,
                    offering.price_minor
               FROM menu_variant variant
               JOIN menu_variant_offering offering
@@ -214,12 +214,13 @@ public class GuestCatalogService {
                    option_choice.name AS choice_name,
                    option_choice.display_order AS choice_display_order,
                    option_choice.is_default,
-                   variant_choice.price_delta_minor
+                   CASE WHEN ? = 'SGD' THEN variant_choice.price_delta_minor ELSE currency_price.price_delta_minor END AS price_delta_minor
               FROM menu_variant variant
               JOIN menu_variant_option_choice variant_choice
                 ON variant_choice.menu_variant_id = variant.id
                AND variant_choice.organization_id = variant.organization_id
                AND variant_choice.enabled
+              LEFT JOIN menu_variant_currency_price currency_price ON currency_price.menu_variant_option_choice_id = variant_choice.id AND currency_price.currency_code = ?
               JOIN option_choice
                 ON option_choice.id = variant_choice.option_choice_id
                AND option_choice.organization_id = variant_choice.organization_id
@@ -235,6 +236,8 @@ public class GuestCatalogService {
                       option_group.display_order,
                       option_choice.display_order
             """, rs -> {
+                Long choicePrice = rs.getObject("price_delta_minor", Long.class);
+                if (choicePrice == null) return; // Only unpriced, unavailable variants omit these choices.
                 UUID variantId = rs.getObject("variant_id", UUID.class);
                 UUID groupId = rs.getObject("group_id", UUID.class);
                 String groupName = rs.getString("group_name");
@@ -256,8 +259,8 @@ public class GuestCatalogService {
                     rs.getString("choice_name"),
                     rs.getInt("choice_display_order"),
                     rs.getBoolean("is_default"),
-                    new GuestCatalogDto.Money(rs.getLong("price_delta_minor"), currency)));
-            }, organizationId, productId);
+                    new GuestCatalogDto.Money(choicePrice, currency)));
+            }, currency, currency, organizationId, productId);
         return result;
     }
 

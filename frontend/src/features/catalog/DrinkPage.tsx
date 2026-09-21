@@ -51,7 +51,7 @@ export function DrinkPage() {
 }
 
 function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; product: CatalogProduct }) {
-  const { addItem, itemCount, locationSlug: cartLocationSlug } = useCart();
+  const { addItem, itemCount, checkoutState, locationSlug: cartLocationSlug } = useCart();
   const [configuration, setConfiguration] = useState<DrinkConfiguration>(() => (
     createDefaultConfiguration(product)
   ));
@@ -90,13 +90,14 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
     setAddedMessage("");
   }
 
-  function selectChoice(group: CatalogOptionGroup, choice: CatalogOptionChoice) {
+  function selectChoice(group: CatalogOptionGroup, choice: CatalogOptionChoice | null) {
+    if (choice === null && (group.minimumSelections !== 0 || group.maximumSelections !== 1)) return;
     setConfiguration((current) => ({
       ...current,
       selections: current.selections.map((selection) => {
         if (selection.groupId !== group.id) return selection;
-        const selected = selection.choiceIds.includes(choice.id);
-        const choiceIds = group.maximumSelections === 1
+        const selected = choice !== null && selection.choiceIds.includes(choice.id);
+        const choiceIds = choice === null ? [] : group.maximumSelections === 1
           ? [choice.id]
           : selected
             ? selection.choiceIds.filter((id) => id !== choice.id)
@@ -157,7 +158,8 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
           ))}
           <div className="sticky bottom-0 z-10 -mx-4 grid gap-3 border-t bg-card px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:p-0">
             <p className="text-sm leading-5 text-muted-foreground">Menu total. The shop confirms the final price when you place the order.</p>
-            <Button className="w-full" type="submit">Add to order · {formatMoney(previewTotalMinor, currency)}</Button>
+            {checkoutState.attempt ? <p role="status">An earlier order needs confirmation. <Link to="/cart">Recover your order</Link> before changing your cart.</p> : null}
+            <Button className="w-full" type="submit" disabled={Boolean(checkoutState.attempt)}>Add to order · {formatMoney(previewTotalMinor, currency)}</Button>
           </div>
           {addedMessage ? <Alert role="status"><AlertDescription>✓ {addedMessage} <Link to="/cart">View order</Link></AlertDescription></Alert> : null}
           </CardContent>

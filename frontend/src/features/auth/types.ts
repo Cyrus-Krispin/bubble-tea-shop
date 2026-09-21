@@ -4,6 +4,7 @@ export type Credentials = {
 };
 
 export type AuthSession = {
+  userId: string;
   accessToken: string;
   expiresAt: number;
   email: string;
