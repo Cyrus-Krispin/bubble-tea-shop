@@ -28,8 +28,8 @@ layout: none
 <div class="slide demo-opening">
   <video
     class="demo-opening-video"
-    src="/bubble-tea-shop-demo-expanded.mp4"
-    poster="/bubble-tea-shop-demo-expanded-poster.jpg"
+    src="/bubble-tea-shop-demo-schema.mp4"
+    poster="/bubble-tea-shop-demo-schema-poster.jpg"
     aria-label="Bubble Tea Shop product demo"
     autoplay
     muted
@@ -40,8 +40,9 @@ layout: none
 </div>
 
 <!--
-Play the silent 51-second product tour after the title. It moves from the customer order into
-recipe and inventory work, manager shop access, Supabase Studio, and Grafana. It starts
+Play the silent 50-second product tour after the title. It moves from the customer order into
+recipe and inventory work, manager shop access, a pan through Supabase Studio's connected-table
+diagram, and Grafana. It starts
 automatically when this slide opens; the native controls let you pause or replay it. Then move
 to the one-drink example.
 -->
