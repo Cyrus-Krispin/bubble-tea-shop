@@ -78,3 +78,14 @@ race returns `409 INVENTORY_STATE_CONFLICT`; and a movement that would make stoc
 
 The [forecast specification](../specs/ingredient-consumption-forecast.md) defines the authorized
 `GET .../inventory/forecasts` projection and on-demand inventory forecast panel.
+
+The [alert specification](../specs/projected-low-stock-alerts.md) defines automatic in-app warnings
+from `GET .../inventory/alerts` for stock projected to exhaust within seven days.
+
+The [reorder list](../specs/ingredient-reorder-planning.md), `GET .../inventory/reorder`, combines
+quantity thresholds and projected shortages before pagination and explains each inclusion.
+
+Manual movements require an `Idempotency-Key` UUID. Repeating the same normalized input as the same
+staff account at the same shop returns the original movement. Reusing the key with different input
+or actor returns a conflict. The UI retains uncertain attempts during the signed-in app session;
+after a full reload/sign-out, reconcile history before entering a delivery again.

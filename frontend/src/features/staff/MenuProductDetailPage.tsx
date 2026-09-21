@@ -1,3 +1,4 @@
+import { CurrencyPriceEditor } from "./CurrencyPriceEditor";
 import {
   useEffect,
   useId,
@@ -1036,6 +1037,7 @@ function VariantCard({
           </div>
         )}
       </section>
+      {!variant.archived && !product.archived ? <CurrencyPriceEditor token={accessToken} organizationId={organizationId} variantId={variant.id} onChanged={onChanged} /> : null}
       <section
         className="menu-subsection"
         aria-label={`${variant.name} option configuration`}

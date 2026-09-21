@@ -1,19 +1,25 @@
+import { CardRecoveryNotice } from "../features/cart/CardRecoveryNotice";
 import { lazy, Suspense, useEffect } from "react";
 import { Link, Navigate, Route, Routes, useLocation } from "react-router";
 
-import { AccountAccessPage } from "../features/auth/AccountAccessPage";
-import { StaffSignInPage } from "../features/auth/StaffSignInPage";
 import { AuthProvider } from "../features/auth/AuthProvider";
 import { CustomerAccountPage } from "../features/auth/CustomerAccountPage";
-import { CartPage } from "../features/cart/CartPage";
 import { CartProvider } from "../features/cart/CartProvider";
 import { DrinkPage } from "../features/catalog/DrinkPage";
 import { ShopPage } from "../features/catalog/ShopPage";
-import { CustomerOrderDetailPage } from "../features/orders/CustomerOrderDetailPage";
 import { StaffWorkspacePage } from "../features/staff/StaffWorkspacePage";
+import { StaffDraftProvider } from "../features/staff/StaffDraftProvider";
 import { StaffLayout } from "../features/staff/StaffLayout";
 import { NotFoundPage } from "./NotFoundPage";
 
+const StaffSignInPage = lazy(() => import("../features/auth/StaffSignInPage").then((module) => ({ default: module.StaffSignInPage })));
+const AccountAccessPage = lazy(() => import("../features/auth/AccountAccessPage").then((module) => ({ default: module.AccountAccessPage })));
+const CustomerOrderDetailPage = lazy(() => import("../features/orders/CustomerOrderDetailPage").then((module) => ({ default: module.CustomerOrderDetailPage })));
+const CartPage = lazy(() => import("../features/cart/CartPage").then((module) => ({ default: module.CartPage })));
+const CardCheckoutPage = lazy(() => import("../features/cart/CardCheckoutPage").then((module) => ({ default: module.CardCheckoutPage })));
+const OwnerLocationsPage = lazy(() => import("../features/staff/OwnerLocationsPage"));
+const CashFlowPage = lazy(() => import("../features/staff/CashFlowPage"));
+const CounterOrderPage = lazy(() => import("../features/staff/CounterOrderPage"));
 const IngredientManagementPage = lazy(() => import("../features/staff/IngredientManagementPage"));
 const RecipeManagementPage = lazy(() => import("../features/staff/RecipeManagementPage"));
 const RecipeDetailPage = lazy(() => import("../features/staff/RecipeDetailPage"));
@@ -64,20 +70,23 @@ export function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <StaffDraftProvider>
         <ScrollToTop />
+        <CardRecoveryNotice />
         <Routes>
           <Route path="/" element={<ShopPage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/shop/drinks/:drinkId" element={<DrinkPage />} />
           <Route path="/shop/:locationSlug" element={<ShopPage />} />
           <Route path="/shop/:locationSlug/drinks/:drinkId" element={<DrinkPage />} />
-          <Route path="/cart" element={<CartPage />} />
+          <Route path="/cart" element={<Suspense fallback={<main role="status">Loading checkout…</main>}><CartPage /></Suspense>} />
+          <Route path="/card-checkout/:id" element={<Suspense fallback={<main role="status">Loading payment…</main>}><CardCheckoutPage /></Suspense>} />
           <Route path="/account" element={<CustomerAccountPage />} />
-          <Route path="/account/orders/:orderId" element={<CustomerOrderDetailPage />} />
-          <Route path="/account/access" element={<AccountAccessPage />} />
+          <Route path="/account/orders/:orderId" element={<Suspense fallback={<main role="status">Loading receipt…</main>}><CustomerOrderDetailPage /></Suspense>} />
+          <Route path="/account/access" element={<Suspense fallback={<main role="status">Loading sign in…</main>}><AccountAccessPage /></Suspense>} />
           <Route path="/account/create" element={<LegacyAccountAccessRedirect mode="create" />} />
           <Route path="/account/sign-in" element={<LegacyAccountAccessRedirect mode="sign-in" />} />
-          <Route path="/staff/sign-in" element={<StaffSignInPage />} />
+          <Route path="/staff/sign-in" element={<Suspense fallback={<main role="status">Loading sign in…</main>}><StaffSignInPage /></Suspense>} />
           <Route path="/staff" element={<StaffLayout />}>
             <Route index element={<StaffWorkspacePage />} />
             <Route path="catalog" element={<Navigate replace to="/staff/catalog/ingredients" />} />
@@ -121,6 +130,9 @@ export function App() {
                 <InventoryManagementPage />
               </Suspense>
             )} />
+            <Route path="locations" element={<Suspense fallback={<CatalogLoading label="Shop locations" />}><OwnerLocationsPage /></Suspense>} />
+            <Route path="cash-flow" element={<Suspense fallback={<CatalogLoading label="Cash flow" />}><CashFlowPage /></Suspense>} />
+            <Route path="counter" element={<Suspense fallback={<CatalogLoading label="Counter order entry" />}><CounterOrderPage /></Suspense>} />
             <Route path="orders" element={(
               <Suspense fallback={<CatalogLoading label="Order operations" />}>
                 <OrderOperationsPage />
@@ -140,6 +152,7 @@ export function App() {
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </StaffDraftProvider>
       </CartProvider>
     </AuthProvider>
   );

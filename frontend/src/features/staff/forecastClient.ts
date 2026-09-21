@@ -5,26 +5,48 @@ export type ForecastPage = components["schemas"]["InventoryForecastPage"];
 export type Forecast = components["schemas"]["InventoryForecast"];
 
 export async function getForecasts(token: string, organizationId: string, locationId: string, page: number,
-  signal?: AbortSignal): Promise<ForecastPage> {
+  signal?: AbortSignal, mode: "forecasts" | "reorder" = "forecasts"): Promise<ForecastPage> {
   const client = createClient<paths>({ baseUrl: window.location.origin,
     headers: { Authorization: `Bearer ${token}` } });
   const { data } = await client.GET(
-    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts",
+    mode === "reorder"
+      ? "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/reorder"
+      : "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/forecasts",
     { params: { path: { organizationId, locationId }, query: { page, size: 25 } }, signal },
   );
   if (!data || !Array.isArray(data.items) || !Number.isSafeInteger(data.totalPages)
     || data.totalPages < 0 || !Number.isFinite(Date.parse(data.calculatedAt))) throw new Error("Invalid forecast response");
+  validateForecasts(data.items);
+  return { ...data, items: data.items.map((item) => ({ ...item })) };
+}
+
+function validateForecasts(items: readonly Forecast[]) {
   const decimal = (value: unknown) => typeof value === "string" && /^\d+(\.\d+)?$/.test(value);
-  for (const item of data.items) {
+  for (const item of items) {
     if (typeof item.ingredientId !== "string" || typeof item.ingredientName !== "string"
       || !["GRAM", "MILLILITER", "EACH"].includes(item.baseUnit) || !decimal(item.quantity)
       || (item.dailyConsumption !== null && !decimal(item.dailyConsumption))
       || (item.daysRemaining !== null && !decimal(item.daysRemaining))
       || (item.reorderThreshold !== null && !decimal(item.reorderThreshold))
       || !Number.isInteger(item.observedDays) || item.observedDays < 0 || item.observedDays > 30
+      || !["OUT_OF_STOCK", "THRESHOLD", "PROJECTED", "BOTH", "NONE"].includes(item.reorderReason)
       || !["ESTIMATED", "OUT_OF_STOCK", "INSUFFICIENT_HISTORY", "NO_OBSERVED_DEMAND"].includes(item.status)) {
       throw new Error("Invalid forecast response");
     }
   }
+}
+
+export async function getInventoryAlerts(token: string, organizationId: string, locationId: string,
+  signal?: AbortSignal): Promise<components["schemas"]["InventoryAlertSummary"]> {
+  const client = createClient<paths>({ baseUrl: window.location.origin,
+    headers: { Authorization: `Bearer ${token}` } });
+  const { data } = await client.GET(
+    "/api/v1/staff/organizations/{organizationId}/locations/{locationId}/inventory/alerts",
+    { params: { path: { organizationId, locationId } }, signal },
+  );
+  if (!data || !Array.isArray(data.items) || !Number.isSafeInteger(data.totalItems) || data.totalItems < 0
+    || !Number.isInteger(data.horizonDays) || data.horizonDays < 1
+    || !Number.isFinite(Date.parse(data.calculatedAt))) throw new Error("Invalid alerts");
+  validateForecasts(data.items);
   return { ...data, items: data.items.map((item) => ({ ...item })) };
 }

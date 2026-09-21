@@ -9,7 +9,7 @@ import { CustomerHeader } from "./CustomerHeader";
 
 const authState = vi.hoisted(() => ({
   isLoading: false,
-  session: null as null | { accessToken: string; email: string },
+  session: null as null | { userId: string; accessToken: string; expiresAt: number; email: string },
 }));
 
 vi.mock("../features/auth/useAuth", () => ({ useAuth: () => authState }));
@@ -76,7 +76,7 @@ describe("CustomerHeader", () => {
   });
 
   it("links signed-in customers to their account from the profile menu", () => {
-    authState.session = { accessToken: "customer-token", email: "customer@example.test" };
+    authState.session = { userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800, email: "customer@example.test" };
 
     render(
       <MemoryRouter>
