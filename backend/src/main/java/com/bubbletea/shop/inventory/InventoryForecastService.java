@@ -55,20 +55,31 @@ public class InventoryForecastService {
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public ForecastPage forecasts(UUID subject, UUID organizationId, UUID locationId, int page, int size) {
-        return load(subject, organizationId, locationId, page, size, false);
+        return load(subject, organizationId, locationId, page, size, Selection.ALL);
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public AlertSummary alerts(UUID subject, UUID organizationId, UUID locationId) {
-        ForecastPage page = load(subject, organizationId, locationId, 0, 5, true);
+        ForecastPage page = load(subject, organizationId, locationId, 0, 5, Selection.PROJECTED);
         return new AlertSummary(page.items(), page.totalItems(), ALERT_HORIZON_DAYS, page.calculatedAt());
     }
 
-    private ForecastPage load(UUID subject, UUID organizationId, UUID locationId, int page, int size, boolean alerts) {
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public ForecastPage reorder(UUID subject, UUID organizationId, UUID locationId, int page, int size) {
+        return load(subject, organizationId, locationId, page, size, Selection.REORDER);
+    }
+
+    private enum Selection { ALL, PROJECTED, REORDER }
+
+    private ForecastPage load(UUID subject, UUID organizationId, UUID locationId, int page, int size, Selection selection) {
         if (page < 0 || size < 1 || size > 100) throw new InvalidInventoryException();
         access.authorize(subject, organizationId, locationId);
         Instant asOf = jdbc.sql("SELECT now()").query(Timestamp.class).single().toInstant();
-        String filter = alerts ? " WHERE quantity = 0 OR (observed_days > 0 AND consumed > 0 AND quantity * observed_days <= consumed * :horizon)" : " WHERE :horizon > 0";
+        String filter = switch (selection) {
+            case ALL -> " WHERE :horizon > 0";
+            case PROJECTED -> " WHERE quantity = 0 OR (observed_days > 0 AND consumed > 0 AND quantity * observed_days <= consumed * :horizon)";
+            case REORDER -> " WHERE quantity = 0 OR quantity <= reorder_threshold OR (observed_days > 0 AND consumed > 0 AND quantity * observed_days <= consumed * :horizon)";
+        };
         long total = jdbc.sql(ROWS + " SELECT count(*) FROM forecast_rows" + filter)
             .param("org", organizationId).param("loc", locationId).param("horizon", ALERT_HORIZON_DAYS)
             .query(Long.class).single();
@@ -92,8 +103,13 @@ public class InventoryForecastService {
         BigDecimal remaining = quantity.signum() == 0 ? BigDecimal.ZERO
             : days == 0 || consumed.signum() == 0 ? null
             : quantity.multiply(BigDecimal.valueOf(days)).divide(consumed, 2, RoundingMode.DOWN);
+        boolean belowThreshold = threshold != null && quantity.compareTo(threshold) <= 0;
+        boolean projected = days > 0 && consumed.signum() > 0
+            && quantity.multiply(BigDecimal.valueOf(days)).compareTo(consumed.multiply(BigDecimal.valueOf(ALERT_HORIZON_DAYS))) <= 0;
+        String reason = quantity.signum() == 0 ? "OUT_OF_STOCK" : belowThreshold && projected ? "BOTH"
+            : belowThreshold ? "THRESHOLD" : projected ? "PROJECTED" : "NONE";
         return new Forecast(id, name, unit, decimal(quantity), decimal(threshold), decimal(rate),
-            decimal(remaining), days, status);
+            decimal(remaining), days, status, reason);
     }
 
     private static String decimal(BigDecimal number) {
@@ -105,7 +121,7 @@ public class InventoryForecastService {
                            @Schema(nullable = true) String reorderThreshold,
                            @Schema(nullable = true) String dailyConsumption,
                            @Schema(nullable = true) String daysRemaining,
-                           int observedDays, String status) { }
+                           int observedDays, String status, String reorderReason) { }
 
     @Schema(name = "InventoryAlertSummary")
     public record AlertSummary(List<Forecast> items, long totalItems, int horizonDays, Instant calculatedAt) { }

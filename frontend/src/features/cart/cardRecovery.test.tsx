@@ -1,0 +1,42 @@
+import { act, renderHook } from "@testing-library/react";
+import { beforeEach, expect, it, vi } from "vitest";
+import { CartProvider } from "./CartProvider";
+import { useCart } from "./CartContext";
+import { createCardCheckout, type CardStatus } from "./cardClient";
+import type { CartItem } from "./cartReducer";
+vi.mock("./cardClient", () => ({ createCardCheckout: vi.fn(), CardPaymentError: class extends Error {} }));
+const item: CartItem = { id: "line", drinkId: "tea", drinkName: "Tea", locationSlug: "shop", currency: "SGD", quantity: 1, unitPriceMinor: 500,
+  configuration: { variantId: "20000000-0000-0000-0000-000000000001", variantName: "Medium", selections: [] } };
+const id = "30000000-0000-0000-0000-000000000001";
+beforeEach(() => { vi.resetAllMocks(); sessionStorage.clear(); });
+it("recovers the same card purchase after a full provider remount with an empty cart", async () => {
+  vi.mocked(createCardCheckout).mockRejectedValueOnce(new TypeError("lost response")).mockResolvedValueOnce({ id } as CardStatus);
+  const original = renderHook(() => useCart(), { wrapper: CartProvider });
+  act(() => original.result.current.addItem(item));
+  await act(() => original.result.current.checkout(null, undefined, "CARD"));
+  const key = original.result.current.checkoutState.attempt!.key;
+  original.unmount();
+  const recovered = renderHook(() => useCart(), { wrapper: CartProvider });
+  expect(recovered.result.current.itemCount).toBe(0);
+  await act(() => recovered.result.current.checkout(null));
+  expect(createCardCheckout).toHaveBeenLastCalledWith("shop", key, { items: [{ variantId: item.configuration.variantId, quantity: 1, optionChoiceIds: [] }] }, undefined);
+  expect(recovered.result.current.checkoutState.attempt?.cardId).toBe(id);
+  const finish = recovered.result.current.finishCard;
+  recovered.rerender(); expect(recovered.result.current.finishCard).toBe(finish);
+  act(() => recovered.result.current.finishCard(id));
+  expect(recovered.result.current.checkoutState.attempt).toBeUndefined();
+  expect(sessionStorage.length).toBe(0);
+});
+it("retains the original account and never retries as another customer", async () => {
+  const session = { userId: "40000000-0000-0000-0000-000000000001", email: "a@example.test", accessToken: "token", expiresAt: 2_000_000_000 };
+  vi.mocked(createCardCheckout).mockRejectedValue(new TypeError("lost"));
+  const original = renderHook(() => useCart(), { wrapper: CartProvider });
+  act(() => original.result.current.addItem(item));
+  await act(() => original.result.current.checkout(session, undefined, "CARD")); original.unmount();
+  const recovered = renderHook(() => useCart(), { wrapper: CartProvider });
+  await act(() => recovered.result.current.checkout(null));
+  await act(() => recovered.result.current.checkout({ ...session, userId: id }));
+  expect(createCardCheckout).toHaveBeenCalledTimes(1);
+  await act(() => recovered.result.current.checkout({ ...session, accessToken: "fresh" }));
+  expect(vi.mocked(createCardCheckout).mock.calls[1][3]).toBe("fresh");
+});

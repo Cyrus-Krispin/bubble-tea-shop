@@ -68,9 +68,31 @@ The Flyway migration remains the executable source of truth for the database.
 
 - [Projected low-stock alerts](specs/projected-low-stock-alerts.md) — automatic in-app shortage warnings.
 
+- [Ingredient reorder planning](specs/ingredient-reorder-planning.md) — prioritized stock purchasing list.
+
+- [Staff counter order entry](specs/staff-counter-order-entry.md) — attributed walk-in cash orders.
+
 ## Documentation rules
 
 1. Add an ADR when a decision is expensive to reverse or affects more than one module.
 2. Update the ERD, dictionary, and invariants in the same change as a Flyway schema migration.
 3. Never edit an applied Flyway migration; add a new versioned migration instead.
 4. Keep generated OpenAPI artifacts separate from human-authored API conventions.
+
+- [Session expiry and refresh](specs/session-expiry-handling.md)
+
+- [Cash-flow dashboard and paid expense ledger](specs/cash-flow-dashboard.md)
+
+- [Favorite drink and checkout discount](specs/favorite-drink-discount.md)
+
+- [Customer checkout recovery](specs/customer-checkout-recovery.md)
+
+- [Location currencies and option prices](specs/location-currency-pricing.md)
+
+- [Currency-correct reorder suggestions](specs/currency-reorder-consistency.md)
+
+- [Safe retries for manual stock movements](specs/manual-stock-retry-safety.md)
+
+- [Clear optional drink customizations](specs/optional-drink-choice-clearing.md)
+
+- [Hosted card checkout](specs/stripe-card-checkout.md) and [payment operations](operations/card-payments.md).

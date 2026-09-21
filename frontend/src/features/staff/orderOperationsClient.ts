@@ -86,12 +86,12 @@ function orderStatus(value: unknown): StaffOrderStatus {
 }
 
 function paymentMethod(value: unknown): string {
-  if (value !== "CASH") invalid();
+  if (value !== "CASH" && value !== "CARD") invalid();
   return value;
 }
 
 function paymentStatus(value: unknown): string {
-  if (value !== "PENDING" && value !== "PAID") invalid();
+  if (value !== "PENDING" && value !== "PAID" && value !== "FAILED" && value !== "REFUNDED") invalid();
   return value;
 }
 

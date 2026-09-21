@@ -9,6 +9,8 @@ import {
   SelectField,
   type DataTableColumn,
 } from "../../components/shared";
+import { StaffCardPayment } from "./StaffCardPayment";
+import type { CardStatus } from "../cart/cardClient";
 import { Button } from "../../components/ui/button";
 import { formatMoney } from "../catalog/formatMoney";
 import type { StaffOutletContext } from "./StaffLayout";
@@ -276,7 +278,7 @@ export default function OrderOperationsPage() {
           <p className="eyebrow">Live service</p>
           <h1>Orders</h1>
           <p className="staff-muted">
-            Collect cash and complete orders without overselling ingredients.
+            Confirm payments and complete orders without overselling ingredients.
           </p>
         </div>
       </div>
@@ -418,6 +420,8 @@ export default function OrderOperationsPage() {
                       ) : null}
                       {detailState.status === "ready" ? (
                         <OrderDetail
+                          paymentScope={{ token: accessToken, organizationId, locationId }}
+                          onPaymentChanged={() => { setDetailVersion((v) => v + 1); setReloadVersion((v) => v + 1); }}
                           completionError={completionError}
                           completionOpen={completionOpen}
                           completing={completing}
@@ -457,6 +461,7 @@ export default function OrderOperationsPage() {
 }
 
 function OrderDetail({
+  paymentScope, onPaymentChanged,
   completionError,
   completionOpen,
   completing,
@@ -465,6 +470,8 @@ function OrderDetail({
   order,
   shortages,
 }: {
+  paymentScope: { token: string; organizationId: string; locationId: string };
+  onPaymentChanged: () => void;
   completionError?: string;
   completionOpen: boolean;
   completing: boolean;
@@ -473,6 +480,9 @@ function OrderDetail({
   order: StaffOrderDetail;
   shortages: OrderOperationError["shortages"];
 }) {
+  const [cardStatus, setCardStatus] = useState<CardStatus>();
+  const card = order.paymentMethod === "CARD";
+  const canComplete = !card || (cardStatus?.order.id === order.id && cardStatus.state === "PAID" && !cardStatus.cancellationRequested);
   return (
     <section aria-labelledby="order-detail-title" className="order-detail">
       <div className="order-detail-heading">
@@ -489,6 +499,7 @@ function OrderDetail({
       </div>
       <div className="order-detail-grid">
         <div>
+          {order.subtotalMinor > order.totalMinor ? <p>Discount: −{formatMoney(order.subtotalMinor - order.totalMinor, order.currencyCode)}</p> : null}
           <h3>Items</h3>
           <ol className="order-line-list">
             {order.lines.map((line) => (
@@ -538,16 +549,17 @@ function OrderDetail({
         </div>
       </div>
       <div className="order-total-row">
-        <span>Cash total</span>
+        <span>{card ? "Card total" : "Cash total"}</span>
         <strong>{formatMoney(order.totalMinor, order.currencyCode)}</strong>
       </div>
+      {card ? <StaffCardPayment key={order.id} {...paymentScope} orderId={order.id} onState={setCardStatus} onChanged={onPaymentChanged} /> : null}
       {order.status === "PENDING" ? (
         <Dialog
-          description={`Confirm that ${formatMoney(order.totalMinor, order.currencyCode)} cash has been received. Completion deducts the current ingredient snapshot.`}
+          description={card ? "Payment was collected online. Complete the drinks and deduct their reserved ingredients." : `Confirm that ${formatMoney(order.totalMinor, order.currencyCode)} cash has been received. Completion deducts the current ingredient snapshot.`}
           onOpenChange={onOpenChange}
           open={completionOpen}
           title={`Complete ${order.publicOrderNumber}`}
-          trigger={<Button>Collect cash &amp; complete</Button>}
+          trigger={<Button disabled={!canComplete}>{card ? "Complete paid order" : "Collect cash & complete"}</Button>}
         >
           {completionError === undefined ? null : (
             <p className="form-message form-message--error" role="alert">
@@ -571,14 +583,13 @@ function OrderDetail({
               loadingLabel="Completing order"
               onClick={onComplete}
             >
-              Confirm cash &amp; complete
+              {card ? "Confirm completion" : "Confirm cash & complete"}
             </Button>
           </div>
         </Dialog>
       ) : (
         <p className="order-completed-note">
-          Cash recorded {formatDate(order.paidAt)} · Completed{" "}
-          {formatDate(order.completedAt)}
+          {order.status === "CANCELLED" ? "Order cancelled" : <>Payment {order.paymentStatus.toLowerCase()} · Collected {formatDate(order.paidAt)} · Completed {formatDate(order.completedAt)}</>}
         </p>
       )}
     </section>

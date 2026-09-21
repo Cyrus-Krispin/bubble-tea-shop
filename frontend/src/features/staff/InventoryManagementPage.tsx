@@ -1,6 +1,7 @@
+import { useStaffDraft } from "./StaffDraftContext";
 import { InventoryAlerts } from "./InventoryAlerts";
 import { InventoryForecastPanel } from "./InventoryForecastPanel";
-import { useEffect, useId, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { useOutletContext } from "react-router";
 
 import {
@@ -107,6 +108,7 @@ function MovementDialog({
   locationId,
   onSaved,
   organizationId,
+  open, onOpenChange, onFinished, locationName,
 }: {
   accessToken: string;
   balance: InventoryBalance;
@@ -114,23 +116,29 @@ function MovementDialog({
   locationId: string;
   onSaved: () => void;
   organizationId: string;
+  locationName: string;
+  open: boolean;
+  onOpenChange: (value: boolean) => void;
+  onFinished: () => void;
 }) {
   const prefix = useId();
   const initialType: ManualInventoryMovementType = balance.openingRecorded
     ? "RECEIPT"
     : "OPENING";
-  const [open, setOpen] = useState(false);
+
   const [movementType, setMovementType] =
-    useState<ManualInventoryMovementType>(initialType);
-  const [quantity, setQuantity] = useState("");
-  const [sourceReference, setSourceReference] = useState("");
-  const [note, setNote] = useState("");
-  const [totalCostMinor, setTotalCostMinor] = useState("");
-  const [quantityError, setQuantityError] = useState<string>();
-  const [noteError, setNoteError] = useState<string>();
-  const [costError, setCostError] = useState<string>();
-  const [submitError, setSubmitError] = useState<string>();
-  const [saving, setSaving] = useState(false);
+    useStaffDraft<ManualInventoryMovementType>("stock:type", initialType);
+  const [quantity, setQuantity] = useStaffDraft("stock:quantity", "");
+  const [sourceReference, setSourceReference] = useStaffDraft("stock:sourceReference", "");
+  const [note, setNote] = useStaffDraft("stock:note", "");
+  const [totalCostMinor, setTotalCostMinor] = useStaffDraft("stock:totalCostMinor", "");
+  const [quantityError, setQuantityError] = useStaffDraft<string | undefined>("stock:quantityError", undefined);
+  const [noteError, setNoteError] = useStaffDraft<string | undefined>("stock:noteError", undefined);
+  const [costError, setCostError] = useStaffDraft<string | undefined>("stock:costError", undefined);
+  const [submitError, setSubmitError] = useStaffDraft<string | undefined>("stock:submitError", undefined);
+  const [saving, setSaving] = useStaffDraft("stock:saving", false);
+  const [requestKey, setRequestKey] = useStaffDraft<string | undefined>("stock:key", undefined);
+  const submitting = useRef(false);
 
   function reset() {
     setMovementType(initialType);
@@ -142,10 +150,12 @@ function MovementDialog({
     setNoteError(undefined);
     setCostError(undefined);
     setSubmitError(undefined);
+    setRequestKey(undefined);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving || submitting.current) return;
     const normalizedQuantity = quantity.trim();
     const numericQuantity = Number(normalizedQuantity);
     const invalidQuantity =
@@ -181,9 +191,10 @@ function MovementDialog({
     )
       return;
 
-    setSaving(true);
+    const key = requestKey ?? crypto.randomUUID();
+    setRequestKey(key); setSaving(true); submitting.current = true;
     try {
-      await recordInventoryMovement(accessToken, organizationId, locationId, {
+      await recordInventoryMovement(accessToken, organizationId, locationId, key, {
         ingredientId: balance.ingredientId,
         movementType,
         quantityDelta: normalizedQuantity,
@@ -191,10 +202,14 @@ function MovementDialog({
         note: note.trim() || undefined,
         totalCostMinor: movementType === "RECEIPT" ? parsedCost : undefined,
       });
-      setOpen(false);
+      reset(); onFinished();
       onSaved();
     } catch (error) {
-      setSubmitError(mutationMessage(error, balance.ingredientId));
+      if (requestKey === undefined && error instanceof InventoryError && error.status >= 400 && error.status < 500) {
+        setRequestKey(undefined); setSubmitError(mutationMessage(error, balance.ingredientId));
+      } else {
+        setSubmitError("The outcome is unknown. Retry this same movement to avoid changing stock twice. Keep this app session open; after a reload or sign-out, check movement history before entering it again.");
+      }
       if (
         error instanceof InventoryError &&
         (error.code === "INVENTORY_STATE_CONFLICT" ||
@@ -202,28 +217,31 @@ function MovementDialog({
       )
         onSaved();
     } finally {
-      setSaving(false);
+      setSaving(false); submitting.current = false;
     }
   }
 
   return (
     <Dialog
-      description={`Append an immutable movement for ${balance.ingredientName}. Current balance: ${balance.quantity} ${unitLabel(balance.baseUnit)}.`}
+      description={`${locationName}: append an immutable movement for ${balance.ingredientName}. Current balance: ${balance.quantity} ${unitLabel(balance.baseUnit)}.`}
       onOpenChange={(next) => {
-        setOpen(next);
-        if (next) reset();
+        if (saving) return;
+        onOpenChange(next);
+        if (!next && requestKey === undefined) { reset(); onFinished(); }
       }}
       open={open}
       title="Record stock movement"
       trigger={
         <Button size="compact" variant="secondary">
-          Record
+          Resume stock movement
         </Button>
       }
     >
       <form className="inventory-movement-form" onSubmit={submit}>
+        <fieldset disabled={requestKey !== undefined} className="grid gap-4">
         <SelectField
           id={`${prefix}-type`}
+          disabled={requestKey !== undefined}
           label="Movement type"
           onValueChange={(nextValue) => {
             const next = nextValue as ManualInventoryMovementType;
@@ -297,6 +315,7 @@ function MovementDialog({
             />
           </Field>
         ) : null}
+        </fieldset>
         {submitError === undefined ? null : (
           <p className="form-message form-message--error" role="alert">
             {submitError}
@@ -308,7 +327,7 @@ function MovementDialog({
             loadingLabel="Recording movement"
             type="submit"
           >
-            Record movement
+            {requestKey ? "Retry same movement" : "Record movement"}
           </Button>
         </div>
       </form>
@@ -329,12 +348,15 @@ function activeLocation(
 export default function InventoryManagementPage() {
   const { accessToken, staffContext } = useOutletContext<StaffOutletContext>();
   const initialMembership = staffContext.memberships[0];
-  const [organizationId, setOrganizationId] = useState(
+  const [organizationId, setOrganizationId] = useStaffDraft("stock:organization",
     initialMembership?.organizationId ?? "",
   );
-  const [locationId, setLocationId] = useState(
+  const [locationId, setLocationId] = useStaffDraft("stock:location",
     initialMembership?.locations[0]?.id ?? "",
   );
+  const [, setDraftMovementType] = useStaffDraft<ManualInventoryMovementType>("stock:type", "RECEIPT");
+  const [selectedMovement, setSelectedMovement] = useStaffDraft<{balance: InventoryBalance; location: StaffLocation; organizationId: string} | null>("stock:selected", null);
+  const [movementOpen, setMovementOpen] = useStaffDraft("stock:open", false);
   const [queryInput, setQueryInput] = useState("");
   const [query, setQuery] = useState<string>();
   const [includeArchived, setIncludeArchived] = useState(false);
@@ -342,7 +364,7 @@ export default function InventoryManagementPage() {
   const [movementPage, setMovementPage] = useState(0);
   const [movementIngredientId, setMovementIngredientId] = useState<string>();
   const [movementType, setMovementType] = useState<InventoryMovementType>();
-  const [reloadVersion, setReloadVersion] = useState(0);
+  const [reloadVersion, setReloadVersion] = useStaffDraft("stock:reload", 0);
   const [balanceState, setBalanceState] = useState<BalanceState>({
     status: "loading",
   });
@@ -431,8 +453,7 @@ export default function InventoryManagementPage() {
 
   const balances =
     balanceState.status === "ready" ? balanceState.page.items : [];
-  const balanceColumns = useMemo<readonly DataTableColumn<InventoryBalance>[]>(
-    () => [
+  const balanceColumns: readonly DataTableColumn<InventoryBalance>[] = [
       {
         key: "ingredientName",
         header: "Ingredient",
@@ -448,7 +469,7 @@ export default function InventoryManagementPage() {
       {
         key: "quantity",
         header: "On hand",
-        cell: (row) => `${row.quantity} ${unitLabel(row.baseUnit)}`,
+        cell: (row) => <div>{row.quantity} {unitLabel(row.baseUnit)}<small className="block text-muted-foreground">{row.reservedQuantity} reserved · {row.availableQuantity} available</small></div>,
       },
       {
         key: "reorderThreshold",
@@ -483,19 +504,11 @@ export default function InventoryManagementPage() {
           row.ingredientArchived || location === undefined ? (
             "Archived"
           ) : (
-            <MovementDialog
-              accessToken={accessToken}
-              balance={row}
-              currencyCode={location.currencyCode}
-              locationId={location.id}
-              onSaved={() => setReloadVersion((value) => value + 1)}
-              organizationId={organizationId}
-            />
+            <Button size="compact" variant="secondary" disabled={selectedMovement !== null}
+              onClick={() => { setDraftMovementType(row.openingRecorded ? "RECEIPT" : "OPENING"); setSelectedMovement({ balance: row, location, organizationId }); setMovementOpen(true); }}>Record</Button>
           ),
       },
-    ],
-    [accessToken, location, organizationId],
-  );
+    ];
 
   const movementColumns: readonly DataTableColumn<InventoryMovement>[] = [
     {
@@ -553,6 +566,13 @@ export default function InventoryManagementPage() {
           </p>
         </div>
       </div>
+      {selectedMovement ? <MovementDialog
+        key={`${selectedMovement.organizationId}:${selectedMovement.location.id}:${selectedMovement.balance.ingredientId}`}
+        accessToken={accessToken} balance={selectedMovement.balance} locationName={selectedMovement.location.name}
+        currencyCode={selectedMovement.location.currencyCode} locationId={selectedMovement.location.id}
+        organizationId={selectedMovement.organizationId} open={movementOpen} onOpenChange={setMovementOpen}
+        onFinished={() => { setSelectedMovement(null); setMovementOpen(false); }}
+        onSaved={() => setReloadVersion((value) => value + 1)} /> : null}
       <section aria-label="Inventory scope" className="inventory-scope">
         <SelectField
           id="inventory-organization"
@@ -608,7 +628,8 @@ export default function InventoryManagementPage() {
       ) : (
         <div className="inventory-workspace">
           <InventoryAlerts accessToken={accessToken} organizationId={organizationId} locationId={locationId} key={`alerts:${locationId}:${reloadVersion}`} />
-          <InventoryForecastPanel accessToken={accessToken} organizationId={organizationId} locationId={locationId} key={`${locationId}:${reloadVersion}`} />
+          <InventoryForecastPanel accessToken={accessToken} organizationId={organizationId} locationId={locationId} refreshVersion={reloadVersion} key={`forecasts:${organizationId}:${locationId}`} />
+          <InventoryForecastPanel accessToken={accessToken} organizationId={organizationId} locationId={locationId} mode="reorder" refreshVersion={reloadVersion} key={`reorder:${organizationId}:${locationId}`} />
           <section
             aria-labelledby="inventory-balances-title"
             className="inventory-panel"

@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -8,6 +9,7 @@ import {
 import { MemoryRouter, Outlet, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { StaffDraftProvider } from "./StaffDraftProvider";
 import { expectNoAccessibilityViolations } from "../../test/accessibility";
 import { selectOption } from "../../test/selectOption";
 vi.mock("./inventoryClient", () => ({
@@ -66,6 +68,8 @@ const balance = {
   sku: "TEA-001",
   baseUnit: "GRAM" as const,
   quantity: "4.000000",
+  reservedQuantity: "0",
+  availableQuantity: "4.000000",
   reorderThreshold: "5.000000",
   belowReorderThreshold: true,
   version: 1,
@@ -120,6 +124,67 @@ describe("InventoryManagementPage", () => {
     vi.mocked(recordInventoryMovement).mockResolvedValue(movement);
   });
 
+  it("retains an unknown movement through route removal and a later forbidden response", async () => {
+    vi.mocked(recordInventoryMovement).mockRejectedValueOnce(new Error("Lost response"))
+      .mockRejectedValueOnce(new InventoryError("STAFF_ACCESS_DENIED", 403)).mockResolvedValueOnce(movement);
+    const app = (visible: boolean, token = "staff-token") => <StaffDraftProvider>
+      <MemoryRouter initialEntries={["/staff/inventory"]}><Routes>
+        <Route element={<Outlet context={{ ...outletContext, accessToken: token }} />} path="/staff">
+          <Route element={visible ? <InventoryManagementPage /> : <p>Rechecking staff access</p>} path="inventory" />
+        </Route></Routes></MemoryRouter></StaffDraftProvider>;
+    const view = render(app(true));
+    fireEvent.click(await screen.findByRole("button", { name: "Record" }));
+    fireEvent.change(screen.getByLabelText("Quantity (g)"), { target: { value: "100" } });
+    fireEvent.click(screen.getByRole("button", { name: "Record movement" }));
+    await screen.findByText(/The outcome is unknown/);
+    expect(screen.getByLabelText("Quantity (g)")).toBeDisabled();
+    const original = vi.mocked(recordInventoryMovement).mock.calls[0];
+    view.rerender(app(false));
+    vi.mocked(getInventoryBalances).mockResolvedValue({ items: [], page: 0, size: 25, totalItems: 0, totalPages: 0 });
+    view.rerender(app(true, "refreshed-token"));
+    expect(await screen.findByLabelText("Quantity (g)")).toHaveValue("100");
+    fireEvent.click(screen.getByRole("button", { name: "Retry same movement" }));
+    await waitFor(() => expect(recordInventoryMovement).toHaveBeenCalledTimes(2));
+    await screen.findByText(/The outcome is unknown/);
+    expect(screen.getByLabelText("Quantity (g)")).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Retry same movement" }));
+    await waitFor(() => expect(recordInventoryMovement).toHaveBeenCalledTimes(3));
+    for (const call of vi.mocked(recordInventoryMovement).mock.calls.slice(1)) {
+      expect(call.slice(1)).toEqual(original.slice(1)); expect(call[0]).toBe("refreshed-token");
+    }
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+
+  it("reloads current balances when an older in-flight request succeeds after remount", async () => {
+    let resolve: (value: typeof movement) => void = () => undefined;
+    vi.mocked(recordInventoryMovement).mockReturnValueOnce(new Promise((done) => { resolve = done; }));
+    const app = (visible: boolean) => <StaffDraftProvider><MemoryRouter initialEntries={["/staff/inventory"]}>
+      <Routes><Route element={<Outlet context={outletContext} />} path="/staff">
+        <Route element={visible ? <InventoryManagementPage /> : <p>Reloading access</p>} path="inventory" />
+      </Route></Routes></MemoryRouter></StaffDraftProvider>;
+    const view = render(app(true)); fireEvent.click(await screen.findByRole("button", { name: "Record" }));
+    fireEvent.change(screen.getByLabelText("Quantity (g)"), { target: { value: "100" } });
+    fireEvent.click(screen.getByRole("button", { name: "Record movement" }));
+    view.rerender(app(false)); view.rerender(app(true));
+    await screen.findByRole("button", { name: "Recording movement" });
+    await waitFor(() => expect(getInventoryBalances).toHaveBeenCalledTimes(2));
+    vi.mocked(getInventoryBalances).mockResolvedValue({ items: [{ ...balance, quantity: "104.000000" }], page: 0, size: 25, totalItems: 1, totalPages: 1 });
+    await act(async () => resolve(movement));
+    expect(await screen.findByText("104.000000 g")).toBeVisible();
+    expect(getInventoryBalances).toHaveBeenCalledTimes(3);
+    expect(getInventoryMovements).toHaveBeenCalledTimes(3);
+  });
+
+  it("blocks duplicate submits while a movement request is pending", async () => {
+    vi.mocked(recordInventoryMovement).mockReturnValueOnce(new Promise(() => {}));
+    renderPage(); fireEvent.click(await screen.findByRole("button", { name: "Record" }));
+    fireEvent.change(screen.getByLabelText("Quantity (g)"), { target: { value: "100" } });
+    const form = screen.getByRole("button", { name: "Record movement" }).closest("form")!;
+    fireEvent.submit(form); fireEvent.submit(form);
+    expect(recordInventoryMovement).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Recording movement" })).toBeDisabled();
+  });
+
   it("loads balances and immutable history within the server-provided staff scope", async () => {
     const { container } = renderPage();
 
@@ -168,6 +233,7 @@ describe("InventoryManagementPage", () => {
         "staff-token",
         organizationId,
         locationId,
+        expect.any(String),
         {
           ingredientId,
           movementType: "RECEIPT",

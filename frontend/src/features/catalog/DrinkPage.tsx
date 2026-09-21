@@ -7,12 +7,12 @@ import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
-import { Checkbox } from "../../components/ui/checkbox";
 import { Label } from "../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Separator } from "../../components/ui/separator";
 import { cn } from "../../lib/utils";
 import { useCart } from "../cart/CartContext";
+import { DrinkOptionGroup } from "./DrinkOptionGroup";
 import { DrinkArtwork } from "./DrinkArtwork";
 import { formatMoney } from "./formatMoney";
 import {
@@ -51,7 +51,7 @@ export function DrinkPage() {
 }
 
 function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; product: CatalogProduct }) {
-  const { addItem, itemCount, locationSlug: cartLocationSlug } = useCart();
+  const { addItem, itemCount, checkoutState, locationSlug: cartLocationSlug } = useCart();
   const [configuration, setConfiguration] = useState<DrinkConfiguration>(() => (
     createDefaultConfiguration(product)
   ));
@@ -90,13 +90,14 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
     setAddedMessage("");
   }
 
-  function selectChoice(group: CatalogOptionGroup, choice: CatalogOptionChoice) {
+  function selectChoice(group: CatalogOptionGroup, choice: CatalogOptionChoice | null) {
+    if (choice === null && (group.minimumSelections !== 0 || group.maximumSelections !== 1)) return;
     setConfiguration((current) => ({
       ...current,
       selections: current.selections.map((selection) => {
         if (selection.groupId !== group.id) return selection;
-        const selected = selection.choiceIds.includes(choice.id);
-        const choiceIds = group.maximumSelections === 1
+        const selected = choice !== null && selection.choiceIds.includes(choice.id);
+        const choiceIds = choice === null ? [] : group.maximumSelections === 1
           ? [choice.id]
           : selected
             ? selection.choiceIds.filter((id) => id !== choice.id)
@@ -153,66 +154,18 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
             </RadioGroup>
           </fieldset>
           {variant.optionGroups.map((group) => (
-            <div className="grid gap-6" key={group.id}><Separator /><OptionGroup configuration={configuration} group={group} onSelect={selectChoice} /></div>
+            <div className="grid gap-6" key={group.id}><Separator /><DrinkOptionGroup configuration={configuration} group={group} onSelect={selectChoice} /></div>
           ))}
           <div className="sticky bottom-0 z-10 -mx-4 grid gap-3 border-t bg-card px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:p-0">
             <p className="text-sm leading-5 text-muted-foreground">Menu total. The shop confirms the final price when you place the order.</p>
-            <Button className="w-full" type="submit">Add to order · {formatMoney(previewTotalMinor, currency)}</Button>
+            {checkoutState.attempt ? <p role="status">An earlier order needs confirmation. <Link to="/cart">Recover your order</Link> before changing your cart.</p> : null}
+            <Button className="w-full" type="submit" disabled={Boolean(checkoutState.attempt)}>Add to order · {formatMoney(previewTotalMinor, currency)}</Button>
           </div>
           {addedMessage ? <Alert role="status"><AlertDescription>✓ {addedMessage} <Link to="/cart">View order</Link></AlertDescription></Alert> : null}
           </CardContent>
         </form></Card>
       </main>
     </div>
-  );
-}
-
-function OptionGroup({
-  configuration,
-  group,
-  onSelect,
-}: {
-  configuration: DrinkConfiguration;
-  group: CatalogOptionGroup;
-  onSelect: (group: CatalogOptionGroup, choice: CatalogOptionChoice) => void;
-}) {
-  const selection = configuration.selections.find((candidate) => candidate.groupId === group.id);
-  const selectedIds = selection?.choiceIds ?? [];
-  const multiple = group.maximumSelections > 1;
-  const singleChoiceGrid = group.choices.length >= 3
-    ? "sm:grid-cols-3"
-    : group.choices.length === 2
-      ? "sm:grid-cols-2"
-      : "sm:grid-cols-1";
-
-  return (
-    <fieldset className="grid gap-3">
-      <legend className="font-semibold">{group.name} {group.minimumSelections === 0 ? <small className="ml-2 text-muted-foreground">Optional</small> : null}</legend>
-      {multiple ? <div className="grid gap-2">
-        {group.choices.map((choice) => {
-          const selected = selectedIds.includes(choice.id);
-          const limitReached = multiple && !selected && selectedIds.length >= group.maximumSelections;
-          return (
-            <Label className={cn("grid min-h-14 cursor-pointer grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60", limitReached ? "cursor-not-allowed opacity-50" : "hover:border-primary/70 hover:bg-interactive-hover")} htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}>
-              <Checkbox
-                aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`}
-                checked={selected}
-                disabled={limitReached}
-                id={`choice-${group.id}-${choice.id}`}
-                onCheckedChange={() => onSelect(group, choice)}
-              />
-              <strong>{choice.name}</strong>
-              <small className="text-muted-foreground">{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small>
-            </Label>
-          );
-        })}
-      </div> : <RadioGroup className={cn("grid gap-2", singleChoiceGrid)} onValueChange={(choiceId) => {
-        const choice = group.choices.find((candidate) => candidate.id === choiceId);
-        if (choice) onSelect(group, choice);
-      }} value={selectedIds[0]}>
-        {group.choices.map((choice) => <Label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors hover:border-primary/70 hover:bg-interactive-hover has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60" htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}><RadioGroupItem aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`} id={`choice-${group.id}-${choice.id}`} value={choice.id} /><span className="grid"><span>{choice.name}</span><small className="text-muted-foreground">{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small></span></Label>)}
-      </RadioGroup>}
-    </fieldset>
   );
 }
 

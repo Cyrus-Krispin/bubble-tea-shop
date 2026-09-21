@@ -11,30 +11,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     let hasAuthEvent = false;
+    let currentSession: AuthSession | null = null;
+    let expiryTimer: ReturnType<typeof setTimeout> | undefined;
+    function acceptSession(nextSession: AuthSession | null) {
+      if (!active) return;
+      clearTimeout(expiryTimer);
+      currentSession = nextSession && Number.isFinite(nextSession.expiresAt)
+        && nextSession.expiresAt * 1000 > Date.now() ? nextSession : null;
+      setSession(currentSession);
+      setIsLoading(false);
+      if (currentSession) {
+        expiryTimer = setTimeout(checkExpiry, Math.min(currentSession.expiresAt * 1000 - Date.now(), 2_147_483_647));
+      }
+    }
+    function checkExpiry() {
+      if (currentSession) acceptSession(currentSession);
+    }
+    window.addEventListener("focus", checkExpiry);
+    document.addEventListener("visibilitychange", checkExpiry);
     const unsubscribe = subscribeToAuthState((nextSession) => {
       if (active) {
         hasAuthEvent = true;
-        setSession(nextSession);
-        setIsLoading(false);
+        acceptSession(nextSession);
       }
     });
 
     getCurrentAuthSession()
       .then((nextSession) => {
         if (active && !hasAuthEvent) {
-          setSession(nextSession);
-          setIsLoading(false);
+          acceptSession(nextSession);
         }
       })
       .catch(() => {
         if (active && !hasAuthEvent) {
-          setSession(null);
-          setIsLoading(false);
+          acceptSession(null);
         }
       });
 
     return () => {
       active = false;
+      clearTimeout(expiryTimer);
+      window.removeEventListener("focus", checkExpiry);
+      document.removeEventListener("visibilitychange", checkExpiry);
       unsubscribe();
     };
   }, []);
