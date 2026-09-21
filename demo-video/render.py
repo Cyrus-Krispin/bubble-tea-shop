@@ -55,7 +55,7 @@ def paint_background() -> Image.Image:
 BACKGROUND = paint_background()
 
 
-def browser_tile(screenshot: Path, focus: dict | None = None, zoom: float = 1.0) -> Image.Image:
+def browser_tile(screenshot: Image.Image, focus: dict | None = None, zoom: float = 1.0) -> Image.Image:
     window = Image.new("RGBA", (TILE_WIDTH, TILE_HEIGHT), (0, 0, 0, 0))
     draw = ImageDraw.Draw(window)
     draw.rectangle((0, 0, TILE_WIDTH, BAR_HEIGHT), fill=(255, 253, 247, 255))
@@ -64,7 +64,7 @@ def browser_tile(screenshot: Path, focus: dict | None = None, zoom: float = 1.0)
     draw.text((121, 17), "Bubble Tea Shop", font=CHROME_FONT, fill=INK)
     draw.rounded_rectangle((TILE_WIDTH - 212, 13, TILE_WIDTH - 25, 45), radius=16, fill=(244, 243, 239))
     draw.text((TILE_WIDTH - 190, 20), "LOCAL DEMO", font=SMALL_FONT, fill=(92, 97, 110))
-    shot = Image.open(screenshot).convert("RGB").resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS)
+    shot = screenshot
     if focus and zoom > 1:
         enlarged_width = round(TILE_WIDTH * zoom)
         enlarged_height = round(CONTENT_HEIGHT * zoom)
@@ -84,9 +84,9 @@ def browser_tile(screenshot: Path, focus: dict | None = None, zoom: float = 1.0)
 
 
 SCENES = MANIFEST["scenes"]
-TILES = [browser_tile(ROOT / "frames" / scene["file"]) for scene in SCENES]
-ZOOM_TILES = [browser_tile(ROOT / "frames" / scene["file"], scene.get("pointer"), 1.06)
-              if scene.get("pointer") else tile for scene, tile in zip(SCENES, TILES)]
+SCREENSHOTS = [Image.open(ROOT / "frames" / scene["file"]).convert("RGB")
+               .resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS) for scene in SCENES]
+TILES = [browser_tile(screenshot) for screenshot in SCREENSHOTS]
 
 shadow = Image.new("RGBA", (TILE_WIDTH + 100, TILE_HEIGHT + 100), (0, 0, 0, 0))
 ImageDraw.Draw(shadow).rounded_rectangle(
@@ -121,16 +121,13 @@ def render_frame(index: int, scene_index: int, local_time: float) -> Image.Image
     tile_y = TILE_Y + round(5 * math.sin(index / 26))
     frame.alpha_composite(SHADOW, (TILE_X - 50, tile_y - 42))
     tile = TILES[scene_index]
-    if scene_index > 0 and local_time < 0.23:
-        previous = TILES[scene_index - 1]
-        tile = Image.blend(previous, tile, ease(local_time / 0.23))
     if scene.get("pointer"):
         phase = local_time / duration
         zoom_in = ease((phase - 0.28) / 0.25)
         zoom_out = 1 - ease((phase - 0.73) / 0.20)
         amount = min(zoom_in, zoom_out) * 0.75
         if amount > 0:
-            tile = Image.blend(tile, ZOOM_TILES[scene_index], amount)
+            tile = browser_tile(SCREENSHOTS[scene_index], scene["pointer"], 1 + 0.025 * amount)
     frame.alpha_composite(tile, (TILE_X, tile_y))
 
     draw = ImageDraw.Draw(frame)
