@@ -2,7 +2,7 @@
 layout: none
 theme: default
 title: Bubble Tea Shop — the app and the workflow
-info: A six-slide project showcase mock
+info: A seven-slide project showcase with a product demo
 aspectRatio: 16/9
 colorSchema: light
 duration: 10min
@@ -18,7 +18,30 @@ transition: fade
 </div>
 
 <!--
-Opening: introduce the product. If a short demo video is added later, play it after this cover, then return to the complexity slide. The deck currently has no video.
+Introduce the app and the question behind the talk: what does it take to build a complete shop workflow? Then show the product tour.
+-->
+
+---
+layout: none
+---
+
+<div class="slide demo-opening">
+  <video
+    class="demo-opening-video"
+    src="/bubble-tea-shop-demo-stable.mp4"
+    poster="/bubble-tea-shop-demo-poster.jpg"
+    aria-label="Bubble Tea Shop product demo"
+    autoplay
+    muted
+    playsinline
+    controls
+    preload="auto"
+  ></video>
+</div>
+
+<!--
+Play the silent 30-second product tour after the title. It starts automatically when this slide
+opens; the native controls let you pause or replay it. Then move to the one-drink example.
 -->
 
 ---
@@ -45,7 +68,7 @@ layout: none
 </div>
 
 <!--
-After the optional demo, use everyday language: the customer sees one drink, but the shop must agree on its location, recipe, price, ingredient availability, payment, and staff handoff. Reveal the decisions in three quick waves. The implementation underneath has 35 created application tables (including an unused legacy refresh-session table), 20 Flyway migrations, and four domain modules, but save those terms for the technical discussion if asked. Supabase Auth issues sessions; Spring resolves customer or staff permissions and assigned location. That distinction belongs on the guardrails slide, not in the opening story.
+Use everyday language: the customer sees one drink, but the shop must agree on its location, recipe, price, ingredient availability, payment, and staff handoff. Reveal the decisions in three quick waves. The implementation underneath has 35 created application tables (including an unused legacy refresh-session table), 20 Flyway migrations, and four domain modules, but save those terms for the technical discussion if asked. Supabase Auth issues sessions; Spring resolves customer or staff permissions and assigned location. That distinction belongs on the guardrails slide, not in the opening story.
 -->
 
 ---
