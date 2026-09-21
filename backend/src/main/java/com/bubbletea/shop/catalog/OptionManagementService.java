@@ -263,6 +263,7 @@ public class OptionManagementService {
         } catch (DataAccessException exception) {
             throw new OptionStateConflictException();
         }
+        jdbc.sql("UPDATE menu_variant SET version = version + 1, updated_at = now() WHERE id = :id").param("id", variantId).update();
         audit(organizationId, "VARIANT_OPTION_CHOICE", linkId, "CONFIGURE", context.accountId());
         return configuredChoice(organizationId, variantId, linkId);
     }

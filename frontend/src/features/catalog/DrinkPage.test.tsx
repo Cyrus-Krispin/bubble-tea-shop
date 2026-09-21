@@ -41,6 +41,23 @@ describe("DrinkPage", () => {
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
+  it("lets a guest remove a defaulted optional single topping and its surcharge", async () => {
+    const product = { ...catalogProduct, variants: catalogProduct.variants.map((variant) => ({ ...variant,
+      optionGroups: variant.optionGroups.map((group) => group.name === "Toppings" ? { ...group,
+        maximumSelections: 1, choices: group.choices.map((choice, index) => ({ ...choice, isDefault: index === 0 })),
+      } : group),
+    })) };
+    vi.mocked(getGuestProduct).mockResolvedValueOnce(product);
+    renderDrink("/shop/orchard-central/drinks/moonlit-milk-tea");
+    await screen.findByRole("heading", { name: "Moonlit Milk Tea" });
+    expect(screen.getByRole("button", { name: "Add to order · $7.20" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("radio", { name: "None for Toppings" }));
+    expect(screen.getByRole("radio", { name: "None for Toppings" })).toBeChecked();
+    expect(screen.queryByRole("radio", { name: "None for Sweetness" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Add to order · $6.60" }));
+    expect(screen.getByRole("link", { name: "Current order, 1 item" })).toBeVisible();
+  });
+
   it("offers retry and a route back when a drink cannot be loaded", async () => {
     vi.mocked(getGuestProduct).mockRejectedValueOnce(new Error("missing"));
     renderDrink("/shop/orchard-central/drinks/not-a-drink");

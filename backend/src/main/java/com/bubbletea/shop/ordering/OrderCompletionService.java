@@ -1,6 +1,7 @@
 package com.bubbletea.shop.ordering;
 
 import com.bubbletea.shop.inventory.InsufficientStockException;
+import com.bubbletea.shop.inventory.InventoryReservationService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +17,11 @@ import java.util.stream.Collectors;
 @Service
 public class OrderCompletionService {
     private final JdbcTemplate jdbc;
+    private final InventoryReservationService reservations;
 
-    public OrderCompletionService(JdbcTemplate jdbc) {
+    public OrderCompletionService(JdbcTemplate jdbc, InventoryReservationService reservations) {
         this.jdbc = jdbc;
+        this.reservations = reservations;
     }
 
     @Transactional
@@ -47,17 +50,28 @@ public class OrderCompletionService {
             : findAndLockScopedOrder(orderId, organizationId, locationId);
         PaymentRecord payment = findAndLockPayment(orderId);
         if (order.status() == OrderStatus.COMPLETED) {
-            if (!payment.matches(order, "PAID")) throw new InvalidOrderStateException(orderId);
+            if (!payment.matches(order, "PAID") && !(order.paymentMethod().equals("CARD") && payment.matches(order, "REFUNDED"))) throw new InvalidOrderStateException(orderId);
             return new CompletionResult(orderId, true);
         }
         if (order.status() != OrderStatus.PENDING) {
             throw new InvalidOrderTransitionException(orderId, order.status());
         }
-        if (!payment.matches(order, "PENDING")) throw new InvalidOrderStateException(orderId);
+        boolean card = order.paymentMethod().equals("CARD");
+        if (!payment.matches(order, card ? "PAID" : "PENDING")) throw new InvalidOrderStateException(orderId);
+        if (card && !Boolean.TRUE.equals(jdbc.queryForObject("""
+            SELECT EXISTS(SELECT 1 FROM card_checkout WHERE customer_order_id = ? AND state = 'PAID' AND NOT cancel_requested)
+            """, Boolean.class, orderId))) throw new InvalidOrderStateException(orderId);
 
         List<Consumption> consumption = loadConsumption(orderId);
         if (consumption.isEmpty()) throw new InvalidOrderStateException(orderId);
         Map<UUID, BigDecimal> available = lockBalances(order.locationId(), consumption);
+        for (Consumption item : consumption) {
+            if (card && !reservations.covers(orderId, item.ingredientId(), item.quantity())) {
+                throw new InvalidOrderStateException(orderId);
+            }
+            available.computeIfPresent(item.ingredientId(), (id, balance) -> balance.subtract(
+                reservations.reserved(order.locationId(), id, card ? orderId : null)));
+        }
         Map<UUID, InsufficientStockException.StockShortage> shortages = findShortages(consumption, available);
         if (!shortages.isEmpty()) {
             throw new InsufficientStockException(shortages);
@@ -88,12 +102,16 @@ public class OrderCompletionService {
                 order.publicOrderNumber());
         }
 
+        if (!card) {
         int paymentChanged = jdbc.update("""
             UPDATE payment
                SET status = 'PAID', paid_at = now(), recorded_by_account_id = ?, updated_at = now()
              WHERE id = ? AND status = 'PENDING'
             """, actorAccountId, payment.id());
         if (paymentChanged != 1) throw new InvalidOrderStateException(orderId);
+        } else {
+            reservations.release(orderId);
+        }
 
         int changed = jdbc.update("""
             UPDATE customer_order
@@ -252,7 +270,7 @@ public class OrderCompletionService {
     private record PaymentRecord(UUID id, String method, String status,
                                  long amountMinor, String currencyCode) {
         boolean matches(OrderRecord order, String expectedStatus) {
-            return method.equals("CASH")
+            return (method.equals("CASH") || method.equals("CARD"))
                 && method.equals(order.paymentMethod())
                 && status.equals(expectedStatus)
                 && amountMinor == order.totalMinor()

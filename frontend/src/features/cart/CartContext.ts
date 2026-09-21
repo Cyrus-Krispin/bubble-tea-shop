@@ -1,8 +1,14 @@
 import { createContext, useContext } from "react";
 
+import type { OrderQuote } from "../auth/favoriteClient";
+import type { AuthSession } from "../auth/types";
+import type { CheckoutState } from "./useCheckoutAttempt";
 import type { CartDraft, CartItem, CartOrderLine } from "./cartReducer";
 
 export type CartContextValue = {
+  checkoutState: CheckoutState;
+  checkout: (session: AuthSession | null, quote?: OrderQuote, method?: "CASH" | "CARD") => Promise<void>;
+  finishCard: (id: string) => void;
   items: CartItem[];
   itemCount: number;
   previewTotalMinor: number;
