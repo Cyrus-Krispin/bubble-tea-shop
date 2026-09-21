@@ -11,13 +11,21 @@ import java.util.UUID;
 @Service
 public class InventoryLedgerService {
     private final JdbcTemplate jdbc;
+    private final InventoryReservationService reservations;
 
-    public InventoryLedgerService(JdbcTemplate jdbc) {
+    public InventoryLedgerService(JdbcTemplate jdbc, InventoryReservationService reservations) {
         this.jdbc = jdbc;
+        this.reservations = reservations;
     }
 
     @Transactional
     public UUID recordManualMovement(ManualMovement command) {
+        return recordManualMovement(command, UUID.randomUUID());
+    }
+
+    @Transactional
+    public UUID recordManualMovement(ManualMovement command, UUID movementId) {
+        Objects.requireNonNull(movementId, "movementId");
         validateManualMovement(command);
 
         jdbc.update("""
@@ -45,11 +53,12 @@ public class InventoryLedgerService {
         }
 
         BigDecimal resultingQuantity = balance.quantity().add(command.quantityDelta());
-        if (resultingQuantity.signum() < 0) {
+        BigDecimal reserved = reservations.reserved(command.locationId(), command.ingredientId(), null);
+        if (resultingQuantity.compareTo(reserved) < 0) {
             throw new InsufficientStockException(java.util.Map.of(
                 command.ingredientId(),
                 new InsufficientStockException.StockShortage(
-                    command.quantityDelta().abs(), balance.quantity())));
+                    command.quantityDelta().abs(), balance.quantity().subtract(reserved))));
         }
 
         jdbc.update("""
@@ -59,7 +68,6 @@ public class InventoryLedgerService {
             """,
             resultingQuantity, command.locationId(), command.ingredientId());
 
-        UUID movementId = UUID.randomUUID();
         jdbc.update("""
             INSERT INTO inventory_movement (
                 id, organization_id, location_id, ingredient_id, movement_type,

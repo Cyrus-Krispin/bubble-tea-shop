@@ -1,4 +1,4 @@
-import { useReducer, type ReactNode } from "react";
+import { useCallback, useReducer, type ReactNode } from "react";
 
 import { useCheckoutAttempt } from "./useCheckoutAttempt";
 import { CartContext, type CartContextValue } from "./CartContext";
@@ -6,11 +6,13 @@ import { cartReducer, initialCartState } from "./cartReducer";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialCartState);
-  const recovery = useCheckoutAttempt(() => dispatch({ type: "clear" }));
+  const clearConfirmed = useCallback(() => dispatch({ type: "clear" }), []);
+  const recovery = useCheckoutAttempt(clearConfirmed);
   const locked = recovery.state.attempt !== undefined;
   const value: CartContextValue = {
     checkoutState: recovery.state,
-    checkout: (session, quote) => recovery.checkout(state.items, session, quote),
+    checkout: (session, quote, method) => recovery.checkout(state.items, session, quote, method),
+    finishCard: recovery.finishCard,
     items: state.items,
     itemCount: state.items.reduce((total, item) => total + item.quantity, 0),
     previewTotalMinor: state.items.reduce((total, item) => total + item.unitPriceMinor * item.quantity, 0),

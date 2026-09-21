@@ -93,3 +93,11 @@ The [counter entry spec](../specs/staff-counter-order-entry.md) adds an authenti
 `POST /api/v1/staff/organizations/{organizationId}/locations/{locationId}/counter-orders` route
 and `/staff/counter` workspace. Creation records the staff actor in the initial immutable status
 event, keeps customer ownership null, and shares guest pricing/snapshots and normal cash completion.
+
+## Online card orders
+
+The queue also shows card orders and their payment state. The payment panel reconciles provider
+status and offers authorized cancellation/refund for unfulfilled orders. Card completion collects
+no cash: it requires verified payment and consumes the order's own reserved stock once. Failed or
+unresolved payment/refund states block fulfillment. A fully refunded completed order remains in
+history with its original stock consumption. Stock requirements exclude other orders' reservations.
