@@ -77,6 +77,12 @@ SCENES = MANIFEST["scenes"]
 SCREENSHOTS = [Image.open(ROOT / "frames" / scene["file"]).convert("RGB")
                .resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS) for scene in SCENES]
 TILES = [browser_tile(screenshot) for screenshot in SCREENSHOTS]
+SCROLL_TILES = {
+    index: [browser_tile(Image.open(ROOT / "frames" / filename).convert("RGB")
+                         .resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS))
+            for filename in scene["frameFiles"]]
+    for index, scene in enumerate(SCENES) if scene.get("frameFiles")
+}
 
 shadow = Image.new("RGBA", (TILE_WIDTH + 100, TILE_HEIGHT + 100), (0, 0, 0, 0))
 ImageDraw.Draw(shadow).rounded_rectangle(
@@ -110,7 +116,12 @@ def render_frame(index: int, scene_index: int, local_time: float) -> Image.Image
     frame = BACKGROUND.copy().convert("RGBA")
     tile_y = TILE_Y
     frame.alpha_composite(SHADOW, (TILE_X - 50, tile_y - 42))
-    frame.alpha_composite(TILES[scene_index], (TILE_X, tile_y))
+    tile = TILES[scene_index]
+    if scene_index in SCROLL_TILES:
+        frames = SCROLL_TILES[scene_index]
+        position = min(len(frames) - 1, int(local_time / duration * len(frames)))
+        tile = frames[position]
+    frame.alpha_composite(tile, (TILE_X, tile_y))
 
     draw = ImageDraw.Draw(frame)
     draw.rounded_rectangle((TILE_X, 31, TILE_X + 62, 78), radius=11, fill=PINK, outline=INK, width=2)

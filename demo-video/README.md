@@ -2,7 +2,7 @@
 
 This silent talk insert is rendered from real browser screenshots of the local Docker stack. It
 shows shop selection, drink customization, checkout, the staff queue, published recipe formulas,
-inventory forecasts, owner-managed shop access, local Supabase tables and Auth users, and the
+inventory forecasts, owner-managed shop access, Supabase Studio's connected-table diagram, and the
 Grafana dashboard. The edit adds a floating browser frame and an animated cursor that moves
 to the same controls Playwright actually used. It is designed to play after the talk's cover slide.
 
@@ -30,6 +30,6 @@ the virtual environment, and the rendered MP4 stay local and are ignored by Git.
 music or narration so the presenter can speak over it. The local test order remains in the local
 Docker database. The screenshots are real captured app states; the floating frame and cursor movement
 are added during rendering. The browser frame stays fixed, with clean cuts between app states.
+The Schema Visualizer scene pans through the real diagram to show how the database tables connect.
 The capture uses local Supabase Studio at `http://localhost:54323` by default; set
-`DEMO_STUDIO_URL` if your local port differs. It filters the Auth view to the documented local
-manager fixture so unrelated test accounts do not appear in the video.
+`DEMO_STUDIO_URL` if your local port differs.

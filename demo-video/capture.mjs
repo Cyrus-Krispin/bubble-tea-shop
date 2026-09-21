@@ -18,7 +18,7 @@ if (!staffEmail || !staffPassword) {
 
 await mkdir(framesDir, { recursive: true });
 for (const file of await readdir(framesDir)) {
-  if (/^\d{2}-[a-z-]+\.png$/.test(file)) await rm(path.join(framesDir, file));
+  if (/^\d{2}-[a-z-]+(?:-\d{3})?\.png$/.test(file)) await rm(path.join(framesDir, file));
 }
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
@@ -151,29 +151,47 @@ try {
   await capture("manager-scope", "LOCATION-SCOPED ROLES", "The owner can change a manager's scope", 2.5, null, staff);
 
   const studio = await context.newPage();
-  await studio.goto(`${studioUrl}/project/default/editor`);
-  await studio.getByRole("heading", { name: "Table Editor" }).waitFor();
-  await studio.getByPlaceholder("Search tables...").fill("recipe");
-  await studio.getByRole("button").filter({ hasText: "recipeUnrestricted" }).first().click();
-  await studio.getByText("recipe", { exact: true }).last().waitFor();
-  await studio.waitForFunction(() => document.querySelectorAll('[role="row"]').length > 5);
-  await studio.mouse.move(1000, 80);
-  await capture("studio-recipes", "LOCAL POSTGRES TABLES", "Recipes live in application tables", 2.5, null, studio);
+  await studio.goto(`${studioUrl}/project/default/database/schemas`);
+  await studio.getByText("Loading tables").waitFor({ state: "hidden" });
+  await studio.waitForFunction(() => document.querySelectorAll(".react-flow__node").length > 0);
+  await settle(studio);
 
-  await studio.getByRole("button").filter({ hasText: "recipe_version" }).first().click();
-  await studio.getByText("recipe_version", { exact: true }).last().waitFor();
-  await studio.waitForFunction(() => document.querySelectorAll('[role="row"]').length > 5);
-  await studio.mouse.move(1000, 80);
-  await capture("studio-versions", "VERSIONED IN THE DATABASE", "Supabase Studio shows the Flyway-owned tables", 2.5, null, studio);
-
-  await studio.getByRole("link", { name: "Authentication" }).click();
-  await studio.getByRole("heading", { name: "Users" }).waitFor();
-  const userSearch = studio.getByPlaceholder("Search by email");
-  await userSearch.fill("manager@manager.com");
-  await userSearch.press("Enter");
-  await studio.getByText("manager@manager.com", { exact: true }).waitFor();
-  await studio.mouse.move(1000, 80);
-  await capture("studio-users", "AUTH USERS", "Supabase identifies users; Spring checks shop access", 2.8, null, studio);
+  // Pan the real Schema Visualizer canvas from its upper tables through the
+  // connected order, inventory, and catalog tables. Each frame is a browser
+  // screenshot; the renderer never warps or blends application content.
+  for (let stroke = 0; stroke < 3; stroke++) {
+    await studio.mouse.move(350, 150);
+    await studio.mouse.down();
+    await studio.mouse.move(350, 650, { steps: 10 });
+    await studio.mouse.up();
+  }
+  const schemaFrameFiles = [];
+  const schemaPrefix = `${String(scenes.length + 1).padStart(2, "0")}-studio-schema`;
+  async function captureSchemaFrame() {
+    const file = `${schemaPrefix}-${String(schemaFrameFiles.length).padStart(3, "0")}.png`;
+    await studio.screenshot({ path: path.join(framesDir, file), animations: "disabled" });
+    schemaFrameFiles.push(file);
+  }
+  await captureSchemaFrame();
+  for (let stroke = 0; stroke < 7; stroke++) {
+    await studio.mouse.move(350, 650);
+    await studio.mouse.down();
+    for (let step = 0; step < 10; step++) {
+      await studio.mouse.move(350, 600 - step * 50);
+      await captureSchemaFrame();
+    }
+    await studio.mouse.up();
+  }
+  scenes.push({
+    id: "studio-schema",
+    title: "THE CONNECTED DATA MODEL",
+    detail: "Supabase Studio maps the tables and their relationships",
+    duration: 7.0,
+    file: schemaFrameFiles[0],
+    frameFiles: schemaFrameFiles,
+    pointer: null,
+  });
+  process.stdout.write(`${String(scenes.length).padStart(2, "0")} THE CONNECTED DATA MODEL\n`);
 
   const metrics = await context.newPage();
   await metrics.goto(metricsUrl);
