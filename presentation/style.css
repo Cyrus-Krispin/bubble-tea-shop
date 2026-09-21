@@ -105,36 +105,38 @@ html, body, #app { background:var(--paper); }
 .closing { position:absolute; bottom:30px; left:54px; margin:0; font-size:27px; border-bottom:4px solid var(--pink); transform:rotate(-1deg); }
 @media (prefers-reduced-motion:reduce) { .slidev-vclick-target { transition:none !important; } }
 
-/* A compact peek behind a deliberately simple product name. */
+/* One familiar order branches into the work a shop must coordinate. */
 .complexity { background:#fffaf0; }
 .complexity h2 { font-size:62px; }
-.complexity-stats { display:flex; gap:24px; margin-top:42px; }
-.complexity-stats div { width:175px; height:120px; border:3px solid var(--ink); border-radius:8px 17px 11px 6px; transform:rotate(-2deg); background:var(--yellow); display:flex; align-items:center; justify-content:center; flex-direction:column; }
-.complexity-stats div:nth-child(2) { background:var(--pink); transform:rotate(2deg); }
-.complexity-stats div:nth-child(3) { background:var(--green); transform:rotate(-1deg); }
-.complexity-stats strong { font:400 68px/.85 'Patrick Hand',cursive; }
-.complexity-stats small { font-size:21px; }
-.auth-sketch { position:absolute; left:55px; right:55px; top:335px; display:grid; gap:13px; }
-.auth-row { display:flex; align-items:center; gap:13px; font-size:24px; }
-.auth-row span:not(.auth-person) { border:2px solid var(--ink); border-radius:9px 4px 11px 7px; background:#fff; padding:3px 13px; transform:rotate(-1deg); }
-.auth-row:nth-child(2) span:not(.auth-person):nth-of-type(2) { background:var(--blue); }
-.auth-row b { font-weight:400; font-size:29px; }
-.auth-person { min-width:160px; font-size:25px; }
-.tiny-note { position:absolute; right:50px; bottom:12px; margin:0; font:500 12px 'DM Sans',sans-serif; color:#656b78; }
+.order-sketch { position:absolute; left:54px; right:54px; top:166px; height:305px; }
+.order-cup { position:absolute; top:47px; left:54px; width:115px; height:145px; transform:rotate(-6deg); }
+.order-cup .straw { position:absolute; left:69px; top:-29px; width:11px; height:64px; border:3px solid var(--ink); border-bottom:0; transform:rotate(9deg); background:var(--blue); }
+.order-cup .lid { position:absolute; top:20px; left:-8px; width:129px; height:19px; border:3px solid var(--ink); border-radius:45% 53% 43% 50%; background:var(--pink); z-index:2; }
+.order-cup .cup-body { position:absolute; inset:33px 5px 0; border:3px solid var(--ink); border-radius:3% 3% 29% 31%; background:var(--green); }
+.order-cup .cup-body i { position:absolute; bottom:12px; width:12px; height:12px; border:2px solid var(--ink); border-radius:50%; background:var(--ink); }
+.order-cup .cup-body i:nth-child(1) { left:13px; }
+.order-cup .cup-body i:nth-child(2) { left:45px; bottom:20px; }
+.order-cup .cup-body i:nth-child(3) { right:11px; }
+.one-drink { position:absolute; left:12px; top:205px; margin:0; width:206px; text-align:center; font-size:28px; line-height:.95; }
+.order-arrow { position:absolute; left:205px; top:97px; font-size:64px; transform:rotate(-12deg); }
+.order-decisions { position:absolute; left:292px; right:0; top:22px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.order-decisions div { height:106px; box-sizing:border-box; border:3px solid var(--ink); border-radius:9px 17px 11px 6px; background:#fff; transform:rotate(-2deg); display:flex; flex-direction:column; justify-content:center; align-items:center; }
+.order-decisions div:nth-child(2), .order-decisions div:nth-child(5) { background:var(--yellow); transform:rotate(2deg); }
+.order-decisions div:nth-child(3), .order-decisions div:nth-child(6) { background:var(--blue); transform:rotate(-1deg); }
+.order-decisions div:nth-child(4) { background:var(--pink); transform:rotate(1deg); }
+.order-decisions b { font:400 30px/.9 'Patrick Hand',cursive; }
+.order-decisions span { font-size:22px; white-space:nowrap; }
+.order-point { position:absolute; left:54px; bottom:24px; margin:0; font-size:25px; }
 
-/* Intentionally packed word wall; four waves keep it presentable. */
+/* Irregular, color-coded word wall with four presenter-controlled waves. */
 .crowded-cloud { background:#f7f8ff; }
 .crowded-cloud h2 { font-size:51px; margin-top:8px; }
-.feature-wall { position:absolute; left:54px; right:44px; top:138px; bottom:14px; display:flex; flex-wrap:wrap; align-content:flex-start; align-items:baseline; column-gap:8px; row-gap:4px; }
-.feature-wall span { display:inline-block; white-space:nowrap; font-size:17px; line-height:1.03; padding:1px 3px; transform:rotate(-1deg); }
-.feature-wall span:nth-child(4n) { transform:rotate(2deg); font-size:18px; }
-.feature-wall span:nth-child(7n) { transform:rotate(-3deg); font-size:16px; background:var(--yellow); }
-.feature-wall span:nth-child(11n) { background:var(--green); }
-.feature-wall .group-marker { flex-basis:100%; font:700 11px/1 'DM Sans',sans-serif; letter-spacing:.08em; padding:6px 0 2px; background:transparent !important; transform:none !important; }
-.feature-wall .customer { color:#b75a63; }
-.feature-wall .staff { color:#4279a3; }
-.feature-wall .insight { color:#608d63; }
-.feature-wall .ops { color:#8b6d35; }
+.feature-wall { position:absolute; left:54px; right:44px; top:133px; bottom:15px; }
+.feature-wall span { position:absolute; display:inline-block; white-space:nowrap; line-height:1; padding:3px 7px 4px; border-radius:5px 10px 4px 7px; color:var(--ink); transform:rotate(var(--twist)); }
+.feature-wall .tag-customer { background:#f9c6c8; }
+.feature-wall .tag-staff { background:#bfdcf9; }
+.feature-wall .tag-insight { background:#cceccc; }
+.feature-wall .tag-ops { background:#ffe6a5; }
 
 /* The slide is technical: each box names the artifact, check, and skill. */
 .technical-flow { background:#fffaf0; }
@@ -154,12 +156,14 @@ html, body, #app { background:var(--paper); }
 
 .technical-guardrails { background:#f8fff9; }
 .technical-guardrails h2 { font-size:58px; }
-.guardrail-map { display:flex; gap:16px; margin-top:70px; }
-.guardrail-map div { flex:1; min-width:0; height:218px; border:3px solid var(--ink); border-radius:9px 16px 8px 12px; background:#fff; padding:16px 12px; box-sizing:border-box; transform:rotate(-2deg); }
+.guardrail-map { display:flex; gap:16px; margin-top:42px; }
+.guardrail-map div { flex:1; min-width:0; height:210px; border:3px solid var(--ink); border-radius:9px 16px 8px 12px; background:#fff; padding:14px 12px; box-sizing:border-box; transform:rotate(-2deg); }
 .guardrail-map div:nth-child(2) { background:var(--yellow); transform:rotate(2deg); }
 .guardrail-map div:nth-child(3) { background:var(--pink); }
 .guardrail-map div:nth-child(4) { background:var(--blue); transform:rotate(1deg); }
 .guardrail-map b { display:block; font:700 15px 'DM Sans',sans-serif; }
-.guardrail-map span { display:block; font-size:24px; line-height:1.18; margin-top:25px; }
-.guardrail-link { position:absolute; bottom:28px; left:54px; margin:0; font-size:25px; }
+.guardrail-map span { display:block; font-size:23px; line-height:1.16; margin-top:20px; }
+.observability-strip { position:absolute; left:54px; right:54px; bottom:24px; display:flex; align-items:center; gap:10px; border-top:3px dashed var(--ink); padding-top:10px; font-size:18px; }
+.observability-strip b { flex:none; font:700 13px 'DM Sans',sans-serif; }
+.observability-strip span { background:var(--green); padding:1px 5px; border-radius:6px; white-space:nowrap; }
 .next .closing { display:none; }

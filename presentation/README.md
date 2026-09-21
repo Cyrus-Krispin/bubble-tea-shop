@@ -1,8 +1,9 @@
 # Bubble Tea Shop talk mock
 
 This is a six-slide, browser-based draft for a talk of about eight to ten minutes. It uses
-Slidev so the dense feature wall and technical workflow can animate on click. The visual
-direction is hand-drawn diagrams rather than product photos. The demo video is intentionally
+Slidev so the scattered feature wall and technical workflow can animate on click. The visual
+direction is hand-drawn diagrams rather than product photos. The opening explains one order in
+everyday terms; the workflow and guardrails carry the technical detail. The demo video is intentionally
 left out of this version; it can be added after the cover if it strengthens the talk.
 
 [Research notes](research.md) record the implementation evidence behind the dense feature wall,
