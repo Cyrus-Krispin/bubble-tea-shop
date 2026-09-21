@@ -63,6 +63,8 @@ public class InventoryManagementService {
                        ingredient.sku, ingredient.base_unit, ingredient.reorder_threshold,
                        ingredient.archived_at, coalesce(balance.quantity, 0) AS quantity,
                        coalesce(balance.version, 0) AS balance_version, balance.updated_at,
+                       COALESCE((SELECT SUM(r.quantity) FROM inventory_reservation r WHERE r.location_id = :locationId
+                           AND r.ingredient_id = ingredient.id AND r.active), 0) AS reserved_quantity,
                        EXISTS (
                            SELECT 1 FROM inventory_movement opening
                             WHERE opening.location_id = :locationId
@@ -260,7 +262,8 @@ public class InventoryManagementService {
         return new Balance(rs.getObject("ingredient_id", UUID.class),
             rs.getString("ingredient_name"), rs.getString("sku"),
             BaseUnit.valueOf(rs.getString("base_unit")),
-            quantity.toPlainString(), threshold == null ? null : threshold.toPlainString(),
+            quantity.toPlainString(), rs.getBigDecimal("reserved_quantity").toPlainString(),
+            quantity.subtract(rs.getBigDecimal("reserved_quantity")).toPlainString(), threshold == null ? null : threshold.toPlainString(),
             threshold != null && quantity.compareTo(threshold) <= 0, rs.getLong("balance_version"),
             rs.getBoolean("opening_recorded"), rs.getTimestamp("archived_at") != null,
             updated == null ? null : updated.toInstant());
@@ -299,7 +302,7 @@ public class InventoryManagementService {
     @Schema(name = "StaffInventoryBalance")
     public record Balance(UUID ingredientId, String ingredientName,
                           @Schema(nullable = true) String sku, BaseUnit baseUnit,
-                          String quantity, @Schema(nullable = true) String reorderThreshold,
+                          String quantity, String reservedQuantity, String availableQuantity, @Schema(nullable = true) String reorderThreshold,
                           boolean belowReorderThreshold, long version, boolean openingRecorded,
                           boolean ingredientArchived,
                           @Schema(nullable = true) Instant updatedAt) { }

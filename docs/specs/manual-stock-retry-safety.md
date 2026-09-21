@@ -13,7 +13,9 @@ inventory UI is the authorized restocking workflow; no supplier integration is r
 - Previously committed retries continue to work after an ingredient is archived. New movements
   still require an active ingredient. No existing audit rows are rewritten.
 - Keep the original UI input/key through ambiguous failures, dialog dismissal, navigation and
-  token refresh in the same signed-in app session. Prevent edits while the outcome is unknown.
+  token refresh in the same signed-in app session, including visits to customer pages and back.
+  The private cache lives above app routes and is scoped by stable authenticated user ID. Prevent
+  edits while the outcome is unknown.
   Retry with the same key, including after a later 4xx response; release only an initially definite
   rejection or confirmed success. A new request must not replace an unresolved one.
 - State is memory-only and cleared on sign-out/account change. Explain that after a full reload,

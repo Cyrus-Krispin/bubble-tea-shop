@@ -189,3 +189,18 @@
   normalized input. Concurrent retries serialize on this identity and return the original movement.
 - Request identity, immutable movement and balance change commit atomically. Request rows cannot be
   updated or deleted. Authorization precedes replay; ingredient activity is checked only for new work.
+
+## Card payments and reservations
+
+- All stock writers lock balances in ingredient UUID order. Available stock subtracts active holds;
+  a paid card fulfillment can consume its own reservation but cannot use another order's hold.
+- A card order and its reservations commit together before any provider request. Payment and
+  reservation release follow verified provider evidence, never return parameters or elapsed time.
+- Provider session/intent, reference, amount, currency and expiry must match the immutable order.
+  Signed webhook payloads only queue work. Duplicate refunds have matching identity and facts.
+- Guest cancellation authorizes provider expiry only. A discovered payment requires a recorded staff
+  cancellation actor before the application can request its refund.
+- Unresolved provider refunds block pending-order fulfillment regardless of whether cancellation
+  originated in the application or provider dashboard. Reservations remain until verified full refund.
+- Completing a refunded historical order replays its existing completion without another sale.
+  A pending refunded order is cancelled; a completed refunded order never restores ingredients.

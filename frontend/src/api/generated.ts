@@ -212,6 +212,40 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/staff/organizations/{org}/locations/{location}/orders/{order}/card-payment/refresh": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Verify a scoped order payment and refunds */
+        readonly post: operations["refreshStaffCardPayment"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/staff/organizations/{org}/locations/{location}/orders/{order}/card-payment/cancel": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Cancel an unfulfilled card order and refund any collected payment */
+        readonly post: operations["cancelStaffCardOrder"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/staff/organizations/{organizationId}/recipes": {
         readonly parameters: {
             readonly query?: never;
@@ -643,6 +677,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/guest/locations/{slug}/card-checkouts": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Reserve stock and start an idempotent hosted card checkout */
+        readonly post: operations["createCardCheckout"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/guest/locations/{locationSlug}/orders": {
         readonly parameters: {
             readonly query?: never;
@@ -654,6 +705,40 @@ export interface paths {
         readonly put?: never;
         /** Place an order at a public location */
         readonly post: operations["placeGuestLocationOrder"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/guest/card-checkouts/{id}/refresh": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Verify the latest hosted payment status */
+        readonly post: operations["refreshCardCheckout"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/guest/card-checkouts/{id}/cancel": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** Cancel an unpaid hosted checkout before releasing stock */
+        readonly post: operations["cancelUnpaidCardCheckout"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -847,6 +932,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/guest/payment-methods": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Read configured payment methods */
+        readonly get: operations["getGuestPaymentMethods"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/guest/menu": {
         readonly parameters: {
             readonly query?: never;
@@ -924,6 +1026,23 @@ export interface paths {
         };
         /** Load a guest product by location */
         readonly get: operations["getGuestLocationProduct"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/guest/card-checkouts/{id}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Read a card checkout using its private recovery identifier */
+        readonly get: operations["getCardCheckout"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -1325,6 +1444,52 @@ export interface components {
             readonly id: string;
             readonly name: string;
         };
+        readonly CardCheckoutStatus: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly state: string;
+            readonly checkoutUrl: string | null;
+            /** Format: date-time */
+            readonly expiresAt: string;
+            readonly cancellationRequested: boolean;
+            readonly recoveryCode: string | null;
+            /** Format: int64 */
+            readonly refundedMinor: number;
+            readonly order: components["schemas"]["GuestOrder"];
+        };
+        readonly GuestOrder: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly publicOrderNumber: string;
+            readonly status: string;
+            readonly paymentMethod: string;
+            readonly currencyCode: string;
+            /** Format: int64 */
+            readonly subtotalMinor: number;
+            /** Format: int64 */
+            readonly totalMinor: number;
+            /** Format: date-time */
+            readonly createdAt: string;
+            readonly replayed: boolean;
+            readonly items: readonly components["schemas"]["GuestOrderLine"][];
+        };
+        readonly GuestOrderLine: {
+            readonly productName: string;
+            readonly variantName: string;
+            /** Format: int32 */
+            readonly quantity: number;
+            /** Format: int64 */
+            readonly unitPriceMinor: number;
+            /** Format: int64 */
+            readonly lineTotalMinor: number;
+            readonly options: readonly components["schemas"]["GuestOrderOption"][];
+        };
+        readonly GuestOrderOption: {
+            readonly groupName: string;
+            readonly choiceName: string;
+            /** Format: int64 */
+            readonly priceDeltaMinor: number;
+        };
         readonly CreateRecipeRequest: {
             readonly name: string;
             readonly description?: string | null;
@@ -1494,39 +1659,6 @@ export interface components {
         };
         readonly CreateGuestOrderRequest: {
             readonly items: readonly components["schemas"]["CreateGuestOrderLineRequest"][];
-        };
-        readonly GuestOrder: {
-            /** Format: uuid */
-            readonly id: string;
-            readonly publicOrderNumber: string;
-            readonly status: string;
-            readonly paymentMethod: string;
-            readonly currencyCode: string;
-            /** Format: int64 */
-            readonly subtotalMinor: number;
-            /** Format: int64 */
-            readonly totalMinor: number;
-            /** Format: date-time */
-            readonly createdAt: string;
-            readonly replayed: boolean;
-            readonly items: readonly components["schemas"]["GuestOrderLine"][];
-        };
-        readonly GuestOrderLine: {
-            readonly productName: string;
-            readonly variantName: string;
-            /** Format: int32 */
-            readonly quantity: number;
-            /** Format: int64 */
-            readonly unitPriceMinor: number;
-            /** Format: int64 */
-            readonly lineTotalMinor: number;
-            readonly options: readonly components["schemas"]["GuestOrderOption"][];
-        };
-        readonly GuestOrderOption: {
-            readonly groupName: string;
-            readonly choiceName: string;
-            /** Format: int64 */
-            readonly priceDeltaMinor: number;
         };
         readonly ExpenseRequest: {
             /** Format: int64 */
@@ -1747,6 +1879,8 @@ export interface components {
             /** @enum {string} */
             readonly baseUnit: "GRAM" | "MILLILITER" | "EACH";
             readonly quantity: string;
+            readonly reservedQuantity: string;
+            readonly availableQuantity: string;
             readonly reorderThreshold: string | null;
             readonly belowReorderThreshold: boolean;
             /** Format: int64 */
@@ -1875,6 +2009,10 @@ export interface components {
             /** @enum {string} */
             readonly role: "OWNER" | "MANAGER";
             readonly locations: readonly components["schemas"]["StaffLocation"][];
+        };
+        readonly PaymentMethods: {
+            readonly cash: boolean;
+            readonly card: boolean;
         };
         readonly Location: {
             /** Format: uuid */
@@ -2010,6 +2148,8 @@ export interface components {
             readonly cancelledAt: string | null;
             readonly location: components["schemas"]["CustomerOrderLocation"];
             readonly items: readonly components["schemas"]["CustomerOrderLine"][];
+            /** Format: uuid */
+            readonly cardCheckoutId: string | null;
         };
         readonly CustomerOrderLine: {
             /** Format: int32 */
@@ -2662,6 +2802,54 @@ export interface operations {
             readonly 403: components["responses"]["Problem"];
             readonly 404: components["responses"]["Problem"];
             readonly 409: components["responses"]["Problem"];
+        };
+    };
+    readonly refreshStaffCardPayment: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly org: string;
+                readonly location: string;
+                readonly order: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["CardCheckoutStatus"];
+                };
+            };
+        };
+    };
+    readonly cancelStaffCardOrder: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly org: string;
+                readonly location: string;
+                readonly order: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["CardCheckoutStatus"];
+                };
+            };
         };
     };
     readonly listRecipes: {
@@ -3813,6 +4001,34 @@ export interface operations {
             readonly 503: components["responses"]["Problem"];
         };
     };
+    readonly createCardCheckout: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly "Idempotency-Key": string;
+            };
+            readonly path: {
+                readonly slug: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateGuestOrderRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["CardCheckoutStatus"];
+                };
+            };
+        };
+    };
     readonly placeGuestLocationOrder: {
         readonly parameters: {
             readonly query?: never;
@@ -3851,6 +4067,50 @@ export interface operations {
             readonly 400: components["responses"]["Problem"];
             readonly 409: components["responses"]["Problem"];
             readonly 503: components["responses"]["Problem"];
+        };
+    };
+    readonly refreshCardCheckout: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["CardCheckoutStatus"];
+                };
+            };
+        };
+    };
+    readonly cancelUnpaidCardCheckout: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["CardCheckoutStatus"];
+                };
+            };
         };
     };
     readonly quoteCustomerOrder: {
@@ -4210,6 +4470,26 @@ export interface operations {
             };
         };
     };
+    readonly getGuestPaymentMethods: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["PaymentMethods"];
+                };
+            };
+        };
+    };
     readonly getCurrentGuestMenu: {
         readonly parameters: {
             readonly query?: never;
@@ -4358,6 +4638,28 @@ export interface operations {
                 };
                 content: {
                     readonly "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    readonly getCardCheckout: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["CardCheckoutStatus"];
                 };
             };
         };

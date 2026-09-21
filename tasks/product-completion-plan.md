@@ -29,7 +29,7 @@ PRs so each diff remains reviewable. Preserve the earlier shadcn task files.
 - [x] Multi-currency: location configuration and currency-specific option prices; PR #44.
 - [ ] Localization: translated UI, catalog content, formatting and persistence.
 - [x] Session expiry: safe refresh/expiry behavior and race tests; PR #39.
-- [ ] Card checkout: hosted provider integration, event idempotency, stock/payment reconciliation.
+- [x] Card checkout: hosted provider integration, event idempotency, stock/payment reconciliation; implementation PR prepared. Actual Stripe merchant sandbox verification still requires credentials.
 - [x] Supplier restocking decision: user chose existing manual inventory UI; verify it during final review.
 - [x] Staff retry safety: retain uncertain counter/expense drafts across token refresh; PR #41.
 - [x] Intermediate subagent review: inventory refresh/pagination and staff retry recovery findings fixed and regression-tested.
@@ -43,5 +43,5 @@ Never declare a live external integration verified without its provider sandbox/
 
 - [x] Final review follow-up: currency-correct reorder suggestions and availability; PR #45.
 
-- [x] Final review follow-up: idempotent manual stock movements and preserved UI recovery; focused PR pending.
-- [ ] Final review follow-up: clear optional single-choice customizations in guest and counter flows.
+- [x] Final review follow-up: idempotent manual stock movements and preserved UI recovery; PR #46.
+- [x] Final review follow-up: clear optional single-choice customizations in guest and counter flows; PR #47.

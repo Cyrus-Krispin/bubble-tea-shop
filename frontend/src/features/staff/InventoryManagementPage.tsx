@@ -469,7 +469,7 @@ export default function InventoryManagementPage() {
       {
         key: "quantity",
         header: "On hand",
-        cell: (row) => `${row.quantity} ${unitLabel(row.baseUnit)}`,
+        cell: (row) => <div>{row.quantity} {unitLabel(row.baseUnit)}<small className="block text-muted-foreground">{row.reservedQuantity} reserved · {row.availableQuantity} available</small></div>,
       },
       {
         key: "reorderThreshold",

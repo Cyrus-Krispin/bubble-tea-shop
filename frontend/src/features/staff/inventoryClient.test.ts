@@ -34,6 +34,8 @@ describe("inventoryClient", () => {
           sku: "TEA-001",
           baseUnit: "GRAM" as const,
           quantity: "10.500000",
+          reservedQuantity: "2.500000",
+          availableQuantity: "8.000000",
           reorderThreshold: "5.000000",
           belowReorderThreshold: false,
           version: 1,

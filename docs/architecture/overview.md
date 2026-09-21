@@ -74,3 +74,10 @@ The guest storefront uses an honest generic shop icon until location artwork is 
 Inventory owns manual-movement retry identities. Its application service authorizes each request,
 claims the location-scoped key, compares the resolved actor and normalized payload, and returns an
 existing immutable movement or records one new ledger mutation in the same transaction.
+
+### Hosted card checkout
+
+Ordering owns the Stripe adapter, checkout reconciliation and successful refund ledger. It calls
+inventory's reservation service for holds/releases; every stock writer respects active holds.
+Provider network requests execute outside local transactions. React uses hosted Stripe checkout
+and server-verified receipts; it never collects card data. See [operations](../operations/card-payments.md).

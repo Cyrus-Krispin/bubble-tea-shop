@@ -17,7 +17,7 @@ export function DrinkOptionGroup({
 }: {
   configuration: DrinkConfiguration;
   group: CatalogOptionGroup;
-  onSelect: (group: CatalogOptionGroup, choice: CatalogOptionChoice) => void;
+  onSelect: (group: CatalogOptionGroup, choice: CatalogOptionChoice | null) => void;
 }) {
   const selection = configuration.selections.find((candidate) => candidate.groupId === group.id);
   const selectedIds = selection?.choiceIds ?? [];
@@ -50,12 +50,17 @@ export function DrinkOptionGroup({
           );
         })}
       </div> : <RadioGroup className={cn("grid gap-2", singleChoiceGrid)} onValueChange={(choiceId) => {
+        if (choiceId === "__none__" && group.minimumSelections === 0) {
+          onSelect(group, null); return;
+        }
         const choice = group.choices.find((candidate) => candidate.id === choiceId);
         if (choice) onSelect(group, choice);
-      }} value={selectedIds[0]}>
+      }} value={selectedIds[0] ?? (group.minimumSelections === 0 ? "__none__" : "")}>
+        {group.minimumSelections === 0 ? <Label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground" htmlFor={`choice-${group.id}-none`}>
+          <RadioGroupItem aria-label={`None for ${group.name}`} id={`choice-${group.id}-none`} value="__none__" /><span>None</span>
+        </Label> : null}
         {group.choices.map((choice) => <Label className="flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-input bg-input/30 px-3 transition-colors hover:border-primary/70 hover:bg-interactive-hover has-data-[state=checked]:border-interactive-selected-border has-data-[state=checked]:bg-interactive-selected has-data-[state=checked]:text-interactive-selected-foreground has-data-[state=checked]:ring-1 has-data-[state=checked]:ring-primary/60" htmlFor={`choice-${group.id}-${choice.id}`} key={choice.id}><RadioGroupItem aria-label={`${choice.name} ${priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}`} id={`choice-${group.id}-${choice.id}`} value={choice.id} /><span className="grid"><span>{choice.name}</span><small className="text-muted-foreground">{priceDeltaLabel(choice.priceDelta.amountMinor, choice.priceDelta.currency)}</small></span></Label>)}
       </RadioGroup>}
     </fieldset>
   );
 }
-

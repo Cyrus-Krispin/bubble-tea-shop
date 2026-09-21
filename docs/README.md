@@ -92,3 +92,7 @@ The Flyway migration remains the executable source of truth for the database.
 - [Currency-correct reorder suggestions](specs/currency-reorder-consistency.md)
 
 - [Safe retries for manual stock movements](specs/manual-stock-retry-safety.md)
+
+- [Clear optional drink customizations](specs/optional-drink-choice-clearing.md)
+
+- [Hosted card checkout](specs/stripe-card-checkout.md) and [payment operations](operations/card-payments.md).
