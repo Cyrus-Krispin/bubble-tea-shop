@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { beforeEach, expect, it, vi } from "vitest";
 import { AuthContext } from "../auth/AuthContext";
+import { StaffDraftProvider } from "./StaffDraftProvider";
 import { StaffLayout } from "./StaffLayout";
 import { catalogLocations, catalogMenu, catalogProduct } from "../../test/catalogFixtures";
 import CounterOrderPage from "./CounterOrderPage";
@@ -24,9 +25,9 @@ beforeEach(() => {
     totals: [{ currencyCode: "SGD", incomeMinor: 0, outflowMinor: 0, netMinor: 0 }], daily: [], expenses: [], totalExpenses: 0, totalPages: 0, page: 0 });
   vi.mocked(recordExpense).mockRejectedValue(new Error("Lost response"));
 });
-function app(token: string, counter = false) {
-  return <AuthContext.Provider value={{ isLoading: false, session: { accessToken: token, expiresAt: 4102444800, email: "staff@example.test" } }}>
-    <MemoryRouter initialEntries={[counter ? "/staff/counter" : "/staff/cash-flow"]}><Routes><Route path="/staff" element={<StaffLayout />}><Route path="cash-flow" element={<CashFlowPage />} /><Route path="counter" element={<CounterOrderPage />} /></Route></Routes></MemoryRouter>
+function app(token: string, counter = false, userId = "test-user") {
+  return <AuthContext.Provider value={{ isLoading: false, session: { userId, accessToken: token, expiresAt: 4102444800, email: "staff@example.test" } }}>
+    <StaffDraftProvider><MemoryRouter initialEntries={[counter ? "/staff/counter" : "/staff/cash-flow"]}><Routes><Route path="/staff" element={<StaffLayout />}><Route path="cash-flow" element={<CashFlowPage />} /><Route path="counter" element={<CounterOrderPage />} /></Route></Routes></MemoryRouter></StaffDraftProvider>
   </AuthContext.Provider>;
 }
 it("restores an uncertain expense after real staff access revalidation unmounts the route", async () => {
@@ -53,7 +54,7 @@ it("does not expose a previous account's draft when another account resolves", a
   const view = render(app("first-token")); await screen.findByLabelText("Expense description");
   fireEvent.change(screen.getByLabelText("Expense description"), { target: { value: "Private expense" } });
   vi.mocked(getStaffContext).mockResolvedValueOnce({ ...context, accountId: "different-staff" });
-  view.rerender(app("another-account-token"));
+  view.rerender(app("another-account-token", false, "another-user"));
   expect(await screen.findByLabelText("Expense description")).toHaveValue("");
 });
 
@@ -99,4 +100,13 @@ it("keeps a pending expense single-flight across refresh and retains the origina
   fireEvent.click(await screen.findByRole("button", { name: "Retry same expense" }));
   await vi.waitFor(() => expect(recordExpense).toHaveBeenCalledTimes(2));
   expect(vi.mocked(recordExpense).mock.calls[1].slice(1)).toEqual(vi.mocked(recordExpense).mock.calls[0].slice(1));
+});
+
+it("shows no payment due for a cancelled counter replay", async () => {
+  vi.mocked(placeCounterOrder).mockResolvedValue({ id: "order", publicOrderNumber: "BT123", status: "CANCELLED", paymentMethod: "CASH", currencyCode: "SGD", subtotalMinor: 660, totalMinor: 660, createdAt: "2026-09-15T00:00:00Z", replayed: true, items: [] });
+  render(app("token", true));
+  fireEvent.click(await screen.findByRole("button", { name: /^Add drink/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Place counter order" }));
+  expect(await screen.findByText(/This order was cancelled. Do not collect payment./)).toBeVisible();
+  expect(screen.queryByText(/Collect cash and complete/)).not.toBeInTheDocument();
 });

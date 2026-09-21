@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 const sdk = vi.hoisted(() => ({
   listener: undefined as undefined | ((event: string, session: unknown) => void),
-  session: { access_token: "test-token", expires_at: 4102444800, user: { email: "test@example.test" } },
+  session: { access_token: "test-token", expires_at: 4102444800, user: { id: "test-user", email: "test@example.test" } },
   getSession: vi.fn(),
   signInWithPassword: vi.fn(),
   unsubscribe: vi.fn(),
@@ -28,7 +28,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 it("includes the absolute expiry and refuses an expired stored session", async () => {
-  expect(await getCurrentAuthSession()).toEqual({ accessToken: "test-token", email: "test@example.test", expiresAt: 4102444800 });
+  expect(await getCurrentAuthSession()).toEqual({ userId: "test-user", accessToken: "test-token", email: "test@example.test", expiresAt: 4102444800 });
   sdk.session.expires_at = 1;
   expect(await getCurrentAuthSession()).toBeNull();
 });

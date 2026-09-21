@@ -34,6 +34,8 @@ describe("inventoryClient", () => {
           sku: "TEA-001",
           baseUnit: "GRAM" as const,
           quantity: "10.500000",
+          reservedQuantity: "2.500000",
+          availableQuantity: "8.000000",
           reorderThreshold: "5.000000",
           belowReorderThreshold: false,
           version: 1,
@@ -100,7 +102,7 @@ describe("inventoryClient", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      recordInventoryMovement("token", "org", "location", {
+      recordInventoryMovement("token", "org", "location", "request-key", {
         ingredientId: "ingredient-id",
         movementType: "RECEIPT",
         quantityDelta: "10.500000",
@@ -111,6 +113,7 @@ describe("inventoryClient", () => {
 
     const request = fetchMock.mock.calls[0]?.[0] as Request;
     expect(request.method).toBe("POST");
+    expect(request.headers.get("Idempotency-Key")).toBe("request-key");
     expect(await request.clone().json()).toEqual({
       ingredientId: "ingredient-id",
       movementType: "RECEIPT",
@@ -134,12 +137,19 @@ describe("inventoryClient", () => {
     );
 
     await expect(
-      recordInventoryMovement("token", "org", "location", {
+      recordInventoryMovement("token", "org", "location", "request-key", {
         ingredientId: "ingredient-id",
         movementType: "RECEIPT",
         quantityDelta: "10",
       }),
     ).rejects.toThrow("invalid inventory response");
+  });
+
+  it("preserves the movement retry conflict code", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ code: "INVENTORY_IDEMPOTENCY_CONFLICT" }), { status: 409 })));
+    await expect(recordInventoryMovement("token", "org", "location", "request-key", {
+      ingredientId: "ingredient-id", movementType: "RECEIPT", quantityDelta: "10",
+    })).rejects.toMatchObject({ code: "INVENTORY_IDEMPOTENCY_CONFLICT", status: 409 });
   });
 
   it("preserves stable problem codes, status, and shortage details", async () => {
@@ -165,7 +175,7 @@ describe("inventoryClient", () => {
     );
 
     await expect(
-      recordInventoryMovement("token", "org", "location", {
+      recordInventoryMovement("token", "org", "location", "request-key", {
         ingredientId: "ingredient-id",
         movementType: "ADJUSTMENT",
         quantityDelta: "-12",

@@ -24,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -67,6 +70,9 @@ class GuestOrderPlacementApiIntegrationTest {
 
     @Autowired
     GuestOrderPlacementService placement;
+
+    @Autowired com.bubbletea.shop.catalog.CurrencyPriceService currencyPrices;
+    @Autowired com.bubbletea.shop.catalog.OptionManagementService optionManagement;
 
     @MockitoBean
     JwtDecoder jwtDecoder;
@@ -309,6 +315,156 @@ class GuestOrderPlacementApiIntegrationTest {
                 .header("Idempotency-Key", UUID.randomUUID()).contentType("application/json").content(orderBody(1)))
             .andExpect(status().isForbidden());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_movement WHERE customer_order_id = ?", Integer.class, orderId)).isZero();
+    }
+
+    @Test
+    void favoriteDiscountIsServerPricedOncePerOrderAndRetainedOnReplay() throws Exception {
+        UUID subject = UUID.randomUUID(), account = UUID.randomUUID(), key = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", account, subject);
+        String favoritePath = "/api/v1/customer/locations/orchard-central/favorite";
+        String favoriteRecipe = "40000000-0000-0000-0000-000000000001";
+        mvc.perform(put(favoritePath).with(jwt().jwt(t -> t.subject(subject.toString())))
+                .contentType("application/json").content("{\"recipeId\":\"" + favoriteRecipe + "\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.recipeId").value(favoriteRecipe));
+        mvc.perform(post("/api/v1/customer/locations/orchard-central/order-quote")
+                .with(jwt().jwt(t -> t.subject(subject.toString()))).contentType("application/json").content(orderBody(2)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.subtotalMinor").value(1440))
+            .andExpect(jsonPath("$.discountMinor").value(33)).andExpect(jsonPath("$.totalMinor").value(1407));
+        mvc.perform(post("/api/v1/guest/orders").with(jwt().jwt(t -> t.subject(subject.toString())))
+                .header("Idempotency-Key", key).contentType("application/json").content(orderBody(2)))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.totalMinor").value(1407));
+        UUID otherSubject = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", UUID.randomUUID(), otherSubject);
+        mvc.perform(get(favoritePath).with(jwt().jwt(t -> t.subject(otherSubject.toString()))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.recipeId").isEmpty());
+        UUID orderId = jdbc.queryForObject("SELECT id FROM customer_order WHERE placement_key = ?", UUID.class, key);
+        assertThat(jdbc.queryForObject("SELECT discount_minor FROM customer_order WHERE id = ?", Long.class, orderId)).isEqualTo(33L);
+        assertThat(jdbc.queryForObject("SELECT amount_minor FROM payment WHERE customer_order_id = ?", Long.class, orderId)).isEqualTo(1407L);
+        mvc.perform(delete(favoritePath).with(jwt().jwt(t -> t.subject(subject.toString())))).andExpect(status().isOk());
+        mvc.perform(post("/api/v1/guest/orders").with(jwt().jwt(t -> t.subject(subject.toString())))
+                .header("Idempotency-Key", key).contentType("application/json").content(orderBody(2)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.replayed").value(true)).andExpect(jsonPath("$.totalMinor").value(1407));
+        mvc.perform(post("/api/v1/guest/orders").with(jwt().jwt(t -> t.subject(subject.toString())))
+                .header("Idempotency-Key", UUID.randomUUID()).contentType("application/json").content(orderBody(2)))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.totalMinor").value(1440));
+    }
+
+    @Test
+    void favoriteIsPrivateAndRejectsRecipesOutsideTheCurrentMenu() throws Exception {
+        UUID subject = UUID.randomUUID(), account = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", account, subject);
+        String path = "/api/v1/customer/locations/orchard-central/favorite";
+        mvc.perform(get(path)).andExpect(status().isUnauthorized());
+        mvc.perform(put(path).with(jwt().jwt(t -> t.subject(subject.toString())))
+                .contentType("application/json").content("{\"recipeId\":\"" + UUID.randomUUID() + "\"}"))
+            .andExpect(status().isNotFound());
+        mvc.perform(get(path).with(jwt().jwt(t -> t.subject(subject.toString()))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.recipeId").isEmpty());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM customer_favorite WHERE account_id = ?", Long.class, account)).isZero();
+    }
+
+    @Test
+    void favoriteChoosesOneLargestBaseDiscountCapsNegativeOptionsAndExcludesCounterOrders() {
+        UUID subject = UUID.randomUUID(), account = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", account, subject);
+        jdbc.update("INSERT INTO customer_favorite (account_id, organization_id, recipe_id) VALUES (?, ?, '40000000-0000-0000-0000-000000000001')", account, ORGANIZATION);
+        UUID small = UUID.fromString("50000000-0000-0000-0000-000000000001"), large = UUID.fromString("50000000-0000-0000-0000-000000000003");
+        var choices = List.of(SWEETNESS_50, LESS_ICE, PEARLS);
+        var lines = List.of(new GuestOrderPlacementService.CreateLine(small, 2, choices), new GuestOrderPlacementService.CreateLine(large, 2, choices));
+        var quote = placement.quote("orchard-central", subject, lines);
+        assertThat(quote.subtotalMinor()).isEqualTo(2940);
+        assertThat(quote.discountMinor()).isEqualTo(37);
+        assertThat(quote.totalMinor()).isEqualTo(2903);
+        jdbc.update("INSERT INTO organization_membership (organization_id, account_id, role) VALUES (?, ?, 'OWNER')", ORGANIZATION, account);
+        assertThat(placement.placeCounter(subject, ORGANIZATION, LOCATION, UUID.randomUUID(), lines).totalMinor()).isEqualTo(2940);
+        long original = jdbc.queryForObject("SELECT price_delta_minor FROM menu_variant_option_choice WHERE menu_variant_id = ? AND option_choice_id = ?", Long.class, large, PEARLS);
+        try {
+            jdbc.update("UPDATE menu_variant_option_choice SET price_delta_minor = -739 WHERE menu_variant_id = ? AND option_choice_id = ?", large, PEARLS);
+            var reduced = placement.quote("orchard-central", subject, List.of(new GuestOrderPlacementService.CreateLine(large, 1, choices)));
+            assertThat(reduced.subtotalMinor()).isEqualTo(1);
+            assertThat(reduced.discountMinor()).isEqualTo(1);
+            assertThat(reduced.totalMinor()).isZero();
+        } finally {
+            jdbc.update("UPDATE menu_variant_option_choice SET price_delta_minor = ? WHERE menu_variant_id = ? AND option_choice_id = ?", original, large, PEARLS);
+        }
+    }
+
+
+    @Test
+    void createsOwnerLocationsAndUsesExplicitCurrencyPricesWithHistoricalReplay() throws Exception {
+        UUID subject = UUID.randomUUID(), account = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", account, subject);
+        jdbc.update("INSERT INTO organization_membership (organization_id, account_id, role) VALUES (?, ?, 'OWNER')", ORGANIZATION, account);
+        String locations = "/api/v1/staff/organizations/" + ORGANIZATION + "/locations";
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        for (String currency : List.of("MYR", "CNY")) {
+            String slug = "currency-" + UUID.randomUUID();
+            String body = "{\"name\":\"" + slug + "\",\"slug\":\"" + slug + "\",\"currencyCode\":\"" + currency + "\",\"timezone\":\"Asia/Singapore\",\"defaultLocale\":\"en-SG\"}";
+            var created = mvc.perform(post(locations).with(jwt().jwt(t -> t.subject(subject.toString())))
+                .contentType("application/json").content(body)).andExpect(status().isCreated()).andReturn();
+            UUID loc = UUID.fromString(mapper.readTree(created.getResponse().getContentAsString()).get("id").asText());
+            mvc.perform(post(locations).with(jwt().jwt(t -> t.subject(subject.toString())))
+                .contentType("application/json").content(body)).andExpect(status().isConflict());
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> jdbc.update("UPDATE location SET currency_code = 'SGD' WHERE id = ?", loc))
+                .isInstanceOf(org.springframework.dao.DataAccessException.class);
+            jdbc.update("""
+                INSERT INTO menu_variant_offering (organization_id, location_id, menu_variant_id, recipe_version_id, price_minor, currency_code, available)
+                SELECT organization_id, ?, menu_variant_id, recipe_version_id, 1000, ?, true FROM menu_variant_offering WHERE location_id = ? AND menu_variant_id = ?
+                """, loc, currency, LOCATION, MEDIUM_MILK_TEA);
+            String orderPath = "/api/v1/guest/locations/" + slug + "/orders";
+            mvc.perform(post(orderPath).header("Idempotency-Key", UUID.randomUUID()).contentType("application/json").content(orderBody(1)))
+                .andExpect(status().isConflict());
+            String pricePath = "/api/v1/staff/organizations/" + ORGANIZATION + "/variants/" + MEDIUM_MILK_TEA + "/currency-prices/" + currency;
+            var response = mvc.perform(get(pricePath).with(jwt().jwt(t -> t.subject(subject.toString())))).andExpect(status().isOk()).andReturn();
+            var priceSet = mapper.readTree(response.getResponse().getContentAsString());
+            long version = priceSet.get("version").asLong();
+            var inputs = new java.util.ArrayList<java.util.Map<String, Object>>();
+            UUID pearlsLink = jdbc.queryForObject("SELECT id FROM menu_variant_option_choice WHERE menu_variant_id = ? AND option_choice_id = ?", UUID.class, MEDIUM_MILK_TEA, PEARLS);
+            int delta = currency.equals("MYR") ? 150 : 250;
+            for (var choice : priceSet.get("choices")) inputs.add(java.util.Map.of("linkId", choice.get("linkId").asText(), "priceDeltaMinor", choice.get("linkId").asText().equals(pearlsLink.toString()) ? delta : 0));
+            String prices = mapper.writeValueAsString(java.util.Map.of("version", version, "prices", inputs));
+            mvc.perform(put(pricePath).with(jwt().jwt(t -> t.subject(subject.toString()))).contentType("application/json").content(prices)).andExpect(status().isOk());
+            mvc.perform(put(pricePath).with(jwt().jwt(t -> t.subject(subject.toString()))).contentType("application/json").content(prices)).andExpect(status().isConflict());
+            mvc.perform(get("/api/v1/guest/locations/" + slug + "/menu/products/moonlit-milk-tea"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.variants[0].available").value(true));
+            UUID key = UUID.randomUUID();
+            mvc.perform(post(orderPath).header("Idempotency-Key", key).contentType("application/json").content(orderBody(1)))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.currencyCode").value(currency)).andExpect(jsonPath("$.totalMinor").value(1000 + delta));
+            jdbc.update("UPDATE menu_variant_currency_price SET price_delta_minor = price_delta_minor + 500 WHERE menu_variant_option_choice_id = ? AND currency_code = ?", pearlsLink, currency);
+            mvc.perform(post(orderPath).header("Idempotency-Key", key).contentType("application/json").content(orderBody(1)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalMinor").value(1000 + delta));
+        }
+        UUID outsider = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", UUID.randomUUID(), outsider);
+        mvc.perform(get(locations).with(jwt().jwt(t -> t.subject(outsider.toString())))).andExpect(status().isForbidden());
+        UUID outsiderAccount = jdbc.queryForObject("SELECT id FROM account WHERE auth_subject = ?", UUID.class, outsider);
+        UUID membership = UUID.randomUUID();
+        jdbc.update("INSERT INTO organization_membership (id, organization_id, account_id, role) VALUES (?, ?, ?, 'MANAGER')", membership, ORGANIZATION, outsiderAccount);
+        jdbc.update("INSERT INTO location_assignment (membership_id, organization_id, location_id) VALUES (?, ?, ?)", membership, ORGANIZATION, LOCATION);
+        mvc.perform(get(locations).with(jwt().jwt(t -> t.subject(outsider.toString())))).andExpect(status().isForbidden());
+        mvc.perform(post(locations).with(jwt().jwt(t -> t.subject(subject.toString()))).contentType("application/json")
+            .content("{\"name\":\"Invalid\",\"slug\":\"invalid\",\"currencyCode\":\"USD\",\"timezone\":\"Asia/Singapore\",\"defaultLocale\":\"en-SG\"}"))
+            .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    void currencyEditsRejectStaleLegacyChoiceChangesAndRecordTheActor() {
+        UUID subject = UUID.randomUUID(), account = UUID.randomUUID();
+        jdbc.update("INSERT INTO account (id, auth_subject, enabled) VALUES (?, ?, true)", account, subject);
+        jdbc.update("INSERT INTO organization_membership (organization_id, account_id, role) VALUES (?, ?, 'OWNER')", ORGANIZATION, account);
+        var snapshot = currencyPrices.get(subject, ORGANIZATION, MEDIUM_MILK_TEA, "SGD");
+        UUID link = jdbc.queryForObject("SELECT id FROM menu_variant_option_choice WHERE menu_variant_id = ? AND option_choice_id = ?", UUID.class, MEDIUM_MILK_TEA, PEARLS);
+        long version = jdbc.queryForObject("SELECT version FROM menu_variant_option_choice WHERE id = ?", Long.class, link);
+        var effects = jdbc.query("SELECT ingredient_id, quantity_delta FROM option_choice_ingredient_effect WHERE menu_variant_option_choice_id = ?", (rs, row) -> new com.bubbletea.shop.catalog.OptionManagementService.EffectInput(rs.getObject("ingredient_id", UUID.class), rs.getBigDecimal("quantity_delta").toPlainString()), link);
+        UUID product = jdbc.queryForObject("SELECT menu_product_id FROM menu_variant WHERE id = ?", UUID.class, MEDIUM_MILK_TEA);
+        optionManagement.configure(subject, ORGANIZATION, product, MEDIUM_MILK_TEA, PEARLS, new com.bubbletea.shop.catalog.OptionManagementService.ConfigurationInput(true, 60, version, effects));
+        var inputs = snapshot.choices().stream().map(choice -> new com.bubbletea.shop.catalog.CurrencyPriceService.PriceInput(choice.linkId(), choice.priceDeltaMinor())).toList();
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> currencyPrices.set(subject, ORGANIZATION, MEDIUM_MILK_TEA, "SGD", snapshot.version(), inputs))
+            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
+        var current = currencyPrices.get(subject, ORGANIZATION, MEDIUM_MILK_TEA, "SGD");
+        currencyPrices.set(subject, ORGANIZATION, MEDIUM_MILK_TEA, "SGD", current.version(), inputs);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM catalog_change WHERE actor_account_id = ? AND entity_id = ? AND entity_type = 'MENU_VARIANT'", Long.class, account, MEDIUM_MILK_TEA)).isEqualTo(1);
     }
 
     private String orderBody(int quantity) {

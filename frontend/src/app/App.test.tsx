@@ -202,7 +202,7 @@ describe("App", () => {
 
   it("shows the signed-in customer account without granting a staff role", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "customer-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800,
       email: "customer@example.test",
     });
 
@@ -220,7 +220,7 @@ describe("App", () => {
 
   it("does not offer registration to an already signed-in account", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "customer-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800,
       email: "customer@example.test",
     });
 
@@ -248,14 +248,14 @@ describe("App", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Moonlit Milk Tea" })).toBeVisible();
   });
 
-  it("keeps staff sign-in on its own route", () => {
+  it("keeps staff sign-in on its own route", async () => {
     render(
       <MemoryRouter initialEntries={["/staff/sign-in"]}>
         <App />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("main")).toHaveAccessibleName("Staff sign in");
+    expect(await screen.findByRole("main", { name: "Staff sign in" })).toHaveAccessibleName("Staff sign in");
     expect(screen.getByRole("heading", { level: 1, name: "Staff sign in" })).toBeVisible();
     expect(screen.getByText("Use the account assigned to your shop role.")).toBeVisible();
   });
@@ -273,7 +273,7 @@ describe("App", () => {
 
   it("guards the staff workspace and renders only server-returned scope", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800,
       email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({
@@ -337,7 +337,7 @@ describe("App", () => {
 
   it("shows a generic no-access state without inventing an organization", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "customer-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800,
       email: "customer@example.test",
     });
     vi.mocked(getStaffContext).mockRejectedValue(
@@ -357,7 +357,7 @@ describe("App", () => {
 
   it("manages ingredients inside server-returned organization scope", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800,
       email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({
@@ -426,7 +426,7 @@ describe("App", () => {
 
   it("refreshes the list and explains an optimistic edit conflict", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800,
       email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({
@@ -457,7 +457,7 @@ describe("App", () => {
 
   it("lists and creates recipes inside server-returned organization scope", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800,
       email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({
@@ -499,7 +499,7 @@ describe("App", () => {
 
   it("edits a draft formula using live ingredients", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800,
       email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({
@@ -544,7 +544,7 @@ describe("App", () => {
 
   it("reloads recipe state and explains a formula version conflict", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800, email: "owner@example.test",
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800, email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({
       accountId: "35f942a3-0591-4973-83ef-8889f608184e",
@@ -576,7 +576,7 @@ describe("App", () => {
 
   it("updates recipe metadata and confirms publication and archival", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800, email: "owner@example.test",
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800, email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({
       accountId: "35f942a3-0591-4973-83ef-8889f608184e",
@@ -628,7 +628,7 @@ describe("App", () => {
 
   it("creates a next draft and retires an unused published version", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800, email: "owner@example.test",
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800, email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({
       accountId: "35f942a3-0591-4973-83ef-8889f608184e",
@@ -694,7 +694,7 @@ describe("App", () => {
     scrollToMock.mockClear();
     fireEvent.click(screen.getByRole("link", { name: "View order" }));
 
-    expect(screen.getByRole("heading", { level: 1, name: "Your current order" })).toBeVisible();
+    expect(await screen.findByRole("heading", { level: 1, name: "Your current order" })).toBeVisible();
     expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
     expect(screen.getByText("Medium · 50% · Less ice · Pearls")).toBeVisible();
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$7.20");
@@ -702,7 +702,7 @@ describe("App", () => {
 
   it("keeps unknown staff routes inside the operations workspace", async () => {
     vi.mocked(getCurrentAuthSession).mockResolvedValue({
-      accessToken: "staff-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "staff-token", expiresAt: 4102444800,
       email: "owner@example.test",
     });
     vi.mocked(getStaffContext).mockResolvedValue({

@@ -219,7 +219,7 @@ public class OptionManagementController {
                                    String quantityDelta) { }
     record VersionRequest(@NotNull @PositiveOrZero Long version) { }
 
-    @RestControllerAdvice(assignableTypes = OptionManagementController.class)
+    @RestControllerAdvice(assignableTypes = {OptionManagementController.class, CurrencyPriceController.class})
     static class OptionExceptionHandler {
         @ExceptionHandler(StaffAccessDeniedException.class)
         ResponseEntity<ProblemDetail> denied() {

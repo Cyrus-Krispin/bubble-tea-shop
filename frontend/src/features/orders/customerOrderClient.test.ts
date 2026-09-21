@@ -32,6 +32,7 @@ const detail = {
   status: summary.status,
   paymentMethod: summary.paymentMethod,
   currencyCode: summary.currencyCode,
+  cardCheckoutId: null,
   subtotalMinor: 720,
   totalMinor: summary.totalMinor,
   createdAt: summary.createdAt,

@@ -29,7 +29,8 @@
   line-height: 1.55;
 }
 
-.location-picker-photo {
+.location-picker-photo,
+.location-picker-placeholder {
   width: 3.2rem;
   height: 3.2rem;
   flex: 0 0 auto;

@@ -57,6 +57,8 @@ class CustomerOrderHistoryApiIntegrationTest {
     @MockitoBean
     JwtDecoder jwtDecoder;
 
+    @Autowired GuestOrderPlacementService placement;
+
     @Test
     void listsOnlyOwnedOrdersNewestFirstWithBoundedPaginationAndSnapshotPreviews() throws Exception {
         Customer customer = customer(true);
@@ -238,6 +240,59 @@ class CustomerOrderHistoryApiIntegrationTest {
                 .param("locationSlug", "orchard-central")
                 .with(jwt().jwt(token -> token.subject(customer.subject().toString()))))
             .andExpect(status().isNoContent());
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"MYR,150", "CNY,250"})
+    @Transactional
+    void reorderUsesShopCurrencyPricesAndRequiresTheCompletePriceSet(String currency, int toppingPrice) throws Exception {
+        Customer customer = customer(true);
+        UUID location = UUID.randomUUID();
+        String slug = "reorder-" + location;
+        UUID variant = UUID.fromString("50000000-0000-0000-0000-000000000002");
+        UUID pearls = UUID.fromString("71000000-0000-0000-0000-000000000010");
+        jdbc.update("""
+            INSERT INTO location (id, organization_id, name, public_slug, timezone, currency_code)
+            VALUES (?, ?, ?, ?, 'Asia/Singapore', ?)
+            """, location, ORGANIZATION, slug, slug, currency);
+        jdbc.update("""
+            INSERT INTO menu_variant_offering (organization_id, location_id, menu_variant_id, recipe_version_id, price_minor, currency_code)
+            SELECT organization_id, ?, menu_variant_id, recipe_version_id, 1000, ?
+            FROM menu_variant_offering WHERE location_id = ? AND menu_variant_id = ?
+            """, location, currency, LOCATION, variant);
+        jdbc.update("""
+            INSERT INTO menu_variant_currency_price (organization_id, menu_variant_option_choice_id, currency_code, price_delta_minor)
+            SELECT organization_id, id, ?, CASE WHEN option_choice_id = ? THEN ? ELSE 0 END
+            FROM menu_variant_option_choice WHERE menu_variant_id = ?
+            """, currency, pearls, toppingPrice, variant);
+        jdbc.update("""
+            INSERT INTO inventory_balance (organization_id, location_id, ingredient_id, quantity)
+            SELECT ?, ?, id, 10000 FROM ingredient WHERE organization_id = ?
+            """, ORGANIZATION, location, ORGANIZATION);
+        var selected = java.util.List.of(
+            UUID.fromString("71000000-0000-0000-0000-000000000003"),
+            UUID.fromString("71000000-0000-0000-0000-000000000007"), pearls);
+        var order = placement.place(slug, UUID.randomUUID(), customer.subject(),
+            java.util.List.of(new GuestOrderPlacementService.CreateLine(variant, 1, selected)));
+        mvc.perform(get("/api/v1/customer/orders/latest-reorder").param("locationSlug", slug)
+                .with(jwt().jwt(t -> t.subject(customer.subject().toString()))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.currencyCode").value(currency))
+            .andExpect(jsonPath("$.totalMinor").value(1000 + toppingPrice))
+            .andExpect(jsonPath("$.items[0].unitPriceMinor").value(1000 + toppingPrice));
+        // A newly unpriced active option makes the whole variant unavailable, even if it was not selected.
+        jdbc.update("""
+            DELETE FROM menu_variant_currency_price WHERE currency_code = ? AND menu_variant_option_choice_id = (
+                SELECT id FROM menu_variant_option_choice WHERE menu_variant_id = ?
+                  AND option_choice_id NOT IN (?, ?, ?) AND enabled LIMIT 1)
+            """, currency, variant, selected.get(0), selected.get(1), selected.get(2));
+        mvc.perform(get("/api/v1/customer/orders/latest-reorder").param("locationSlug", slug)
+                .with(jwt().jwt(t -> t.subject(customer.subject().toString()))))
+            .andExpect(status().isNoContent());
+        // Historical receipt remains the original currency and price after catalog changes.
+        mvc.perform(get("/api/v1/customer/orders/{id}", order.id())
+                .with(jwt().jwt(t -> t.subject(customer.subject().toString()))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalMinor").value(1000 + toppingPrice));
     }
 
     private Customer customer(boolean enabled) {
