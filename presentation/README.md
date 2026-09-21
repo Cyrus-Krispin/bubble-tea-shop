@@ -1,9 +1,12 @@
 # Bubble Tea Shop talk mock
 
-This is a seven-slide, browser-based draft for a talk of about seven to nine minutes. It uses
-Slidev so the feature cloud and workflow can animate on click. The visual direction is a sparse,
-hand-drawn diagram rather than product photos. The demo video is intentionally left out of this
-version; it can be added later if it strengthens the talk.
+This is a six-slide, browser-based draft for a talk of about eight to ten minutes. It uses
+Slidev so the dense feature wall and technical workflow can animate on click. The visual
+direction is hand-drawn diagrams rather than product photos. The demo video is intentionally
+left out of this version; it can be added after the cover if it strengthens the talk.
+
+[Research notes](research.md) record the implementation evidence behind the dense feature wall,
+complexity numbers, authentication flow, and Codex skill references.
 
 ## Preview
 
@@ -26,4 +29,4 @@ Serve `dist/` as a static site. Keep access inside the tailnet. A local build on
 laptop is a useful backup if the venue connection fails.
 
 The text and timing are a starting point. The deck intentionally has no audience submission or QR
-feature. Its word cloud borrows the look, with presenter-controlled reveals.
+feature. The feature wall borrows the look, with presenter-controlled reveals.
