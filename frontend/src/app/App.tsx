@@ -8,6 +8,7 @@ import { CartProvider } from "../features/cart/CartProvider";
 import { DrinkPage } from "../features/catalog/DrinkPage";
 import { ShopPage } from "../features/catalog/ShopPage";
 import { StaffWorkspacePage } from "../features/staff/StaffWorkspacePage";
+import { StaffDraftProvider } from "../features/staff/StaffDraftProvider";
 import { StaffLayout } from "../features/staff/StaffLayout";
 import { NotFoundPage } from "./NotFoundPage";
 
@@ -69,6 +70,7 @@ export function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <StaffDraftProvider>
         <ScrollToTop />
         <CardRecoveryNotice />
         <Routes>
@@ -150,6 +152,7 @@ export function App() {
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </StaffDraftProvider>
       </CartProvider>
     </AuthProvider>
   );
