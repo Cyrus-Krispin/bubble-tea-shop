@@ -248,14 +248,14 @@ describe("App", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Moonlit Milk Tea" })).toBeVisible();
   });
 
-  it("keeps staff sign-in on its own route", () => {
+  it("keeps staff sign-in on its own route", async () => {
     render(
       <MemoryRouter initialEntries={["/staff/sign-in"]}>
         <App />
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("main")).toHaveAccessibleName("Staff sign in");
+    expect(await screen.findByRole("main", { name: "Staff sign in" })).toHaveAccessibleName("Staff sign in");
     expect(screen.getByRole("heading", { level: 1, name: "Staff sign in" })).toBeVisible();
     expect(screen.getByText("Use the account assigned to your shop role.")).toBeVisible();
   });
@@ -694,7 +694,7 @@ describe("App", () => {
     scrollToMock.mockClear();
     fireEvent.click(screen.getByRole("link", { name: "View order" }));
 
-    expect(screen.getByRole("heading", { level: 1, name: "Your current order" })).toBeVisible();
+    expect(await screen.findByRole("heading", { level: 1, name: "Your current order" })).toBeVisible();
     expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
     expect(screen.getByText("Medium · 50% · Less ice · Pearls")).toBeVisible();
     expect(screen.getByText("Preview total").nextSibling).toHaveTextContent("$7.20");

@@ -15,7 +15,7 @@ public class CustomerFavoriteService {
         JOIN menu_variant_offering o ON o.recipe_version_id = rv.id AND o.organization_id = rv.organization_id
         JOIN menu_variant v ON v.id = o.menu_variant_id
         JOIN menu_product p ON p.id = v.menu_product_id
-        WHERE r.organization_id = :org AND o.location_id = :loc AND o.available
+        WHERE r.organization_id = :org AND o.location_id = :loc AND o.available AND variant_currency_ready(v.id, o.currency_code)
           AND r.archived_at IS NULL AND rv.status = 'PUBLISHED' AND v.archived_at IS NULL AND p.archived_at IS NULL
         """;
     private final JdbcClient jdbc;

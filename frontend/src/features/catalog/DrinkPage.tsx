@@ -90,13 +90,14 @@ function DrinkCustomizer({ locationSlug, product }: { locationSlug?: string; pro
     setAddedMessage("");
   }
 
-  function selectChoice(group: CatalogOptionGroup, choice: CatalogOptionChoice) {
+  function selectChoice(group: CatalogOptionGroup, choice: CatalogOptionChoice | null) {
+    if (choice === null && (group.minimumSelections !== 0 || group.maximumSelections !== 1)) return;
     setConfiguration((current) => ({
       ...current,
       selections: current.selections.map((selection) => {
         if (selection.groupId !== group.id) return selection;
-        const selected = selection.choiceIds.includes(choice.id);
-        const choiceIds = group.maximumSelections === 1
+        const selected = choice !== null && selection.choiceIds.includes(choice.id);
+        const choiceIds = choice === null ? [] : group.maximumSelections === 1
           ? [choice.id]
           : selected
             ? selection.choiceIds.filter((id) => id !== choice.id)

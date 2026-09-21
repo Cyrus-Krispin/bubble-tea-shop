@@ -85,14 +85,14 @@ function line(value: unknown): GuestOrderLine {
   };
 }
 
-function order(value: unknown): GuestOrder {
+export function parsePlacedOrder(value: unknown, method: "CASH" | "CARD" = "CASH"): GuestOrder {
   const input = object(value);
-  if (!["PENDING", "COMPLETED", "CANCELLED"].includes(String(input.status)) || input.paymentMethod !== "CASH") invalid();
+  if (!["PENDING", "COMPLETED", "CANCELLED"].includes(String(input.status)) || input.paymentMethod !== method) invalid();
   return {
     id: string(input.id),
     publicOrderNumber: string(input.publicOrderNumber),
     status: input.status as "PENDING" | "COMPLETED" | "CANCELLED",
-    paymentMethod: "CASH",
+    paymentMethod: method,
     currencyCode: string(input.currencyCode),
     subtotalMinor: integer(input.subtotalMinor),
     totalMinor: integer(input.totalMinor),
@@ -149,7 +149,7 @@ export async function placeGuestOrder(
       params: { header: request.params.header, path: { locationSlug } },
     });
   if (data === undefined) throw apiError(error, response.status);
-  return order(data);
+  return parsePlacedOrder(data);
 }
 
 export async function placeCounterOrder(accessToken: string, organizationId: string, locationId: string,
@@ -161,5 +161,5 @@ export async function placeCounterOrder(accessToken: string, organizationId: str
     { signal: AbortSignal.timeout(30_000), params: { path: { organizationId, locationId }, header: { "Idempotency-Key": idempotencyKey } }, body: input },
   );
   if (data === undefined) throw apiError(error, response.status);
-  return order(data);
+  return parsePlacedOrder(data);
 }
