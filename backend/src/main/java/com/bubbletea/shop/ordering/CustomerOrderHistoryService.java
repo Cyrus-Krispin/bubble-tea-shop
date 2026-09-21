@@ -125,7 +125,8 @@ public class CustomerOrderHistoryService {
         return new CustomerOrderDetail(
             header.id(), header.publicOrderNumber(), header.status(), header.paymentMethod(),
             header.currencyCode(), header.subtotalMinor(), header.totalMinor(), header.createdAt(),
-            header.completedAt(), header.cancelledAt(), header.location(), List.copyOf(items));
+            header.completedAt(), header.cancelledAt(), header.location(), List.copyOf(items),
+            jdbc.query("SELECT id FROM card_checkout WHERE customer_order_id = ?", (rs, n) -> rs.getObject(1, UUID.class), orderId).stream().findFirst().orElse(null));
     }
 
     private UUID accountId(UUID authSubject) {
@@ -239,7 +240,8 @@ public class CustomerOrderHistoryService {
         @Schema(nullable = true) Instant completedAt,
         @Schema(nullable = true) Instant cancelledAt,
         CustomerOrderLocation location,
-        List<CustomerOrderLine> items
+        List<CustomerOrderLine> items,
+        @Schema(nullable = true) UUID cardCheckoutId
     ) { }
 
     public record CustomerOrderLine(

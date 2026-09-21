@@ -86,3 +86,18 @@ and its paid audit fields.
 - A real-browser check places a guest order, observes it in the authorized staff queue, completes it
   after stocking its ingredients, and verifies the paid order plus inventory deductions at desktop
   and mobile widths.
+
+## Counter order entry
+
+The [counter entry spec](../specs/staff-counter-order-entry.md) adds an authenticated
+`POST /api/v1/staff/organizations/{organizationId}/locations/{locationId}/counter-orders` route
+and `/staff/counter` workspace. Creation records the staff actor in the initial immutable status
+event, keeps customer ownership null, and shares guest pricing/snapshots and normal cash completion.
+
+## Online card orders
+
+The queue also shows card orders and their payment state. The payment panel reconciles provider
+status and offers authorized cancellation/refund for unfulfilled orders. Card completion collects
+no cash: it requires verified payment and consumes the order's own reserved stock once. Failed or
+unresolved payment/refund states block fulfillment. A fully refunded completed order remains in
+history with its original stock consumption. Stock requirements exclude other orders' reservations.

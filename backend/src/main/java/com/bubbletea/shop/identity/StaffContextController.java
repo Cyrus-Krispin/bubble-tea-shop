@@ -68,7 +68,7 @@ public class StaffContextController {
         }
     }
 
-    @RestControllerAdvice(assignableTypes = StaffContextController.class)
+    @RestControllerAdvice(assignableTypes = {StaffContextController.class, OwnerLocationController.class})
     static class StaffContextExceptionHandler {
         @ExceptionHandler(StaffIdentityClaimsException.class)
         ResponseEntity<ProblemDetail> invalidIdentity() {

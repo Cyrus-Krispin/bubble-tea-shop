@@ -654,3 +654,18 @@ Never edit an applied Flyway migration. When a later migration changes the schem
 3. Update [`erd.md`](erd.md), [`data-dictionary.md`](data-dictionary.md), and
    [`invariants.md`](invariants.md) when their views of the schema change.
 4. Run the migration/integration tests and `git diff --check`.
+
+## `inventory_movement_request`
+
+Primary key `(location_id, request_key)`; immutable actor account, organization, SHA-256 normalized
+request fingerprint, unique inventory movement ID and creation timestamp. Scoped location and deferred
+scoped movement foreign keys ensure the identity and successful balance change commit together.
+
+## V20 — card checkout and reservations
+
+`card_checkout` adds a unique order relationship, scoped ownership, private UUID, unique provider
+session/intent identifiers, hosted URL, original expiry, cancellation actor, worker lease/token,
+reconciliation generation and diagnostics. `inventory_reservation` has a composite order/ingredient
+key, positive quantity, scoped references and active/released timestamp consistency. `card_refund`
+is an immutable provider-keyed successful refund ledger with amount, currency and event time.
+See the [payment runbook](../operations/card-payments.md) for reconciliation and failure recovery.

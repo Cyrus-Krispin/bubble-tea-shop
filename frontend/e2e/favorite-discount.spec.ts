@@ -1,0 +1,30 @@
+import AxeBuilder from "@axe-core/playwright";
+import { expect, test } from "@playwright/test";
+
+test("customer saves a favorite and receives the same discount at checkout and on the receipt", async ({ page }, testInfo) => {
+  await page.goto("/account/access?mode=sign-in");
+  await page.getByLabel("Email address").fill("user@user.com");
+  await page.getByLabel("Password", { exact: true }).fill("User@1234");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Your account" })).toBeVisible();
+  await page.getByRole("combobox", { name: "Favorite recipe" }).click();
+  await page.getByRole("option", { name: "Moonlit Milk Tea", exact: true }).click();
+  await page.getByRole("button", { name: "Save favorite" }).click();
+  await expect(page.getByText("Current favorite: Moonlit Milk Tea")).toBeVisible();
+  await page.goto("/shop/orchard-central");
+  await page.getByRole("link", { name: /Customize Moonlit Milk Tea/ }).click();
+  await page.getByRole("button", { name: /Add to order/ }).click();
+  await page.getByRole("link", { name: "View order" }).click();
+  await expect(page.getByText("Favorite discount", { exact: true })).toBeVisible();
+  const quoted = await page.getByText("Preview total", { exact: true }).locator("..").textContent();
+  await page.getByRole("button", { name: /Place order ·/ }).click();
+  await expect(page.getByRole("heading", { name: /Pickup BT/ })).toBeVisible();
+  await expect(page.getByText("Favorite discount", { exact: true }).locator("..")).toContainText("0.33");
+  const confirmed = await page.getByText("Confirmed total", { exact: true }).locator("..").textContent();
+  expect(confirmed?.replace("Confirmed total", "")).toBe(quoted?.replace("Preview total", ""));
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.screenshot({ path: testInfo.outputPath("favorite-discount.png"), fullPage: true });
+  await page.goto("/account");
+  await page.getByRole("button", { name: "Remove favorite" }).click();
+  await expect(page.getByText("You have not chosen a favorite yet.")).toBeVisible();
+});
