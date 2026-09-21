@@ -274,6 +274,19 @@ services:
       retries: 6
       start_period: 5s
 
+  presentation:
+    build:
+      context: ./presentation
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:${PRESENTATION_PORT:-4177}:4177"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:4177/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
+
   prometheus:
     image: prom/prometheus:v3.13.2
     restart: unless-stopped

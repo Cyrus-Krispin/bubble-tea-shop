@@ -7,6 +7,7 @@ The development runtime is intentionally local-only. One Compose project starts:
 - Supabase Studio and Postgres Meta for local database and Auth administration;
 - the Spring Boot modular monolith; and
 - a React/Vite SPA served by Nginx with guest ordering and separate customer/staff authentication;
+- a static Slidev presentation with its bundled product tour video;
 - Prometheus for local metric collection and seven-day retention; and
 - Grafana with a provisioned Bubble Tea Shop system dashboard.
 
@@ -114,6 +115,7 @@ Colima profile provides a rollback path until the Docker Desktop stack is valida
 | Service | URL | Purpose |
 | --- | --- | --- |
 | Frontend workspace | <http://localhost:4173> | Guest ordering, customer accounts, and staff sign-in SPA |
+| Project talk | <http://localhost:4177> | Seven-slide presentation and bundled demo video |
 | Supabase Studio | <http://localhost:54323> | Local table editor, SQL editor, and Auth administration |
 | Swagger UI | <http://localhost:8080/swagger-ui.html> | Interactive documentation for the Spring application API |
 | OpenAPI JSON | <http://localhost:8080/v3/api-docs> | Runtime-generated OpenAPI 3.1 contract |
@@ -134,6 +136,7 @@ Check the stack without changing data:
 ```bash
 docker compose ps
 curl --fail http://localhost:4173/health
+curl --fail http://localhost:4177/health
 curl --fail http://localhost:54323/api/platform/profile
 curl --fail http://localhost:8080/swagger-ui.html
 curl --fail http://localhost:8080/v3/api-docs

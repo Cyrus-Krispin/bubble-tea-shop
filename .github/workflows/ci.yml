@@ -20,6 +20,7 @@ jobs:
     outputs:
       backend: ${{ steps.classify.outputs.backend }}
       frontend: ${{ steps.classify.outputs.frontend }}
+      presentation: ${{ steps.classify.outputs.presentation }}
       infrastructure: ${{ steps.classify.outputs.infrastructure }}
       release: ${{ steps.classify.outputs.release }}
     steps:
@@ -101,6 +102,32 @@ jobs:
         working-directory: frontend
         run: pnpm build-storybook
 
+  presentation:
+    name: Presentation verification
+    needs: changes
+    if: needs.changes.outputs.presentation == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.19.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.16.0
+          cache: pnpm
+          cache-dependency-path: presentation/pnpm-lock.yaml
+      - name: Install dependencies
+        working-directory: presentation
+        run: pnpm install --frozen-lockfile
+      - name: Build deck
+        working-directory: presentation
+        run: pnpm build
+
   infrastructure:
     name: Infrastructure verification
     needs: changes
@@ -124,12 +151,13 @@ jobs:
 
   release-candidate:
     name: Container and browser release gate
-    needs: [changes, backend, frontend, infrastructure]
+    needs: [changes, backend, frontend, presentation, infrastructure]
     if: >-
       ${{ !cancelled()
           && needs.changes.outputs.release == 'true'
           && (needs.backend.result == 'success' || needs.backend.result == 'skipped')
           && (needs.frontend.result == 'success' || needs.frontend.result == 'skipped')
+          && (needs.presentation.result == 'success' || needs.presentation.result == 'skipped')
           && (needs.infrastructure.result == 'success' || needs.infrastructure.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -158,6 +186,10 @@ jobs:
           node infra/supabase/generate-local-auth-keys.mjs >> .env
       - name: Build and start release stack
         run: docker compose up --detach --build --wait
+      - name: Check presentation and bundled video
+        run: |
+          curl --fail --silent --show-error http://localhost:4177/health
+          curl --fail --silent --show-error --head http://localhost:4177/bubble-tea-shop-demo-schema.mp4
       - name: Run desktop and mobile release browser gate
         working-directory: frontend
         run: pnpm e2e
