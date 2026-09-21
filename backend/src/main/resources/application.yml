@@ -17,6 +17,12 @@ spring:
           time_zone: UTC
 
 app:
+  payments:
+    public-origin: ${PAYMENT_PUBLIC_ORIGIN:}
+    stripe:
+      enabled: ${STRIPE_ENABLED:false}
+      secret-key: ${STRIPE_SECRET_KEY:}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
   bootstrap:
     owner:
       enabled: ${OWNER_BOOTSTRAP_ENABLED:false}

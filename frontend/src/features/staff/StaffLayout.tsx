@@ -1,4 +1,3 @@
-import { StaffDraftProvider } from "./StaffDraftProvider";
 import { useEffect, useState } from "react";
 import { ClipboardList, LayoutDashboard, LogOut, Menu, PackageSearch, ScrollText, ShoppingBag, Users } from "lucide-react";
 import { Link, Navigate, NavLink, Outlet, useLocation } from "react-router";
@@ -49,7 +48,6 @@ export function StaffLayout() {
   const location = useLocation();
   const { isLoading: isSessionLoading, session } = useAuth();
   const [contextState, setContextState] = useState<ContextState>({ status: "idle" });
-  const [draftAccountId, setDraftAccountId] = useState<string>();
   const [requestVersion, setRequestVersion] = useState(0);
   const [signOutFailed, setSignOutFailed] = useState(false);
   const accessToken = session?.accessToken ?? null;
@@ -60,7 +58,6 @@ export function StaffLayout() {
     getStaffContext(accessToken, controller.signal)
       .then((context) => {
         if (!controller.signal.aborted) {
-          setDraftAccountId(context.accountId);
           setContextState({ status: "ready", accessToken, context });
         }
       })
@@ -97,7 +94,7 @@ export function StaffLayout() {
     && visibleState.error.status === 403;
 
   return (
-    <StaffDraftProvider key={draftAccountId ?? "unresolved"}><div className="staff-shell bg-background text-foreground">
+    <div className="staff-shell bg-background text-foreground">
       <a className="skip-link" href="#staff-workspace">Skip to workspace</a>
       <aside className="staff-header bg-sidebar text-sidebar-foreground" aria-label="Staff workspace navigation">
         <Link className="staff-brand" to="/staff" aria-label="Bubble Tea Shop staff home">
@@ -168,6 +165,6 @@ export function StaffLayout() {
       {visibleState.status === "ready" ? (
         <Outlet context={{ accessToken: session.accessToken, staffContext: visibleState.context, refreshAccess: () => setRequestVersion((n) => n + 1) } satisfies StaffOutletContext} />
       ) : null}
-    </div></StaffDraftProvider>
+    </div>
   );
 }

@@ -30,7 +30,7 @@ public class CustomerReorderSuggestionService {
         this.namedJdbc = namedJdbc;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
     public Optional<CustomerReorderSuggestion> latest(UUID authSubject, String locationSlug) {
         UUID accountId = accountId(authSubject);
         Optional<OrderHeader> latest = jdbc.query("""
@@ -140,6 +140,7 @@ public class CustomerReorderSuggestionService {
                AND offering.organization_id = variant.organization_id
                AND offering.location_id = ?
                AND offering.available
+               AND variant_currency_ready(variant.id, offering.currency_code)
               JOIN recipe_version recipe_version
                 ON recipe_version.id = offering.recipe_version_id
                AND recipe_version.organization_id = offering.organization_id
@@ -160,14 +161,20 @@ public class CustomerReorderSuggestionService {
             SELECT item.id AS item_id, option_group.id AS group_id,
                    option_group.name AS group_name, choice.id AS choice_id,
                    choice.name AS choice_name, variant_choice.id AS variant_choice_id,
-                   variant_choice.price_delta_minor
+                   CASE WHEN location.currency_code = 'SGD' THEN variant_choice.price_delta_minor
+                        ELSE currency_price.price_delta_minor END AS price_delta_minor
               FROM order_item item
+              JOIN customer_order orders ON orders.id = item.customer_order_id
+              JOIN location ON location.id = orders.location_id
               JOIN order_item_option selected ON selected.order_item_id = item.id
               JOIN menu_variant_option_choice variant_choice
                 ON variant_choice.menu_variant_id = item.menu_variant_id
                AND variant_choice.option_choice_id = selected.option_choice_id
                AND variant_choice.organization_id = item.organization_id
                AND variant_choice.enabled
+              LEFT JOIN menu_variant_currency_price currency_price
+                ON currency_price.menu_variant_option_choice_id = variant_choice.id
+               AND currency_price.currency_code = location.currency_code
               JOIN option_choice choice
                 ON choice.id = variant_choice.option_choice_id
                AND choice.organization_id = variant_choice.organization_id
@@ -180,12 +187,15 @@ public class CustomerReorderSuggestionService {
              ORDER BY item.line_number, option_group.display_order,
                       choice.display_order, choice.id
             """, rs -> {
+                Long price = rs.getObject("price_delta_minor", Long.class);
+                // A missing price removes the selected choice; the complete-count check rejects the suggestion.
+                if (price == null) return;
                 result.computeIfAbsent(rs.getObject("item_id", UUID.class),
                     ignored -> new ArrayList<>()).add(new CurrentChoice(
                     rs.getObject("group_id", UUID.class), rs.getString("group_name"),
                     rs.getObject("choice_id", UUID.class), rs.getString("choice_name"),
                     rs.getObject("variant_choice_id", UUID.class),
-                    rs.getLong("price_delta_minor")));
+                    price));
             }, orderId);
         return result;
     }
@@ -279,8 +289,9 @@ public class CustomerReorderSuggestionService {
 
         Map<UUID, BigDecimal> available = new LinkedHashMap<>();
         namedJdbc.query("""
-            SELECT ingredient_id, quantity
-              FROM inventory_balance
+            SELECT b.ingredient_id, b.quantity - COALESCE((SELECT SUM(r.quantity) FROM inventory_reservation r
+              WHERE r.location_id = b.location_id AND r.ingredient_id = b.ingredient_id AND r.active), 0) AS quantity
+              FROM inventory_balance b
              WHERE location_id = :locationId AND ingredient_id IN (:ingredientIds)
             """, new MapSqlParameterSource()
                 .addValue("locationId", locationId)

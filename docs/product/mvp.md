@@ -73,3 +73,11 @@ record walk-in orders, inspect observed ingredient consumption, projected shorta
 Owners may create shops in SGD, MYR and CNY. Configure offerings and currency-specific add-on prices
 through the staff catalog, then record opening stock through inventory. Currency is permanent for a
 shop and there is no exchange-rate conversion. See [currency specification](../specs/location-currency-pricing.md).
+
+## Completion scope: online card payments
+
+The original deferred payment scope is superseded by the requested product completion: customers
+can choose Stripe-hosted card payment when merchant configuration is enabled. Stock is reserved,
+provider evidence confirms payment, and staff can complete or cancel/refund unfulfilled card orders.
+Tax calculation and unrelated promotions remain outside this increment. See the
+[card checkout specification](../specs/stripe-card-checkout.md).
