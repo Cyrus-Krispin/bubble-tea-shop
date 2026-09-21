@@ -128,10 +128,11 @@ export async function signOut(): Promise<void> {
 }
 
 function summarizeSession(session: Session | null): AuthSession | null {
+  const userId = session?.user.id;
   const email = session?.user.email;
   const expiresAt = session?.expires_at;
-  return email === undefined || session === null || expiresAt === undefined || !Number.isFinite(expiresAt)
+  return !userId || email === undefined || session === null || expiresAt === undefined || !Number.isFinite(expiresAt)
     || expiresAt * 1000 <= Date.now()
     ? null
-    : { accessToken: session.access_token, email, expiresAt };
+    : { accessToken: session.access_token, userId, email, expiresAt };
 }

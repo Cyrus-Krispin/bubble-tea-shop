@@ -48,11 +48,11 @@ Guests choose an active shop before browsing its database-owned menu and pricing
 
 ## Deferred
 
-- Extended customer profiles, favorites, discounts, and customer cancellation.
+- Extended customer profiles and customer cancellation.
 - Card payment providers, refunds, taxation, and promotions.
-- Consumption forecasting, projected low-stock alerts, and supplier ordering.
-- Cash-flow dashboards, purchase orders, and detailed cost-of-goods accounting.
-- Multiple active currencies, translations, and self-service location lifecycle management.
+- Supplier ordering (explicitly excluded; restocking uses the inventory UI).
+- Purchase orders and detailed cost-of-goods accounting.
+- Translations and location closure/reactivation workflows.
 - Inventory reservations, delivery lots, expiry dates, and FIFO consumption.
 
 ## Authorized product completion: operational cash flow
@@ -60,3 +60,24 @@ Guests choose an active shop before browsing its database-owned menu and pricing
 The 2026-09-15 expanded request adds a manager dashboard for today and the last 7/30 local calendar
 days, collected payment totals, and a paid-expense form with audited correction. Stock receipt costs
 are not automatically treated as payments. See [cash-flow rules](../specs/cash-flow-dashboard.md).
+
+## Authorized product completion: favorites and inventory planning
+
+Customers can save one favorite recipe per organization and receive a server-calculated 5% discount
+on one matching base drink per order. Current price quotes precede checkout; immutable receipts retain
+the confirmed savings. See [favorite pricing rules](../specs/favorite-drink-discount.md). Managers can
+record walk-in orders, inspect observed ingredient consumption, projected shortages, and reorder lists.
+
+## Authorized product completion: location currencies
+
+Owners may create shops in SGD, MYR and CNY. Configure offerings and currency-specific add-on prices
+through the staff catalog, then record opening stock through inventory. Currency is permanent for a
+shop and there is no exchange-rate conversion. See [currency specification](../specs/location-currency-pricing.md).
+
+## Completion scope: online card payments
+
+The original deferred payment scope is superseded by the requested product completion: customers
+can choose Stripe-hosted card payment when merchant configuration is enabled. Stock is reserved,
+provider evidence confirms payment, and staff can complete or cancel/refund unfulfilled card orders.
+Tax calculation and unrelated promotions remain outside this increment. See the
+[card checkout specification](../specs/stripe-card-checkout.md).

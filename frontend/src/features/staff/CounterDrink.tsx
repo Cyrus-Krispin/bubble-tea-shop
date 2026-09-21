@@ -14,10 +14,11 @@ export function CounterDrink({ product, onAdd, disabled }: { product: CatalogPro
   const [configuration, setConfiguration] = useState(() => createDefaultConfiguration(product));
   const [quantity, setQuantity] = useState(1);
   const variant = product.variants.find((item) => item.id === configuration.variantId)!;
-  function select(group: CatalogOptionGroup, choice: CatalogOptionChoice) {
+  function select(group: CatalogOptionGroup, choice: CatalogOptionChoice | null) {
+    if (choice === null && (group.minimumSelections !== 0 || group.maximumSelections !== 1)) return;
     setConfiguration((current) => ({ ...current, selections: current.selections.map((selection) => {
       if (selection.groupId !== group.id) return selection;
-      const ids = group.maximumSelections === 1 ? [choice.id] : selection.choiceIds.includes(choice.id)
+      const ids = choice === null ? [] : group.maximumSelections === 1 ? [choice.id] : selection.choiceIds.includes(choice.id)
         ? selection.choiceIds.filter((id) => id !== choice.id) : [...selection.choiceIds, choice.id].slice(0, group.maximumSelections);
       return { ...selection, choiceIds: ids, choiceNames: group.choices.filter((item) => ids.includes(item.id)).map((item) => item.name) };
     }) }));

@@ -116,3 +116,9 @@ it("replays a completed counter order through the authorized staff route", async
   expect(request.headers.get("authorization")).toBe("Bearer staff-token");
   expect(request.headers.get("idempotency-key")).toBe("retry-key");
 });
+
+it.each(["COMPLETED", "CANCELLED"])("recovers a %s customer order without demanding a new purchase", async (status) => {
+  const previous = { ...response, status, replayed: true };
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(previous), { status: 200 })));
+  await expect(placeGuestOrder({ items: [] }, "original-key")).resolves.toEqual(previous);
+});

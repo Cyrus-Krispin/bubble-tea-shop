@@ -19,6 +19,7 @@ const detail = {
   status: "COMPLETED" as const,
   paymentMethod: "CASH",
   currencyCode: "SGD",
+  cardCheckoutId: null,
   subtotalMinor: 720,
   totalMinor: 720,
   createdAt: "2026-08-22T09:30:00Z",
@@ -45,7 +46,7 @@ const detail = {
   }],
 };
 
-function renderPage(session: { accessToken: string; expiresAt: number; email: string } | null) {
+function renderPage(session: { userId: string; accessToken: string; expiresAt: number; email: string } | null) {
   return render(
     <AuthContext.Provider value={{ isLoading: false, session }}>
       <MemoryRouter initialEntries={[`/account/orders/${orderId}`]}>
@@ -65,7 +66,7 @@ describe("CustomerOrderDetailPage", () => {
 
   it("renders an immutable, accessible customer receipt", async () => {
     const { container } = renderPage({
-      accessToken: "customer-token", expiresAt: 4102444800,
+      userId: "test-user", accessToken: "customer-token", expiresAt: 4102444800,
       email: "customer@example.test",
     });
 

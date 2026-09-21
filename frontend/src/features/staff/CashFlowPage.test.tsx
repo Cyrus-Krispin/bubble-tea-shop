@@ -2,9 +2,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router";
 import { beforeEach, expect, it, vi } from "vitest";
 import CashFlowPage from "./CashFlowPage";
-import { getCashFlow, recordExpense } from "./cashFlowClient";
+import { CashFlowError, getCashFlow, recordExpense } from "./cashFlowClient";
 vi.mock("./cashFlowClient", async (original) => ({ ...await original<typeof import("./cashFlowClient")>(), getCashFlow: vi.fn(), recordExpense: vi.fn() }));
 beforeEach(() => {
+  vi.clearAllMocks();
   vi.mocked(getCashFlow).mockResolvedValue({ days: 7, currencyCode: "SGD", timezone: "Asia/Singapore", startDate: "2026-09-09", asOf: "2026-09-15T00:00:00Z",
     totals: [{ currencyCode: "SGD", incomeMinor: 2000, outflowMinor: 500, netMinor: 1500 }], daily: [], expenses: [], totalExpenses: 0, totalPages: 0, page: 0 });
 });
@@ -31,4 +32,20 @@ it("freezes an uncertain expense and retries with the same key", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Retry same expense" }));
   await vi.waitFor(() => expect(recordExpense).toHaveBeenCalledTimes(2));
   expect(vi.mocked(recordExpense).mock.calls[0]).toEqual(vi.mocked(recordExpense).mock.calls[1]);
+});
+
+it("retains the recovery key when an uncertain expense retry is forbidden", async () => {
+  vi.mocked(recordExpense).mockRejectedValueOnce(new Error("lost response")).mockRejectedValueOnce(new CashFlowError(403));
+  renderPage(); await screen.findByText("$20.00");
+  fireEvent.change(screen.getByLabelText("Expense description"), { target: { value: "Tea paid" } });
+  fireEvent.change(screen.getByLabelText("Amount paid (SGD)"), { target: { value: "12.34" } });
+  fireEvent.click(screen.getByRole("button", { name: "Record expense" }));
+  await screen.findByText(/The outcome is unknown/);
+  fireEvent.click(screen.getByRole("button", { name: "Retry same expense" }));
+  await screen.findByText(/The outcome is unknown/);
+  expect(screen.getByLabelText("Expense description")).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Retry same expense" }));
+  await vi.waitFor(() => expect(recordExpense).toHaveBeenCalledTimes(3));
+  const calls = vi.mocked(recordExpense).mock.calls;
+  expect(calls[0]).toEqual(calls[1]); expect(calls[0]).toEqual(calls[2]);
 });

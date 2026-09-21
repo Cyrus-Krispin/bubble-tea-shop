@@ -24,6 +24,7 @@ type ContextState =
 export type StaffOutletContext = {
   accessToken: string;
   staffContext: StaffContext;
+  refreshAccess?: () => void;
 };
 
 const navigation = [
@@ -107,7 +108,7 @@ export function StaffLayout() {
           ))}
           {visibleState.status === "ready"
             && visibleState.context.memberships.some((membership) => membership.role === "OWNER")
-            ? <NavLink to="/staff/managers"><Users aria-hidden="true" className="size-4" />Team</NavLink>
+            ? <><NavLink to="/staff/locations"><ShoppingBag aria-hidden="true" className="size-4" />Shops</NavLink><NavLink to="/staff/managers"><Users aria-hidden="true" className="size-4" />Team</NavLink></>
             : null}
         </nav>
         <Sheet>
@@ -122,7 +123,7 @@ export function StaffLayout() {
                 <SheetClose asChild key={to}><NavLink className={cn(mobileNavigationClassName, isCurrentPath(location.pathname, to, end) && mobileNavigationActiveClassName)} end={end} to={to}><Icon aria-hidden="true" className="size-4" />{label}</NavLink></SheetClose>
               ))}
               {visibleState.status === "ready" && visibleState.context.memberships.some((membership) => membership.role === "OWNER") ? (
-                <SheetClose asChild><NavLink className={cn(mobileNavigationClassName, isCurrentPath(location.pathname, "/staff/managers") && mobileNavigationActiveClassName)} to="/staff/managers"><Users aria-hidden="true" className="size-4" />Team</NavLink></SheetClose>
+                <><SheetClose asChild><NavLink className={cn(mobileNavigationClassName, isCurrentPath(location.pathname, "/staff/locations") && mobileNavigationActiveClassName)} to="/staff/locations"><ShoppingBag aria-hidden="true" className="size-4" />Shops</NavLink></SheetClose><SheetClose asChild><NavLink className={cn(mobileNavigationClassName, isCurrentPath(location.pathname, "/staff/managers") && mobileNavigationActiveClassName)} to="/staff/managers"><Users aria-hidden="true" className="size-4" />Team</NavLink></SheetClose></>
               ) : null}
             </nav>
             <SheetFooter>
@@ -149,11 +150,11 @@ export function StaffLayout() {
       {visibleState.status === "error" ? (
         <main aria-label="Staff workspace" className="staff-status" id="staff-workspace">
           <ProblemState
-            actionLabel={accessError ? "Sign out" : "Try again"}
+            actionLabel="Try again"
             message={accessError
               ? "Your identity is signed in, but it does not have an active staff membership."
               : "We couldn’t load your current permissions. Try again before using staff tools."}
-            onRetry={accessError ? handleSignOut : () => {
+            onRetry={() => {
               setContextState({ status: "loading" });
               setRequestVersion((value) => value + 1);
             }}
@@ -162,7 +163,7 @@ export function StaffLayout() {
         </main>
       ) : null}
       {visibleState.status === "ready" ? (
-        <Outlet context={{ accessToken: session.accessToken, staffContext: visibleState.context } satisfies StaffOutletContext} />
+        <Outlet context={{ accessToken: session.accessToken, staffContext: visibleState.context, refreshAccess: () => setRequestVersion((n) => n + 1) } satisfies StaffOutletContext} />
       ) : null}
     </div>
   );
