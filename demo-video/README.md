@@ -27,5 +27,5 @@ demo-video/.venv/bin/python demo-video/render.py
 The final file is `demo-video/output/bubble-tea-shop-demo.mp4`. Screenshots, the scene manifest,
 the virtual environment, and the rendered MP4 stay local and are ignored by Git. The video has no
 music or narration so the presenter can speak over it. The local test order remains in the local
-Docker database. The screenshots are real captured app states; the floating frame, cursor movement,
-zoom, and transitions are added during rendering.
+Docker database. The screenshots are real captured app states; the floating frame and cursor movement
+are added during rendering. The browser frame stays fixed, with clean cuts between app states.

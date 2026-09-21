@@ -55,7 +55,7 @@ def paint_background() -> Image.Image:
 BACKGROUND = paint_background()
 
 
-def browser_tile(screenshot: Image.Image, focus: dict | None = None, zoom: float = 1.0) -> Image.Image:
+def browser_tile(screenshot: Image.Image) -> Image.Image:
     window = Image.new("RGBA", (TILE_WIDTH, TILE_HEIGHT), (0, 0, 0, 0))
     draw = ImageDraw.Draw(window)
     draw.rectangle((0, 0, TILE_WIDTH, BAR_HEIGHT), fill=(255, 253, 247, 255))
@@ -64,17 +64,7 @@ def browser_tile(screenshot: Image.Image, focus: dict | None = None, zoom: float
     draw.text((121, 17), "Bubble Tea Shop", font=CHROME_FONT, fill=INK)
     draw.rounded_rectangle((TILE_WIDTH - 212, 13, TILE_WIDTH - 25, 45), radius=16, fill=(244, 243, 239))
     draw.text((TILE_WIDTH - 190, 20), "LOCAL DEMO", font=SMALL_FONT, fill=(92, 97, 110))
-    shot = screenshot
-    if focus and zoom > 1:
-        enlarged_width = round(TILE_WIDTH * zoom)
-        enlarged_height = round(CONTENT_HEIGHT * zoom)
-        enlarged = shot.resize((enlarged_width, enlarged_height), Image.Resampling.LANCZOS)
-        point_x = focus["x"] / MANIFEST["viewport"]["width"] * TILE_WIDTH
-        point_y = focus["y"] / MANIFEST["viewport"]["height"] * CONTENT_HEIGHT
-        crop_x = min(enlarged_width - TILE_WIDTH, max(0, round(point_x * (zoom - 1))))
-        crop_y = min(enlarged_height - CONTENT_HEIGHT, max(0, round(point_y * (zoom - 1))))
-        shot = enlarged.crop((crop_x, crop_y, crop_x + TILE_WIDTH, crop_y + CONTENT_HEIGHT))
-    window.paste(shot, (0, BAR_HEIGHT))
+    window.paste(screenshot, (0, BAR_HEIGHT))
     draw = ImageDraw.Draw(window)
     draw.line((0, BAR_HEIGHT, TILE_WIDTH, BAR_HEIGHT), fill=(207, 204, 195), width=2)
     mask = Image.new("L", (TILE_WIDTH, TILE_HEIGHT), 0)
@@ -118,17 +108,9 @@ def render_frame(index: int, scene_index: int, local_time: float) -> Image.Image
     scene = SCENES[scene_index]
     duration = scene["duration"]
     frame = BACKGROUND.copy().convert("RGBA")
-    tile_y = TILE_Y + round(5 * math.sin(index / 26))
+    tile_y = TILE_Y
     frame.alpha_composite(SHADOW, (TILE_X - 50, tile_y - 42))
-    tile = TILES[scene_index]
-    if scene.get("pointer"):
-        phase = local_time / duration
-        zoom_in = ease((phase - 0.28) / 0.25)
-        zoom_out = 1 - ease((phase - 0.73) / 0.20)
-        amount = min(zoom_in, zoom_out) * 0.75
-        if amount > 0:
-            tile = browser_tile(SCREENSHOTS[scene_index], scene["pointer"], 1 + 0.025 * amount)
-    frame.alpha_composite(tile, (TILE_X, tile_y))
+    frame.alpha_composite(TILES[scene_index], (TILE_X, tile_y))
 
     draw = ImageDraw.Draw(frame)
     draw.rounded_rectangle((TILE_X, 31, TILE_X + 62, 78), radius=11, fill=PINK, outline=INK, width=2)
