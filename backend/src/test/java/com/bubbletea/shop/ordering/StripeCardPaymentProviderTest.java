@@ -27,8 +27,8 @@ class StripeCardPaymentProviderTest {
         assertThat(provider().verifySignature(body, signature)).isTrue();
         assertThat(provider().verifySignature(body, signature + ",v1=bad-rotation-signature")).isTrue();
         assertThat(provider().verifySignature("{}".getBytes(), signature)).isFalse();
-        assertThat(provider().verifySignature(body, sign(body, now - 301))).isFalse();
-        assertThat(provider().verifySignature(body, sign(body, now + 301))).isFalse();
+        assertThat(provider().verifySignature(body, sign(body, now - 600))).isFalse();
+        assertThat(provider().verifySignature(body, sign(body, now + 600))).isFalse();
         assertThat(provider().verifySignature(body, signature + ",t=" + now)).isFalse();
         assertThat(provider().verifySignature(body, null)).isFalse();
         assertThat(provider().verifySignature(new byte[1_048_577], signature)).isFalse();

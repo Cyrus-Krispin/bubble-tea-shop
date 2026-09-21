@@ -147,6 +147,52 @@ class CardCheckoutIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_movement WHERE customer_order_id = ?", Integer.class, checkout.order().id())).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_reservation WHERE customer_order_id = ? AND active", Integer.class, checkout.order().id())).isZero();
     }
+    @Test void guestCancellationCannotRefundAnUnobservedPayment() {
+        var checkout = create(UUID.randomUUID()); pay(checkout.id());
+        var result = cards.cancelGuest(checkout.id());
+        assertThat(result.state()).isEqualTo("PAID");
+        assertThat(result.cancellationRequested()).isFalse();
+        assertThat(result.order().status()).isEqualTo("PENDING");
+        verify(provider, never()).refund(anyString(), any());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_reservation WHERE customer_order_id = ? AND active", Integer.class, checkout.order().id())).isPositive();
+        assertThat(cards.staffRefresh(subject, ORG, location, checkout.order().id(), true).state()).isEqualTo("REFUNDED");
+    }
+    @Test void paymentWinningGuestExpiryRaceStillRequiresStaffToRefund() {
+        var checkout = create(UUID.randomUUID());
+        doAnswer(call -> {
+            pay(checkout.id());
+            throw new CardPaymentException("CARD_PROVIDER_REJECTED", 503);
+        }).when(provider).expire(sessionId(checkout.id()));
+        var result = cards.cancelGuest(checkout.id());
+        assertThat(result.state()).isEqualTo("PAID");
+        assertThat(result.cancellationRequested()).isFalse();
+        verify(provider, never()).refund(anyString(), any());
+        assertThat(completion.complete(checkout.order().id(), actor).alreadyCompleted()).isFalse();
+    }
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"pending,REFUND_PENDING", "requires_action,REVIEW_REQUIRED", "failed,REVIEW_REQUIRED", "canceled,REVIEW_REQUIRED"})
+    void dashboardRefundProblemsBlockFulfillmentUntilAConfirmedRefund(String refundStatus, String expectedState) {
+        var checkout = create(UUID.randomUUID()); var payment = pay(checkout.id()); cards.refresh(checkout.id());
+        Instant refundDate = Instant.now().minusSeconds(1).truncatedTo(java.time.temporal.ChronoUnit.SECONDS);
+        var refund = new CardPaymentProvider.Refund("re_dashboard_" + checkout.id(), payment.id(), payment.amountMinor(), payment.currency(), refundStatus, refundDate);
+        payments.put(payment.id(), new CardPaymentProvider.Payment(payment.id(), payment.amountMinor(), payment.currency(), true, payment.paidAt(), List.of(refund)));
+        var unresolved = cards.refresh(checkout.id());
+        assertThat(unresolved.state()).isEqualTo(expectedState);
+        assertThat(unresolved.cancellationRequested()).isFalse();
+        assertThat(unresolved.refundedMinor()).isZero();
+        assertThatThrownBy(() -> completion.complete(checkout.order().id(), actor)).isInstanceOf(InvalidOrderStateException.class);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_reservation WHERE customer_order_id = ? AND active", Integer.class, checkout.order().id())).isPositive();
+        verify(provider, never()).refund(anyString(), any());
+
+        boolean failed = List.of("failed", "canceled").contains(refundStatus);
+        var succeeded = new CardPaymentProvider.Refund(failed ? refund.id() + "_success" : refund.id(), payment.id(), payment.amountMinor(), payment.currency(), "succeeded", refundDate);
+        payments.put(payment.id(), new CardPaymentProvider.Payment(payment.id(), payment.amountMinor(), payment.currency(), true, payment.paidAt(), failed ? List.of(refund, succeeded) : List.of(succeeded)));
+        var resolved = cards.refresh(checkout.id());
+        assertThat(resolved.state()).isEqualTo("REFUNDED");
+        assertThat(resolved.refundedMinor()).isEqualTo(payment.amountMinor());
+        assertThat(resolved.order().status()).isEqualTo("CANCELLED");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM inventory_reservation WHERE customer_order_id = ? AND active", Integer.class, checkout.order().id())).isZero();
+    }
     @Test void rejectsProviderAmountMismatchesWithoutMarkingPaidOrReleasingStock() {
         var checkout = create(UUID.randomUUID()); var payment = pay(checkout.id());
         payments.put(payment.id(), new CardPaymentProvider.Payment(payment.id(), payment.amountMinor() + 1, payment.currency(), true, payment.paidAt(), List.of()));

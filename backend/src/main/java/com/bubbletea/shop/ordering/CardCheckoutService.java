@@ -158,7 +158,8 @@ public class CardCheckoutService {
                 validate(claim, session);
             }
             CardPaymentProvider.Payment payment = session.paid() ? provider.payment(session.paymentIntentId()) : null;
-            if (payment != null && (claim.cancelRequested() && claim.orderStatus().equals("PENDING") || claim.orderStatus().equals("CANCELLED"))) {
+            if (payment != null && claim.cancelActor() != null
+                && (claim.cancelRequested() && claim.orderStatus().equals("PENDING") || claim.orderStatus().equals("CANCELLED"))) {
                 validate(claim, session, payment);
                 long returned = payment.refunds().stream().filter(r -> r.status().equals("succeeded")).mapToLong(CardPaymentProvider.Refund::amountMinor).sum();
                 if (returned < claim.amount() && payment.refunds().stream().allMatch(r -> r.status().equals("succeeded"))) provider.refund(payment.id(), id);
@@ -194,6 +195,11 @@ public class CardCheckoutService {
             """, session.id(), session.paymentIntentId(), session.url(), row.id());
         if (session.paid()) {
             validate(row, session, payment);
+            boolean staffCancellation = row.cancelRequested() && row.cancelActor() != null;
+            if (row.cancelRequested() && row.cancelActor() == null && row.orderStatus().equals("PENDING")) {
+                // Payment can win the guest expiry race. Only staff may turn that payment into a refund.
+                jdbc.update("UPDATE card_checkout SET cancel_requested = false WHERE id = ?", row.id());
+            }
             int changed = jdbc.update("""
                 UPDATE payment SET status = CASE WHEN status = 'REFUNDED' THEN status ELSE 'PAID' END,
                     paid_at = COALESCE(paid_at, ?), updated_at = now()
@@ -223,9 +229,10 @@ public class CardCheckoutService {
                 state = "REFUNDED";
                 jdbc.update("UPDATE payment SET status = 'REFUNDED', updated_at = now() WHERE customer_order_id = ?", row.orderId());
                 if (row.orderStatus().equals("PENDING")) cancelOrder(row);
-            } else if ((row.cancelRequested() || row.orderStatus().equals("CANCELLED"))
-                && payment.refunds().stream().anyMatch(r -> List.of("failed", "canceled").contains(r.status()))) state = "REVIEW_REQUIRED";
-            else if (row.cancelRequested() || row.orderStatus().equals("CANCELLED")) state = "REFUND_PENDING";
+            } else if (payment.refunds().stream().anyMatch(r -> !List.of("succeeded", "pending").contains(r.status()))) state = "REVIEW_REQUIRED";
+            else if (row.orderStatus().equals("CANCELLED") && row.cancelActor() == null) state = "REVIEW_REQUIRED";
+            else if (staffCancellation || row.orderStatus().equals("CANCELLED")
+                || payment.refunds().stream().anyMatch(r -> r.status().equals("pending"))) state = "REFUND_PENDING";
             else if (refunded > 0 && row.orderStatus().equals("PENDING")) state = "REVIEW_REQUIRED";
             else state = "PAID";
             jdbc.update("UPDATE card_checkout SET state = ? WHERE id = ?", state, row.id());

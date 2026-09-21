@@ -198,5 +198,9 @@
   reservation release follow verified provider evidence, never return parameters or elapsed time.
 - Provider session/intent, reference, amount, currency and expiry must match the immutable order.
   Signed webhook payloads only queue work. Duplicate refunds have matching identity and facts.
+- Guest cancellation authorizes provider expiry only. A discovered payment requires a recorded staff
+  cancellation actor before the application can request its refund.
+- Unresolved provider refunds block pending-order fulfillment regardless of whether cancellation
+  originated in the application or provider dashboard. Reservations remain until verified full refund.
 - Completing a refunded historical order replays its existing completion without another sale.
   A pending refunded order is cancelled; a completed refunded order never restores ingredients.

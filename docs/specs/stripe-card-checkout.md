@@ -20,8 +20,12 @@ configured. Supplier integration remains excluded.
   merely because a browser timer elapsed. Provider outages keep reservations and expose recovery.
 - Customers can cancel an unpaid checkout. Staff may cancel/refund an unfulfilled paid card order;
   release stock after the refund is confirmed. Completed drinks are never restocked by a refund.
+  If payment wins guest cancellation, clear the guest expiry request and retain the paid order;
+  only a recorded staff cancellation actor authorizes the application to request a paid refund.
   Immutable refund records contribute to cash-flow outflow on their actual refund date; original
   collection remains in income. A failed/pending refund stays visible for follow-up.
+  This includes refunds initiated from the provider dashboard: pending refunds block fulfillment,
+  and failed, canceled, or action-required refunds require review until successfully resolved.
 - Stable provider idempotency keys, short HTTP timeouts, persisted reconciliation state and periodic
   reconciliation recover interrupted requests and duplicate/out-of-order events. No network call
   holds a database transaction open. Unexpected provider data fails closed and needs investigation.

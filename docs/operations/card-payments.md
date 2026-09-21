@@ -33,10 +33,14 @@ one-hour provider expiry gives customers time to pay. Completion requires verifi
 uses the reservation once. Unpaid cancellation first expires the provider session. Staff can
 cancel/refund an unfulfilled paid order from the order queue. Confirmed refunds are immutable
 cash-flow outflows on their provider dates; original paid income and completed inventory remain.
+If payment wins a guest cancellation race, the order remains paid and the guest cancellation is
+cleared. Ask scoped staff to cancel/refund it; a guest receipt never authorizes a paid refund.
 
-Use **Check online payment** to reconcile an order. `REFUND_PENDING` retains stock; a failed or
-cancelled refund enters `REVIEW_REQUIRED`. Investigate it in Stripe before taking any further
-financial action. The app does not automatically issue replacement refunds with new retry keys.
+Use **Check online payment** to reconcile an order. `REFUND_PENDING` retains stock; a failed,
+cancelled, or action-required refund enters `REVIEW_REQUIRED`. These safeguards also apply to
+refunds initiated from the Stripe dashboard, and unresolved refunds block pending-order fulfillment.
+Investigate them in Stripe before taking any further financial action. The app does not automatically
+issue replacement refunds with new retry keys.
 After resolving a failed refund in Stripe, reconciliation imports the confirmed successful refund.
 
 Unknown creation responses retain the original request key. If too little provider expiry time
