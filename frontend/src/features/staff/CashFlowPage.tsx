@@ -91,7 +91,7 @@ function Report({ token, scope, onDraftChange }: Access & { onDraftChange: (valu
       {data.totals.length > 1 ? <SelectField id="cash-flow-currency" label="Report currency" value={selected?.currencyCode ?? ""}
         options={data.totals.map((total) => ({ value: total.currencyCode, label: total.currencyCode }))} onValueChange={setCurrency} /> : null}
       {selected ? <><div className="grid gap-4 md:grid-cols-3">{[
-        ["Money collected", selected.incomeMinor], ["Recorded expenses", selected.outflowMinor], ["Net cash flow", selected.netMinor],
+        ["Money collected", selected.incomeMinor], ["Expenses and refunds", selected.outflowMinor], ["Net cash flow", selected.netMinor],
       ].map(([label, amount]) => <Card key={label}><CardHeader><CardTitle><h2>{label}</h2></CardTitle></CardHeader><CardContent><p className="text-2xl font-semibold">{formatMoney(Number(amount), selected.currencyCode)}</p></CardContent></Card>)}</div>
       <Card><CardHeader><CardTitle><h2>Daily cash flow · {selected.currencyCode}</h2></CardTitle></CardHeader><CardContent>
         <Table><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Collected</TableHead><TableHead>Spent</TableHead></TableRow></TableHeader>
@@ -122,7 +122,7 @@ export default function CashFlowPage() {
     if (scope && location !== scope.id) setLocation(scope.id);
   }, [scope, location, setLocation]);
   return <main id="staff-workspace" className="staff-main grid gap-5"><h1>Cash flow</h1>
-    <p className="text-muted-foreground">Collected payments minus recorded paid expenses. This is not profit; expenses must be entered to make outflow complete.</p>
+    <p className="text-muted-foreground">Collected payments minus recorded paid expenses and confirmed card refunds. This is not profit; expenses must be entered to make outflow complete.</p>
     {!scope ? <p>No active shops are assigned to your account.</p> : <><SelectField id="cash-flow-shop" label="Shop" disabled={scopeLocked} value={scope.id}
       options={scopes.map((shop) => ({ value: shop.id, label: shop.name }))} onValueChange={setLocation} />
       <Report key={scope.id} token={accessToken} scope={scope} onDraftChange={setScopeLocked} /></>}

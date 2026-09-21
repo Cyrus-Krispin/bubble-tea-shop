@@ -7,7 +7,8 @@ import type { CartDraft, CartItem, CartOrderLine } from "./cartReducer";
 
 export type CartContextValue = {
   checkoutState: CheckoutState;
-  checkout: (session: AuthSession | null, quote?: OrderQuote) => Promise<void>;
+  checkout: (session: AuthSession | null, quote?: OrderQuote, method?: "CASH" | "CARD") => Promise<void>;
+  finishCard: (id: string) => void;
   items: CartItem[];
   itemCount: number;
   previewTotalMinor: number;

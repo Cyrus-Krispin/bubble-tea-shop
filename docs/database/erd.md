@@ -141,3 +141,14 @@ erDiagram
     account ||--o{ inventory_movement_request : requests
     inventory_movement ||--o| inventory_movement_request : identifies
 ```
+
+## Card payment reservations (V20)
+
+```mermaid
+erDiagram
+    CUSTOMER_ORDER ||--o| CARD_CHECKOUT : pays_online
+    CUSTOMER_ORDER ||--o{ INVENTORY_RESERVATION : reserves
+    INGREDIENT ||--o{ INVENTORY_RESERVATION : held_for_order
+    LOCATION ||--o{ INVENTORY_RESERVATION : scopes
+    CUSTOMER_ORDER ||--o{ CARD_REFUND : refunded_payments
+```

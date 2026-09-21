@@ -289,8 +289,9 @@ public class CustomerReorderSuggestionService {
 
         Map<UUID, BigDecimal> available = new LinkedHashMap<>();
         namedJdbc.query("""
-            SELECT ingredient_id, quantity
-              FROM inventory_balance
+            SELECT b.ingredient_id, b.quantity - COALESCE((SELECT SUM(r.quantity) FROM inventory_reservation r
+              WHERE r.location_id = b.location_id AND r.ingredient_id = b.ingredient_id AND r.active), 0) AS quantity
+              FROM inventory_balance b
              WHERE location_id = :locationId AND ingredient_id IN (:ingredientIds)
             """, new MapSqlParameterSource()
                 .addValue("locationId", locationId)
