@@ -37,6 +37,9 @@ public class SupabaseAuthSecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/api/v1/guest/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/guest/orders").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/guest/locations/*/orders").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/guest/locations/*/card-checkouts",
+                    "/api/v1/guest/card-checkouts/*/refresh", "/api/v1/guest/card-checkouts/*/cancel",
+                    "/api/v1/payments/stripe/webhook").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll())
             .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))

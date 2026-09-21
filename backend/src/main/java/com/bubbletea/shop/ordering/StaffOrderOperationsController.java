@@ -107,7 +107,7 @@ public class StaffOrderOperationsController {
         }
     }
 
-    @RestControllerAdvice(assignableTypes = {StaffOrderOperationsController.class, CounterOrderController.class})
+    @RestControllerAdvice(assignableTypes = {StaffOrderOperationsController.class, CounterOrderController.class, CashFlowController.class, CardCheckoutController.class})
     static class OrderExceptionHandler {
         @ExceptionHandler({HandlerMethodValidationException.class,
             MethodArgumentTypeMismatchException.class,
