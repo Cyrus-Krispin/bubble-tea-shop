@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 const everyGate = Object.freeze({
   backend: true,
   frontend: true,
+  presentation: true,
   infrastructure: true,
   release: true,
 });
@@ -12,6 +13,7 @@ export function classifyChangedPaths(paths) {
   const gates = {
     backend: false,
     frontend: false,
+    presentation: false,
     infrastructure: false,
     release: false,
   };
@@ -30,6 +32,10 @@ export function classifyChangedPaths(paths) {
     }
     if (path.startsWith("frontend/") || path === "docs/api/openapi.json") {
       gates.frontend = true;
+      gates.release = true;
+    }
+    if (path.startsWith("presentation/")) {
+      gates.presentation = true;
       gates.release = true;
     }
     if (path.startsWith("infra/") || path === "compose.yaml" || path === ".env.example") {

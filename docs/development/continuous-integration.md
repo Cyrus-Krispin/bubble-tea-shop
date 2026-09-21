@@ -14,8 +14,9 @@ the pull request did not change its owned paths.
 | --- | --- | --- |
 | Backend verification | `backend/**` or the generated OpenAPI contract | Java 21 build, all unit and PostgreSQL Testcontainers integration tests, Flyway validation, and packaging through `./mvnw verify`. |
 | Frontend verification | `frontend/**` or the generated OpenAPI contract | Frozen dependency install, high/critical dependency audit, Vitest accessibility/component tests, generated OpenAPI drift check, TypeScript, ESLint, the Vite production build, and the static Storybook catalog. |
+| Presentation verification | `presentation/**` | Frozen dependency install and the Slidev production build. |
 | Infrastructure verification | `infra/**`, `compose.yaml`, or `.env.example` | Node tests for local Supabase Auth bootstrap and key generation plus Kong Auth throttling policy. |
-| Container and browser release gate | Any backend, frontend, infrastructure, Compose, environment-example, OpenAPI-contract, or Docker-build-context change | Build and boot the complete Compose stack, then run guest checkout in desktop and mobile Chromium with WCAG, responsive-layout, console/network, and performance-budget assertions. |
+| Container and browser release gate | Any backend, frontend, presentation, infrastructure, Compose, environment-example, OpenAPI-contract, or Docker-build-context change | Build and boot the complete Compose stack, check the presentation health endpoint and bundled video, then run guest checkout in desktop and mobile Chromium with WCAG, responsive-layout, console/network, and performance-budget assertions. |
 
 Changes to CI routing run every gate so that the routing behavior verifies itself. Documentation-only
 and other unrelated changes run the change detector but skip the expensive application gates.
@@ -41,10 +42,16 @@ pnpm build
 pnpm build-storybook
 pnpm exec playwright install chromium
 
+cd ../presentation
+pnpm install --frozen-lockfile
+pnpm build
+
 cd ..
 node --test infra/supabase/generate-local-auth-keys.test.mjs \
   infra/supabase/kong/kong.test.mjs
 docker compose up --detach --build --wait
+curl --fail http://localhost:4177/health
+curl --fail --head http://localhost:4177/bubble-tea-shop-demo-schema.mp4
 
 cd frontend
 pnpm e2e

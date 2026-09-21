@@ -1,0 +1,17 @@
+{
+  "name": "bubble-tea-talk",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "dev": "slidev --host 127.0.0.1",
+    "build": "slidev build",
+    "export": "slidev export"
+  },
+  "devDependencies": {
+    "@fontsource/dm-sans": "5.2.8",
+    "@fontsource/patrick-hand": "5.2.8",
+    "@slidev/cli": "53.0.0",
+    "@slidev/theme-default": "0.25.0"
+  }
+}

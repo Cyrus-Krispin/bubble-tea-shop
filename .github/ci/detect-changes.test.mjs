@@ -7,6 +7,7 @@ test("runs only frontend verification and the release gate for frontend changes"
   assert.deepEqual(classifyChangedPaths(["frontend/src/App.tsx"]), {
     backend: false,
     frontend: true,
+    presentation: false,
     infrastructure: false,
     release: true,
   });
@@ -16,6 +17,17 @@ test("runs only backend verification and the release gate for backend changes", 
   assert.deepEqual(classifyChangedPaths(["backend/src/main/java/Application.java"]), {
     backend: true,
     frontend: false,
+    presentation: false,
+    infrastructure: false,
+    release: true,
+  });
+});
+
+test("runs the deck build and release gate for presentation changes", () => {
+  assert.deepEqual(classifyChangedPaths(["presentation/slides.md"]), {
+    backend: false,
+    frontend: false,
+    presentation: true,
     infrastructure: false,
     release: true,
   });
@@ -25,6 +37,7 @@ test("runs infrastructure verification and the release gate for Compose changes"
   assert.deepEqual(classifyChangedPaths(["compose.yaml"]), {
     backend: false,
     frontend: false,
+    presentation: false,
     infrastructure: true,
     release: true,
   });
@@ -34,6 +47,7 @@ test("runs the release gate when the Docker build context changes", () => {
   assert.deepEqual(classifyChangedPaths([".dockerignore"]), {
     backend: false,
     frontend: false,
+    presentation: false,
     infrastructure: false,
     release: true,
   });
@@ -43,6 +57,7 @@ test("runs backend and frontend verification for the shared OpenAPI contract", (
   assert.deepEqual(classifyChangedPaths(["docs/api/openapi.json"]), {
     backend: true,
     frontend: true,
+    presentation: false,
     infrastructure: false,
     release: true,
   });
@@ -52,6 +67,7 @@ test("skips expensive verification for documentation-only changes", () => {
   assert.deepEqual(classifyChangedPaths(["README.md", "docs/product/mvp.md"]), {
     backend: false,
     frontend: false,
+    presentation: false,
     infrastructure: false,
     release: false,
   });
@@ -62,6 +78,7 @@ test("runs every gate when CI routing changes", () => {
     assert.deepEqual(classifyChangedPaths([path]), {
       backend: true,
       frontend: true,
+      presentation: true,
       infrastructure: true,
       release: true,
     });
@@ -75,6 +92,7 @@ test("combines categories across multiple changed files", () => {
   ]), {
     backend: true,
     frontend: false,
+    presentation: false,
     infrastructure: true,
     release: true,
   });

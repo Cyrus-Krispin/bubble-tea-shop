@@ -82,6 +82,8 @@ The first run pulls the pinned images and downloads build dependencies. After th
 healthy, open [localhost:4173](http://localhost:4173) to browse the shop.
 Open [localhost:3000](http://localhost:3000) for the provisioned system dashboard; Grafana uses
 anonymous, read-only access in this loopback-only development stack.
+Open [localhost:4177](http://localhost:4177) for the seven-slide project talk. Its demo video is
+bundled with the deck, so it plays without a separate video server.
 If another Docker runtime was previously installed, confirm that `docker context show` reports
 `desktop-linux` before starting the stack.
 
@@ -94,6 +96,8 @@ These URLs use the default ports from `.env.example`. Every published service bi
 | --- | --- | --- |
 | Customer and staff application | <http://localhost:4173> | Guest ordering, customer accounts, and staff operations |
 | Frontend health | <http://localhost:4173/health> | Nginx/frontend container readiness |
+| Project talk | <http://localhost:4177> | Slidev deck with the product demo video |
+| Project talk health | <http://localhost:4177/health> | Presentation container readiness |
 | Supabase Studio | <http://localhost:54323> | Local database, SQL, and Auth administration UI |
 | Swagger UI | <http://localhost:8080/swagger-ui.html> | Interactive Spring API documentation |
 | OpenAPI JSON | <http://localhost:8080/v3/api-docs> | Machine-readable runtime API contract |
@@ -157,6 +161,8 @@ pnpm test && pnpm typecheck && pnpm lint && pnpm build
 | --- | --- |
 | [`backend/`](backend/) | Spring modules, Flyway migrations, and integration tests |
 | [`frontend/`](frontend/) | React SPA, reusable UI primitives, Storybook, and browser tests |
+| [`presentation/`](presentation/) | Slidev talk, speaker notes, bundled video, and its static container |
+| [`demo-video/`](demo-video/) | Browser capture and video rendering source for the talk |
 | [`docs/`](docs/) | Product, architecture, API, database, delivery, and operations documentation |
 | [`infra/`](infra/) | Local Supabase configuration plus backup and restore tooling |
 | [`compose.yaml`](compose.yaml) | The complete local application stack |
