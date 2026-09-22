@@ -29,7 +29,14 @@ The final file is `demo-video/output/bubble-tea-shop-demo.mp4`. Screenshots, the
 the virtual environment, and the rendered MP4 stay local and are ignored by Git. The video has no
 music or narration so the presenter can speak over it. The local test order remains in the local
 Docker database. The screenshots are real captured app states; the floating frame and cursor movement
-are added during rendering. The browser frame stays fixed, with clean cuts between app states.
+are added during rendering. The browser frame stays fixed while the camera moves into the
+size selector, then follows the page scroll and cursor down through toppings and checkout.
+The Large and pearls actions each have a captured before and after state,
+so the selected control and resulting price change are visible. State changes use clean cuts.
 The Schema Visualizer scene pans through the real diagram to show how the database tables connect.
 The capture uses local Supabase Studio at `http://localhost:54323` by default; set
 `DEMO_STUDIO_URL` if your local port differs.
+
+To publish a new cut in the talk, copy the rendered MP4 and a poster frame into
+`presentation/public/`, then update the video paths in `presentation/slides.md` and the media
+check in `.github/workflows/ci.yml`. Use a new filename so a browser cannot reuse an older cut.
