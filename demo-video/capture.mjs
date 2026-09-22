@@ -66,7 +66,7 @@ try {
   const tiongLink = page.getByRole("link", { name: /Tiong Bahru/ });
   await tiongLink.waitFor();
   await capture("shop-picker", "CHOOSE A SHOP", "The menu follows the pickup location", 2.3, tiongLink, page, {
-    camera: { zoom: 1.1, x: 1060, y: 390, motion: "inout" },
+    camera: { zoom: 1.1, x: 1060, y: 390, motion: "in" },
   });
 
   await tiongLink.click();
@@ -74,7 +74,7 @@ try {
   const customize = page.getByRole("link", { name: /Customize / }).first();
   await customize.waitFor();
   await capture("location-menu", "BROWSE THE MENU", "Products and prices come from the app", 2.8, customize, page, {
-    camera: { zoom: 1.08, x: 340, y: 530, motion: "inout" },
+    camera: { zoom: 1.1, x: 500, y: 450, toX: 340, toY: 530, motion: "pan" },
   });
 
   await customize.click();
@@ -89,27 +89,53 @@ try {
   await large.check();
   if (!(await large.isChecked())) throw new Error("Large size was not selected in the captured UI.");
   await capture("large-selected", "LARGE, SELECTED", "The choice is visible and the price updates", 1.5, large, page, {
-    camera: { ...sizeCamera, motion: "out" },
+    camera: { ...sizeCamera, motion: "hold" },
     cursorAction: "hover",
   });
 
   const pearls = page.getByRole("checkbox", { name: /Pearls/ });
   if (await pearls.isChecked()) throw new Error("Pearls must start unselected for the demo action.");
-  await pearls.evaluate((element) => element.scrollIntoView({ block: "center" }));
-  const toppingsCamera = { zoom: 1.16, x: 950, y: 390 };
+  const scrollStart = await page.evaluate(() => window.scrollY);
+  const pearlBeforeScroll = await center(pearls);
+  const scrollTarget = scrollStart + pearlBeforeScroll.y - 384;
+  const toppingsFrames = [];
+  const toppingsPrefix = `${String(scenes.length + 1).padStart(2, "0")}-scroll-toppings`;
+  for (let step = 0; step < 24; step++) {
+    const progress = step / 23;
+    const eased = progress * progress * (3 - 2 * progress);
+    await page.evaluate((scrollY) => window.scrollTo(0, scrollY), scrollStart + (scrollTarget - scrollStart) * eased);
+    const file = `${toppingsPrefix}-${String(step).padStart(3, "0")}.png`;
+    await page.screenshot({ path: path.join(framesDir, file), animations: "disabled" });
+    toppingsFrames.push(file);
+  }
+  const pearlAfterScroll = await center(pearls);
+  scenes.push({
+    id: "scroll-toppings",
+    title: "FOLLOW THE CUSTOMIZATION",
+    detail: "Move down to the optional toppings",
+    duration: 1.5,
+    file: toppingsFrames[0],
+    frameFiles: toppingsFrames,
+    pointer: pearlAfterScroll,
+    camera: { zoom: 1.18, x: 950, y: 280, toY: 390, motion: "pan" },
+    cursorAction: "hover",
+  });
+  process.stdout.write(`${String(scenes.length).padStart(2, "0")} FOLLOW THE CUSTOMIZATION\n`);
+
+  const toppingsCamera = { zoom: 1.18, x: 950, y: 390 };
   await capture("pearls-choice", "ADD A TOPPING", "Pearls are an optional extra", 1.8, pearls, page, {
-    camera: { ...toppingsCamera, motion: "in" },
+    camera: { ...toppingsCamera, motion: "hold" },
   });
   await pearls.check();
   if (!(await pearls.isChecked())) throw new Error("Pearls were not selected in the captured UI.");
-  await capture("pearls-selected", "PEARLS, ADDED", "The selected topping appears in the order", 1.4, pearls, page, {
-    camera: { ...toppingsCamera, motion: "out" },
+  const addToOrder = page.getByRole("button", { name: /Add to order/ });
+  await capture("pearls-selected", "PEARLS, ADDED", "The selected topping appears in the order", 1.6, addToOrder, page, {
+    camera: { ...toppingsCamera, toY: 560, motion: "pan" },
     cursorAction: "hover",
   });
-  const addToOrder = page.getByRole("button", { name: /Add to order/ });
   await addToOrder.scrollIntoViewIfNeeded();
-  await capture("priced-options", "SEE THE PRICE UPDATE", "Choices become a priced order", 2.5, addToOrder, page, {
-    camera: { zoom: 1.1, x: 940, y: 560, motion: "inout" },
+  await capture("priced-options", "SEE THE PRICE UPDATE", "Choices become a priced order", 2.2, addToOrder, page, {
+    camera: { zoom: 1.18, x: 950, y: 560, motion: "hold" },
   });
 
   await addToOrder.click();
@@ -117,13 +143,13 @@ try {
   await page.getByRole("heading", { name: "Your current order" }).waitFor();
   const placeOrder = page.getByRole("button", { name: /Place order ·/ });
   await capture("checkout", "READY FOR PICKUP", "Cash checkout in one step", 2.8, placeOrder, page, {
-    camera: { zoom: 1.1, x: 990, y: 540, motion: "inout" },
+    camera: { zoom: 1.1, x: 870, y: 400, toX: 990, toY: 540, motion: "pan" },
   });
 
   await placeOrder.click();
   await page.getByRole("heading", { name: /Pickup BT\d+/ }).waitFor();
   await capture("confirmation", "ORDER PLACED", "The shop receives a real order", 2.6, null, page, {
-    camera: { zoom: 1.08, x: 690, y: 340, motion: "inout" },
+    camera: { zoom: 1.08, x: 690, y: 340, motion: "hold" },
   });
 
   const staff = await context.newPage();
@@ -144,7 +170,7 @@ try {
   const staffNav = staff.getByRole("navigation", { name: "Staff navigation" });
   const catalogNav = staffNav.getByRole("link", { name: "Catalog" });
   await capture("staff-queue", "THE LIVE ORDER QUEUE", "Staff see orders for their shop", 2.8, catalogNav, staff, {
-    camera: { zoom: 1.09, x: 850, y: 420, motion: "inout" },
+    camera: { zoom: 1.09, x: 850, y: 300, toY: 500, motion: "pan" },
   });
 
   await catalogNav.click();
@@ -152,14 +178,14 @@ try {
   await staff.getByRole("heading", { name: "Recipes" }).waitFor();
   const honeyRecipe = staff.getByRole("row").filter({ hasText: "Honey Peach Green Tea" }).getByRole("link", { name: "Open recipe" });
   await capture("recipes", "RECIPES BEHIND THE MENU", "Managers can inspect every formula", 2.5, honeyRecipe, staff, {
-    camera: { zoom: 1.1, x: 930, y: 470, motion: "inout" },
+    camera: { zoom: 1.1, x: 750, y: 320, toX: 930, toY: 470, motion: "pan" },
   });
 
   await honeyRecipe.click();
   await staff.getByRole("heading", { name: "Formula history" }).waitFor();
   const backToRecipes = staff.getByRole("link", { name: "Back to recipes" });
   await capture("recipe-ingredients", "MEASURED INGREDIENTS", "Green tea and peach syrup make the recipe", 2.5, backToRecipes, staff, {
-    camera: { zoom: 1.1, x: 840, y: 460, motion: "inout" },
+    camera: { zoom: 1.1, x: 840, y: 300, toY: 460, motion: "pan" },
   });
 
   await backToRecipes.click();
@@ -182,7 +208,7 @@ try {
   const editAccess = staff.getByRole("button", { name: "Edit access" });
   await editAccess.scrollIntoViewIfNeeded();
   await capture("manager-access", "OWNER CONTROLS ACCESS", "Managers are assigned to specific shops", 2.5, editAccess, staff, {
-    camera: { zoom: 1.12, x: 900, y: 520, motion: "inout" },
+    camera: { zoom: 1.12, x: 900, y: 350, toY: 520, motion: "pan" },
   });
 
   await editAccess.click();

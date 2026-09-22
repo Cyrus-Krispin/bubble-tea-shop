@@ -77,11 +77,17 @@ SCENES = MANIFEST["scenes"]
 SCREENSHOTS = [Image.open(ROOT / "frames" / scene["file"]).convert("RGB")
                .resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS) for scene in SCENES]
 TILES = [browser_tile(screenshot) for screenshot in SCREENSHOTS]
+SCROLL_SCREENSHOTS = {
+    index: [Image.open(ROOT / "frames" / filename).convert("RGB")
+             .resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS)
+            for filename in scene["frameFiles"]]
+    for index, scene in enumerate(SCENES) if scene.get("frameFiles") and scene.get("camera")
+}
 SCROLL_TILES = {
     index: [browser_tile(Image.open(ROOT / "frames" / filename).convert("RGB")
                          .resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS))
             for filename in scene["frameFiles"]]
-    for index, scene in enumerate(SCENES) if scene.get("frameFiles")
+    for index, scene in enumerate(SCENES) if scene.get("frameFiles") and not scene.get("camera")
 }
 
 shadow = Image.new("RGBA", (TILE_WIDTH + 100, TILE_HEIGHT + 100), (0, 0, 0, 0))
@@ -105,6 +111,8 @@ def camera_box(scene: dict, local_time: float) -> tuple[int, int, int, int]:
         amount = 1.0 - ease(progress)
     elif motion == "inout":
         amount = math.sin(math.pi * progress) ** 2
+    elif motion in ("hold", "pan"):
+        amount = 1.0
     else:
         raise ValueError(f"Unknown camera motion: {motion}")
 
@@ -113,8 +121,9 @@ def camera_box(scene: dict, local_time: float) -> tuple[int, int, int, int]:
     crop_height = round(CONTENT_HEIGHT / zoom)
     scale_x = TILE_WIDTH / MANIFEST["viewport"]["width"]
     scale_y = CONTENT_HEIGHT / MANIFEST["viewport"]["height"]
-    focus_x = camera["x"] * scale_x
-    focus_y = camera["y"] * scale_y
+    travel = ease(progress) if motion == "pan" else 0.0
+    focus_x = (camera["x"] + (camera.get("toX", camera["x"]) - camera["x"]) * travel) * scale_x
+    focus_y = (camera["y"] + (camera.get("toY", camera["y"]) - camera["y"]) * travel) * scale_y
     left = round(max(0, min(TILE_WIDTH - crop_width, focus_x - crop_width / 2)))
     top = round(max(0, min(CONTENT_HEIGHT - crop_height, focus_y - crop_height / 2)))
     return left, top, left + crop_width, top + crop_height
@@ -149,7 +158,12 @@ def render_frame(index: int, scene_index: int, local_time: float) -> Image.Image
     tile_y = TILE_Y
     frame.alpha_composite(SHADOW, (TILE_X - 50, tile_y - 42))
     tile = TILES[scene_index]
-    if scene_index in SCROLL_TILES:
+    if scene_index in SCROLL_SCREENSHOTS:
+        frames = SCROLL_SCREENSHOTS[scene_index]
+        position = min(len(frames) - 1, int(local_time / duration * len(frames)))
+        tile = browser_tile(frames[position].crop(camera_box(scene, local_time))
+                            .resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS))
+    elif scene_index in SCROLL_TILES:
         frames = SCROLL_TILES[scene_index]
         position = min(len(frames) - 1, int(local_time / duration * len(frames)))
         tile = frames[position]
