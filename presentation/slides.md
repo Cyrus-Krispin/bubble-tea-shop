@@ -2,7 +2,7 @@
 layout: none
 theme: default
 title: Bubble Tea Shop — the app and the workflow
-info: A seven-slide project showcase with a product demo
+info: An eight-slide project showcase with a product demo and LinkedIn contact
 aspectRatio: 16/9
 colorSchema: light
 duration: 10min
@@ -211,4 +211,21 @@ layout: none
 
 <!--
 About one minute. End honestly: AI makes it easy to create more code, but visual quality still requires taste, green tests can repeat a flawed assumption, and product scope needs deliberate cuts. The old closing tagline has been removed as requested.
+-->
+
+---
+layout: none
+---
+
+<div class="slide thank-you">
+  <h2>Thank you.</h2>
+  <p>Connect with me on LinkedIn</p>
+  <a href="https://www.linkedin.com/in/cyruskrispin/" target="_blank" rel="noopener noreferrer" aria-label="Cyrus Krispin on LinkedIn">
+    <img src="/linkedin-cyruskrispin-qr.svg" alt="QR code for Cyrus Krispin's LinkedIn profile" width="228" height="228">
+  </a>
+  <a class="thank-you-url" href="https://www.linkedin.com/in/cyruskrispin/" target="_blank" rel="noopener noreferrer">linkedin.com/in/cyruskrispin/</a>
+</div>
+
+<!--
+Leave this slide up for the audience to scan the QR code. It links to the LinkedIn profile shown on the slide.
 -->
