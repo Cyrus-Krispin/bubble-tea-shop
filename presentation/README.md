@@ -42,5 +42,16 @@ Serve `dist/` as a static site. A local build on the presenting laptop is a usef
 venue connection fails. The Compose configuration above is for the local, loopback-only stack;
 any remote hosting needs its own network access configuration.
 
+## Share the talk
+
+- Download [the PowerPoint deck](Bubble-Tea-Shop.pptx) to send as a single file. The product tour
+  is embedded on slide 2 and plays when selected in PowerPoint. The other slides are rendered
+  images, so Slidev's click reveals and editable text are not available in this version.
+- To share the original Slidev experience, run `pnpm build` and publish the contents of `dist/`
+  to a static website host. Send the resulting URL to the group. The demo video is included in
+  the build.
+- To present from a local checkout, run `pnpm install --frozen-lockfile` and `pnpm dev` in this
+  directory, then open the local URL printed by Slidev.
+
 The text and timing are a starting point. The deck intentionally has no audience submission or QR
 feature. The feature wall borrows the look, with presenter-controlled reveals.
