@@ -51,7 +51,7 @@ node --test infra/supabase/generate-local-auth-keys.test.mjs \
   infra/supabase/kong/kong.test.mjs
 docker compose up --detach --build --wait
 curl --fail http://localhost:4177/health
-curl --fail --head http://localhost:4177/bubble-tea-shop-demo-schema.mp4
+curl --fail --head http://localhost:4177/bubble-tea-shop-demo-motion.mp4
 
 cd frontend
 pnpm e2e

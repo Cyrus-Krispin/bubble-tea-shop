@@ -91,11 +91,43 @@ ImageDraw.Draw(shadow).rounded_rectangle(
 SHADOW = shadow.filter(ImageFilter.GaussianBlur(32))
 
 
-def pointer_position(pointer: dict | None) -> tuple[float, float] | None:
+def camera_box(scene: dict, local_time: float) -> tuple[int, int, int, int]:
+    camera = scene.get("camera")
+    if not camera:
+        return 0, 0, TILE_WIDTH, CONTENT_HEIGHT
+
+    duration = scene["duration"]
+    progress = max(0.0, min(1.0, local_time / duration))
+    motion = camera["motion"]
+    if motion == "in":
+        amount = ease(progress / 0.75)
+    elif motion == "out":
+        amount = 1.0 - ease(progress)
+    elif motion == "inout":
+        amount = math.sin(math.pi * progress) ** 2
+    else:
+        raise ValueError(f"Unknown camera motion: {motion}")
+
+    zoom = 1.0 + (camera["zoom"] - 1.0) * amount
+    crop_width = round(TILE_WIDTH / zoom)
+    crop_height = round(CONTENT_HEIGHT / zoom)
+    scale_x = TILE_WIDTH / MANIFEST["viewport"]["width"]
+    scale_y = CONTENT_HEIGHT / MANIFEST["viewport"]["height"]
+    focus_x = camera["x"] * scale_x
+    focus_y = camera["y"] * scale_y
+    left = round(max(0, min(TILE_WIDTH - crop_width, focus_x - crop_width / 2)))
+    top = round(max(0, min(CONTENT_HEIGHT - crop_height, focus_y - crop_height / 2)))
+    return left, top, left + crop_width, top + crop_height
+
+
+def pointer_position(pointer: dict | None, scene: dict, local_time: float) -> tuple[float, float] | None:
     if pointer is None:
         return None
-    scale = TILE_WIDTH / MANIFEST["viewport"]["width"]
-    return TILE_X + pointer["x"] * scale, TILE_Y + BAR_HEIGHT + pointer["y"] * scale
+    left, top, right, bottom = camera_box(scene, local_time)
+    x = pointer["x"] * TILE_WIDTH / MANIFEST["viewport"]["width"]
+    y = pointer["y"] * CONTENT_HEIGHT / MANIFEST["viewport"]["height"]
+    return (TILE_X + (x - left) * TILE_WIDTH / (right - left),
+            TILE_Y + BAR_HEIGHT + (y - top) * CONTENT_HEIGHT / (bottom - top))
 
 
 def draw_cursor(draw: ImageDraw.ImageDraw, x: float, y: float, click: float) -> None:
@@ -121,6 +153,10 @@ def render_frame(index: int, scene_index: int, local_time: float) -> Image.Image
         frames = SCROLL_TILES[scene_index]
         position = min(len(frames) - 1, int(local_time / duration * len(frames)))
         tile = frames[position]
+    elif scene.get("camera"):
+        screenshot = SCREENSHOTS[scene_index]
+        tile = browser_tile(screenshot.crop(camera_box(scene, local_time))
+                            .resize((TILE_WIDTH, CONTENT_HEIGHT), Image.Resampling.LANCZOS))
     frame.alpha_composite(tile, (TILE_X, tile_y))
 
     draw = ImageDraw.Draw(frame)
@@ -132,14 +168,16 @@ def render_frame(index: int, scene_index: int, local_time: float) -> Image.Image
     draw.rounded_rectangle((TILE_X, 999, TILE_X + TILE_WIDTH, 1005), radius=3, fill=(222, 216, 204))
     draw.rounded_rectangle((TILE_X, 999, TILE_X + progress_width, 1005), radius=3, fill=PINK)
 
-    end = pointer_position(scene.get("pointer"))
+    end = pointer_position(scene.get("pointer"), scene, local_time)
     if end:
-        previous_end = pointer_position(SCENES[scene_index - 1].get("pointer")) if scene_index else None
-        start = previous_end if previous_end and scene_index not in (7, 10) else (TILE_X + 430, tile_y + 340)
+        previous = SCENES[scene_index - 1] if scene_index else None
+        previous_end = pointer_position(previous.get("pointer"), previous, previous["duration"]) if previous else None
+        reset_cursor = scene["id"] in ("staff-overview", "recipe-ingredients")
+        start = previous_end if previous_end and not reset_cursor else (TILE_X + 430, tile_y + 340)
         move = ease((local_time / duration - 0.10) / 0.52)
         x = start[0] + (end[0] - start[0]) * move
         y = start[1] + (end[1] - start[1]) * move - 20 * math.sin(math.pi * move)
-        pulse = max(0.0, 1.0 - abs(local_time / duration - 0.73) / 0.11)
+        pulse = 0.0 if scene.get("cursorAction") == "hover" else max(0.0, 1.0 - abs(local_time / duration - 0.73) / 0.11)
         draw_cursor(draw, x, y + (tile_y - TILE_Y), pulse)
 
     if index < 10:

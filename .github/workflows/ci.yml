@@ -189,7 +189,7 @@ jobs:
       - name: Check presentation and bundled video
         run: |
           curl --fail --silent --show-error http://localhost:4177/health
-          curl --fail --silent --show-error --head http://localhost:4177/bubble-tea-shop-demo-schema.mp4
+          curl --fail --silent --show-error --head http://localhost:4177/bubble-tea-shop-demo-motion.mp4
       - name: Run desktop and mobile release browser gate
         working-directory: frontend
         run: pnpm e2e
